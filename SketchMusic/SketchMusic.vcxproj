@@ -208,6 +208,7 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="SketchMusic\base\Cursor.h" />
+    <ClInclude Include="SketchMusic\base\Idea.h" />
     <ClInclude Include="SketchMusic\base\OnKeyToStringConverter.h" />
     <ClInclude Include="SketchMusic\base\SGNote.h" />
     <ClInclude Include="SketchMusic\base\SLineEnd.h" />

@@ -169,6 +169,9 @@
     <ClInclude Include="SketchMusic\commands\CommandManager.h">
       <Filter>commands</Filter>
     </ClInclude>
+    <ClInclude Include="SketchMusic\base\Idea.h">
+      <Filter>base</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="SketchMusic\commands\DelegateCommand.txt">
