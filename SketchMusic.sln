@@ -3,7 +3,54 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SketchMusic", "SketchMusic\SketchMusic.vcxproj", "{067FE571-0802-4F80-BAD6-C008D0C393AD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StrokeEditor", "StrokeEditor\StrokeEditor.vcxproj", "{A38D2516-D6A5-4514-AC42-A62B4F05ED78}"
+	ProjectSection(ProjectDependencies) = postProject
+		{067FE571-0802-4F80-BAD6-C008D0C393AD} = {067FE571-0802-4F80-BAD6-C008D0C393AD}
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|ARM = Release|ARM
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Debug|ARM.ActiveCfg = Debug|ARM
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Debug|ARM.Build.0 = Debug|ARM
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Debug|x64.ActiveCfg = Debug|x64
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Debug|x64.Build.0 = Debug|x64
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Debug|x86.ActiveCfg = Debug|Win32
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Debug|x86.Build.0 = Debug|Win32
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Release|ARM.ActiveCfg = Release|ARM
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Release|ARM.Build.0 = Release|ARM
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Release|x64.ActiveCfg = Release|x64
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Release|x64.Build.0 = Release|x64
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Release|x86.ActiveCfg = Release|Win32
+		{067FE571-0802-4F80-BAD6-C008D0C393AD}.Release|x86.Build.0 = Release|Win32
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Debug|ARM.ActiveCfg = Debug|ARM
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Debug|ARM.Build.0 = Debug|ARM
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Debug|ARM.Deploy.0 = Debug|ARM
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Debug|x64.ActiveCfg = Debug|x64
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Debug|x64.Build.0 = Debug|x64
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Debug|x64.Deploy.0 = Debug|x64
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Debug|x86.ActiveCfg = Debug|Win32
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Debug|x86.Build.0 = Debug|Win32
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Debug|x86.Deploy.0 = Debug|Win32
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Release|ARM.ActiveCfg = Release|ARM
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Release|ARM.Build.0 = Release|ARM
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Release|ARM.Deploy.0 = Release|ARM
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Release|x64.ActiveCfg = Release|x64
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Release|x64.Build.0 = Release|x64
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Release|x64.Deploy.0 = Release|x64
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Release|x86.ActiveCfg = Release|Win32
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Release|x86.Build.0 = Release|Win32
+		{A38D2516-D6A5-4514-AC42-A62B4F05ED78}.Release|x86.Deploy.0 = Release|Win32
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

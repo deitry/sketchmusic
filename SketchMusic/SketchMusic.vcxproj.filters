@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>b09f2e61-ee3f-4506-8111-dc96669e5c61</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tga;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="base">
+      <UniqueIdentifier>{68d399c3-6561-4b5e-a60d-963c18264a2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="view">
+      <UniqueIdentifier>{d594262f-6a81-4db9-8a22-105967c4c3d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="player">
+      <UniqueIdentifier>{a5ea6675-b70a-4439-86d0-7adfbd30e5ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="commands">
+      <UniqueIdentifier>{a2c94fec-4a73-4b16-b982-9ba048086f70}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SketchMusic\view\GenericKeyboard.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\view\MultiRowStackPanel.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\view\RadialKeyboard.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\view\StrokeEditor.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\view\TextMultiRow.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\view\TextRow.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\view\TextRowHandlers.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\base\Cursor.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\base\Symbol.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\base\Text.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\player\Instrument.cpp">
+      <Filter>player</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\player\Player.cpp">
+      <Filter>player</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\player\Sample.cpp">
+      <Filter>player</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\player\SFData.cpp">
+      <Filter>player</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\player\SFSoundEngine.cpp">
+      <Filter>player</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\player\SimpleSoundEngine.cpp">
+      <Filter>player</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\player\SoundEnginePool.cpp">
+      <Filter>player</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\player\SoundFont.cpp">
+      <Filter>player</Filter>
+    </ClCompile>
+    <ClCompile Include="SketchMusic\SketchMusic.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="SketchMusic\view\GenericKeyboard.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\view\Key.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\view\Keyboard.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\view\MultiRowStackPanel.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\view\RadialKeyboard.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\view\StrokeEditor.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\view\TextMultiRow.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\view\TextRow.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\Cursor.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\OnKeyToStringConverter.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\SGNote.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\SLineEnd.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\SNote.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\SNoteEnd.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\SRNote.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\SScale.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\SSpace.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\Symbol.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\base\Text.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\player\Instrument.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\player\ISoundEngine.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\player\Player.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\player\Sample.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\player\SFData.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\player\SFSoundEngine.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\player\SimpleSoundEngine.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\player\SoundEnginePool.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\player\SoundFont.h">
+      <Filter>player</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\SketchMusic.h" />
+    <ClInclude Include="SketchMusic\commands\Command.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\commands\CommandManager.h">
+      <Filter>commands</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="SketchMusic\commands\DelegateCommand.txt">
+      <Filter>commands</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Themes\Generic.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\acoustic_guitar.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Bass_Drum_Hard1.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Ensemble_Pad.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Epiphone_Pick_Bass.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Jazz_GM.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Rock_Screams.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Sax_full_range.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Solo_Viola.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Warwick_Headless_Slap.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\grand_piano.sf2">
+      <Filter>Resources</Filter>
+    </None>
+  </ItemGroup>
+</Project>
