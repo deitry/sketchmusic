@@ -136,6 +136,9 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AboutPage.xaml.h">
+      <DependentUpon>AboutPage.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="LibraryEntryPage.xaml.h">
       <DependentUpon>LibraryEntryPage.xaml</DependentUpon>
     </ClInclude>
@@ -157,6 +160,9 @@
     <ApplicationDefinition Include="App.xaml">
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="AboutPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LibraryEntryPage.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -186,6 +192,9 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AboutPage.xaml.cpp">
+      <DependentUpon>AboutPage.xaml</DependentUpon>
+    </ClCompile>
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>

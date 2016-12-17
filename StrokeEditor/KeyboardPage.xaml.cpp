@@ -282,3 +282,15 @@ void StrokeEditor::KeyboardPage::ListView_SelectionChanged(Platform::Object^ sen
 	if (text)
 		_textRow->SetText(text);
 }
+
+
+void StrokeEditor::KeyboardPage::GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	//We should verify if there are pages in the navigation back stack 
+	//before navigating to the previous page.
+	if (this->Frame != nullptr && Frame->CanGoBack)
+	{
+		//Using the GoBack method, the frame navigates to the previous page.
+		Frame->GoBack();
+	}
+}

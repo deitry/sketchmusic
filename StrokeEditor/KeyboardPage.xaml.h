@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "MainPage.g.h"
+#include "KeyboardPage.g.h"
 
 template<>
 struct std::less<SketchMusic::View::Key^>
@@ -51,6 +51,7 @@ namespace StrokeEditor
 		void _keyboard_KeyboardPressed(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ e);
 		void _keyboard_KeyReleased(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ e);
 		void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
+		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
 	public ref class InstrumentToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter

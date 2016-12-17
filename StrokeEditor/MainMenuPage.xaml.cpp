@@ -6,6 +6,8 @@
 #include "pch.h"
 #include "KeyboardPage.xaml.h"
 #include "MainMenuPage.xaml.h"
+#include "AboutPage.xaml.h"
+
 
 using namespace StrokeEditor;
 
@@ -49,5 +51,5 @@ void StrokeEditor::MainMenuPage::OpenLibraryBtn_Click(Platform::Object^ sender, 
 
 void StrokeEditor::MainMenuPage::AboutBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-
+	this->Frame->Navigate(TypeName(StrokeEditor::AboutPage::typeid));
 }

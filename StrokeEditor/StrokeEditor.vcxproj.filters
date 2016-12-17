@@ -56,5 +56,6 @@
     <Page Include="LibraryOverviewPage.xaml" />
     <Page Include="LibraryEntryPage.xaml" />
     <Page Include="KeyboardPage.xaml" />
+    <Page Include="AboutPage.xaml" />
   </ItemGroup>
 </Project>
