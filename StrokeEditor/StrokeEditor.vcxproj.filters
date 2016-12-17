@@ -14,13 +14,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp" />
-    <ClCompile Include="MainPage.xaml.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="KeyboardPage.xaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="App.xaml.h" />
-    <ClInclude Include="MainPage.xaml.h" />
+    <ClInclude Include="KeyboardPage.xaml.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -52,6 +52,9 @@
     <None Include="StrokeEditor_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="MainPage.xaml" />
+    <Page Include="MainMenuPage.xaml" />
+    <Page Include="LibraryOverviewPage.xaml" />
+    <Page Include="LibraryEntryPage.xaml" />
+    <Page Include="KeyboardPage.xaml" />
   </ItemGroup>
 </Project>

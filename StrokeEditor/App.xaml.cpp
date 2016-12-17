@@ -4,7 +4,8 @@
 //
 
 #include "pch.h"
-#include "MainPage.xaml.h"
+#include "KeyboardPage.xaml.h"
+#include "MainMenuPage.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -78,7 +79,7 @@ void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEvent
 			// Если стек навигации не восстанавливается для перехода к первой странице,
 			// настройка новой страницы путем передачи необходимой информации в качестве параметра
 			// навигации
-			rootFrame->Navigate(TypeName(MainPage::typeid), e->Arguments);
+			rootFrame->Navigate(TypeName(MainMenuPage::typeid), e->Arguments);
 		}
 		// Размещение фрейма в текущем окне
 		Window::Current->Content = rootFrame;
@@ -92,7 +93,7 @@ void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEvent
 			// Если стек навигации не восстанавливается для перехода к первой странице,
 			// настройка новой страницы путем передачи необходимой информации в качестве параметра
 			// навигации
-			rootFrame->Navigate(TypeName(MainPage::typeid), e->Arguments);
+			rootFrame->Navigate(TypeName(MainMenuPage::typeid), e->Arguments);
 		}
 		// Обеспечение активности текущего окна
 		Window::Current->Activate();

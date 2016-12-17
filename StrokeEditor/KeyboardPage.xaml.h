@@ -21,7 +21,7 @@ namespace StrokeEditor
 	/// <summary>
 	/// Пустая страница, которую можно использовать саму по себе или для перехода внутри фрейма.
 	/// </summary>
-	public ref class MainPage sealed
+	public ref class KeyboardPage sealed
 	{
 	private:
 		SketchMusic::Player::Player^ _player;
@@ -44,7 +44,7 @@ namespace StrokeEditor
 		std::multimap<SketchMusic::View::Key^, SketchMusic::Player::NoteOff^> notesPlayingMap;
 
 	public:
-		MainPage();
+		KeyboardPage();
 
 	private:
 		void playAll_Click();

@@ -4,7 +4,7 @@
 //
 
 #include "pch.h"
-#include "MainPage.xaml.h"
+#include "KeyboardPage.xaml.h"
 #include "concrt.h"
 
 
@@ -71,7 +71,7 @@ Text^ testText()
 	return text;
 }
 
-MainPage::MainPage()
+KeyboardPage::KeyboardPage()
 {
 	InitializeComponent();
 
@@ -125,13 +125,13 @@ MainPage::MainPage()
 
 	_textRow->SetText(_texts, nullptr);
 
-	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyPressed += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MainPage::*)
-		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MainPage::_keyboard_KeyboardPressed);
-	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyReleased += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MainPage::*)
-		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MainPage::_keyboard_KeyReleased);
+	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyPressed += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::KeyboardPage::*)
+		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&KeyboardPage::_keyboard_KeyboardPressed);
+	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyReleased += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::KeyboardPage::*)
+		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&KeyboardPage::_keyboard_KeyReleased);
 }
 
-void StrokeEditor::MainPage::playAll_Click()
+void StrokeEditor::KeyboardPage::playAll_Click()
 {
 	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([this]()
 	{
@@ -143,7 +143,7 @@ void StrokeEditor::MainPage::playAll_Click()
 	}));
 }
 
-void StrokeEditor::MainPage::_keyboard_KeyboardPressed(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ args)
+void StrokeEditor::KeyboardPage::_keyboard_KeyboardPressed(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ args)
 {
 	//SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(e);
 	if (args->key)
@@ -261,7 +261,7 @@ void StrokeEditor::MainPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 	}
 }
 
-void StrokeEditor::MainPage::_keyboard_KeyReleased(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ args)
+void StrokeEditor::KeyboardPage::_keyboard_KeyReleased(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ args)
 {
 	// на отпускание клавиши мы должны
 	// - прекращать звучание
@@ -276,7 +276,7 @@ void StrokeEditor::MainPage::_keyboard_KeyReleased(Platform::Object^ sender, Ske
 	}
 }
 
-void StrokeEditor::MainPage::ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+void StrokeEditor::KeyboardPage::ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
 {
 	Text^ text = dynamic_cast<Text^>(e->AddedItems->First()->Current);
 	if (text)
