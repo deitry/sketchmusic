@@ -7,6 +7,9 @@
 #include "KeyboardPage.xaml.h"
 #include "MainMenuPage.xaml.h"
 
+#include <cvt/wstring>
+#include <codecvt>
+
 using namespace StrokeEditor;
 
 using namespace Platform;
@@ -33,6 +36,20 @@ App::App()
 {
 	InitializeComponent();
 	Suspending += ref new SuspendingEventHandler(this, &App::OnSuspending);
+
+	// создание базы данных, если отсутствует
+	//sqlite3* libraryDB; // объявление в хидере
+	String^ fullPath = Windows::Storage::ApplicationData::Current->LocalFolder->Path + "\\ideaLibrary.db";
+	int size_needed = WideCharToMultiByte(CP_UTF8,0,fullPath->Data(),fullPath->Length(),NULL,0,NULL,NULL);
+	char *pathC = new char[size_needed+1];
+	WideCharToMultiByte(CP_UTF8, 0, fullPath->Data(), fullPath->Length(), pathC, size_needed, NULL, NULL);
+	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+	pathC[size_needed] = '\0';
+
+	if (sqlite3_open(pathC, &libraryDB))
+		fprintf(stderr, "Ошибка открытия/создания БД: %s\n", sqlite3_errmsg(libraryDB));
+
+	delete[] pathC;
 }
 
 /// <summary>
@@ -113,6 +130,7 @@ void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 	(void) e;	// Неиспользуемый параметр
 
 	//TODO: Сохранить состояние приложения и остановить все фоновые операции
+	sqlite3_close(libraryDB);
 }
 
 /// <summary>
