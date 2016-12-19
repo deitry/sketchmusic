@@ -6,6 +6,9 @@
 #pragma once
 
 #include "LibraryOverviewPage.g.h"
+#include "App.xaml.h"
+
+using namespace Windows::UI::Xaml::Navigation;
 
 namespace StrokeEditor
 {
@@ -17,6 +20,7 @@ namespace StrokeEditor
 	{
 	public:
 		LibraryOverviewPage();
+
 	private:
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 

@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include <winsqlite/winsqlite3.h>
-//#include <sqlite3.h>
+#include <sqlite3.h>
 
 #include "App.g.h"
 
@@ -23,12 +22,11 @@ namespace StrokeEditor
 	internal:
 		App();
 
+		sqlite3* libraryDB;
+
 	private:
 		void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
 		void OnNavigationFailed(Platform::Object ^sender, Windows::UI::Xaml::Navigation::NavigationFailedEventArgs ^e);
-
-		sqlite3* libraryDB;
-
 	};
 
 	ref class Command;

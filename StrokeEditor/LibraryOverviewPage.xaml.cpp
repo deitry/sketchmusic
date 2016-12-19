@@ -27,6 +27,7 @@ LibraryOverviewPage::LibraryOverviewPage()
 {
 	InitializeComponent();
 
+	// тестовая библиотека
 	ideaLibrary = ref new Vector<SketchMusic::Idea^>();
 	ideaLibrary->Append(ref new SketchMusic::Idea("idea1", SketchMusic::IdeaCategoryEnum(1)));
 	ideaLibrary->Append(ref new SketchMusic::Idea("idea2", SketchMusic::IdeaCategoryEnum(2)));
@@ -34,7 +35,6 @@ LibraryOverviewPage::LibraryOverviewPage()
 
 	LibView->ItemsSource = ideaLibrary;
 }
-
 
 void StrokeEditor::LibraryOverviewPage::GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {

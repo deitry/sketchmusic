@@ -37,19 +37,25 @@ App::App()
 	InitializeComponent();
 	Suspending += ref new SuspendingEventHandler(this, &App::OnSuspending);
 
+	// ? Не уверен, что это нужно оставлять здесь
 	// создание базы данных, если отсутствует
 	//sqlite3* libraryDB; // объявление в хидере
 	String^ fullPath = Windows::Storage::ApplicationData::Current->LocalFolder->Path + "\\ideaLibrary.db";
-	int size_needed = WideCharToMultiByte(CP_UTF8,0,fullPath->Data(),fullPath->Length(),NULL,0,NULL,NULL);
-	char *pathC = new char[size_needed+1];
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, fullPath->Data(), fullPath->Length(), NULL, 0, NULL, NULL);
+	char *pathC = new char[size_needed + 1];
 	WideCharToMultiByte(CP_UTF8, 0, fullPath->Data(), fullPath->Length(), pathC, size_needed, NULL, NULL);
 	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
 	pathC[size_needed] = '\0';
 
 	if (sqlite3_open(pathC, &libraryDB))
+	{
 		fprintf(stderr, "Ошибка открытия/создания БД: %s\n", sqlite3_errmsg(libraryDB));
+		sqlite3_close(libraryDB);
+	}
 
 	delete[] pathC;
+
+	// Удостоверяемся, что БД содержит те колонки, что нам нужны
 }
 
 /// <summary>
@@ -129,7 +135,7 @@ void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 	(void) sender;	// Неиспользуемый параметр
 	(void) e;	// Неиспользуемый параметр
 
-	//TODO: Сохранить состояние приложения и остановить все фоновые операции
+	// Сохранить состояние приложения и остановить все фоновые операции
 	sqlite3_close(libraryDB);
 }
 
