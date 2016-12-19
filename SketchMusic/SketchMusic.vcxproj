@@ -250,6 +250,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="SketchMusic\base\Cursor.cpp" />
+    <ClCompile Include="SketchMusic\base\Idea.cpp" />
     <ClCompile Include="SketchMusic\base\Symbol.cpp" />
     <ClCompile Include="SketchMusic\base\Text.cpp" />
     <ClCompile Include="SketchMusic\player\Instrument.cpp" />

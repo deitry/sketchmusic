@@ -26,6 +26,9 @@ namespace SketchMusic
 
 	ref class Idea;
 
+	//ref class IdeaDataToStringConverter;
+
+	//[Windows::UI::Xaml::Data::BindableAttribute]
 	public enum class IdeaCategoryEnum
 		// категория, к которой относится идея. Будет использоваться 
 		// для выбора отображения редактора идеи и для сортировки. Может ещё где-нибудь

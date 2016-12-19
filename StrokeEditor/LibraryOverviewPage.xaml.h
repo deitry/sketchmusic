@@ -17,5 +17,12 @@ namespace StrokeEditor
 	{
 	public:
 		LibraryOverviewPage();
+	private:
+		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+
+		void RefreshList();	// Обновить список в соответствии с выбранным фильтром
+
+		Windows::Foundation::Collections::IVector<SketchMusic::Idea^>^ ideaLibrary;
+		void RefreshBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }

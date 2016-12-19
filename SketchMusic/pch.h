@@ -14,4 +14,5 @@
 #include "SketchMusic\view\MultiRowStackPanel.h"
 #include "SketchMusic\SketchMusic.h"
 #include "SketchMusic\player\Instrument.h"
+#include "SketchMusic\base\Idea.h"
 #include "SketchMusic\base\Text.h"

@@ -75,6 +75,9 @@
       <Filter>player</Filter>
     </ClCompile>
     <ClCompile Include="SketchMusic\SketchMusic.cpp" />
+    <ClCompile Include="SketchMusic\base\Idea.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
