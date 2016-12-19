@@ -8,6 +8,11 @@ using Platform::Collections::Vector;
 typedef std::multimap < Cursor^, ISymbol^ >  psymMap;
 typedef psymMap::iterator psymIter;
 
+Text ^ SketchMusic::Text::deserializeFromString(Platform::String ^ serialized)
+{
+	return nullptr;
+}
+
 SketchMusic::Text::Text()
 {
 	this->curPosition = ref new Cursor;
@@ -75,6 +80,11 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 	}
 
 	return vect;
+}
+
+Platform::String ^ SketchMusic::Text::serializeToString()
+{
+	return "";
 }
 
 void SketchMusic::Text::moveSymbol(SketchMusic::PositionedSymbol^ psym, SketchMusic::Cursor^ newpos)

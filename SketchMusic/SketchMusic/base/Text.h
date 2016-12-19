@@ -36,6 +36,8 @@ private:
 		// для каждого элемента хранить не абсолютное положение, а относительное - относительно текущего элемента?
 		// абсолютное - можно как буферизованное значение, вычисляемое для последнего обращения к одному из элементов...
 public:
+	static Text^ deserializeFromString(Platform::String^ serialized);	// конструктор из строки уже имеется :( TODO можно будет позже поменять
+
 	Text();
 	Text(Instrument^ instrument);
 	Text(String^ instrumentName);
@@ -64,6 +66,7 @@ public:
 	IVector<PositionedSymbol^>^ getText();
 	//Platform::Collections::Vector<PositionedSymbol^>^ getText();
 	//Platform::String^ toXml();
+	Platform::String^ serializeToString();	// не факт, что стоит пользоваться xml
 
 	// TODO : функции вставки одного текста в другой, объединение, "вырезание" и так далее
 	// Потребуются, когда можно будет идеи объединять друг с другом
