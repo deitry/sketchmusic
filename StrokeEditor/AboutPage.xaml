@@ -12,11 +12,11 @@
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-        SketchMusic для Windows 10.
-            Автор: deiry 
-            e-mail: dm.s.vornychev@gmail.com
-        </TextBlock>
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" >
+            <TextBlock Text="SketchMusic для Windows 10."/>
+            <TextBlock Text="Автор: deitry"/>
+            <TextBlock Text="e-mail: dm.s.vornychev@gmail.com"/>
+        </StackPanel>
         <Button Grid.Row="1" Name="GoBackBtn" Content="Вернуться в меню" Click="GoBackBtn_Click" Margin="0,20" HorizontalAlignment="Center"/>
     </Grid>
 </Page>

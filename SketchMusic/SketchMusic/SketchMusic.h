@@ -28,6 +28,7 @@ namespace SketchMusic
 	ref class Cursor;
 
 	ref class Idea;
+	//ref class TextToJsonConverter;
 
 	//ref class IdeaDataToStringConverter;
 
@@ -94,11 +95,29 @@ namespace SketchMusic
 	};
 
 	// внутренняя структура
+
+	// список используемых типов символов
+	public enum class SymbolType
+	{
+		unknown,
+		NOTE,		// обычная нота
+		RNOTE,		// относительная нота (относительно последней "обычной")
+		GNOTE,		// обобщённая нота (не имеет непосредственной связи с высотой звука)
+		END,		// прекращение звучания нот(-ы)
+		SCALE,		// текущая гамма
+		NLINE,		// новая строка - для визуального отображения
+		SPACE,		// "пробел" - для визуального отображения
+		//npart,		// новый раздел - для отделения частей одна от другой
+		//tempo,		// задание темпа
+		STRING		// для вставки строки
+	};
+
 	public interface class ISymbol
 	{
 	public:
+		SymbolType GetSymType();
 		Platform::String^ ToString();	// представление в текстовом виде значения
-		Platform::String^ Serialize();	// сохранение в строке с отметкой типа
+		//Platform::String^ Serialize();	// сохранение в строке с отметкой типа
 	};
 
 	public interface class INote
@@ -130,8 +149,9 @@ namespace SketchMusic
 		virtual property int _val;
 		virtual property bool _striked;
 
+		virtual SymbolType GetSymType() { return SymbolType::NOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
-		virtual Platform::String^ Serialize() { return "note," + valToString(_val); }	// приставка указывает на тип
+		//virtual Platform::String^ Serialize() { return "note," + valToString(_val); }	// приставка указывает на тип
 	};
 
 	public ref class SSpace sealed : public SketchMusic::ISymbol
@@ -139,8 +159,9 @@ namespace SketchMusic
 	public:
 		SSpace() {}
 
+		virtual SymbolType GetSymType() { return SymbolType::SPACE; }
 		virtual Platform::String^ ToString() { return "Space"; }
-		virtual Platform::String^ Serialize() { return "space"; }
+		//virtual Platform::String^ Serialize() { return "space"; }
 	};
 
 	public ref class SRNote sealed : public ISymbol, public SketchMusic::INote
@@ -156,8 +177,9 @@ namespace SketchMusic
 		virtual property int _val;
 		virtual property bool _striked;
 
+		virtual SymbolType GetSymType() { return SymbolType::RNOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
-		virtual Platform::String^ Serialize() { return "rnote," + valToString(_val); }
+		//virtual Platform::String^ Serialize() { return "rnote," + valToString(_val); }
 	};
 
 	public ref class SGNote sealed : public ISymbol, public SketchMusic::INote
@@ -173,8 +195,9 @@ namespace SketchMusic
 		virtual property int _val;
 		virtual property bool _striked;
 
+		virtual SymbolType GetSymType() { return SymbolType::GNOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
-		virtual Platform::String^ Serialize() { return "gnote," + valToString(_val); }
+		//virtual Platform::String^ Serialize() { return "gnote," + valToString(_val); }
 	};
 
 	/**
@@ -185,8 +208,9 @@ namespace SketchMusic
 	public:
 		SNoteEnd() {}
 
+		virtual SymbolType GetSymType() { return SymbolType::END; }
 		virtual Platform::String^ ToString() { return "SNoteEnd"; }
-		virtual Platform::String^ Serialize() { return "end"; }
+		//virtual Platform::String^ Serialize() { return "end"; }
 	};
 
 	/**
@@ -198,8 +222,9 @@ namespace SketchMusic
 	public:
 		SScale() {}
 
+		virtual SymbolType GetSymType() { return SymbolType::SCALE; }
 		virtual Platform::String^ ToString() { return "SScale"; }
-		virtual Platform::String^ Serialize() { return "scale"; }
+		//virtual Platform::String^ Serialize() { return "scale"; }
 	};
 
 	// переименовать в LinStart и пусть он хранит всю необходимую информацию
@@ -212,8 +237,9 @@ namespace SketchMusic
 	public:
 		SNewLine() {}
 
+		virtual SymbolType GetSymType() { return SymbolType::NLINE; }
 		virtual Platform::String^ ToString() { return "SNewLine"; }
-		virtual Platform::String^ Serialize() { return "nline"; }
+		//virtual Platform::String^ Serialize() { return "nline"; }
 	};
 
 	/**
@@ -226,13 +252,16 @@ namespace SketchMusic
 
 		property String^ value;
 
+		virtual SymbolType GetSymType() { return SymbolType::STRING; }
 		virtual Platform::String^ ToString() { return value; }
-		virtual Platform::String^ Serialize() { return "string," + value; }
+		//virtual Platform::String^ Serialize() { return "string," + value; }
 	};
 
 	public ref class ISymbolFactory sealed
 	{
-		ISymbol^ Deserialize(String^ string);
+	public:
+		static ISymbol^ Deserialize(Windows::Data::Json::JsonObject^ val);	// принудительно запрашиваем
+		//static ISymbol^ CreateSymbol(int type, int val);
 	};
 
 	// классы для обеспечения модели синтеза SoundFont

@@ -60,3 +60,32 @@ SketchMusic::Idea::Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String
 	CreationTime = _created;
 	ModifiedTime = _modified;
 }
+
+// "Загрузка" идеи из данных о ней
+SketchMusic::Idea::Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String ^ _desc, int _parent, byte _rating,
+	Platform::String ^ _content, String ^ _tags, String ^ _projects, long long _created, long long _modified)
+{
+	Hash = _hash;
+	Name = _name;
+	Category = _cat;
+	Description = _desc;
+	Parent = _parent;
+	Rating = _rating;
+	SerializedContent = _content;
+	Tags = _tags;
+	Projects = _projects;
+	CreationTime = _created;
+	ModifiedTime = _modified;
+}
+
+SketchMusic::Text ^ SketchMusic::Idea::GetContent()
+{
+	if ((Content == nullptr) && (SerializedContent != nullptr))
+	{
+		Content = ref new Text();
+		Content->deserialize(SerializedContent);
+		SerializedContent = nullptr;	// чтобы не казалось, что мы можем просто взять это значение
+			// Предполагается, что если мы всё это делаем, то хотим изменить идею.
+	}
+	return Content;
+}

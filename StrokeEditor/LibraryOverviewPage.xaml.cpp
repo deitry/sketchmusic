@@ -70,11 +70,15 @@ LibraryOverviewPage::LibraryOverviewPage()
 		//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
 		//	"VALUE (" + idea->Hash + idea->Name + idea->Category.ToString() + idea->Content->serializeToString() + idea->Parent + idea->Tags + idea->Projects +
 		//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
+		idea->Content = ref new SketchMusic::Text("piano");
+		idea->Content->addSymbol(ref new SketchMusic::Cursor(1, 1),ref new SketchMusic::SNote(1));
+		idea->Content->addSymbol(ref new SketchMusic::Cursor(3, 1), ref new SketchMusic::SNote(1));
+		idea->Content->addSymbol(ref new SketchMusic::Cursor(3, 30), ref new SketchMusic::SNote(3));
 
 		//itoa(static_cast<int>(idea->Category),str,10);
-		String^ sqlQuery = "INSERT INTO summary (hash,name,category,created,modified) "
+		String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,created,modified) "
 			"VALUES (" + idea->Hash +",'"+ idea->Name + "'," + static_cast<int>(idea->Category).ToString() + "," +
-						idea->CreationTime + "," + idea->ModifiedTime + ")";
+						"'"+idea->Content->serialize()->Stringify() +"'," + idea->CreationTime + "," + idea->ModifiedTime + ")";
 		int size_needed = sqlQuery->Length();
 		char* charQuery = new char[size_needed + 1];
 		WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);

@@ -16,7 +16,12 @@ namespace SketchMusic
 		Idea();
 		Idea(String^ _name, IdeaCategoryEnum _cat);
 		Idea(int _hash, String^ _name, IdeaCategoryEnum _cat, String^ _desc, int _parent, byte _rating,
-			 SketchMusic::Text^ _content, String^ tags, String^ projects, long long _created, long long _modified);
+			 SketchMusic::Text^ _content, String^ tags, String^ projects, long long _created, long long _modified); // дл€ загрузки
+		Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String ^ _desc, int _parent, byte _rating,
+			Platform::String ^ _content, String ^ _tags, String ^ _projects, long long _created, long long _modified);	// чтобы не десериализовывать контент
+
+		SketchMusic::Text^ GetContent();
+
 		// свойства
 
 		property int Hash;						// уникальный дл€ каждой идеи
@@ -36,11 +41,14 @@ namespace SketchMusic
 			// котора€ будет опиратьс€ прежде всего на некий исходный мотив. Ќа другие мотивы в принципе тоже можно ссылатьс€,
 			// об том стоит подумать
 
-		property SketchMusic::Text^ Content;				// собственно, в чЄм иде€ заключаетс€
+		property SketchMusic::Text^ Content;	// собственно, в чЄм иде€ заключаетс€
+		property Platform::String^ SerializedContent;	// даже если мы не воспользуемс€ идеей, 
+			// дл€ отображени€ объект создавать всЄ равно придЄтс€. „тобы не тратить врем€, содержимое будем держать
+			// в сериализованном виде, пока не потребуетс€ открыть.
 		property Platform::String^ Tags;		// список тегов, по которым можно будет искать идею
 		//Windows::Foundation::Collections::IVector<String^>^
 		property Platform::String^ Projects;	// в каких проектах иде€ задействована
-		property long long CreationTime;	// врем€ и дата создани€ идеи. ѕригодитс€ дл€ сортировки и фильтрации
-		property long long ModifiedTime;	// врем€ последней модификации - нужно?
+		property long long CreationTime;		// врем€ и дата создани€ идеи. ѕригодитс€ дл€ сортировки и фильтрации
+		property long long ModifiedTime;		// врем€ последней модификации - нужно?
 	};
 }

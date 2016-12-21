@@ -55,3 +55,8 @@ bool SketchMusic::Cursor::LT(SketchMusic::Cursor^ that)
 	if ((this->_beat == that->_beat) && (this->_tick < that->_tick)) return true;
 	return false;
 }
+
+IJsonValue ^ SketchMusic::Cursor::Serialize()
+{
+	return nullptr;
+}

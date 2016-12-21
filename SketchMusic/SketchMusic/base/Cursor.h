@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../SketchMusic.h"
-#include "rapidjson/prettywriter.h"
+
+using namespace Windows::Data::Json;
 
 [Windows::UI::Xaml::Data::Bindable]
 public ref class SketchMusic::Cursor sealed
@@ -54,7 +55,7 @@ public:
 	bool LT(SketchMusic::Cursor^ that);
 
 	Platform::String^ ToString() { return "" + _beat + ":" + _tick; }
-	
+	IJsonValue^ Serialize();
 	property Platform::String^ asString;
 };
 
