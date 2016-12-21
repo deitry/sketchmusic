@@ -1,8 +1,10 @@
 #pragma once
 
-#include "../SketchMusic.h"
 #include <string>
 #include <vector>
+
+#include "../SketchMusic.h"
+#include "rapidjson/prettywriter.h"
 
 /**
 Определяет инструмент.

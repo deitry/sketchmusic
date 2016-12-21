@@ -84,7 +84,14 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 
 Platform::String ^ SketchMusic::Text::serializeToString()
 {
-	return "";
+	// инструмент в начале
+	// потом список со всеми нотами
+	String^ result = this->instrument->_name + ";";
+	for (std::pair<Cursor^, ISymbol^> sym : this->_t)
+	{
+		result += sym.first->ToString() + "=" + sym.second->ToString() + ";";
+	}
+	return result;
 }
 
 void SketchMusic::Text::moveSymbol(SketchMusic::PositionedSymbol^ psym, SketchMusic::Cursor^ newpos)

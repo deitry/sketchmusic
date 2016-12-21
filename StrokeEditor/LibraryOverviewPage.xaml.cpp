@@ -27,13 +27,73 @@ LibraryOverviewPage::LibraryOverviewPage()
 {
 	InitializeComponent();
 
+	// Работа с БД
+	// int rc = sqlite3_exec(db, <SQL-запрос>, <КАЛЛБАК>, 0, &zErrMsg);
+		
+	sqlite3* db = ((App^)App::Current)->libraryDB;
+	if (db)
+	{
+		char *zErrMsg = 0;
+		
+		// инициализация
+		// - создание таблицы если нету
+		int rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS `summary` ("
+									"`hash` INTEGER NOT NULL PRIMARY KEY,"
+									"`name` TEXT,"
+									"'category' INTEGER,"
+									"'content' BLOB,"
+									"'parent' INTEGER,"
+									"'tags' TEXT,"
+									"'projects' TEXT,"
+									"'created' TEXT,"
+									"'modified' TEXT,"
+									"'description' TEXT,"
+									"'rating' INTEGER);", NULL, 0, &zErrMsg);
+		if (rc != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+
+		// delete all
+		rc = sqlite3_exec(db, "DELETE FROM summary", NULL, 0, &zErrMsg);
+		if (rc != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+		rc = sqlite3_exec(db, "VACUUM", NULL, 0, &zErrMsg);
+		if (rc != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+		// тестовые записи
+		auto idea = ref new SketchMusic::Idea("idea1", SketchMusic::IdeaCategoryEnum(1));
+		//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
+		//	"VALUE (" + idea->Hash + idea->Name + idea->Category.ToString() + idea->Content->serializeToString() + idea->Parent + idea->Tags + idea->Projects +
+		//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
+
+		//itoa(static_cast<int>(idea->Category),str,10);
+		String^ sqlQuery = "INSERT INTO summary (hash,name,category,created,modified) "
+			"VALUES (" + idea->Hash +",'"+ idea->Name + "'," + static_cast<int>(idea->Category).ToString() + "," +
+						idea->CreationTime + "," + idea->ModifiedTime + ")";
+		int size_needed = sqlQuery->Length();
+		char* charQuery = new char[size_needed + 1];
+		WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+		//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+		charQuery[size_needed] = '\0';
+		rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
+		if (rc != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+	}
+
 	// тестовая библиотека
-	ideaLibrary = ref new Vector<SketchMusic::Idea^>();
+	/*ideaLibrary = ref new Vector<SketchMusic::Idea^>();
 	ideaLibrary->Append(ref new SketchMusic::Idea("idea1", SketchMusic::IdeaCategoryEnum(1)));
 	ideaLibrary->Append(ref new SketchMusic::Idea("idea2", SketchMusic::IdeaCategoryEnum(2)));
 	ideaLibrary->Append(ref new SketchMusic::Idea("idea3", SketchMusic::IdeaCategoryEnum(10)));
 
-	LibView->ItemsSource = ideaLibrary;
+	LibView->ItemsSource = ideaLibrary;*/
 }
 
 void StrokeEditor::LibraryOverviewPage::GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)

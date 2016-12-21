@@ -3,10 +3,13 @@
 #include "math.h"
 #include "ppltasks.h"
 #include "agents.h"
+#include "rapidjson/prettywriter.h"
+#include "rapidjson/reader.h"
 
 using namespace Platform;
 using namespace Windows::Foundation;
 using namespace concurrency;
+using namespace rapidjson;
 
 #define SOURCE_VOICES_MAX		16		// максимальное количество голосов
 #define DISCRETIZATION_FREQ		44100	// частота дискретизации
@@ -32,14 +35,16 @@ namespace SketchMusic
 	public enum class IdeaCategoryEnum
 		// категория, к которой относится идея. Будет использоваться 
 		// для выбора отображения редактора идеи и для сортировки. Может ещё где-нибудь
+		// TODO : отдельные категории (?) : functional (тоники, доминанты)
+		// transitions (переходы - специальный подвид мелодий), loops 
 	{
 		none = 0,		// по умолчанию будем считать, что идея не принадлежит никакой категории.
 			// если что, обрабатывать будем аналогично "комбинированной" идее ...
 		name = 1,		// идея определяет по сути только название
 		instrument = 2,	// идея определяет используемый инструмент (как вариант - способ звукоизвлечения)
 		tempo = 6,		// задаёт темп. Можно использовать как ббазу для создания композиции,
-			// когда вообще не знаешь о чём думать.
-		
+		// когда вообще не знаешь о чём думать.
+
 		rhythm = 10,			// задаёт некоторый ритм или размер
 		melody = 11,			// мелодическая последовательность + ритм
 		chord = 13,				// один аккорд
@@ -47,22 +52,22 @@ namespace SketchMusic
 		chordProgression = 16,	// гармоническая последовательность - набор аккордов без привязки к ритму?
 
 		shape = 20,		// форма композиции. Такая категория идей обязательно должна быть, осталось понять,
-			// как это можно увязать с представлением идеи в качестве текста - с помощью специальных "символов формы"?
-			// "Символы формы" могут указывать, где начинается одна часть и заканчивается другая.
-			// Символы "перехода на новую строку" могут быть также частью символов формы
-			// TODO : нужен символ начала новой части / подчасти - два отдельных вида символов? 
-			// Разумнее сделать один тип с указанием "родительского объекта" - тогда можно будет представить все символы в виде иерархии/дерева
-			// TODO : к каждой отдельной части скорее всего пригодится прикладывать описание или ещё какую-нибудь идею
-			// TODO : длительности частей?
+		// как это можно увязать с представлением идеи в качестве текста - с помощью специальных "символов формы"?
+		// "Символы формы" могут указывать, где начинается одна часть и заканчивается другая.
+		// Символы "перехода на новую строку" могут быть также частью символов формы
+		// TODO : нужен символ начала новой части / подчасти - два отдельных вида символов? 
+		// Разумнее сделать один тип с указанием "родительского объекта" - тогда можно будет представить все символы в виде иерархии/дерева
+		// TODO : к каждой отдельной части скорее всего пригодится прикладывать описание или ещё какую-нибудь идею
+		// TODO : длительности частей?
 
 		dynamic = 30,	// указание динамики/текстуры (нутыпонел). Как ритм и акцентирование вместе,
-			// только в более общем виде, без конкретизации
+		// только в более общем виде, без конкретизации
 
 		lyrics = 90,	// задаёт слова - что не влезает в название
 		combo = 100		// идея определяет сразу кучу параметров
 	};
 
-	
+
 
 	ref class Sample;
 	ref class Instrument;
@@ -92,16 +97,17 @@ namespace SketchMusic
 	public interface class ISymbol
 	{
 	public:
-		Platform::String^ ToString();
+		Platform::String^ ToString();	// представление в текстовом виде значения
+		Platform::String^ Serialize();	// сохранение в строке с отметкой типа
 	};
-	
+
 	public interface class INote
 	{
 	public:
 		property int _val;
 		property bool _striked;
 	};
-	
+
 	public ref class PositionedSymbol sealed
 	{
 	public:
@@ -114,17 +120,18 @@ namespace SketchMusic
 	[Windows::UI::Xaml::Data::Bindable]
 	public ref class SNote sealed : public SketchMusic::ISymbol, public SketchMusic::INote
 	{
-	private:		
+	private:
 		static Platform::String^ valToString(int val);	// то ли перенеси функцию в INote,
 			// то ли вообще вынести в отдельный класс, который занимается преобразованиями
 	public:
 		SNote() { _val = 0; }
 		SNote(int tone) { _val = tone; }
-		
+
 		virtual property int _val;
 		virtual property bool _striked;
-		
+
 		virtual Platform::String^ ToString() { return valToString(_val); }
+		virtual Platform::String^ Serialize() { return "note," + valToString(_val); }	// приставка указывает на тип
 	};
 
 	public ref class SSpace sealed : public SketchMusic::ISymbol
@@ -133,6 +140,7 @@ namespace SketchMusic
 		SSpace() {}
 
 		virtual Platform::String^ ToString() { return "Space"; }
+		virtual Platform::String^ Serialize() { return "space"; }
 	};
 
 	public ref class SRNote sealed : public ISymbol, public SketchMusic::INote
@@ -143,12 +151,13 @@ namespace SketchMusic
 		// положение тоники будет задаваться с помощью символов SScale
 	public:
 		SRNote() { _val = 0; }
-		SRNote(int rtone) { _val = rtone; }		
-		
+		SRNote(int rtone) { _val = rtone; }
+
 		virtual property int _val;
 		virtual property bool _striked;
 
 		virtual Platform::String^ ToString() { return valToString(_val); }
+		virtual Platform::String^ Serialize() { return "rnote," + valToString(_val); }
 	};
 
 	public ref class SGNote sealed : public ISymbol, public SketchMusic::INote
@@ -160,13 +169,14 @@ namespace SketchMusic
 	public:
 		SGNote() {}
 		SGNote(int gnote) { _val = gnote; }
-		
+
 		virtual property int _val;
 		virtual property bool _striked;
 
 		virtual Platform::String^ ToString() { return valToString(_val); }
+		virtual Platform::String^ Serialize() { return "gnote," + valToString(_val); }
 	};
-	
+
 	/**
 	Заканчивает все ноты, какие есть в этой дорожке
 	*/
@@ -176,8 +186,9 @@ namespace SketchMusic
 		SNoteEnd() {}
 
 		virtual Platform::String^ ToString() { return "SNoteEnd"; }
+		virtual Platform::String^ Serialize() { return "end"; }
 	};
-	
+
 	/**
 	Определяет текущую гамму
 	- нужен класс Конкретизатор
@@ -186,8 +197,9 @@ namespace SketchMusic
 	{
 	public:
 		SScale() {}
-		
+
 		virtual Platform::String^ ToString() { return "SScale"; }
+		virtual Platform::String^ Serialize() { return "scale"; }
 	};
 
 	// переименовать в LinStart и пусть он хранит всю необходимую информацию
@@ -199,8 +211,9 @@ namespace SketchMusic
 	{
 	public:
 		SNewLine() {}
-		
+
 		virtual Platform::String^ ToString() { return "SNewLine"; }
+		virtual Platform::String^ Serialize() { return "nline"; }
 	};
 
 	/**
@@ -214,6 +227,12 @@ namespace SketchMusic
 		property String^ value;
 
 		virtual Platform::String^ ToString() { return value; }
+		virtual Platform::String^ Serialize() { return "string," + value; }
+	};
+
+	public ref class ISymbolFactory sealed
+	{
+		ISymbol^ Deserialize(String^ string);
 	};
 
 	// классы для обеспечения модели синтеза SoundFont

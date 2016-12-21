@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../SketchMusic.h"
+#include "rapidjson/prettywriter.h"
 
 [Windows::UI::Xaml::Data::Bindable]
 public ref class SketchMusic::Cursor sealed

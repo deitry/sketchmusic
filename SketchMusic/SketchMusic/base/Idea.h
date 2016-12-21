@@ -4,32 +4,28 @@
 #include <string>
 #include <vector>
 
-//using namespace SketchMusic;
-
-
 namespace SketchMusic
 {
 	[Windows::UI::Xaml::Data::BindableAttribute]
 	public ref class Idea sealed
 	{
-	private:
-
 	public:
 		// конструкторы
 
-		Idea() {}	// удалить его вообще?
 		//Idea(Platform::String^ _name) { Name = _name; }
+		Idea();
 		Idea(String^ _name, IdeaCategoryEnum _cat);
-		
+		Idea(int _hash, String^ _name, IdeaCategoryEnum _cat, String^ _desc, int _parent, byte _rating,
+			 SketchMusic::Text^ _content, String^ tags, String^ projects, long long _created, long long _modified);
 		// свойства
 
+		property int Hash;						// уникальный для каждой идеи
 		property IdeaCategoryEnum Category;		// к какой категории относится идея
 		property Platform::String^ Name;		// имя для идеи
-		property Platform::String^ hash;		// нужен ? уникальный для каждой идеи
 		property Platform::String^ Description;	// описание идеи
 		//SketchMusic::Idea^	Parent;			// ссылка на родительскую идею.
-		property Platform::String^	Parent;		// ссылка на родительскую идею в виде хэша
-		property byte rating;					// оценка, данная данной идее
+		property int Parent;					// хэш родительской идеи
+		property byte Rating;					// оценка, данная данной идее
 		
 			// ссылки на объекты не продержатся дальше первого же удаления-восстановления объектов из бд (мы же собираемся их хранить?)
 
@@ -40,13 +36,11 @@ namespace SketchMusic
 			// которая будет опираться прежде всего на некий исходный мотив. На другие мотивы в принципе тоже можно ссылаться,
 			// об том стоит подумать
 
-		
-	internal:
-	
-		SketchMusic::Text^ Content;				// собственно, в чём идея заключается
-		Windows::Foundation::Collections::IVector<String^>^ tags;		// список тегов, по которым можно будет искать идею
-		Windows::Foundation::Collections::IVector<String^>^ projects;	// в каких проектах идея задействована
-		DateTime creationTime;	// время и дата создания идеи. Пригодится для сортировки и фильтрации
-		DateTime modifiedTime;	// время последней модификации - нужно?
+		property SketchMusic::Text^ Content;				// собственно, в чём идея заключается
+		property Platform::String^ Tags;		// список тегов, по которым можно будет искать идею
+		//Windows::Foundation::Collections::IVector<String^>^
+		property Platform::String^ Projects;	// в каких проектах идея задействована
+		property long long CreationTime;	// время и дата создания идеи. Пригодится для сортировки и фильтрации
+		property long long ModifiedTime;	// время последней модификации - нужно?
 	};
 }

@@ -6,6 +6,7 @@
 #include "Cursor.h"
 #include <string>
 #include "collection.h"
+#include "rapidjson/prettywriter.h"
 
 using namespace SketchMusic;
 using namespace Windows::Foundation::Collections;
