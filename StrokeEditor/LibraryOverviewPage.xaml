@@ -7,9 +7,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    
+
     <Page.Resources>
-        <!--<common:BoolToStringConverter x:Key="BTSConverter"/>-->
+        <sm:STypeEnumToStrConverter x:Key="STypeEnumToStrConverter"/>
         <Style x:Key="ItemStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI Light"/>
             <Setter Property="FontSize" Value="14.667"/>
@@ -61,12 +61,12 @@
                     <Grid HorizontalAlignment="Left" Height="150" BorderBrush="Black" BorderThickness="2">
                         <StackPanel>
                             <TextBlock Style="{StaticResource ItemStyle}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="10,10,0,0">
-                                <Run Text="{Binding Name}"/>
+                                <Run Text="Name: "/>
                                 <Run Text="{Binding Name}"/>
                             </TextBlock>
                             <TextBlock Style="{StaticResource ItemStyle}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="10,10,0,0">
                                 <Run Text="Category: "/>
-                                <Run Text="{Binding Category}"/>
+                                <Run Text="{Binding Category, Converter={StaticResource STypeEnumToStrConverter}}"/>
                             </TextBlock>
                             <TextBlock Style="{StaticResource ItemStyle}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="10,10,0,0">
                                 <Run Text="Ololo: "/>

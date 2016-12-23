@@ -3,6 +3,10 @@
 // Реализация класса LibraryOverviewPage
 //
 
+#include <string>
+#include <locale>
+#include <codecvt>
+
 #include "pch.h"
 #include "LibraryOverviewPage.xaml.h"
 
@@ -21,11 +25,71 @@ using namespace Windows::UI::Xaml::Navigation;
 using Windows::Foundation::Collections::IVector;
 using Platform::Collections::Vector;
 
+Windows::Foundation::Collections::IVector<SketchMusic::Idea^>^ StrokeEditor::LibraryOverviewPage::ideaLibrary = nullptr;
+
 // Шаблон элемента пустой страницы задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234238
+inline String^ StringFromAscIIChars(char* chars) //StrokeEditor::LibraryOverviewPage::
+{
+	if (!chars) return nullptr;
+	//
+	//size_t newsize = strlen(chars) + 1;
+	//wchar_t * wcstring = new wchar_t[newsize];
+	//size_t convertedChars = 0;
+	//mbstowcs_s(&convertedChars, wcstring, newsize, chars, _TRUNCATE);
+	//String^ str = ref new Platform::String(wcstring);
+	//delete[] wcstring;
+	//return str;
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+	std::wstring intermediateForm = converter.from_bytes(chars);
+	return ref new Platform::String(intermediateForm.c_str());
+}
+
+int StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback(void *unused, int count, char **data, char **columns)
+{
+	//for (int idx = 0; idx < count; idx++)
+	//{
+	//	columns[idx]
+	//	data[idx]
+	//}
+
+//	Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String ^ _desc, int _parent, byte _rating,
+//		Platform::String ^ _content, String ^ _tags, String ^ _projects, long long _created, long long _modified);	// чтобы не десериализовывать контент
+	//auto idea = ref new SketchMusic::Idea(
+	//	std::stoi(data[0]),	// хэш
+	//	StringFromAscIIChars(data[1]),	// имя
+	//	static_cast<SketchMusic::IdeaCategoryEnum>(std::stoi(data[2])),	// категория
+	//	StringFromAscIIChars(data[9]),	// описание				
+	//	std::stoi(data[4]),	// родитель
+	//	static_cast<byte>(std::stoi(data[10])),	// рейтинг
+	//	StringFromAscIIChars(data[3]),	// контент
+	//	StringFromAscIIChars(data[5]),	// теги
+	//	StringFromAscIIChars(data[6]),	// проекты
+	//	std::stol(data[7]),	// создан
+	//	std::stol(data[8])	// изменён				
+	//);
+	auto idea = ref new SketchMusic::Idea;
+	idea->Hash = data[0] ? std::stoi(data[0]) : 0;	// хэш	// не делаем проверок, пусть будет ошибка, если хэша нет
+	idea->Name = StringFromAscIIChars(data[1]);	// имя
+	idea->Category = static_cast<SketchMusic::IdeaCategoryEnum>(std::stoi(data[2]));	// категория
+	idea->Description = StringFromAscIIChars(data[9]);	// описание				
+	idea->Parent = data[4] ? std::stoi(data[4]) : 0;	// родитель
+	idea->Rating = data[10] ? static_cast<byte>(std::stoi(data[10])) : 0;	// рейтинг
+	idea->SerializedContent = StringFromAscIIChars(data[3]);	// контент
+	idea->Tags = StringFromAscIIChars(data[5]);	// теги
+	idea->Projects = StringFromAscIIChars(data[6]);	// проекты
+	idea->CreationTime = data[7] ? std::stol(data[7]) : 0;	// создан
+	idea->ModifiedTime= data[8] ? std::stol(data[8]) : 0;	// изменён	
+
+	ideaLibrary->Append(idea);
+	
+	return 0;
+}
 
 LibraryOverviewPage::LibraryOverviewPage()
 {
 	InitializeComponent();
+
+	ideaLibrary = ref new Vector<SketchMusic::Idea^>();
 
 	// Работа с БД
 	// int rc = sqlite3_exec(db, <SQL-запрос>, <КАЛЛБАК>, 0, &zErrMsg);
@@ -89,7 +153,25 @@ LibraryOverviewPage::LibraryOverviewPage()
 			fprintf(stderr, "SQL error: %s\n", zErrMsg);
 			sqlite3_free(zErrMsg);
 		}
+		delete[] charQuery;
+
+		// чтение объектов из БД
+		sqlQuery = "SELECT * FROM summary";
+		size_needed = sqlQuery->Length();
+		charQuery = new char[size_needed + 1];
+		WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+		//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+		charQuery[size_needed] = '\0';
+		rc = sqlite3_exec(db, charQuery, StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback, 0, &zErrMsg);
+		if (rc != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+		delete[] charQuery;
+
 	}
+
+	LibView->ItemsSource = ideaLibrary;
 
 	// тестовая библиотека
 	/*ideaLibrary = ref new Vector<SketchMusic::Idea^>();

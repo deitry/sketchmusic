@@ -151,3 +151,4 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 	}
 	return nullptr;
 }*/
+
