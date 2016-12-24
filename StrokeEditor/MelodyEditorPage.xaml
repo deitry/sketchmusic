@@ -47,7 +47,7 @@
                     </Flyout>
                 </Button.Flyout>
             </Button>-->
-            <Button Name="GoBackBtn" Content="Вернуться назад" Click="GoBackBtn_Click"/>
+            <Button Name="GoBackBtn" Content="Вернуться назад" Click="GoBackBtn_Click" Width="60" Height="90"/>
         </StackPanel>
 
         <StackPanel

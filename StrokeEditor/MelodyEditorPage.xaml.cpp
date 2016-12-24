@@ -67,8 +67,14 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	//_text = testText();
 	_texts = ref new Platform::Collections::Vector < Text^ >;
 	_idea = (Idea^)e->Parameter;
+	if (_idea->Content == nullptr)
+	{
+		_idea->Content = ref new Text("grand_piano.sf2");
+	}
+	else {
+		_idea->Content->instrument = ref new Instrument("grand_piano.sf2");
+	}
 	_texts->Append(_idea->GetContent());
-	_texts->GetAt(0)->instrument = ref new Instrument("grand_piano.sf2");
 	//_texts->Append(ref new Text("acoustic_guitar.sf2"));
 	//_texts->Append(ref new Text("Epiphone_Pick_Bass.sf2"));
 	//_texts->Append(ref new Text("Solo_Viola.sf2"));
@@ -162,7 +168,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 					{
 						auto delay = concurrency::create_task([this]
 						{
-							unsigned int timeout = 1000 * 60 / _player->_BPM / _textRow->scale;
+							unsigned int timeout = 300 * 60 / _player->_BPM / _textRow->scale;
 							concurrency::wait(timeout);
 							Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=] {
 								this->appending = false;

@@ -32,18 +32,20 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Button Content="Назад" Name="GoBackBtn" Click="GoBackBtn_Click" Grid.Row="0" Grid.Column="2"/>
-        <Button Content="ОК" Name="OkBtn" Click="OkBtn_Click" Grid.Row="0" Grid.Column="2"/>
+        <!--<Button Content="Назад" Name="GoBackBtn" Click="GoBackBtn_Click" Grid.Row="0" Grid.Column="2"/>-->
+        <Button Content="Отмена" Name="CancelBtn" Click="CancelBtn_Click" Grid.Row="0" Grid.Column="2"/>
+        <Button Content="ОК" Name="OkBtn" Click="OkBtn_Click" Grid.Row="1" Grid.Column="2"/>
         <!--<Button Content="Обновить" Name="NotifyBtn" Click="NotifyBtn_Click" Grid.Row="1" Grid.Column="2"/>-->
-        <Button Content="Редактировать" Name="EditBtn" Click="EditBtn_Click" Grid.Row="1" Grid.Column="2"/>
-
+        <Button Content="Редактировать" Name="EditBtn" Click="EditBtn_Click" Grid.Row="2" Grid.Column="2"/>
+        <Button Content="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click" Grid.Row="3" Grid.Column="2"/>
+        
         <TextBlock Text="Название: " Grid.Row="0" Grid.Column="0"/>
         <TextBox IsReadOnly="{StaticResource _isRead1}" Name="entryNameTB" Text="{Binding Source={StaticResource _entry}, Path=Name}" Grid.Row="0" Grid.Column="1" />
 
         <TextBlock Text="Категория: " Grid.Row="1" Grid.Column="0"/>
         <TextBox IsReadOnly="{StaticResource _isRead1}" Name="categoryTB" Text="" Grid.Row="1" Grid.Column="1"/>
         
-        <TextBlock Text="Время создания: " Grid.Row="2" Grid.Column="0"/>
+        <TextBlock Text="Время изменения: " Grid.Row="2" Grid.Column="0"/>
         <TextBox IsReadOnly="{StaticResource _isRead1}" Name="creationTB" Text="{Binding Source={StaticResource _entry}, Path=CreationTime}" Grid.Row="2" Grid.Column="1"/>
             
         <TextBlock Text="Рейтинг: " Grid.Row="3" Grid.Column="0"/>

@@ -188,6 +188,116 @@ LibraryOverviewPage::LibraryOverviewPage()
 	LibView->ItemsSource = ideaLibrary;*/
 }
 
+void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
+{
+	// если в качестве параметра нам передали идею, то или заменяем в списке уже имеющуюся,
+	// или создаём новую
+	SketchMusic::Idea^ idea = (SketchMusic::Idea^) e->Parameter;
+	if (!idea) return;	// если ничего не передали - ничего не делаем
+
+	if (idea->CreationTime == 0 && idea->ModifiedTime == 0)
+	{
+		// нам поручили удалить эту запись
+		// TODO : указания к действию на основе передачи типа через аргументы
+		DeleteIdea(idea);
+		RefreshBtn_Click(this, ref new RoutedEventArgs);
+		return;
+	}
+
+	// иначе пробиваем в базе по хешу
+	for (auto i : ideaLibrary)
+	{
+		if (i->Hash == idea->Hash)
+		{
+			i = idea;	// сработает?
+			UpdateIdea(idea);
+			return;
+		}
+	}
+
+	// если не заменили, то добавляем новую идею в библиотеку
+	InsertIdea(idea);
+	ideaLibrary->Append(idea);	// вью перерисуется?
+}
+
+int StrokeEditor::LibraryOverviewPage::InsertIdea(SketchMusic::Idea ^ idea)
+{
+	sqlite3* db = ((App^)App::Current)->libraryDB;
+	char *zErrMsg = 0;
+	// отладить, если захочешь передавать всё
+	//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
+	//	"VALUE (" + idea->Hash+"," + idea->Name + "," + idea->Category.ToString() + "," + idea->Content->serializeToString() + "," + idea->Parent + "," + idea->Tags + "," + idea->Projects + "," +
+	//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
+	String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,description,created,modified) "
+		"VALUES (" + idea->Hash +",'"+ idea->Name + "'," + static_cast<int>(idea->Category).ToString() + "," +
+					"'"+idea->Content->serialize()->Stringify() +"','" +idea->Description + "'," + idea->CreationTime + "," + idea->ModifiedTime + ")";
+
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), NULL, 0, NULL, NULL);
+	char* charQuery = new char[size_needed + 1];
+	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+	charQuery[size_needed] = '\0';
+	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
+	if (rc != SQLITE_OK) {
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	delete[] charQuery;
+	return rc;
+}
+
+int StrokeEditor::LibraryOverviewPage::DeleteIdea(SketchMusic::Idea ^ idea)
+{
+	sqlite3* db = ((App^)App::Current)->libraryDB;
+	char *zErrMsg = 0;
+	// отладить, если захочешь передавать всё
+	//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
+	//	"VALUE (" + idea->Hash+"," + idea->Name + "," + idea->Category.ToString() + "," + idea->Content->serializeToString() + "," + idea->Parent + "," + idea->Tags + "," + idea->Projects + "," +
+	//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
+	String^ sqlQuery = "DELETE FROM summary WHERE "
+		"hash=" + idea->Hash + ";";
+
+	int size_needed = sqlQuery->Length();
+	char* charQuery = new char[size_needed + 1];
+	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+	charQuery[size_needed] = '\0';
+	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
+	if (rc != SQLITE_OK) {
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	delete[] charQuery;
+	return rc;
+}
+
+int StrokeEditor::LibraryOverviewPage::UpdateIdea(SketchMusic::Idea ^ idea)
+{
+	sqlite3* db = ((App^)App::Current)->libraryDB;
+	char *zErrMsg = 0;
+	String^ sqlQuery = "UPDATE summary SET "
+		"name='" + idea->Name + "',"
+		"category=" + static_cast<int>(idea->Category).ToString() + ","
+		"content='" + idea->SerializedContent + "',"
+		"description='" + idea->Description + "',"
+		"created=" + idea->CreationTime + ","
+		"modified=" + idea->ModifiedTime +" " 
+		"WHERE hash=" + idea->Hash + " ;";
+
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), NULL, 0, NULL, NULL);
+	char* charQuery = new char[size_needed + 1];
+	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+	charQuery[size_needed] = '\0';
+	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
+	if (rc != SQLITE_OK) {
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	delete[] charQuery;
+	return rc;
+}
+
 void StrokeEditor::LibraryOverviewPage::GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	//We should verify if there are pages in the navigation back stack 
@@ -214,8 +324,24 @@ void StrokeEditor::LibraryOverviewPage::RefreshList()
 
 void StrokeEditor::LibraryOverviewPage::RefreshBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
+
+	sqlite3* db = ((App^)App::Current)->libraryDB;
+	if (db)
+	{
+		ideaLibrary->Clear();
+		char* charQuery = "SELECT * FROM summary";
+		char* zErrMsg;
+		int rc = sqlite3_exec(db, charQuery, StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback, 0, &zErrMsg);
+		if (rc != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+		//delete[] charQuery;
+		LibView->ItemsSource = ideaLibrary;
+	}
+
 	SizeTxt->Text = "Кол-во в массиве: " + ideaLibrary->Size + " + Кол-во в отображении: " + LibView->Items->Size;
-	//auto str = dynamic_cast<SketchMusic::Idea^>(ideaLibrary->GetAt(1))->Name;
+	
 	LibView->UpdateLayout();
 }
 
@@ -223,7 +349,7 @@ void StrokeEditor::LibraryOverviewPage::RefreshBtn_Click(Platform::Object^ sende
 void StrokeEditor::LibraryOverviewPage::LibView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
 {
 	// открыть страницу со сведениями о данной идее
-	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(e->ClickedItem,true));
+	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(e->ClickedItem,false));
 }
 
 
@@ -231,4 +357,11 @@ void StrokeEditor::LibraryOverviewPage::GoMenuBtn_Click(Platform::Object^ sender
 {
 	// открыть страницу со сведениями о данной идее
 	this->Frame->Navigate(TypeName(StrokeEditor::MainMenuPage::typeid), e);
+}
+
+
+void StrokeEditor::LibraryOverviewPage::CreateEntryBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	// открыть страницу со сведениями о данной идее
+	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(nullptr, false));
 }

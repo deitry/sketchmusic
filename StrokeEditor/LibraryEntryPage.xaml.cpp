@@ -34,12 +34,19 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	//e->
 	auto args = reinterpret_cast<StrokeEditor::LibraryEntryNavigationArgs^>(e->Parameter);
 	this->_entry = reinterpret_cast<SketchMusic::Idea^>(args->idea);
-	_isRead = args->isRead;
+	if (this->_entry == nullptr)
+	{
+		this->_entry = ref new SketchMusic::Idea;
+		this->DeleteBtn->IsEnabled = false;	// что не рождено, удалено быть не может
+	}
+	// пока других нету, задаём принудительно
+	this->_entry->Category = SketchMusic::IdeaCategoryEnum::melody;
+	//_isRead = args->isRead;
 
 	// TODO : очень плохо, надо каким-то образом сделать через привязку, триггеры, хз
 	entryNameTB->IsReadOnly = _isRead;
-	categoryTB->IsReadOnly = _isRead;
-	creationTB->IsReadOnly = _isRead;
+	categoryTB->IsReadOnly = true;	// выбора нет
+	creationTB->IsReadOnly = true;
 	ratingTB->IsReadOnly = _isRead;
 	descrTB->IsReadOnly = _isRead;
 	serContTB->IsReadOnly = _isRead;	//this->Resources->Insert("_isRead", Platform::Boolean(args->isRead));
@@ -84,16 +91,47 @@ void StrokeEditor::LibraryEntryPage::NotifyBtn_Click(Platform::Object^ sender, W
 	this->_entry->RaisePropertyChanged();
 }
 
+void StrokeEditor::LibraryEntryPage::SaveEntry()
+{
+	this->_entry->Name = entryNameTB->Text;
+	this->_entry->Description = descrTB->Text;
+	long long time;
+	_time64(&time);
+	this->_entry->ModifiedTime = time;
+}
+
 
 void StrokeEditor::LibraryEntryPage::EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	// открыть страницу со сведениями о данной идее
+	SaveEntry();
 	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), this->_entry);
 }
 
 
 void StrokeEditor::LibraryEntryPage::OkBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	// открыть страницу со сведениями о данной идее
+	// идём на вкладку с обзором данных, сохраняя изменения
+	// TODO : использовать привязки
+
+	SaveEntry();
+	this->Frame->Navigate(TypeName(StrokeEditor::LibraryOverviewPage::typeid), this->_entry);
+}
+
+
+void StrokeEditor::LibraryEntryPage::CancelBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	// идём на вкладку с обзором данных с пустыми руками
+	this->Frame->Navigate(TypeName(StrokeEditor::LibraryOverviewPage::typeid), nullptr);
+}
+
+
+void StrokeEditor::LibraryEntryPage::DeleteBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	// TODO : сделать указания к действию через передачу параметров
+	
+	this->_entry->CreationTime = 0;
+	this->_entry->ModifiedTime = 0;
+
 	this->Frame->Navigate(TypeName(StrokeEditor::LibraryOverviewPage::typeid), this->_entry);
 }

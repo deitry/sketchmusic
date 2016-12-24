@@ -13,6 +13,9 @@
         <Style x:Key="ItemStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI Light"/>
             <Setter Property="FontSize" Value="14.667"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
     </Page.Resources>
 
@@ -26,6 +29,7 @@
         <StackPanel Name ="ToolBar" Orientation="Horizontal" Grid.Row="0">
             <Button Name="GoBackBtn" Content="Вернуться назад" Click="GoBackBtn_Click"/>
             <Button Name="GoMenuBtn" Content="В меню" Click="GoMenuBtn_Click"/>
+            <Button Name="CreateEntryBtn" Content="Создать новую идею" Click="CreateEntryBtn_Click"/>
             <!--  <TextBlock Text="Фильтр : "/>
            <ListBox Margin="20">
                 <TextBlock Text="по категории"/>
@@ -59,23 +63,10 @@
             </GridView.ItemsPanel>-->
             <GridView.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel HorizontalAlignment="Left" Height="150" BorderBrush="Black" BorderThickness="2">
-                        <TextBlock Style="{StaticResource ItemStyle}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="10,10,0,0">
-                                <Run Text="Name: "/>
-                                <Run Text="{Binding Name}"/>
-                        </TextBlock>
-                        <TextBlock Style="{StaticResource ItemStyle}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="10,10,0,0">
-                                <Run Text="Category: "/>
-                                <Run Text="{Binding Category, Converter={StaticResource IdeaCategoryToStrConverter}}"/>
-                        </TextBlock>
-                        <TextBlock Style="{StaticResource ItemStyle}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="10,10,0,0">
-                                <Run Text="Ololo: "/>
-                                <!--<Run Text="{Binding Sex,Converter={StaticResource BTSConverter}}"/>-->
-                        </TextBlock>
-                        <TextBlock Style="{StaticResource ItemStyle}" TextWrapping="Wrap" HorizontalAlignment="Left" Margin="10,10,0,0">
-                                <Run Text="Data: "/>
-                                <Run Text="{Binding SerializedContent}"/>
-                        </TextBlock>
+                    <StackPanel HorizontalAlignment="Left" Height="180" Width="180" BorderBrush="Black" BorderThickness="2">
+                        <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Name}"/>
+                        <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Category, Converter={StaticResource IdeaCategoryToStrConverter}}"/>
+                        <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Description}"/>
                     </StackPanel>
                 </DataTemplate>
             </GridView.ItemTemplate>

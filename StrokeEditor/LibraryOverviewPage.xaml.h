@@ -21,6 +21,13 @@ namespace StrokeEditor
 	public:
 		LibraryOverviewPage();
 
+	protected:
+		virtual void OnNavigatedTo(NavigationEventArgs^ e) override;
+		//int PushIdea(SketchMusic::Idea^ idea);	// послать в бд
+		int UpdateIdea(SketchMusic::Idea^ idea);	// послать в бд
+		int InsertIdea(SketchMusic::Idea^ idea);	// послать в бд
+		int DeleteIdea(SketchMusic::Idea^ idea);	// послать в бд
+
 	private:
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
@@ -33,5 +40,6 @@ namespace StrokeEditor
 		static int sqlite_readentry_callback(void *unused, int count, char **data, char **columns);
 		void LibView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
 		void GoMenuBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void CreateEntryBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }
