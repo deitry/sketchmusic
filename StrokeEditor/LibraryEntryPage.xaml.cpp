@@ -49,7 +49,7 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	creationTB->IsReadOnly = true;
 	ratingTB->IsReadOnly = _isRead;
 	descrTB->IsReadOnly = _isRead;
-	serContTB->IsReadOnly = _isRead;	//this->Resources->Insert("_isRead", Platform::Boolean(args->isRead));
+	serContTB->IsReadOnly = true;	//this->Resources->Insert("_isRead", Platform::Boolean(args->isRead));
 	//_isRead = args->isRead;
 	//this->UpdateLayout();
 
@@ -66,6 +66,10 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	serContBinding->Source = _entry->SerializedContent;
 	serContTB->SetBinding(serContTB->TextProperty, serContBinding);
 	
+	Binding^ descrBinding = ref new Binding();
+	descrBinding->Source = _entry->Description;
+	descrTB->SetBinding(descrTB->TextProperty, descrBinding);
+
 	//Binding^ entryNameBinding = ref new Binding();
 	//entryNameBinding->Source = _entry->Name;
 	//entryNameTB->SetBinding(entryNameTB->TextProperty, entryNameBinding);
