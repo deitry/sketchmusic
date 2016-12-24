@@ -36,7 +36,7 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			SymbolType sym_type = static_cast<SymbolType>(std::wcstol(begin, nullptr, 10));
 			switch (sym_type)
 			{
-			NOTE:
+			case SymbolType::NOTE:
 				{
 					jval = obj->GetNamedValue("v");
 					if (jval)
@@ -45,7 +45,7 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 					}
 					return ref new SNote(val);
 				}
-			RNOTE:
+			case SymbolType::RNOTE:
 				{
 					jval = obj->GetNamedValue("v");
 					if (jval)
@@ -54,7 +54,7 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 					}
 					return ref new SRNote(val);
 				}
-			GNOTE:
+			case SymbolType::GNOTE:
 				{
 					jval = obj->GetNamedValue("v");
 					if (jval)
@@ -63,19 +63,19 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 					}
 					return ref new SGNote(val);
 				}
-			END:
+			case SymbolType::END:
 				{
 					return ref new SNoteEnd();
 				}
-			NLINE:
+			case SymbolType::NLINE:
 				{
 					return ref new SNewLine();
 				}
-			SPACE:
+			case SymbolType::SPACE:
 				{
 					return ref new SSpace();
 				}
-			SCALE:
+			case SymbolType::SCALE:
 			//	{
 			//		jval = obj->GetNamedValue("v");
 			//		if (jval)
@@ -84,7 +84,7 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			//		}
 			//		return ref new SString(val);
 			//	}
-			STRING:
+			case SymbolType::STRING:
 			//	{
 			//		String^ str;
 			//		jval = obj->GetNamedValue("s");

@@ -81,7 +81,10 @@ void SoundEnginePool::AddSoundEngine(Instrument^ instrument)
 	try
 	{
 		// пробуем создать на основе саунд фонта
-		engine = ref new SFSoundEngine(_xaudio2, instrument);
+		if (instrument->_name != ref new Platform::String(L"Metronome"))
+		{
+			engine = ref new SFSoundEngine(_xaudio2, instrument);
+		}
 	}
 	catch (Exception^ e)
 	{

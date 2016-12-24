@@ -68,5 +68,6 @@
     <Page Include="LibraryEntryPage.xaml" />
     <Page Include="KeyboardPage.xaml" />
     <Page Include="AboutPage.xaml" />
+    <Page Include="MelodyEditorPage.xaml" />
   </ItemGroup>
 </Project>

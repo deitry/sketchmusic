@@ -112,7 +112,7 @@ namespace SketchMusic
 		STRING		// для вставки строки
 	};
 
-	public ref class STypeEnumToStrConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+	public ref class IdeaCategoryToStrConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 	{
 	public:
 		virtual Object^ Convert(Platform::Object ^value, Windows::UI::Xaml::Interop::TypeName targetType, Platform::Object ^parameter, Platform::String ^language)
@@ -146,7 +146,7 @@ namespace SketchMusic
 			return res;
 		}
 
-		STypeEnumToStrConverter() {}
+		IdeaCategoryToStrConverter() {}
 	};
 
 	public interface class ISymbol

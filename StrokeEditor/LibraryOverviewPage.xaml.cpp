@@ -9,6 +9,8 @@
 
 #include "pch.h"
 #include "LibraryOverviewPage.xaml.h"
+#include "LibraryEntryPage.xaml.h"
+#include "MainMenuPage.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -22,6 +24,8 @@ using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace Windows::UI::Xaml::Interop;
+
 using Windows::Foundation::Collections::IVector;
 using Platform::Collections::Vector;
 
@@ -119,56 +123,58 @@ LibraryOverviewPage::LibraryOverviewPage()
 		}
 
 		// delete all
-		rc = sqlite3_exec(db, "DELETE FROM summary", NULL, 0, &zErrMsg);
-		if (rc != SQLITE_OK) {
-			fprintf(stderr, "SQL error: %s\n", zErrMsg);
-			sqlite3_free(zErrMsg);
-		}
-		rc = sqlite3_exec(db, "VACUUM", NULL, 0, &zErrMsg);
-		if (rc != SQLITE_OK) {
-			fprintf(stderr, "SQL error: %s\n", zErrMsg);
-			sqlite3_free(zErrMsg);
-		}
+		//rc = sqlite3_exec(db, "DELETE FROM summary", NULL, 0, &zErrMsg);
+		//if (rc != SQLITE_OK) {
+		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		//	sqlite3_free(zErrMsg);
+		//}
+		//rc = sqlite3_exec(db, "VACUUM", NULL, 0, &zErrMsg);
+		//if (rc != SQLITE_OK) {
+		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		//	sqlite3_free(zErrMsg);
+		//}
+		
 		// тестовые записи
-		auto idea = ref new SketchMusic::Idea("idea1", SketchMusic::IdeaCategoryEnum(1));
+		//auto idea = ref new SketchMusic::Idea("idea1", SketchMusic::IdeaCategoryEnum(1));
 		//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
 		//	"VALUE (" + idea->Hash + idea->Name + idea->Category.ToString() + idea->Content->serializeToString() + idea->Parent + idea->Tags + idea->Projects +
 		//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
-		idea->Content = ref new SketchMusic::Text("piano");
-		idea->Content->addSymbol(ref new SketchMusic::Cursor(1, 1),ref new SketchMusic::SNote(1));
-		idea->Content->addSymbol(ref new SketchMusic::Cursor(3, 1), ref new SketchMusic::SNote(1));
-		idea->Content->addSymbol(ref new SketchMusic::Cursor(3, 30), ref new SketchMusic::SNote(3));
+		//idea->Content = ref new SketchMusic::Text("piano");
+		//idea->Content->addSymbol(ref new SketchMusic::Cursor(1, 1),ref new SketchMusic::SNote(1));
+		//idea->Content->addSymbol(ref new SketchMusic::Cursor(3, 1), ref new SketchMusic::SNote(1));
+		//idea->Content->addSymbol(ref new SketchMusic::Cursor(3, 30), ref new SketchMusic::SNote(3));
 
 		//itoa(static_cast<int>(idea->Category),str,10);
-		String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,created,modified) "
-			"VALUES (" + idea->Hash +",'"+ idea->Name + "'," + static_cast<int>(idea->Category).ToString() + "," +
-						"'"+idea->Content->serialize()->Stringify() +"'," + idea->CreationTime + "," + idea->ModifiedTime + ")";
-		int size_needed = sqlQuery->Length();
-		char* charQuery = new char[size_needed + 1];
-		WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
-		//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-		charQuery[size_needed] = '\0';
-		rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
-		if (rc != SQLITE_OK) {
-			fprintf(stderr, "SQL error: %s\n", zErrMsg);
-			sqlite3_free(zErrMsg);
-		}
-		delete[] charQuery;
+		//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,created,modified) "
+		//	"VALUES (" + idea->Hash +",'"+ idea->Name + "'," + static_cast<int>(idea->Category).ToString() + "," +
+		//				"'"+idea->Content->serialize()->Stringify() +"'," + idea->CreationTime + "," + idea->ModifiedTime + ")";
+		//int size_needed = sqlQuery->Length();
+		//char* charQuery = new char[size_needed + 1];
+		//WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+		////const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+		//charQuery[size_needed] = '\0';
+		//rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
+		//if (rc != SQLITE_OK) {
+		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		//	sqlite3_free(zErrMsg);
+		//}
+		//delete[] charQuery;
 
 		// чтение объектов из БД
-		sqlQuery = "SELECT * FROM summary";
-		size_needed = sqlQuery->Length();
-		charQuery = new char[size_needed + 1];
-		WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+		//String^ sqlQuery = "SELECT * FROM summary";
+		//int size_needed = sqlQuery->Length();
+		//charQuery = new char[size_needed + 1];
+		//WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
 		//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-		charQuery[size_needed] = '\0';
+		//charQuery[size_needed] = '\0';
+		
+		char* charQuery = "SELECT * FROM summary";
 		rc = sqlite3_exec(db, charQuery, StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback, 0, &zErrMsg);
 		if (rc != SQLITE_OK) {
 			fprintf(stderr, "SQL error: %s\n", zErrMsg);
 			sqlite3_free(zErrMsg);
 		}
-		delete[] charQuery;
-
+		//delete[] charQuery;
 	}
 
 	LibView->ItemsSource = ideaLibrary;
@@ -211,4 +217,18 @@ void StrokeEditor::LibraryOverviewPage::RefreshBtn_Click(Platform::Object^ sende
 	SizeTxt->Text = "Кол-во в массиве: " + ideaLibrary->Size + " + Кол-во в отображении: " + LibView->Items->Size;
 	//auto str = dynamic_cast<SketchMusic::Idea^>(ideaLibrary->GetAt(1))->Name;
 	LibView->UpdateLayout();
+}
+
+
+void StrokeEditor::LibraryOverviewPage::LibView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
+{
+	// открыть страницу со сведениями о данной идее
+	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(e->ClickedItem,true));
+}
+
+
+void StrokeEditor::LibraryOverviewPage::GoMenuBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	// открыть страницу со сведениями о данной идее
+	this->Frame->Navigate(TypeName(StrokeEditor::MainMenuPage::typeid), e);
 }

@@ -31,5 +31,7 @@ namespace StrokeEditor
 
 		//static Platform::String^ StringFromAscIIChars(std::string & chars);
 		static int sqlite_readentry_callback(void *unused, int count, char **data, char **columns);
+		void LibView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
+		void GoMenuBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }

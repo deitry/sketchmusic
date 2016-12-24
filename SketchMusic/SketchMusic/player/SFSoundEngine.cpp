@@ -21,7 +21,7 @@ SketchMusic::Player::SFSoundEngine::SFSoundEngine(Microsoft::WRL::ComPtr<IXAudio
 		
 	auto data = SketchMusic::SFReader::SFData::ReadSFData(instrument->_name);
 	if (data == nullptr)
-		throw ref new Exception(1, "Не удалось создать объект");
+		throw ref new Exception(0, "Не удалось создать объект");
 
 	_sfPreset = data->presets->GetAt(0);
 	_sfPreset->updateParams();

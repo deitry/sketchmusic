@@ -359,14 +359,20 @@ void SketchMusic::View::TextRow::AddSymbol(PositionedSymbol^ sym)
 	_canvas->Children->Append(bt);
 	notes.push_back(bt);
 
-	auto point = GetCoordinatsOfPosition(currentPosition);
+	//auto point = GetCoordinatsOfPosition(currentPosition); // WTF?
+	auto point = GetCoordinatsOfPosition(sym->_pos); // WTF?
 	_canvas->SetLeft(bt, point.X - PlaceholderWidth / 2); // + sym->_pos->getTick()* initialised / 32/ BeatWidth
-	INote^ inote = dynamic_cast<INote^>(sym->_sym); 
-	int offsetY = -((inote->_val) % 12);
+	INote^ inote = dynamic_cast<INote^>(sym->_sym);
+	int offsetY = 0;
+	if (inote)
+	{
+		offsetY = -((inote->_val) % 12);
+	}
 	if (offsetY > 6) offsetY -= 12;
 	if (offsetY < -6) offsetY += 12;
 	offsetY *= 5;
 	_canvas->SetTop(bt, point.Y + offsetY);
+	
 }
 
 // скрыть ненужные точки привязки

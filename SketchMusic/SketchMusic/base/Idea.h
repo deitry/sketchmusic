@@ -4,10 +4,12 @@
 #include <string>
 #include <vector>
 
+using namespace Windows::UI::Xaml::Data;
+
 namespace SketchMusic
 {
 	[Windows::UI::Xaml::Data::BindableAttribute]
-	public ref class Idea sealed
+	public ref class Idea sealed : Windows::UI::Xaml::Data::INotifyPropertyChanged
 	{
 	public:
 		// конструкторы
@@ -49,6 +51,10 @@ namespace SketchMusic
 		//Windows::Foundation::Collections::IVector<String^>^
 		property Platform::String^ Projects;	// в каких проектах идея задействована
 		property long long CreationTime;		// время и дата создания идеи. Пригодится для сортировки и фильтрации
-		property long long ModifiedTime;		// время последней модификации - нужно?
+		property long long ModifiedTime;
+		// Унаследовано через INotifyPropertyChanged
+		virtual event PropertyChangedEventHandler ^ PropertyChanged;
+		void RaisePropertyChanged() { PropertyChanged(this, ref new PropertyChangedEventArgs("")); }
+		// время последней модификации - нужно?
 	};
 }
