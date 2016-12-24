@@ -67,11 +67,19 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	//_text = testText();
 	_texts = ref new Platform::Collections::Vector < Text^ >;
 	_idea = (Idea^)e->Parameter;
+	
+	
 	if (_idea->Content == nullptr)
 	{
 		_idea->Content = ref new Text("grand_piano.sf2");
+		// восстанавливаем из сериализованного состояния
+		if (_idea->SerializedContent != nullptr)
+		{
+			_idea->Content->deserialize(_idea->SerializedContent);
+		}
 	}
 	else {
+		// принудительно, пока нет выбора других инструментов
 		_idea->Content->instrument = ref new Instrument("grand_piano.sf2");
 	}
 	_texts->Append(_idea->GetContent());
