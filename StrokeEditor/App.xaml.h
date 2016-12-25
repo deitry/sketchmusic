@@ -24,6 +24,10 @@ namespace StrokeEditor
 
 		sqlite3* libraryDB;
 
+		int InsertIdea(SketchMusic::Idea^ idea);
+		int UpdateIdea(SketchMusic::Idea^ idea);
+		int DeleteIdea(SketchMusic::Idea^ idea);
+
 	private:
 		void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
 		void OnNavigationFailed(Platform::Object ^sender, Windows::UI::Xaml::Navigation::NavigationFailedEventArgs ^e);

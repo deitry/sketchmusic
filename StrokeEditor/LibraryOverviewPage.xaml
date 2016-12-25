@@ -10,6 +10,7 @@
 
     <Page.Resources>
         <sm:IdeaCategoryToStrConverter x:Key="IdeaCategoryToStrConverter"/>
+        <sm:TimeToStrConverter x:Key="TimeToStrConverter"/>
         <Style x:Key="ItemStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI Light"/>
             <Setter Property="FontSize" Value="14.667"/>
@@ -22,12 +23,12 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
         
-        <StackPanel Name ="ToolBar" Orientation="Horizontal" Grid.Row="0">
-            <Button Name="GoBackBtn" Content="Вернуться назад" Click="GoBackBtn_Click"/>
+        <StackPanel Name ="ToolBar" Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Top">
+            <!--<Button Name="GoBackBtn" Content="Вернуться назад" Click="GoBackBtn_Click"/>-->
             <Button Name="GoMenuBtn" Content="В меню" Click="GoMenuBtn_Click"/>
             <Button Name="CreateEntryBtn" Content="Создать новую идею" Click="CreateEntryBtn_Click"/>
             <!--  <TextBlock Text="Фильтр : "/>
@@ -36,8 +37,7 @@
                 <TextBlock Text="по дате"/>
                 <TextBlock Text="по оценке"/>
             </ListBox>-->
-            <Button Content="Фильтр"
-                    Padding="5,20,5,20">
+            <Button Content="Фильтр">
                 <Button.Flyout>
                     <Flyout x:Name="FilterFlyout">
                         <ListView Name="FilterList">
@@ -50,26 +50,61 @@
             </Button>
 
             <Button Name="RefreshBtn" Content="Обновить" Click="RefreshBtn_Click"/>
-            <TextBlock Name="SizeTxt"/>
+            <!--<TextBlock Name="SizeTxt" VerticalAlignment="Center" Margin="10,0,10,0"/>-->
         </StackPanel>
 
-        <GridView Name="LibView" Grid.Row="1" ItemClick="LibView_ItemClick" IsItemClickEnabled="True">
-            <!--<GridView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VariableSizedWrapGrid  Orientation="Horizontal" 
-                                            ItemWidth="{Binding ElementName=AGridView, Path=ItemWidth}"
-                                            MaximumRowsOrColumns="{Binding ElementName=AGridView, Path=MaxRowsOrColumns}"/>
-                </ItemsPanelTemplate>
-            </GridView.ItemsPanel>-->
-            <GridView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel HorizontalAlignment="Left" Height="180" Width="180" BorderBrush="Black" BorderThickness="2">
-                        <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Name}"/>
-                        <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Category, Converter={StaticResource IdeaCategoryToStrConverter}}"/>
-                        <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Description}"/>
-                    </StackPanel>
-                </DataTemplate>
-            </GridView.ItemTemplate>
-        </GridView>
+        <ScrollViewer Grid.Row="1" VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Auto">
+            <GridView Name="LibView" ItemClick="LibView_ItemClick" IsItemClickEnabled="True">
+                <!-- ScrollViewer.VerticalScrollBarVisibility="Visible"
+                      ScrollViewer.VerticalScrollMode="Enabled"
+                      ScrollViewer.HorizontalScrollMode="Disabled" -->
+                <!--<GridView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VariableSizedWrapGrid  Orientation="Horizontal" 
+                                                ItemWidth="{Binding ElementName=AGridView, Path=ItemWidth}"
+                                                MaximumRowsOrColumns="{Binding ElementName=AGridView, Path=MaxRowsOrColumns}"/>
+                    </ItemsPanelTemplate>
+                </GridView.ItemsPanel>-->
+                <GridView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Left" Height="130" Width="180" BorderBrush="{ThemeResource AppBarSeparatorForeground}" BorderThickness="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="30"/>
+                            </Grid.ColumnDefinitions>
+
+                            <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" HorizontalAlignment="Left" VerticalAlignment="Top"
+                                          VerticalScrollMode="auto" VerticalScrollBarVisibility="Auto" IsVerticalScrollChainingEnabled="False">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource ItemStyle}" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
+                                        <Run Text="{Binding Name}"/>
+                                    </TextBlock>
+                                    <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Description}" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </ScrollViewer>
+                            <TextBlock Style="{StaticResource ItemStyle}" Grid.Row="0" Grid.Column="1" Width="15" HorizontalAlignment="Right">
+                                <Run Text="{Binding Category, Converter={StaticResource IdeaCategoryToStrConverter}}" FontFamily="Segoe MDL2 Assets"/>
+                            </TextBlock>
+                            <Border BorderBrush="{ThemeResource AppBarSeparatorForeground}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">
+                                <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Rating}"/>
+                            </Border>
+                            <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                        Style="{StaticResource ItemStyle}" Text="{Binding ModifiedTime, Converter={StaticResource TimeToStrConverter}}"
+                                        HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="60" FontSize="10.5"
+                                        Margin="2"/>
+                        </Grid>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
+        </ScrollViewer>
+        <!--<StackPanel Orientation="Horizontal" Grid.Row="2" VerticalAlignment="Bottom">
+            
+        </StackPanel>-->
     </Grid>
 </Page>

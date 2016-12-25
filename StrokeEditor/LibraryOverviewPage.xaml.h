@@ -23,10 +23,12 @@ namespace StrokeEditor
 
 	protected:
 		virtual void OnNavigatedTo(NavigationEventArgs^ e) override;
+	
+	public:
 		//int PushIdea(SketchMusic::Idea^ idea);	// послать в бд
-		int UpdateIdea(SketchMusic::Idea^ idea);	// послать в бд
-		int InsertIdea(SketchMusic::Idea^ idea);	// послать в бд
-		int DeleteIdea(SketchMusic::Idea^ idea);	// послать в бд
+		//int UpdateIdea(SketchMusic::Idea^ idea);	// послать в бд
+		//int InsertIdea(SketchMusic::Idea^ idea);	// послать в бд
+		//int DeleteIdea(SketchMusic::Idea^ idea);	// послать в бд
 
 	private:
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);

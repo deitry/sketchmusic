@@ -112,6 +112,11 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	//	Frame->GoBack();
 	//}
 
+	// остановить проигрывание, если идёт
+	_player->cycling = false;
+	_player->stop();
+	_player->stopKeyboard();
+
 	// открыть страницу со сведениями о данной идее
 	_idea->Content = this->_texts->GetAt(0);
 	_idea->SerializedContent = _idea->Content->serialize()->Stringify();

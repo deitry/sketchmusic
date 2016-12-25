@@ -6,6 +6,7 @@
 #pragma once
 
 #include "LibraryEntryPage.g.h"
+#include "LibraryOverviewPage.xaml.h"
 
 using namespace Windows::UI::Xaml::Navigation;
 
@@ -20,7 +21,7 @@ namespace StrokeEditor
 	public:
 		LibraryEntryPage();
 		property Platform::Boolean _isRead;
-		
+
 	protected:
 		virtual void OnNavigatedTo(NavigationEventArgs^ e) override;
 
@@ -34,15 +35,23 @@ namespace StrokeEditor
 		void OkBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void CancelBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void DeleteBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void ExtendBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void SaveBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+
+		//StrokeEditor::LibraryOverviewPage^ _library;
 	};
 
 	public ref class LibraryEntryNavigationArgs sealed
 	{
 	public:
 		LibraryEntryNavigationArgs() {}
-		LibraryEntryNavigationArgs(Platform::Object^ _idea, Platform::Boolean _isRead) { idea = _idea; isRead = _isRead; }
+		LibraryEntryNavigationArgs(Platform::Object^ _idea, Platform::Boolean _isRead) //, StrokeEditor::LibraryOverviewPage^ _library 
+		{
+			idea = _idea; isRead = _isRead; //library = _library;
+		}
 
 		property Platform::Object^ idea;
 		property Platform::Boolean isRead;
+		//property StrokeEditor::LibraryOverviewPage^ library;
 	};
 }

@@ -17,7 +17,7 @@
     <x:Double x:Key="NoteWidth">90.0</x:Double>
     <x:Double x:Key="CtrlWidth">70.0</x:Double>
     <x:Double x:Key="NoteHeight">60.0</x:Double>
-    <x:Double x:Key="RowHeight">100.0</x:Double>
+    <x:Double x:Key="RowHeight">50.0</x:Double>
     <x:Double x:Key="BeatWidth">45.0</x:Double>
     <x:Double x:Key="PlaceholderWidth">25.0</x:Double>
     

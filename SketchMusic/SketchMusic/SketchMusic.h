@@ -129,7 +129,7 @@ namespace SketchMusic
 			case IdeaCategoryEnum::instrument: return "Инструмент";
 			case IdeaCategoryEnum::lyrics: return "Текст/стихи";
 			case IdeaCategoryEnum::melodicSequence: return "Мелодическая последовательность";
-			case IdeaCategoryEnum::melody: return "Мелодия";
+			case IdeaCategoryEnum::melody: return L"\ue189";
 			case IdeaCategoryEnum::name: return "Название";
 			case IdeaCategoryEnum::rhythm: return "Ритм";
 			case IdeaCategoryEnum::shape: return "Форма";
@@ -148,6 +148,45 @@ namespace SketchMusic
 
 		IdeaCategoryToStrConverter() {}
 	};
+
+	public ref class VerboseIdeaCategoryToStrConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+	{
+	public:
+		virtual Object^ Convert(Platform::Object ^value, Windows::UI::Xaml::Interop::TypeName targetType, Platform::Object ^parameter, Platform::String ^language)
+		{
+			if (value == nullptr) return nullptr;
+			IdeaCategoryEnum type = (IdeaCategoryEnum)(value);
+			//int res = static_cast<int>(type);
+			switch (type)
+			{
+			case IdeaCategoryEnum::chord: return "Аккорд";
+			case IdeaCategoryEnum::chordProgression: return "Последовательность аккордов";
+			case IdeaCategoryEnum::combo: return "Комбинированная идея";
+			case IdeaCategoryEnum::dynamic: return "Динамика";
+			case IdeaCategoryEnum::instrument: return "Инструмент";
+			case IdeaCategoryEnum::lyrics: return "Текст/стихи";
+			case IdeaCategoryEnum::melodicSequence: return "Мелодическая последовательность";
+			case IdeaCategoryEnum::melody: return "Мелодия";
+			case IdeaCategoryEnum::name: return "Название";
+			case IdeaCategoryEnum::rhythm: return "Ритм";
+			case IdeaCategoryEnum::shape: return "Форма";
+			case IdeaCategoryEnum::tempo: return "Темп";
+			case IdeaCategoryEnum::none:
+			default: return "Неизвестный тип";
+			}
+			return "";
+		}
+		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+		{
+			if (value == nullptr) return nullptr;
+			int res = std::wcstol(dynamic_cast<String^>(value)->Data(), NULL, 10);
+			return res;
+		}
+
+		VerboseIdeaCategoryToStrConverter() {}
+	};
+
+	ref class TimeToStrConverter;
 
 	public interface class ISymbol
 	{

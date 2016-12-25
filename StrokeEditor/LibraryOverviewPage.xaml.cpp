@@ -134,58 +134,10 @@ LibraryOverviewPage::LibraryOverviewPage()
 		//	sqlite3_free(zErrMsg);
 		//}
 		
-		// тестовые записи
-		//auto idea = ref new SketchMusic::Idea("idea1", SketchMusic::IdeaCategoryEnum(1));
-		//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
-		//	"VALUE (" + idea->Hash + idea->Name + idea->Category.ToString() + idea->Content->serializeToString() + idea->Parent + idea->Tags + idea->Projects +
-		//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
-		//idea->Content = ref new SketchMusic::Text("piano");
-		//idea->Content->addSymbol(ref new SketchMusic::Cursor(1, 1),ref new SketchMusic::SNote(1));
-		//idea->Content->addSymbol(ref new SketchMusic::Cursor(3, 1), ref new SketchMusic::SNote(1));
-		//idea->Content->addSymbol(ref new SketchMusic::Cursor(3, 30), ref new SketchMusic::SNote(3));
-
-		//itoa(static_cast<int>(idea->Category),str,10);
-		//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,created,modified) "
-		//	"VALUES (" + idea->Hash +",'"+ idea->Name + "'," + static_cast<int>(idea->Category).ToString() + "," +
-		//				"'"+idea->Content->serialize()->Stringify() +"'," + idea->CreationTime + "," + idea->ModifiedTime + ")";
-		//int size_needed = sqlQuery->Length();
-		//char* charQuery = new char[size_needed + 1];
-		//WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
-		////const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-		//charQuery[size_needed] = '\0';
-		//rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
-		//if (rc != SQLITE_OK) {
-		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		//	sqlite3_free(zErrMsg);
-		//}
-		//delete[] charQuery;
-
-		// чтение объектов из БД
-		//String^ sqlQuery = "SELECT * FROM summary";
-		//int size_needed = sqlQuery->Length();
-		//charQuery = new char[size_needed + 1];
-		//WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
-		//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-		//charQuery[size_needed] = '\0';
-		
-		char* charQuery = "SELECT * FROM summary";
-		rc = sqlite3_exec(db, charQuery, StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback, 0, &zErrMsg);
-		if (rc != SQLITE_OK) {
-			fprintf(stderr, "SQL error: %s\n", zErrMsg);
-			sqlite3_free(zErrMsg);
-		}
-		//delete[] charQuery;
+		RefreshList();
 	}
 
 	LibView->ItemsSource = ideaLibrary;
-
-	// тестовая библиотека
-	/*ideaLibrary = ref new Vector<SketchMusic::Idea^>();
-	ideaLibrary->Append(ref new SketchMusic::Idea("idea1", SketchMusic::IdeaCategoryEnum(1)));
-	ideaLibrary->Append(ref new SketchMusic::Idea("idea2", SketchMusic::IdeaCategoryEnum(2)));
-	ideaLibrary->Append(ref new SketchMusic::Idea("idea3", SketchMusic::IdeaCategoryEnum(10)));
-
-	LibView->ItemsSource = ideaLibrary;*/
 }
 
 void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
@@ -199,7 +151,7 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	{
 		// нам поручили удалить эту запись
 		// TODO : указания к действию на основе передачи типа через аргументы
-		DeleteIdea(idea);
+		((App^)App::Current)->DeleteIdea(idea);
 		RefreshBtn_Click(this, ref new RoutedEventArgs);
 		return;
 	}
@@ -210,93 +162,18 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		if (i->Hash == idea->Hash)
 		{
 			i = idea;	// сработает?
-			UpdateIdea(idea);
+			((App^)App::Current)->UpdateIdea(idea);
 			return;
 		}
 	}
 
 	// если не заменили, то добавляем новую идею в библиотеку
-	InsertIdea(idea);
-	ideaLibrary->Append(idea);	// вью перерисуется?
+	((App^)App::Current)->InsertIdea(idea);
+	//ideaLibrary->Append(idea);
+	RefreshList();
 }
 
-int StrokeEditor::LibraryOverviewPage::InsertIdea(SketchMusic::Idea ^ idea)
-{
-	sqlite3* db = ((App^)App::Current)->libraryDB;
-	char *zErrMsg = 0;
-	// отладить, если захочешь передавать всё
-	//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
-	//	"VALUE (" + idea->Hash+"," + idea->Name + "," + idea->Category.ToString() + "," + idea->Content->serializeToString() + "," + idea->Parent + "," + idea->Tags + "," + idea->Projects + "," +
-	//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
-	String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,description,created,modified) "
-		"VALUES (" + idea->Hash +",'"+ idea->Name + "'," + static_cast<int>(idea->Category).ToString() + "," +
-					"'"+idea->Content->serialize()->Stringify() +"','" +idea->Description + "'," + idea->CreationTime + "," + idea->ModifiedTime + ")";
 
-	int size_needed = WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), NULL, 0, NULL, NULL);
-	char* charQuery = new char[size_needed + 1];
-	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
-	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-	charQuery[size_needed] = '\0';
-	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
-	if (rc != SQLITE_OK) {
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		sqlite3_free(zErrMsg);
-	}
-	delete[] charQuery;
-	return rc;
-}
-
-int StrokeEditor::LibraryOverviewPage::DeleteIdea(SketchMusic::Idea ^ idea)
-{
-	sqlite3* db = ((App^)App::Current)->libraryDB;
-	char *zErrMsg = 0;
-	// отладить, если захочешь передавать всё
-	//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
-	//	"VALUE (" + idea->Hash+"," + idea->Name + "," + idea->Category.ToString() + "," + idea->Content->serializeToString() + "," + idea->Parent + "," + idea->Tags + "," + idea->Projects + "," +
-	//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
-	String^ sqlQuery = "DELETE FROM summary WHERE "
-		"hash=" + idea->Hash + ";";
-
-	int size_needed = sqlQuery->Length();
-	char* charQuery = new char[size_needed + 1];
-	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
-	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-	charQuery[size_needed] = '\0';
-	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
-	if (rc != SQLITE_OK) {
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		sqlite3_free(zErrMsg);
-	}
-	delete[] charQuery;
-	return rc;
-}
-
-int StrokeEditor::LibraryOverviewPage::UpdateIdea(SketchMusic::Idea ^ idea)
-{
-	sqlite3* db = ((App^)App::Current)->libraryDB;
-	char *zErrMsg = 0;
-	String^ sqlQuery = "UPDATE summary SET "
-		"name='" + idea->Name + "',"
-		"category=" + static_cast<int>(idea->Category).ToString() + ","
-		"content='" + idea->SerializedContent + "',"
-		"description='" + idea->Description + "',"
-		"created=" + idea->CreationTime + ","
-		"modified=" + idea->ModifiedTime +" " 
-		"WHERE hash=" + idea->Hash + " ;";
-
-	int size_needed = WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), NULL, 0, NULL, NULL);
-	char* charQuery = new char[size_needed + 1];
-	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
-	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-	charQuery[size_needed] = '\0';
-	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
-	if (rc != SQLITE_OK) {
-		fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		sqlite3_free(zErrMsg);
-	}
-	delete[] charQuery;
-	return rc;
-}
 
 void StrokeEditor::LibraryOverviewPage::GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
@@ -319,30 +196,32 @@ void StrokeEditor::LibraryOverviewPage::RefreshList()
 	// Если будет не устраивать - тогда подумаем. Пока коллекция будет не чересчур большой, этого должно хватить.
 
 	// возможность смены выбора способа отображения? Несколько темплейтов
-}
-
-
-void StrokeEditor::LibraryOverviewPage::RefreshBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
-{
 
 	sqlite3* db = ((App^)App::Current)->libraryDB;
 	if (db)
 	{
 		ideaLibrary->Clear();
-		char* charQuery = "SELECT * FROM summary";
+		char* charQuery = "SELECT * FROM summary ORDER BY modified DESC, name ASC;";
 		char* zErrMsg;
 		int rc = sqlite3_exec(db, charQuery, StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback, 0, &zErrMsg);
 		if (rc != SQLITE_OK) {
 			fprintf(stderr, "SQL error: %s\n", zErrMsg);
 			sqlite3_free(zErrMsg);
 		}
-		//delete[] charQuery;
 		LibView->ItemsSource = ideaLibrary;
 	}
 
-	SizeTxt->Text = "Кол-во в массиве: " + ideaLibrary->Size + " + Кол-во в отображении: " + LibView->Items->Size;
-	
+	//SizeTxt->Text = "Кол-во в массиве: " + ideaLibrary->Size + " + Кол-во в отображении: " + LibView->Items->Size;
+
 	LibView->UpdateLayout();
+}
+
+
+
+
+void StrokeEditor::LibraryOverviewPage::RefreshBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	RefreshList();
 }
 
 
@@ -362,6 +241,6 @@ void StrokeEditor::LibraryOverviewPage::GoMenuBtn_Click(Platform::Object^ sender
 
 void StrokeEditor::LibraryOverviewPage::CreateEntryBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	// открыть страницу со сведениями о данной идее
+	// открыть страницу со сведениями о новой идее
 	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(nullptr, false));
 }

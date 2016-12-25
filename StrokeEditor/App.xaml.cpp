@@ -148,3 +148,89 @@ void App::OnNavigationFailed(Platform::Object ^sender, Windows::UI::Xaml::Naviga
 {
 	throw ref new FailureException("Failed to load Page " + e->SourcePageType.Name);
 }
+
+int StrokeEditor::App::InsertIdea(SketchMusic::Idea ^ idea)
+{
+	sqlite3* db = this->libraryDB;
+	char *zErrMsg = 0;
+	// отладить, если захочешь передавать всё
+
+	idea->SerializedContent = idea->Content ? idea->Content->serialize()->Stringify() : "";
+
+	//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,description,created,modified) "
+	//	"VALUES (" + idea->Hash +",'"+ idea->Name + "'," + static_cast<int>(idea->Category).ToString() + "," +
+	//				"'"+idea->SerializedContent+"','" +idea->Description + "'," + idea->CreationTime + "," + idea->ModifiedTime + ")";
+
+	String^ sqlQuery = L"INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
+		"VALUES (" + idea->Hash + ",'" + idea->Name + "'," + static_cast<int>(idea->Category).ToString() + ",'" + idea->SerializedContent + "'," + idea->Parent +
+		",'" + idea->Tags + "','" + idea->Projects + "'," + idea->CreationTime + "," + idea->ModifiedTime + ",'" + idea->Description + "'," + idea->Rating + ");";
+
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), NULL, 0, NULL, NULL);
+	char* charQuery = new char[size_needed + 1];
+	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+	charQuery[size_needed] = '\0';
+	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
+	if (rc != SQLITE_OK) {
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	delete[] charQuery;
+	return rc;
+}
+
+int StrokeEditor::App::DeleteIdea(SketchMusic::Idea ^ idea)
+{
+	sqlite3* db = this->libraryDB;
+	char *zErrMsg = 0;
+	// отладить, если захочешь передавать всё
+	//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
+	//	"VALUE (" + idea->Hash+"," + idea->Name + "," + idea->Category.ToString() + "," + idea->Content->serializeToString() + "," + idea->Parent + "," + idea->Tags + "," + idea->Projects + "," +
+	//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
+	String^ sqlQuery = "DELETE FROM summary WHERE "
+		"hash=" + idea->Hash + ";";
+
+	int size_needed = sqlQuery->Length();
+	char* charQuery = new char[size_needed + 1];
+	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+	charQuery[size_needed] = '\0';
+	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
+	if (rc != SQLITE_OK) {
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	delete[] charQuery;
+	return rc;
+}
+
+int StrokeEditor::App::UpdateIdea(SketchMusic::Idea ^ idea)
+{
+	sqlite3* db = this->libraryDB;//((App^)App::Current)
+	char *zErrMsg = 0;
+	String^ sqlQuery = "UPDATE summary SET "
+		"name='" + idea->Name + "',"
+		"category=" + static_cast<int>(idea->Category).ToString() + ","
+		"content='" + idea->SerializedContent + "',"
+		"tags='" + idea->Tags + "',"
+		"projects='" + idea->Projects + "',"
+		"parent=" + idea->Parent + ","
+		"rating=" + idea->Rating + ","
+		"description='" + idea->Description + "',"
+		"created=" + idea->CreationTime + ","
+		"modified=" + idea->ModifiedTime + " "
+		"WHERE hash=" + idea->Hash + " ;";
+
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), NULL, 0, NULL, NULL);
+	char* charQuery = new char[size_needed + 1];
+	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
+	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+	charQuery[size_needed] = '\0';
+	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
+	if (rc != SQLITE_OK) {
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+	delete[] charQuery;
+	return rc;
+}

@@ -11,51 +11,78 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <sm:IdeaCategoryToStrConverter x:Key="IdeaCategoryToStrConverter"/>
+        <sm:IdeaCategoryToStrConverter x:Key="VerboseIdeaCategoryToStrConverter"/>
+        <sm:TimeToStrConverter x:Key="TimeToStrConverter"/>
         <sm:Idea x:Key="_entry" x:Name="_entry"/>
         <x:Boolean x:Key="_isRead1">true</x:Boolean>
+        <Style x:Key="TextBoxStyle" TargetType="TextBox">
+            <Setter Property="Margin" Value="10"/>
+        </Style>
     </Page.Resources>
     
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="100,10,10,10">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!--<Button Content="Назад" Name="GoBackBtn" Click="GoBackBtn_Click" Grid.Row="0" Grid.Column="2"/>-->
-        <Button Content="Отмена" Name="CancelBtn" Click="CancelBtn_Click" Grid.Row="0" Grid.Column="2"/>
-        <Button Content="ОК" Name="OkBtn" Click="OkBtn_Click" Grid.Row="1" Grid.Column="2"/>
-        <!--<Button Content="Обновить" Name="NotifyBtn" Click="NotifyBtn_Click" Grid.Row="1" Grid.Column="2"/>-->
-        <Button Content="Редактировать" Name="EditBtn" Click="EditBtn_Click" Grid.Row="2" Grid.Column="2"/>
-        <Button Content="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click" Grid.Row="3" Grid.Column="2"/>
+    <StackPanel Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <Button Content="Назад" Name="GoBackBtn" Click="GoBackBtn_Click"/>
+            <Button Content="Отмена" Name="CancelBtn" Click="CancelBtn_Click"/>
+            <Button Content="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
+            <Button Content="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
+            <Button Content="Развить" Name="ExtendBtn" Click="ExtendBtn_Click"/>
+            <Button Content="Сохранить" Name="SaveBtn" Click="SaveBtn_Click"/>
+            <Button Content="ОК" Name="OkBtn" Click="OkBtn_Click"/>
+        </StackPanel>
         
-        <TextBlock Text="Название: " Grid.Row="0" Grid.Column="0"/>
-        <TextBox IsReadOnly="{StaticResource _isRead1}" Name="entryNameTB" Text="{Binding Source={StaticResource _entry}, Path=Name}" Grid.Row="0" Grid.Column="1" />
+        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="100,10,10,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
 
-        <TextBlock Text="Категория: " Grid.Row="1" Grid.Column="0"/>
-        <TextBox IsReadOnly="{StaticResource _isRead1}" Name="categoryTB" Text="" Grid.Row="1" Grid.Column="1"/>
+            <TextBlock Text="Название: " Grid.Row="0" Grid.Column="0"/>
+            <TextBox IsReadOnly="{StaticResource _isRead1}" Name="entryNameTB" 
+                     Text="{Binding Source={StaticResource _entry}, Path=Name}"
+                     Style="{StaticResource TextBoxStyle}"
+                     PlaceholderText="Новая идея"
+                     Grid.Row="0" Grid.Column="1" />
+
+            <TextBlock Text="Категория: " Grid.Row="1" Grid.Column="0"/>
+            <TextBox IsReadOnly="{StaticResource _isRead1}" Name="categoryTB"
+                     Text="" 
+                     Style="{StaticResource TextBoxStyle}"
+                     Grid.Row="1" Grid.Column="1"/>
         
-        <TextBlock Text="Время изменения: " Grid.Row="2" Grid.Column="0"/>
-        <TextBox IsReadOnly="{StaticResource _isRead1}" Name="creationTB" Text="{Binding Source={StaticResource _entry}, Path=CreationTime}" Grid.Row="2" Grid.Column="1"/>
+            <TextBlock Text="Время изменения: " Grid.Row="2" Grid.Column="0"/>
+            <TextBox IsReadOnly="{StaticResource _isRead1}" Name="creationTB" Text="{Binding Source={StaticResource _entry}, Path=CreationTime, Converter={StaticResource TimeToStrConverter}}"
+                     Style="{StaticResource TextBoxStyle}"
+                     Grid.Row="2" Grid.Column="1"/>
             
-        <TextBlock Text="Рейтинг: " Grid.Row="3" Grid.Column="0"/>
-        <TextBox IsReadOnly="{StaticResource _isRead1}" Name="ratingTB" Text="{Binding Source={StaticResource _entry}, Path=Rating}" Grid.Row="3" Grid.Column="1"/>
+            <TextBlock Text="Рейтинг: " Grid.Row="3" Grid.Column="0"/>
+            <TextBox IsReadOnly="{StaticResource _isRead1}" Name="ratingTB" Text="{Binding Source={StaticResource _entry}, Path=Rating}" 
+                     Style="{StaticResource TextBoxStyle}"
+                     Grid.Row="3" Grid.Column="1"/>
         
-        <TextBlock Text="Описание: " Grid.Row="4" Grid.Column="0"/>
-        <TextBox IsReadOnly="{StaticResource _isRead1}" Name="descrTB" Text="{Binding Source={StaticResource _entry}, Path=Description}" Grid.Row="4" Grid.Column="1"/>
+            <TextBlock Text="Описание: " Grid.Row="4" Grid.Column="0"/>
+            <TextBox IsReadOnly="{StaticResource _isRead1}" Name="descrTB" Text="{Binding Source={StaticResource _entry}, Path=Description}" 
+                     Style="{StaticResource TextBoxStyle}"
+                     TextWrapping="Wrap"
+                     PlaceholderText="Описание"
+                     Height="70"
+                     Grid.Row="4" Grid.Column="1"/>
         
-        <TextBlock Text="Данные: " Grid.Row="5" Grid.Column="0"/>
-        <TextBox IsReadOnly="{StaticResource _isRead1}" Name="serContTB" Text="{Binding Source={StaticResource _entry}, Path=SerializedContent}" Grid.Row="5" Grid.Column="1"/>
+            <TextBlock Text="Данные: " Grid.Row="5" Grid.Column="0"/>
+            <TextBox IsReadOnly="{StaticResource _isRead1}" Name="serContTB" Text="{Binding Source={StaticResource _entry}, Path=SerializedContent}" 
+                     Style="{StaticResource TextBoxStyle}"
+                     Grid.Row="5" Grid.Column="1"/>
 
-    </Grid>
+        </Grid>
+    </StackPanel>
 </Page>
