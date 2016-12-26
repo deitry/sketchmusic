@@ -200,7 +200,7 @@ namespace SketchMusic
 	{
 	public:
 		property int _val;
-		property bool _striked;
+		property int _velocity;
 	};
 
 	public ref class PositionedSymbol sealed
@@ -223,7 +223,7 @@ namespace SketchMusic
 		SNote(int tone) { _val = tone; }
 
 		virtual property int _val;
-		virtual property bool _striked;
+		virtual property int _velocity;
 
 		virtual SymbolType GetSymType() { return SymbolType::NOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
@@ -251,7 +251,7 @@ namespace SketchMusic
 		SRNote(int rtone) { _val = rtone; }
 
 		virtual property int _val;
-		virtual property bool _striked;
+		virtual property int _velocity;
 
 		virtual SymbolType GetSymType() { return SymbolType::RNOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
@@ -269,7 +269,7 @@ namespace SketchMusic
 		SGNote(int gnote) { _val = gnote; }
 
 		virtual property int _val;
-		virtual property bool _striked;
+		virtual property int _velocity;
 
 		virtual SymbolType GetSymType() { return SymbolType::GNOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
@@ -662,6 +662,7 @@ namespace SketchMusic
 			control			= 14,
 			tempo			= 15,
 			zoom			= 16,
+			metronome		= 17,
 		};
 
 		public enum class KeyboardStateEnum

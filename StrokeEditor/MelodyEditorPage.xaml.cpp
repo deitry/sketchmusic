@@ -148,6 +148,11 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 	{
 		switch (args->key->type)
 		{
+		case SketchMusic::View::KeyType::metronome:
+		{
+			_player->needMetronome = (bool)args->key->value;
+			break;
+		}
 		case SketchMusic::View::KeyType::note:
 		case SketchMusic::View::KeyType::relativeNote:
 		case SketchMusic::View::KeyType::genericNote:

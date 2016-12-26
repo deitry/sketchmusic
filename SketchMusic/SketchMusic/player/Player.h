@@ -13,8 +13,6 @@ private:
 
 	ISoundEngine^ _keyboardEngine;	// создаём копию выбранного енжина для проигрывания нот с клавиатуры
 	ISoundEngine^ _metronome;
-	
-	bool needMetronome;
 
 	void playMetronome();
 	
@@ -22,6 +20,7 @@ public:
 	property int _state;
 	property bool cycling;
 	property float _BPM;
+	property bool needMetronome;
 
 	property SketchMusic::Cursor^ _cursor;
 

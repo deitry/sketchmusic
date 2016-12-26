@@ -4,6 +4,7 @@
 
 using namespace Windows::Data::Json;
 
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 [Windows::UI::Xaml::Data::Bindable]
 public ref class SketchMusic::Cursor sealed
 {
@@ -12,20 +13,24 @@ private:
 				// –азбиение на такты происходит в соответствии
 				// с системными символами.
 				// “емп композиции будет задаватьс€ именно относительно крупных тиков.
-	int _tick;	// Ќомер "мелкого" тика. —ложно сказать, как сделать лучше,
-				// пока будем считать, что в одном крупном тике 256 мелких
+	float _tick;	// Ќомер "мелкого" тика. —ложно сказать, как сделать лучше,
+					// пока будем считать, что в одном крупном тике TICK_IN_BEAT мелких
+					// UPD: заменено с int на float дл€ будущей поддержки триолей и проч.
+					// —ейчас предполагаетс€ така€ штука: при создании триолей и прочих -олей можно будет
+					// выбрать ноту, указать длину (триоль = цела€, половинка, произвольное рассто€ние до ближайшей ноты и т.д.)
+					// и дальше произойдЄт автоматическое вычисление требуемого положени€.
 
 public:	
 	// конструкторы
 	Cursor() {_beat = 0; _tick = 0; }
 	Cursor(int b) { _beat = b; _tick = 0; }
-	Cursor(int b, int t) { _beat = b; _tick = t; }
+	Cursor(int b, float t) { _beat = b; _tick = t; }
 	Cursor(Cursor^ cur) { _beat = cur->_beat; _tick = cur->_tick; }
 
 	// доступ к пол€м
 	
 	void moveTo(SketchMusic::Cursor^ pos) { _beat = pos->getBeat(); _tick = pos->getTick(); }
-	void setPos(int b, int t) { _beat = b; _tick = t; }
+	void setPos(int b, float t) { _beat = b; _tick = t; }
 	void setPos(int b) { setPos(b, 0); }
 
 	int getBeat() { return _beat; }

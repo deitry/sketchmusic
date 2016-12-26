@@ -23,12 +23,14 @@
     
     <Flyout x:Key="TempoFlyout">
         <StackPanel Orientation="Vertical">
+            <TextBlock Text="BPM"/>
             <Slider x:Name="TempoSlider"
                     Orientation="Vertical"
                     Height="100"
                     Minimum="30"
-                    Maximum="300"/>
-            <TextBlock Text="BPM"/>
+                    Maximum="300"
+                    Value="120"/>
+            <CheckBox x:Name="metroNeed" Content="Metronome" IsChecked="True"/>
         </StackPanel>
     </Flyout>
 

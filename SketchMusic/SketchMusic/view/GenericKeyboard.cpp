@@ -381,7 +381,15 @@ void SketchMusic::View::GenericKeyboard::OnClosed(Platform::Object ^sender, Plat
 			args->key = key;
 			args->keysPressed = this->pressedKeys;
 			KeyPressed(this, args);
-			return;
+		}
+		CheckBox^ checkBox = dynamic_cast<CheckBox^>(static_cast<Object^>(child));
+		if (checkBox)
+		{
+			auto key = ref new SketchMusic::View::Key(KeyType::metronome, (int)checkBox->IsChecked->Value);
+			auto args = ref new KeyboardEventArgs;
+			args->key = key;
+			args->keysPressed = this->pressedKeys;
+			KeyPressed(this, args);
 		}
 	}
 }

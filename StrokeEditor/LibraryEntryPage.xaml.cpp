@@ -3,6 +3,8 @@
 // Реализация класса LibraryEntryPage
 //
 
+#include <ppltasks.h>
+
 #include "pch.h"
 #include "LibraryEntryPage.xaml.h"
 #include "MelodyEditorPage.xaml.h"
@@ -142,17 +144,23 @@ void StrokeEditor::LibraryEntryPage::DeleteBtn_Click(Platform::Object^ sender, W
 	deleteFileDialog->PrimaryButtonText = "Удалить";
 	deleteFileDialog->SecondaryButtonText = "Отмена";
 	
-	ContentDialogResult result = deleteFileDialog->ShowAsync()->GetResults();
-	
-	// Delete the file if the user clicked the primary button. 
-	/// Otherwise, do nothing. 
-	if (result == ContentDialogResult::Primary)
+	auto dialog = concurrency::create_task(deleteFileDialog->ShowAsync());
+	dialog.then([=] (concurrency::task<ContentDialogResult> t)
 	{
-		this->_entry->CreationTime = 0;
-		this->_entry->ModifiedTime = 0;
+		ContentDialogResult result = t.get();
 
-		this->Frame->Navigate(TypeName(StrokeEditor::LibraryOverviewPage::typeid), this->_entry);
-	}
+		// Delete the file if the user clicked the primary button. 
+		/// Otherwise, do nothing. 
+		if (result == ContentDialogResult::Primary)
+		{
+			this->_entry->CreationTime = 0;
+			this->_entry->ModifiedTime = 0;
+
+			this->Frame->Navigate(TypeName(StrokeEditor::LibraryOverviewPage::typeid), this->_entry);
+		}
+	});
+	
+	
 }
 
 
