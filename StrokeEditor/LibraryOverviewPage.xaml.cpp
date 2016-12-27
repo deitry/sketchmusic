@@ -50,27 +50,6 @@ inline String^ StringFromAscIIChars(char* chars) //StrokeEditor::LibraryOverview
 
 int StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback(void *unused, int count, char **data, char **columns)
 {
-	//for (int idx = 0; idx < count; idx++)
-	//{
-	//	columns[idx]
-	//	data[idx]
-	//}
-
-//	Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String ^ _desc, int _parent, byte _rating,
-//		Platform::String ^ _content, String ^ _tags, String ^ _projects, long long _created, long long _modified);	// чтобы не десериализовывать контент
-	//auto idea = ref new SketchMusic::Idea(
-	//	std::stoi(data[0]),	// хэш
-	//	StringFromAscIIChars(data[1]),	// имя
-	//	static_cast<SketchMusic::IdeaCategoryEnum>(std::stoi(data[2])),	// категория
-	//	StringFromAscIIChars(data[9]),	// описание				
-	//	std::stoi(data[4]),	// родитель
-	//	static_cast<byte>(std::stoi(data[10])),	// рейтинг
-	//	StringFromAscIIChars(data[3]),	// контент
-	//	StringFromAscIIChars(data[5]),	// теги
-	//	StringFromAscIIChars(data[6]),	// проекты
-	//	std::stol(data[7]),	// создан
-	//	std::stol(data[8])	// изменён				
-	//);
 	auto idea = ref new SketchMusic::Idea;
 	idea->Hash = data[0] ? std::stoi(data[0]) : 0;	// хэш	// не делаем проверок, пусть будет ошибка, если хэша нет
 	idea->Name = StringFromAscIIChars(data[1]);	// имя
@@ -201,9 +180,31 @@ void StrokeEditor::LibraryOverviewPage::RefreshList()
 	if (db)
 	{
 		ideaLibrary->Clear();
-		char* charQuery = "SELECT * FROM summary ORDER BY modified DESC, name ASC;";
+		std::string charQuery = "SELECT * FROM summary "; // *FROM summary ORDER BY"; // modified DESC, name ASC;";
+		
+		if (last3DaysFilter || rating5Higher || baseTagsFilter)
+		{
+			charQuery += "WHERE ";
+			long long t;
+			_time64(&t);
+			if (last3DaysFilter) { charQuery = charQuery + "(modified > " + std::to_string(t - 260000) + ")"; }
+			if (last3DaysFilter && rating5Higher) { charQuery = charQuery + " AND "; }
+			if (rating5Higher) { charQuery = charQuery + "(rating > " + std::to_string(5)+")"; }
+			if ((last3DaysFilter || rating5Higher) && baseTagsFilter) { charQuery = charQuery + " AND "; }
+			if (baseTagsFilter) { charQuery = charQuery + "((NOT (tags LIKE '%base%')) OR (tags IS NULL))"; }
+		}
+
+		switch (this->SortingList->SelectedIndex)
+		{
+		case 1:
+			charQuery += " ORDER BY rating DESC, modified DESC";
+			break;
+		case 0:
+		default: charQuery += " ORDER BY modified DESC, name ASC;"; break;
+		}
+		
 		char* zErrMsg;
-		int rc = sqlite3_exec(db, charQuery, StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback, 0, &zErrMsg);
+		int rc = sqlite3_exec(db, charQuery.c_str(), StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback, 0, &zErrMsg);
 		if (rc != SQLITE_OK) {
 			fprintf(stderr, "SQL error: %s\n", zErrMsg);
 			sqlite3_free(zErrMsg);
@@ -243,4 +244,46 @@ void StrokeEditor::LibraryOverviewPage::CreateEntryBtn_Click(Platform::Object^ s
 {
 	// открыть страницу со сведениями о новой идее
 	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(nullptr, false));
+}
+
+
+void StrokeEditor::LibraryOverviewPage::FilterList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+{
+	for (auto i : e->AddedItems)
+	{
+		unsigned int index;
+		FilterList->Items->IndexOf(i, &index);
+		switch (index)
+		{
+		case 0:
+			// фильтрация по дате - последние три дня
+			last3DaysFilter = true;
+			break;
+		case 1:
+			rating5Higher = true;
+			break;
+		case 2:
+			baseTagsFilter = true;
+			break;
+		}
+	}
+
+	for (auto i : e->RemovedItems)
+	{
+		unsigned int index;
+		FilterList->Items->IndexOf(i, &index);
+		switch (index)
+		{
+		case 0:
+			// фильтрация по дате - последние три дня
+			last3DaysFilter = false;
+			break;
+		case 1:
+			rating5Higher = false;
+			break;
+		case 2:
+			baseTagsFilter = false;
+			break;
+		}
+	}
 }

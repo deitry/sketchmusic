@@ -22,7 +22,6 @@ SketchMusic::Player::Player::Player()
 	_BPM = 120;
 	cycling = false;
 
-	_BPM = 80;
 	// do - чтобы можно было "скипнуть" инициализацию, если то-то не удалось
 	do
 	{

@@ -20,6 +20,7 @@
     <ClCompile Include="LibraryEntryPage.xaml.cpp" />
     <ClCompile Include="LibraryOverviewPage.xaml.cpp" />
     <ClCompile Include="MainMenuPage.xaml.cpp" />
+    <ClCompile Include="MelodyEditorPage.xaml.cpp" />
     <ClCompile Include="sqlite3.c" />
   </ItemGroup>
   <ItemGroup>
@@ -30,6 +31,7 @@
     <ClInclude Include="LibraryEntryPage.xaml.h" />
     <ClInclude Include="LibraryOverviewPage.xaml.h" />
     <ClInclude Include="MainMenuPage.xaml.h" />
+    <ClInclude Include="MelodyEditorPage.xaml.h" />
     <ClInclude Include="sqlite3.h" />
   </ItemGroup>
   <ItemGroup>

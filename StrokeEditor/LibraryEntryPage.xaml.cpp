@@ -51,32 +51,40 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	entryNameTB->IsReadOnly = _isRead;
 	categoryTB->IsReadOnly = true;	// выбора нет
 	creationTB->IsReadOnly = true;
-	ratingTB->IsReadOnly = _isRead;
+	//ratingTB->IsReadOnly = _isRead;
 	descrTB->IsReadOnly = _isRead;
 	serContTB->IsReadOnly = true;	//this->Resources->Insert("_isRead", Platform::Boolean(args->isRead));
+	tagsTB->IsReadOnly = _isRead;
 	//_isRead = args->isRead;
 	//this->UpdateLayout();
-
-	Binding^ entryNameBinding = ref new Binding();
-	entryNameBinding->Source = _entry->Name;
-	entryNameTB->SetBinding(entryNameTB->TextProperty, entryNameBinding);
-
-	Binding^ categoryBinding = ref new Binding();
-	categoryBinding->Source = _entry->Category;
-	categoryBinding->Converter = ref new SketchMusic::VerboseIdeaCategoryToStrConverter();
-	categoryTB->SetBinding(categoryTB->TextProperty, categoryBinding);
-
-	Binding^ serContBinding = ref new Binding();
-	serContBinding->Source = _entry->SerializedContent;
-	serContTB->SetBinding(serContTB->TextProperty, serContBinding);
 	
-	Binding^ descrBinding = ref new Binding();
-	descrBinding->Source = _entry->Description;
-	descrTB->SetBinding(descrTB->TextProperty, descrBinding);
-
+	entryNameTB->Text = _entry->Name;
+	categoryTB->Text = (String^)(ref new SketchMusic::VerboseIdeaCategoryToStrConverter())->Convert(_entry->Category, TypeName(Platform::String::typeid), nullptr, nullptr);
+	descrTB->Text = _entry->Description;
+	tagsTB->Text = _entry->Tags;
+	serContTB->Text = _entry->SerializedContent;
 	//Binding^ entryNameBinding = ref new Binding();
 	//entryNameBinding->Source = _entry->Name;
 	//entryNameTB->SetBinding(entryNameTB->TextProperty, entryNameBinding);
+
+	//Binding^ categoryBinding = ref new Binding();
+	//categoryBinding->Source = _entry->Category;
+	//categoryBinding->Converter = ref new SketchMusic::VerboseIdeaCategoryToStrConverter();
+	//categoryTB->SetBinding(categoryTB->TextProperty, categoryBinding);
+
+	//Binding^ serContBinding = ref new Binding();
+	//serContBinding->Source = _entry->SerializedContent;
+	//serContTB->SetBinding(serContTB->TextProperty, serContBinding);
+	
+	//Binding^ descrBinding = ref new Binding();
+	//descrBinding->Source = _entry->Description;
+	//descrTB->SetBinding(descrTB->TextProperty, descrBinding);
+
+	//Binding^ tagsBinding = ref new Binding();
+	//tagsBinding->Source = _entry->Tags;
+	//tagsTB->SetBinding(tagsTB->TextProperty, tagsBinding);
+
+	ratingSlider->Value = _entry->Rating;
 	
 	//this->_entry->RaisePropertyChanged();
 }
@@ -103,9 +111,11 @@ void StrokeEditor::LibraryEntryPage::SaveEntry()
 {
 	this->_entry->Name = entryNameTB->Text;
 	this->_entry->Description = descrTB->Text;
+	this->_entry->Rating = ratingSlider->Value;
 	long long time;
 	_time64(&time);
 	this->_entry->ModifiedTime = time;
+	this->_entry->Tags = this->tagsTB->Text;
 }
 
 

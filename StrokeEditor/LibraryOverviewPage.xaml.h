@@ -43,5 +43,42 @@ namespace StrokeEditor
 		void LibView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
 		void GoMenuBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void CreateEntryBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void FilterList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
+
+		bool last3DaysFilter;
+		bool rating5Higher;
+		bool baseTagsFilter;
+	};
+
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+	public ref class RatingToColorConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+	{
+	public:
+		// на основе клавиши выдаёт её графическое отображение
+		// TODO : для всякого рода перемещений, стрелочек и так далее сделать красиво
+		virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+		{
+			if (value == nullptr) return nullptr;
+
+			int rating = ((Windows::Foundation::IPropertyValue^)value)->GetInt32();
+			if (rating == 0) return nullptr;
+
+			if (rating >= 10) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Blue);
+			if (rating >= 8) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Green);
+			if (rating >= 6) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::YellowGreen);
+			if (rating >= 4) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Goldenrod);
+			if (rating >= 2) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Red);
+			if (rating >= 1) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::DarkRed);
+
+			return nullptr;
+		}
+
+		// обращаю внимание, что при данном подходе не получится сделать convert и convertBack и получить тот же результат
+		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+		{
+			return nullptr;
+		}
+
+		RatingToColorConverter() {}
 	};
 }

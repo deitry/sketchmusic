@@ -11,6 +11,7 @@
     <Page.Resources>
         <sm:IdeaCategoryToStrConverter x:Key="IdeaCategoryToStrConverter"/>
         <sm:TimeToStrConverter x:Key="TimeToStrConverter"/>
+        <local:RatingToColorConverter x:Key="RatingToColorConverter"/>
         <Style x:Key="ItemStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI Light"/>
             <Setter Property="FontSize" Value="14.667"/>
@@ -37,13 +38,23 @@
                 <TextBlock Text="по дате"/>
                 <TextBlock Text="по оценке"/>
             </ListBox>-->
-            <Button Content="Фильтр">
+            <Button Content="Сортировка">
                 <Button.Flyout>
-                    <Flyout x:Name="FilterFlyout">
-                        <ListView Name="FilterList">
-                            <TextBlock Text="по категории"/>
+                    <Flyout x:Name="SortingFlyout">
+                        <ListView Name="SortingList" SelectedIndex="0">
                             <TextBlock Text="по дате"/>
                             <TextBlock Text="по оценке"/>
+                        </ListView>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+            <Button Content="Фильтрация">
+                <Button.Flyout>
+                    <Flyout x:Name="FilterFlyout">
+                        <ListView Name="FilterList" SelectedIndex="0" SelectionMode="Multiple" SelectionChanged="FilterList_SelectionChanged">
+                            <TextBlock Text="последние 3 дня"/>
+                            <TextBlock Text="оценка 6 и выше"/>
+                            <TextBlock Text="не имеет тега 'base'"/>
                         </ListView>
                     </Flyout>
                 </Button.Flyout>
@@ -73,6 +84,7 @@
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -91,10 +103,16 @@
                             <TextBlock Style="{StaticResource ItemStyle}" Grid.Row="0" Grid.Column="1" Width="15" HorizontalAlignment="Right">
                                 <Run Text="{Binding Category, Converter={StaticResource IdeaCategoryToStrConverter}}" FontFamily="Segoe MDL2 Assets"/>
                             </TextBlock>
-                            <Border BorderBrush="{ThemeResource AppBarSeparatorForeground}" BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">
-                                <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Rating}"/>
+                            <Border BorderBrush="{ThemeResource AppBarSeparatorForeground}" 
+                                    Background="{Binding Rating, Converter={StaticResource RatingToColorConverter}}"
+                                    BorderThickness="1" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right">
+                                <TextBlock Style="{StaticResource ItemStyle}" Text="{Binding Rating}" />
                             </Border>
                             <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                                        Style="{StaticResource ItemStyle}" Text="{Binding Tags}"
+                                        HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="60" FontSize="10.5"
+                                        Margin="2"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
                                         Style="{StaticResource ItemStyle}" Text="{Binding ModifiedTime, Converter={StaticResource TimeToStrConverter}}"
                                         HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="60" FontSize="10.5"
                                         Margin="2"/>

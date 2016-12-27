@@ -13,22 +13,26 @@
     <Page.Resources>
         <sm:IdeaCategoryToStrConverter x:Key="VerboseIdeaCategoryToStrConverter"/>
         <sm:TimeToStrConverter x:Key="TimeToStrConverter"/>
+        <local:RatingToColorConverter x:Key="RatingToColorConverter"/>
         <sm:Idea x:Key="_entry" x:Name="_entry"/>
         <x:Boolean x:Key="_isRead1">true</x:Boolean>
         <Style x:Key="TextBoxStyle" TargetType="TextBox">
             <Setter Property="Margin" Value="10"/>
         </Style>
+        <Style x:Key="CtrlButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="40"/>
+        </Style>
     </Page.Resources>
     
     <StackPanel Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
-            <Button Content="Назад" Name="GoBackBtn" Click="GoBackBtn_Click"/>
-            <Button Content="Отмена" Name="CancelBtn" Click="CancelBtn_Click"/>
-            <Button Content="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
-            <Button Content="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
-            <Button Content="Развить" Name="ExtendBtn" Click="ExtendBtn_Click"/>
-            <Button Content="Сохранить" Name="SaveBtn" Click="SaveBtn_Click"/>
-            <Button Content="ОК" Name="OkBtn" Click="OkBtn_Click"/>
+            <Button Style="{StaticResource CtrlButtonStyle}" Content="Назад" Name="GoBackBtn" Click="GoBackBtn_Click"/>
+            <Button Style="{StaticResource CtrlButtonStyle}" Content="Отмена" Name="CancelBtn" Click="CancelBtn_Click"/>
+            <Button Style="{StaticResource CtrlButtonStyle}" Content="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
+            <Button Style="{StaticResource CtrlButtonStyle}" Content="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
+            <Button Style="{StaticResource CtrlButtonStyle}" Content="Развить" Name="ExtendBtn" Click="ExtendBtn_Click"/>
+            <Button Style="{StaticResource CtrlButtonStyle}" Content="Сохранить" Name="SaveBtn" Click="SaveBtn_Click"/>
+            <Button Style="{StaticResource CtrlButtonStyle}" Content="ОК" Name="OkBtn" Click="OkBtn_Click"/>
         </StackPanel>
         
         <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="100,10,10,10">
@@ -66,10 +70,15 @@
                      Grid.Row="2" Grid.Column="1"/>
             
             <TextBlock Text="Рейтинг: " Grid.Row="3" Grid.Column="0"/>
-            <TextBox IsReadOnly="{StaticResource _isRead1}" Name="ratingTB" Text="{Binding Source={StaticResource _entry}, Path=Rating}" 
+            <!--<TextBox IsReadOnly="{StaticResource _isRead1}" Name="ratingTB" Text="{Binding Source={StaticResource _entry}, Path=Rating}" 
                      Style="{StaticResource TextBoxStyle}"
-                     Grid.Row="3" Grid.Column="1"/>
-        
+                     Grid.Row="3" Grid.Column="1"/>-->
+            <Slider Name="ratingSlider" Value="{Binding Source={StaticResource _entry}, Path=Rating}"
+                    Foreground="{Binding ElementName=ratingSlider, Path=Value, Converter={StaticResource RatingToColorConverter}}"
+                    Background="{Binding ElementName=ratingSlider, Path=Value, Converter={StaticResource RatingToColorConverter}}"
+                    Maximum="10" Minimum="0"
+                    Grid.Row="3" Grid.Column="1"/>
+
             <TextBlock Text="Описание: " Grid.Row="4" Grid.Column="0"/>
             <TextBox IsReadOnly="{StaticResource _isRead1}" Name="descrTB" Text="{Binding Source={StaticResource _entry}, Path=Description}" 
                      Style="{StaticResource TextBoxStyle}"
@@ -77,11 +86,18 @@
                      PlaceholderText="Описание"
                      Height="70"
                      Grid.Row="4" Grid.Column="1"/>
-        
-            <TextBlock Text="Данные: " Grid.Row="5" Grid.Column="0"/>
+
+            <TextBlock Text="Теги: " Grid.Row="5" Grid.Column="0"/>
+            <TextBox IsReadOnly="{StaticResource _isRead1}" Name="tagsTB" 
+                     Text="{Binding Source={StaticResource _entry}, Path=Tags}"
+                     Style="{StaticResource TextBoxStyle}"
+                     PlaceholderText="теги"
+                     Grid.Row="5" Grid.Column="1" />
+
+            <TextBlock Text="Данные: " Grid.Row="6" Grid.Column="0"/>
             <TextBox IsReadOnly="{StaticResource _isRead1}" Name="serContTB" Text="{Binding Source={StaticResource _entry}, Path=SerializedContent}" 
                      Style="{StaticResource TextBoxStyle}"
-                     Grid.Row="5" Grid.Column="1"/>
+                     Grid.Row="6" Grid.Column="1"/>
 
         </Grid>
     </StackPanel>
