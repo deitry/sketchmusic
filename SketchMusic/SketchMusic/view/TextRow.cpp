@@ -471,7 +471,7 @@ ContentControl^ SketchMusic::View::TextRow::GetControlAtPos(Cursor^ pos, int off
 
 float SketchMusic::View::TextRow::CalculateTick(float offsetX, ContentControl ^ ctrl)
 {
-	return ((int)((offsetX + ctrl->Width / 4) / ctrl->Width * scale)) * TICK_IN_BEAT / scale;
+	return ((int)((offsetX + ctrl->Width/scale / 4) / ctrl->Width * scale)) * TICK_IN_BEAT / scale;
 	//int tick = (int)(offset.X / ctrl->Width * TICK_IN_BEAT * scale / TICK_IN_BEAT) * TICK_IN_BEAT / scale;
 }
 

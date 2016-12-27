@@ -8,36 +8,23 @@ using namespace Windows::Data::Json;
 
 typedef std::multimap < Cursor^, ISymbol^ >  psymMap;
 typedef psymMap::iterator psymIter;
-
-Text ^ SketchMusic::Text::deserializeFromString(Platform::String ^ serialized)
-{
-	Text^ text = ref new Text();
-
-	// инструмент
-
-	// массив с нотами
-
-	return text;
-}
+namespace t = SketchMusic::SerializationTokens;
 
 SketchMusic::Text::Text()
 {
 	this->curPosition = ref new Cursor;
-	//this->Ops = "koko";
 }
 
 SketchMusic::Text::Text(Instrument^ instrument)
 {
 	this->curPosition = ref new Cursor;
 	this->instrument = instrument;
-	//this->Ops = "koko";
 }
 
 SketchMusic::Text::Text(String^ instrumentName)
 {
 	this->curPosition = ref new Cursor;
 	this->instrument = ref new Instrument(instrumentName);
-	//this->Ops = "koko";
 }
 
 void SketchMusic::Text::deleteSymbol(Cursor^ cur, ISymbol^ sym)
@@ -89,38 +76,28 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 	return vect;
 }
 
-Platform::String ^ SketchMusic::Text::serializeToString()
-{
-	// инструмент в начале
-	// потом список со всеми нотами
-	String^ result = this->instrument->_name + ";";
-	for (std::pair<Cursor^, ISymbol^> sym : this->_t)
-	{
-		result += sym.first->ToString() + "=" + sym.second->ToString() + ";";
-	}
-	return result;
-}
-
 IJsonValue^ SketchMusic::Text::serialize()
 {
 	JsonObject^ json = ref new JsonObject();
-	json->Insert("instr", JsonValue::CreateStringValue(instrument->_name));	
+	json->Insert(t::INSTR, JsonValue::CreateStringValue(instrument->_name));	
 		// TODO : ключи для поиска значений должны НЕ быть встроенными! Вынести отдельно
 	JsonArray^ jsonNotes = ref new JsonArray;
 	for (auto sym : this->_t)
 	{
 		JsonObject^ jsym = ref new JsonObject;
-		jsym->Insert("p1", JsonValue::CreateNumberValue(sym.first->getBeat()));
-		jsym->Insert("p2", JsonValue::CreateNumberValue(sym.first->getTick()));
-		jsym->Insert("t", JsonValue::CreateNumberValue(static_cast<int>(sym.second->GetSymType())));
+		jsym->Insert(t::BEAT, JsonValue::CreateNumberValue(sym.first->getBeat()));
+		jsym->Insert(t::TICK, JsonValue::CreateNumberValue(sym.first->getTick()));
+		jsym->Insert(t::SYMBOL_TYPE, JsonValue::CreateNumberValue(static_cast<int>(sym.second->GetSymType())));
 		auto note = dynamic_cast<INote^>(sym.second);
 		if (note)
 		{
-			jsym->Insert("v",JsonValue::CreateNumberValue(note->_val));
+			jsym->Insert(t::NOTE_VALUE,JsonValue::CreateNumberValue(note->_val));
+			if (note->_velocity) { jsym->Insert(t::NOTE_VELOCITY, JsonValue::CreateNumberValue(note->_velocity)); }
+			if (note->_velocity) { jsym->Insert(t::NOTE_VOICE, JsonValue::CreateNumberValue(note->_voice)); }
 		}
 		jsonNotes->Append(jsym);
 	}
-	json->Insert("notes", jsonNotes);
+	json->Insert(t::NOTES_ARRAY, jsonNotes);
 	return json;
 }
 
@@ -130,16 +107,16 @@ void SketchMusic::Text::deserialize(Platform::String^ str)
 	if (JsonObject::TryParse(str, &json))
 	{
 		//use the JsonObject json
-		this->instrument = ref new Instrument(json->GetNamedString("instr"));
-		auto jArr = json->GetNamedArray("notes");
+		this->instrument = ref new Instrument(json->GetNamedString(t::INSTR));
+		auto jArr = json->GetNamedArray(t::NOTES_ARRAY);
 		// проходимся по массиву и создаём нотки
 		for (auto i : jArr)
 		{
 			JsonObject^ jEl = i->GetObject();
 			if (jEl)
 			{
-				int pos_tick = static_cast<int>(jEl->GetNamedNumber("p1"));
-				int pos_beat = static_cast<int>(jEl->GetNamedNumber("p2"));
+				int pos_tick = static_cast<int>(jEl->GetNamedNumber(t::BEAT));
+				int pos_beat = static_cast<int>(jEl->GetNamedNumber(t::TICK));
 				auto pos = ref new Cursor(pos_tick, pos_beat);
 
 				auto sym = ISymbolFactory::Deserialize(jEl);

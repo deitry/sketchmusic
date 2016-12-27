@@ -6,6 +6,7 @@ using namespace SketchMusic;
 using namespace Platform;
 using namespace Windows::Data::Json;
 using SketchMusic::SymbolType;
+namespace t = SketchMusic::SerializationTokens;
 
 Platform::String^ SketchMusic::SNote::valToString(int val)
 {
@@ -29,7 +30,10 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 	if (obj)
 	{
 		int val = 0;
-		auto jval = obj->GetNamedValue("t");
+		int voi = 0;
+		int vel = 0;
+
+		auto jval = obj->GetNamedValue(t::SYMBOL_TYPE);
 		if (jval)
 		{
 			const wchar_t* begin = jval->Stringify()->Data();
@@ -37,63 +41,62 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			switch (sym_type)
 			{
 			case SymbolType::NOTE:
-				{
-					jval = obj->GetNamedValue("v");
-					if (jval)
-					{
-						val = static_cast<int>(jval->GetNumber());
-					}
-					return ref new SNote(val);
-				}
+			{
+				//jval = obj->GetNamedValue("v");
+				//if (jval)
+				//{
+				//	val = static_cast<int>(jval->GetNumber());
+				//}
+				val = obj->GetNamedNumber(t::NOTE_VALUE);
+				vel = obj->GetNamedNumber(t::NOTE_VELOCITY,0);
+				voi = obj->GetNamedNumber(t::NOTE_VOICE,0);
+				return ref new SNote(val);
+			}
 			case SymbolType::RNOTE:
-				{
-					jval = obj->GetNamedValue("v");
-					if (jval)
-					{
-						val = static_cast<int>(jval->GetNumber());
-					}
-					return ref new SRNote(val);
-				}
+			{
+				val = obj->GetNamedNumber(t::NOTE_VALUE);
+				vel = obj->GetNamedNumber(t::NOTE_VELOCITY,0);
+				voi = obj->GetNamedNumber(t::NOTE_VOICE,0);
+				return ref new SRNote(val);
+			}
 			case SymbolType::GNOTE:
-				{
-					jval = obj->GetNamedValue("v");
-					if (jval)
-					{
-						val = static_cast<int>(jval->GetNumber());
-					}
-					return ref new SGNote(val);
-				}
+			{
+				val = obj->GetNamedNumber(t::NOTE_VALUE);
+				vel = obj->GetNamedNumber(t::NOTE_VELOCITY,0);
+				voi = obj->GetNamedNumber(t::NOTE_VOICE,0);
+				return ref new SGNote(val);
+			}
 			case SymbolType::END:
-				{
-					return ref new SNoteEnd();
-				}
+			{
+				return ref new SNoteEnd();
+			}
 			case SymbolType::NLINE:
-				{
-					return ref new SNewLine();
-				}
+			{
+				return ref new SNewLine();
+			}
 			case SymbolType::SPACE:
-				{
-					return ref new SSpace();
-				}
+			{
+				return ref new SSpace();
+			}
 			case SymbolType::SCALE:
-			//	{
-			//		jval = obj->GetNamedValue("v");
-			//		if (jval)
-			//		{
-			//			val = static_cast<int>(jval->GetNumber());
-			//		}
-			//		return ref new SString(val);
-			//	}
+		//	{
+		//		jval = obj->GetNamedValue("v");
+		//		if (jval)
+		//		{
+		//			val = static_cast<int>(jval->GetNumber());
+		//		}
+		//		return ref new SString(val);
+		//	}
 			case SymbolType::STRING:
-			//	{
-			//		String^ str;
-			//		jval = obj->GetNamedValue("s");
-			//		if (jval)
-			//		{
-			//			str = jval->GetString();
-			//		}
-			//		return ref new SString(str);
-			//	}
+		//	{
+		//		String^ str;
+		//		jval = obj->GetNamedValue("s");
+		//		if (jval)
+		//		{
+		//			str = jval->GetString();
+		//		}
+		//		return ref new SString(str);
+		//	}
 			default: return nullptr;
 			}
 		}

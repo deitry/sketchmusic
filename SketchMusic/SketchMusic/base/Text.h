@@ -6,56 +6,15 @@
 #include "Cursor.h"
 #include <string>
 #include "collection.h"
-//#include "rapidjson/prettywriter.h"
-//#include "rapidjson/reader.h"
 
 using namespace SketchMusic;
 using namespace Windows::Foundation::Collections;
-
-/*public ref class SketchMusic::TextToJsonConverter sealed
-{
-internal:
-	template <typename Writer>
-	void Serialize(Writer& writer) const {
-	}
-
-	virtual Object^ Deserialize(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
-	{
-		return nullptr;
-		//return ref new SketchMusic::PositionedSymbol(ref new SketchMusic::Cursor, ref new SketchMusic::SNote);
-	}
-
-	TextToJsonConverter() {}
-};*/
-
-/*struct SmTextParserHandler {
-	bool Null() { return true; }
-	bool Bool(bool b) { return true; }
-	bool Int(int i) { return true; }
-	bool Uint(unsigned u) { return true; }
-	bool Int64(int64_t i) { return true; }
-	bool Uint64(uint64_t u) { return true; }
-	bool Double(double d) { return true; }
-	bool RawNumber(const char* str, SizeType length, bool copy) {
-		return true;
-	}
-	bool String(const char* str, SizeType length, bool copy) {
-		return true;
-	}
-	bool StartObject() { return true; }
-	bool Key(const char* str, SizeType length, bool copy) {
-		return true;
-	}
-	bool EndObject(SizeType memberCount) { return true; }
-	bool StartArray() { return true; }
-	bool EndArray(SizeType elementCount) { return true; }
-};*/
 
 /**
  * Текст объединяет в себе отедельные символы-ноты и упрощает работу с ними.
  * Не уверен, что для него нужен отдельный класс, возможно можно обойтись просто map,
  * ноя решил ввести класс обёртку, Мало ди какие операции могут пригодиться,
- * особенно когда введу еласс слов. Надо будет упростмть работу с группами нот.
+ * особенно когда введу еласс слов. Надо будет упростить работу с группами нот.
  * Может даже стоит сделать из этого текста карту слов, а не нот.
  * Но на практике я убедился, что это не совсем удобно и я всё больше считаю, что
  * слова должны существовать для внешнего представления.
@@ -78,8 +37,6 @@ private:
 		// для каждого элемента хранить не абсолютное положение, а относительное - относительно текущего элемента?
 		// абсолютное - можно как буферизованное значение, вычисляемое для последнего обращения к одному из элементов...
 public:
-	static Text^ deserializeFromString(Platform::String^ serialized);	// конструктор из строки уже имеется :( TODO можно будет позже поменять
-
 	Text();
 	Text(Windows::Data::Json::JsonObject^ json) {}
 	Text(Instrument^ instrument);
@@ -92,7 +49,6 @@ public:
 
 	property SketchMusic::Instrument^ instrument;	// инструмент, который связывается с данной дорожкой
 	property SketchMusic::Cursor^ curPosition;
-	///property Platform::String^ Ops;
 
 	void addSymbol(PositionedSymbol^ sym) { _t.insert(std::make_pair(sym->_pos, sym->_sym)); }
 	void addSymbol(Cursor^ cur, ISymbol^ sym) { _t.insert(std::make_pair(cur, sym)); }
@@ -108,11 +64,10 @@ public:
 
 	IVector<PositionedSymbol^>^ getText();
 	//Platform::Collections::Vector<PositionedSymbol^>^ getText();
-	//Platform::String^ toXml();
 	
-	Platform::String^ serializeToString();	// не факт, что стоит пользоваться xml
 	Windows::Data::Json::IJsonValue^ serialize();
 	void deserialize(Platform::String^ str);
+
 	// TODO : функции вставки одного текста в другой, объединение, "вырезание" и так далее
 	// Потребуются, когда можно будет идеи объединять друг с другом
 };

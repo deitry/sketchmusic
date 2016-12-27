@@ -3,13 +3,10 @@
 #include "math.h"
 #include "ppltasks.h"
 #include "agents.h"
-#include "rapidjson/prettywriter.h"
-#include "rapidjson/reader.h"
 
 using namespace Platform;
 using namespace Windows::Foundation;
 using namespace concurrency;
-using namespace rapidjson;
 
 #define SOURCE_VOICES_MAX		16		// максимальное количество голосов
 #define DISCRETIZATION_FREQ		44100	// частота дискретизации
@@ -203,6 +200,8 @@ namespace SketchMusic
 	public:
 		property int _val;
 		property int _velocity;
+		property int _voice;
+		//property Platform::String^ str; // ? для будущего, когда появятся слова и подписи
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
@@ -223,10 +222,12 @@ namespace SketchMusic
 			// то ли вообще вынести в отдельный класс, который занимается преобразованиями
 	public:
 		SNote() { _val = 0; }
-		SNote(int tone) { _val = tone; }
+		SNote(int tone) { _val = tone; _velocity = 0; _voice = 0; }
+		SNote(int tone, int velocity, int voice) { _val = tone; _velocity = velocity; _voice = voice; }
 
 		virtual property int _val;
 		virtual property int _velocity;
+		virtual property int _voice;
 
 		virtual SymbolType GetSymType() { return SymbolType::NOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
@@ -251,10 +252,12 @@ namespace SketchMusic
 		// положение тоники будет задаваться с помощью символов SScale
 	public:
 		SRNote() { _val = 0; }
-		SRNote(int rtone) { _val = rtone; }
+		SRNote(int rtone) { _val = rtone; _velocity = 0; _voice = 0; }
+		SRNote(int rtone, int velocity, int voice) { _val = rtone; _velocity = velocity; _voice = voice; }
 
 		virtual property int _val;
 		virtual property int _velocity;
+		virtual property int _voice;
 
 		virtual SymbolType GetSymType() { return SymbolType::RNOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
@@ -269,10 +272,12 @@ namespace SketchMusic
 		// в дальнейшем для обеспечения автоматической конкретизации будет зависимым от "паттерна" (?)	
 	public:
 		SGNote() {}
-		SGNote(int gnote) { _val = gnote; }
+		SGNote(int gnote) { _val = gnote; _velocity = 0; _voice = 0; }
+		SGNote(int gtone, int velocity, int voice) { _val = gtone; _velocity = velocity; _voice = voice; }
 
 		virtual property int _val;
 		virtual property int _velocity;
+		virtual property int _voice;
 
 		virtual SymbolType GetSymType() { return SymbolType::GNOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
@@ -343,6 +348,18 @@ namespace SketchMusic
 		static ISymbol^ Deserialize(Windows::Data::Json::JsonObject^ val);	// принудительно запрашиваем
 		//static ISymbol^ CreateSymbol(int type, int val);
 	};
+
+	namespace SerializationTokens
+	{
+		static Platform::String^ INSTR = "instr";
+		static Platform::String^ BEAT = "p1";
+		static Platform::String^ TICK = "p2";
+		static Platform::String^ SYMBOL_TYPE = "t";
+		static Platform::String^ NOTE_VALUE = "v";
+		static Platform::String^ NOTE_VELOCITY = "y";
+		static Platform::String^ NOTE_VOICE = "o";
+		static Platform::String^ NOTES_ARRAY = "notes";
+	}
 
 	// классы для обеспечения модели синтеза SoundFont
 	// Наберём все возможные, потом выпилим ненужне
