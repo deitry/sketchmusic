@@ -118,6 +118,7 @@ public:
 	// Необычным будет только действие на текст
 };
 
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 public ref class SketchMusic::View::OnPositionedSymbolToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 {
 public:

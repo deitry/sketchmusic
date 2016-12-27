@@ -112,6 +112,7 @@ namespace SketchMusic
 		STRING		// для вставки строки
 	};
 
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class IdeaCategoryToStrConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 	{
 	public:
@@ -149,6 +150,7 @@ namespace SketchMusic
 		IdeaCategoryToStrConverter() {}
 	};
 
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class VerboseIdeaCategoryToStrConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 	{
 	public:
@@ -334,6 +336,7 @@ namespace SketchMusic
 		//virtual Platform::String^ Serialize() { return "string," + value; }
 	};
 
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class ISymbolFactory sealed
 	{
 	public:
@@ -468,6 +471,7 @@ namespace SketchMusic
 			String^ fileName;
 		};
 
+		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 		public ref class SymbolHandlerArgs sealed
 		{
 		public:
@@ -483,6 +487,7 @@ namespace SketchMusic
 			property PositionedSymbol^ _newSym;
 		};
 
+		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 		public ref class BeatHandlerArgs sealed
 		{
 			Text^ text;
@@ -497,6 +502,7 @@ namespace SketchMusic
 		// сохранение-загрузка
 		// void Save(Text, FileName, Options?)
 		// Text Load(FileName, Options?) -> void Load( ..Text^.. ) - интересно, можно ли так
+		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 		public delegate void CompositionHandler(CompositionHandlerArgs^ args);
 
 		// управление символами
@@ -504,6 +510,7 @@ namespace SketchMusic
 		// void Move(Text, PositionedSymbol, Position newPos)
 		// void Delete(Text, PositionedSymbol)
 		// void Edit(Text, PositionedSymbol, Symbol newSym) // вместо комбинации delete-insert
+		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 		public delegate void SymbolHandler(SymbolHandlerArgs^ args);
 
 
@@ -601,7 +608,7 @@ namespace SketchMusic
 	{
 		// состояния плеера
 		const int S_STOP = 0;	// стоит - совсем
-		const int S_PLAY = 1;		// проигрывает
+		const int S_PLAY = 1;	// проигрывает
 		const int S_WAIT = 2;	// останавливается - нужен для проверок на наличие нот. При их наличии продолжает играть
 
 		ref class Player;

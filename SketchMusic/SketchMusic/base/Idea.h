@@ -8,6 +8,7 @@ using namespace Windows::UI::Xaml::Data;
 
 namespace SketchMusic
 {
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	[Windows::UI::Xaml::Data::BindableAttribute]
 	public ref class Idea sealed
 	{
@@ -60,7 +61,7 @@ namespace SketchMusic
 		// время последней модификации - нужно?
 	};
 
-
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class TimeToStrConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 	{
 	public:

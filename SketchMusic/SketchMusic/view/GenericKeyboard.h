@@ -13,6 +13,7 @@ using namespace Platform;
 using namespace SketchMusic;
 using namespace SketchMusic::View;
 
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 public ref class SketchMusic::View::OnSymbolToStringConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 {
 public:
@@ -50,6 +51,7 @@ public:
 	OnSymbolToStringConverter() {}
 };
 
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 public ref class SketchMusic::View::OnKeyToStringConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 {
 public:
@@ -151,6 +153,7 @@ public:
 	OnKeyToStringConverter() {}
 };
 
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 public ref class SketchMusic::View::OnKeyToColorConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 {
 public:
@@ -199,6 +202,7 @@ public:
 /**
 TODO : нужно ли выделять квадкейбоард?
 */
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 public ref class SketchMusic::View::GenericKeyboard sealed : public Windows::UI::Xaml::Controls::Control, public SketchMusic::View::IKeyboard
 {
 private:

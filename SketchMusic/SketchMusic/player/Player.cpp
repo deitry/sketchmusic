@@ -139,8 +139,6 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 		.then([this, iterMap, cursor]
 	{
 		int tempState = SketchMusic::Player::S_PLAY;
-		__time64_t ptime, ctime;
-		_time64(&ptime);
 		int pbeat = -1;
 		
 		clock_t pclock = clock();
@@ -207,7 +205,6 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 				}
 			};
 
-			_time64(&ctime);
 			auto nClock = Clock::now();
 			auto dif = (std::chrono::duration_cast<std::chrono::microseconds>(nClock - pClock).count());
 			pClock = nClock;
