@@ -469,6 +469,12 @@ ContentControl^ SketchMusic::View::TextRow::GetControlAtPos(Cursor^ pos, int off
 	return nullptr;
 }
 
+float SketchMusic::View::TextRow::CalculateTick(float offsetX, ContentControl ^ ctrl)
+{
+	return ((int)((offsetX + ctrl->Width / 4) / ctrl->Width * scale)) * TICK_IN_BEAT / scale;
+	//int tick = (int)(offset.X / ctrl->Width * TICK_IN_BEAT * scale / TICK_IN_BEAT) * TICK_IN_BEAT / scale;
+}
+
 // функцию стоит изменить, т.к. храня только доли мы не сможем отличить одно положение от другого только по контролу
 // Следует передавать текущее вычисленное значение точки привязки. Может быть, стоит пересылать связку Ctrl-sender + Point относительно Ctrl'а,
 // этого должно быть достаточно, чтобы точно вычислить значение курсора, соответствующее текущей точке
@@ -490,7 +496,7 @@ Cursor^ SketchMusic::View::TextRow::GetPositionOfControl(Windows::UI::Xaml::Cont
 		unsigned int index = 0;
 		if (rowPanel->Children->IndexOf(ctrl, &index))
 		{
-			int tick = (int)(offset.X / ctrl->Width * TICK_IN_BEAT * scale / TICK_IN_BEAT) * TICK_IN_BEAT / scale;
+			float tick = CalculateTick(offset.X, ctrl);
 			Cursor^ position = ref new Cursor(index + currentRowIndex, tick);
 			return position;
 		}
@@ -524,7 +530,8 @@ Point SketchMusic::View::TextRow::GetCoordinatsOfControl(Windows::UI::Xaml::Cont
 	Point basePoint = Point(0, 0);
 	auto point = transform->TransformPoint(basePoint);
 
-	int tick = (int)(offset.X / ctrl->Width *TICK_IN_BEAT * scale / TICK_IN_BEAT) * TICK_IN_BEAT / scale;;
+	// прибавка к x чтобы можно было "кидать" на точку привязки не только справа, но и чуть-чуть слева
+	float tick = CalculateTick(offset.X, ctrl);
 	point.X += tick * ctrl->Width / TICK_IN_BEAT;
 
 	return point;

@@ -9,7 +9,7 @@ using namespace Windows::UI::Xaml::Data;
 namespace SketchMusic
 {
 	[Windows::UI::Xaml::Data::BindableAttribute]
-	public ref class Idea sealed : Windows::UI::Xaml::Data::INotifyPropertyChanged
+	public ref class Idea sealed
 	{
 	public:
 		// конструкторы
@@ -52,9 +52,11 @@ namespace SketchMusic
 		property Platform::String^ Projects;	// в каких проектах идея задействована
 		property long long CreationTime;		// время и дата создания идеи. Пригодится для сортировки и фильтрации
 		property long long ModifiedTime;
+		
 		// Унаследовано через INotifyPropertyChanged
-		virtual event PropertyChangedEventHandler ^ PropertyChanged;
-		void RaisePropertyChanged() { PropertyChanged(this, ref new PropertyChangedEventArgs("")); }
+		//virtual event PropertyChangedEventHandler ^ PropertyChanged;
+		//void RaisePropertyChanged() { PropertyChanged(this, ref new PropertyChangedEventArgs("")); }
+		
 		// время последней модификации - нужно?
 	};
 

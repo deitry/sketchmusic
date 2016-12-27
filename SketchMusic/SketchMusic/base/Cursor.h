@@ -24,7 +24,7 @@ public:
 	// конструкторы
 	Cursor() {_beat = 0; _tick = 0; }
 	Cursor(int b) { _beat = b; _tick = 0; }
-	Cursor(int b, float t) { _beat = b; _tick = t; }
+	Cursor(int b, float t);
 	Cursor(Cursor^ cur) { _beat = cur->_beat; _tick = cur->_tick; }
 
 	// доступ к полям
@@ -40,6 +40,16 @@ public:
 	// операции
 
 	SketchMusic::Cursor^ inc();
+	void incTick(float inc)
+	{
+		this->_tick += inc;
+		while (this->_tick > TICK_IN_BEAT)
+		{
+			this->_tick -= TICK_IN_BEAT;
+			this->_beat += 1;
+		}
+	}
+
 	SketchMusic::Cursor^ incBeat()
 	{
 		this->_beat++;
@@ -58,6 +68,7 @@ public:
 	bool EQ(SketchMusic::Cursor^ that);
 	bool GT(SketchMusic::Cursor^ that);
 	bool LT(SketchMusic::Cursor^ that);
+	bool LE(SketchMusic::Cursor^ that);
 
 	Platform::String^ ToString() { return "" + _beat + ":" + _tick; }
 	IJsonValue^ Serialize();

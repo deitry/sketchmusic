@@ -2,6 +2,7 @@
 #include "../SketchMusic.h"
 #include <xaudio2.h>
 
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 public ref class SketchMusic::Player::Player sealed
 {
 private:

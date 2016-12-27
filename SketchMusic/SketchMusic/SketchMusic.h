@@ -203,6 +203,7 @@ namespace SketchMusic
 		property int _velocity;
 	};
 
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class PositionedSymbol sealed
 	{
 	public:
@@ -599,8 +600,10 @@ namespace SketchMusic
 	namespace Player
 	{
 		// состояния плеера
-		const int S_STOP = 0;	// стоит
-		const int S_PLAY = 1;	// проигрывает
+		const int S_STOP = 0;	// стоит - совсем
+		const int S_PLAY = 1;		// проигрывает
+		const int S_WAIT = 2;	// останавливается - нужен для проверок на наличие нот. При их наличии продолжает играть
+
 		ref class Player;
 		interface class ISoundEngine;
 		ref class SimpleSoundEngine;

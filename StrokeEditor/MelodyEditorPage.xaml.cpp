@@ -104,14 +104,6 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	//We should verify if there are pages in the navigation back stack 
-	//before navigating to the previous page.
-	//if (this->Frame != nullptr && Frame->CanGoBack)
-	//{
-	//	//Using the GoBack method, the frame navigates to the previous page.
-	//	Frame->GoBack();
-	//}
-
 	// остановить проигрывание, если идёт
 	_player->cycling = false;
 	_player->stop();
@@ -122,12 +114,6 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	_idea->SerializedContent = _idea->Content->serialize()->Stringify();
 	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(_idea, true));
 }
-
-
-//void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
-//{
-//
-//}
 
 void StrokeEditor::MelodyEditorPage::playAll_Click()
 {
@@ -143,7 +129,6 @@ void StrokeEditor::MelodyEditorPage::playAll_Click()
 
 void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ args)
 {
-	//SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(e);
 	if (args->key)
 	{
 		switch (args->key->type)
@@ -179,9 +164,6 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 				if (!appending)
 				{
 					appending = true;
-					//Window::Current
-					//Windows::ApplicationModel::Core::CoreApplication::MainView
-					//_textRow->_mainPanel
 					Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]
 					{
 						auto delay = concurrency::create_task([this]

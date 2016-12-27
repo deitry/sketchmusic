@@ -151,7 +151,7 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 			// запустить асинхронно
 			//concurrency::parallel_for_each(iterList->begin(), iterList->end(), [this](Windows::Foundation::Collections::IIterator<SketchMusic::PositionedSymbol^>^ iter)
 			// - один итератор = один текст = один инструмент = один саунденжин = несколько нот
-			tempState = S_WAIT;
+			tempState = S_STOP;
 			for (auto iter = iterMap->begin(); iter < iterMap->end(); iter++)
 			{
 				auto pIter = iter->second.first;
@@ -161,6 +161,8 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 					SketchMusic::Cursor^ pos = pIter->Current->_pos;
 					
 					// выбираем все ноты в данной точке
+					// UPD : при переходе на флоат-версию курсора требуем, чтобы пос был меньше чем текущее положение,
+					// чтобы избежать недоразумений. Уже прошедшие ноты таким образом беспокоиться не должны
 					if (pos->LE(cursor))
 					{
 						Windows::Foundation::Collections::IVector<SketchMusic::INote^>^ notes = ref new Platform::Collections::Vector < SketchMusic::INote^ > ;
@@ -192,11 +194,11 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 					if (needMetronome &&((cursor->getBeat() - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
 					{
 						playMetronome();
+						pbeat = cursor->getBeat();
 					}
-					pbeat = cursor->getBeat();
 
 					// если уже пропустили символ, то переходим ко следующему, чтобы не возникало "зависаний"
-					if ((pIter->HasCurrent) && (pIter->Current->_pos->LT(cursor)))
+					if ((pIter->HasCurrent) && (pos->LT(cursor)))
 					{
 						do
 						{
@@ -207,15 +209,26 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 				}
 			};
 
-			_time64(&ctime);
+			_time64(&ctime); // time64 - размерность 100нс
+			//clock_t cl = clock();
+			//float offset = (clock()-pclock)/((double)CLOCKS_PER_SEC) * 60 / (double)TICK_IN_BEAT / (double)_BPM;
 			auto nClock = Clock::now();
 			auto dif = (std::chrono::duration_cast<std::chrono::microseconds>(nClock - pClock).count());
 			pClock = nClock;
 			float offset = dif * _BPM * TICK_IN_BEAT /60 /1000000;
+			//std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count()
 			cursor->incTick(offset);
+			//cursor->inc();
+			// ждать рассчитанное время
+			//unsigned int timeout = 1000 * 60 / TICK_IN_BEAT / _BPM;
+			//concurrency::wait(timeout);
+				// TODO : отказаться от времени ожидания, вместо этого сразу приступать к дальнейшему воспроизведению,
+				// смещая tick курсора на соответствующее разнице во времени положение. Это можно обеспечить, используя float для tick
+				// Сейчас, кстати говоря, при расчёте таймаута не принимается во внимание, что произведение всех операций в цикле
+				// (не считая всех остальных процессов) занимает какое-то время + нельзя использовать дробные положения (для триолей, например)
 			
 
-			if (this->cycling && (tempState == S_WAIT))
+			if (this->cycling && (tempState == S_STOP))
 			{
 				tempState = S_PLAY;
 				cursor->moveTo(ref new Cursor(0, 0));
@@ -244,6 +257,7 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 
 void SketchMusic::Player::Player::stop()
 {
+	//cycling = false;
 	this->_state = SketchMusic::Player::S_STOP;
 }
 

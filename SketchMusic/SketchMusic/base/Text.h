@@ -61,6 +61,7 @@ internal:
  * слова должны существовать для внешнего представления.
  *
  */
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 [Windows::UI::Xaml::Data::BindableAttribute]
 public ref class SketchMusic::Text sealed
 {

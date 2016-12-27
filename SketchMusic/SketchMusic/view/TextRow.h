@@ -9,7 +9,9 @@
 #include "../base/Cursor.h"
 
 using namespace SketchMusic;
+using namespace Windows::UI::Xaml::Controls;
 
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 public ref class SketchMusic::View::TextRow sealed : public Windows::UI::Xaml::Controls::Control
 {
 private:
@@ -22,14 +24,14 @@ private:
 	int currentFormat;	// индекс текста, чьё форматирование берётся за основу
 	
 	std::vector<Windows::UI::Xaml::Controls::ContentControl^> notes;
-	Windows::UI::Xaml::Controls::Canvas^ _canvas;
-	Windows::UI::Xaml::Controls::ContentControl^ _cursor;
+	Canvas^ _canvas;
+	ContentControl^ _cursor;
 	Windows::UI::Xaml::ResourceDictionary^ _dict;
-	Windows::UI::Xaml::Controls::ContentControl^ _dragged;
+	ContentControl^ _dragged;
 	Windows::Foundation::Point _lastPoint;
-	Windows::UI::Xaml::Controls::ContentControl^ _currentSnapPoint;
-	Windows::UI::Xaml::Controls::ContentControl^ _snapPoint;
-	Windows::UI::Xaml::Controls::ScrollViewer^ _scrollViewer;
+	ContentControl^ _currentSnapPoint;
+	ContentControl^ _snapPoint;
+	ScrollViewer^ _scrollViewer;
 	bool _isMoving;
 
 	// 1..32, 1 - 1 ктрл - одна доля, 32 - на одну долю 32 ктрла
@@ -50,25 +52,27 @@ internal:
 		// но ещё и перемещать "пробел", если в результате масштаба данный плейсхолдер окажется невидимым
 	//void CreateNoteObject(ISymbol^ note);
 	void InsertNoteObject(PositionedSymbol^ note);
-	Windows::UI::Xaml::Controls::ContentControl^ GetControlAtPos(Cursor^ pos, int offset = 0);
+	ContentControl^ GetControlAtPos(Cursor^ pos, int offset = 0);
 	int GetControlIndexAtPos(Cursor^ pos, int offset);
-	Cursor^ GetPositionOfControl(Windows::UI::Xaml::Controls::ContentControl^ ctrl, Point offset);
+
+	float CalculateTick(float offsetX, ContentControl^ ctrl);
+	Cursor^ GetPositionOfControl(ContentControl^ ctrl, Point offset);
 	Point GetCoordinatsOfPosition(Cursor^ pos);
-	Point GetCoordinatsOfControl(Windows::UI::Xaml::Controls::ContentControl^ ctrl, Point offset);
+	Point GetCoordinatsOfControl(ContentControl^ ctrl, Point offset);
 	void InvalidateText();
 	void RedrawText();
 	void AllocateSnapPoints(Text^ text, int newScale);
 	void SetSnapPointsVisibility(int newScale);
 	void InsertLineBreak(Cursor^ pos);
 	void DeleteLineBreak(Cursor^ pos);
-	void SetBackgroundColor(Windows::UI::Xaml::Controls::ContentControl^ ctrl);
+	void SetBackgroundColor(ContentControl^ ctrl);
 
 public:
 	property Cursor^ currentPosition;
 	property Text^ current;
 	property Text^ format;
 	property int scale;			// текущий уровень масштаба 
-	property Windows::UI::Xaml::Controls::StackPanel^ _mainPanel;
+	property StackPanel^ _mainPanel;
 
 	TextRow();
 	void OnApplyTemplate() override;

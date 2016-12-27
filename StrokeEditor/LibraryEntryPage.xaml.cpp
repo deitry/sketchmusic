@@ -78,7 +78,7 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	//entryNameBinding->Source = _entry->Name;
 	//entryNameTB->SetBinding(entryNameTB->TextProperty, entryNameBinding);
 	
-	this->_entry->RaisePropertyChanged();
+	//this->_entry->RaisePropertyChanged();
 }
 
 
@@ -96,7 +96,7 @@ void StrokeEditor::LibraryEntryPage::GoBackBtn_Click(Platform::Object^ sender, W
 
 void StrokeEditor::LibraryEntryPage::NotifyBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	this->_entry->RaisePropertyChanged();
+	//this->_entry->RaisePropertyChanged();
 }
 
 void StrokeEditor::LibraryEntryPage::SaveEntry()

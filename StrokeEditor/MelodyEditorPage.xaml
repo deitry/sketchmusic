@@ -58,7 +58,7 @@
                          BorderBrush="White"
                          Height="180"
                          HorizontalAlignment="Left"
-                         Margin="10,10,10,10"/>
+                         Margin="10,40,10,10"/>
             
             <smv:GenericKeyboard x:Name="_keyboard"
                                  BorderBrush="OrangeRed"
