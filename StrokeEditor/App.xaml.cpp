@@ -53,6 +53,42 @@ App::App()
 		sqlite3_close(libraryDB);
 	}
 
+	if (libraryDB)
+	{
+		char *zErrMsg = 0;
+
+		// инициализация
+		// - создание таблицы если нету
+		int rc = sqlite3_exec(libraryDB, "CREATE TABLE IF NOT EXISTS `summary` ("
+			"`hash` INTEGER NOT NULL PRIMARY KEY,"
+			"`name` TEXT,"
+			"'category' INTEGER,"
+			"'content' BLOB,"
+			"'parent' INTEGER,"
+			"'tags' TEXT,"
+			"'projects' TEXT,"
+			"'created' TEXT,"
+			"'modified' TEXT,"
+			"'description' TEXT,"
+			"'rating' INTEGER);", NULL, 0, &zErrMsg);
+		if (rc != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+
+		// delete all
+		//rc = sqlite3_exec(db, "DELETE FROM summary", NULL, 0, &zErrMsg);
+		//if (rc != SQLITE_OK) {
+		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		//	sqlite3_free(zErrMsg);
+		//}
+		//rc = sqlite3_exec(db, "VACUUM", NULL, 0, &zErrMsg);
+		//if (rc != SQLITE_OK) {
+		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		//	sqlite3_free(zErrMsg);
+		//}
+	}
+
 	delete[] pathC;
 
 	// Удостоверяемся, что БД содержит те колонки, что нам нужны

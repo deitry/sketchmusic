@@ -41,7 +41,7 @@
             <Button Content="Сортировка">
                 <Button.Flyout>
                     <Flyout x:Name="SortingFlyout">
-                        <ListView Name="SortingList" SelectedIndex="0">
+                        <ListView Name="SortingList">
                             <TextBlock Text="по дате"/>
                             <TextBlock Text="по оценке"/>
                         </ListView>
@@ -51,10 +51,12 @@
             <Button Content="Фильтрация">
                 <Button.Flyout>
                     <Flyout x:Name="FilterFlyout">
-                        <ListView Name="FilterList" SelectedIndex="0" SelectionMode="Multiple" SelectionChanged="FilterList_SelectionChanged">
-                            <TextBlock Text="последние 3 дня"/>
-                            <TextBlock Text="оценка 6 и выше"/>
-                            <TextBlock Text="не имеет тега 'base'"/>
+                        <ListView Name="FilterList" SelectionMode="Multiple" SelectionChanged="FilterList_SelectionChanged">
+                            <TextBlock Text="последние 3 дня" Tag="0"/>
+                            <TextBlock Text="оценка 6 и выше" Tag="1"/>
+                            <TextBlock Text="имеет тег 'todo'" Tag="2"/>
+                            <TextBlock Text="имеет тег 'base'" Tag="3"/>
+                            <TextBlock Text="не имеет тега 'base'" Tag="4"/>                        
                         </ListView>
                     </Flyout>
                 </Button.Flyout>

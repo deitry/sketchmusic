@@ -73,83 +73,82 @@ LibraryOverviewPage::LibraryOverviewPage()
 	InitializeComponent();
 
 	ideaLibrary = ref new Vector<SketchMusic::Idea^>();
-
-	// Работа с БД
-	// int rc = sqlite3_exec(db, <SQL-запрос>, <КАЛЛБАК>, 0, &zErrMsg);
-		
-	sqlite3* db = ((App^)App::Current)->libraryDB;
-	if (db)
-	{
-		char *zErrMsg = 0;
-		
-		// инициализация
-		// - создание таблицы если нету
-		int rc = sqlite3_exec(db, "CREATE TABLE IF NOT EXISTS `summary` ("
-									"`hash` INTEGER NOT NULL PRIMARY KEY,"
-									"`name` TEXT,"
-									"'category' INTEGER,"
-									"'content' BLOB,"
-									"'parent' INTEGER,"
-									"'tags' TEXT,"
-									"'projects' TEXT,"
-									"'created' TEXT,"
-									"'modified' TEXT,"
-									"'description' TEXT,"
-									"'rating' INTEGER);", NULL, 0, &zErrMsg);
-		if (rc != SQLITE_OK) {
-			fprintf(stderr, "SQL error: %s\n", zErrMsg);
-			sqlite3_free(zErrMsg);
-		}
-
-		// delete all
-		//rc = sqlite3_exec(db, "DELETE FROM summary", NULL, 0, &zErrMsg);
-		//if (rc != SQLITE_OK) {
-		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		//	sqlite3_free(zErrMsg);
-		//}
-		//rc = sqlite3_exec(db, "VACUUM", NULL, 0, &zErrMsg);
-		//if (rc != SQLITE_OK) {
-		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		//	sqlite3_free(zErrMsg);
-		//}
-		
-		RefreshList();
-	}
-
 	LibView->ItemsSource = ideaLibrary;
 }
 
 void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
-	// если в качестве параметра нам передали идею, то или заменяем в списке уже имеющуюся,
-	// или создаём новую
-	SketchMusic::Idea^ idea = (SketchMusic::Idea^) e->Parameter;
-	if (!idea) return;	// если ничего не передали - ничего не делаем
+	// получение настроек навроде параметров фильтрации
+	Windows::Storage::ApplicationDataContainer^ localSettings =
+		Windows::Storage::ApplicationData::Current->LocalSettings;
 
-	if (idea->CreationTime == 0 && idea->ModifiedTime == 0)
-	{
-		// нам поручили удалить эту запись
-		// TODO : указания к действию на основе передачи типа через аргументы
-		((App^)App::Current)->DeleteIdea(idea);
-		RefreshBtn_Click(this, ref new RoutedEventArgs);
-		return;
-	}
+	if (localSettings->Values->HasKey("filter_last3days")) 
+	{ this->last3DaysFilter = (bool)localSettings->Values->Lookup("filter_last3days"); }
+	if (localSettings->Values->HasKey("filter_rating5Higher")) 
+	{ this->rating5Higher = (bool)localSettings->Values->Lookup("filter_rating5Higher"); }
+	if (localSettings->Values->HasKey("filter_todoTag")) 
+	{ this->todoTagsFilter = (bool)localSettings->Values->Lookup("filter_todoTag"); }
+	if (localSettings->Values->HasKey("filter_baseTag")) 
+	{ this->baseTagsFilter = (bool)localSettings->Values->Lookup("filter_baseTag"); }
+	if (localSettings->Values->HasKey("filter_notBaseTag")) 
+	{ this->notBaseTagsFilter = (bool)localSettings->Values->Lookup("filter_notBaseTag"); }
+	if (localSettings->Values->HasKey("sort_index")) 
+	{ this->SortingList->SelectedIndex = (int)localSettings->Values->Lookup("sort_index"); }
 
-	// иначе пробиваем в базе по хешу
-	for (auto i : ideaLibrary)
+	for (auto&& i : FilterList->Items)
 	{
-		if (i->Hash == idea->Hash)
+		FrameworkElement^ item = dynamic_cast<TextBlock^>(static_cast<Object^>(i));
+		switch (std::stoi(((String^)item->Tag)->Data()))
 		{
-			i = idea;	// сработает?
-			((App^)App::Current)->UpdateIdea(idea);
-			return;
+		case 0: if (last3DaysFilter) FilterList->SelectedItems->Append(i); break;
+		case 1: if (rating5Higher) FilterList->SelectedItems->Append(i);break;
+		case 2: if (todoTagsFilter) FilterList->SelectedItems->Append(i);break;
+		case 3: if (baseTagsFilter) FilterList->SelectedItems->Append(i);break;
+		case 4: if (notBaseTagsFilter) FilterList->SelectedItems->Append(i);break;
 		}
 	}
 
-	// если не заменили, то добавляем новую идею в библиотеку
-	((App^)App::Current)->InsertIdea(idea);
-	//ideaLibrary->Append(idea);
+	// если в качестве параметра нам передали идею, то или заменяем в списке уже имеющуюся,
+	// или создаём новую
+	SketchMusic::Idea^ idea = (SketchMusic::Idea^) e->Parameter;
+	if (idea)
+	{
+		// если помечено на удаление
+		if (idea->CreationTime == 0 && idea->ModifiedTime == 0)
+		{
+			// нам поручили удалить эту запись
+			// TODO : указания к действию на основе передачи типа через аргументы
+			((App^)App::Current)->DeleteIdea(idea);
+			RefreshList();
+			return;
+		}
+		else
+		{
+			// изменения в идее
+			int rc = ((App^)App::Current)->UpdateIdea(idea);
+			if (rc != SQLITE_OK)
+			{
+				((App^)App::Current)->InsertIdea(idea);
+			}
+		}
+	}
+
 	RefreshList();
+}
+
+void StrokeEditor::LibraryOverviewPage::OnNavigatedFrom(NavigationEventArgs ^ e)
+{
+	// сохранение настроек навроде параметров фильтрации
+	Windows::Storage::ApplicationDataContainer^ localSettings =
+		Windows::Storage::ApplicationData::Current->LocalSettings;
+
+	localSettings->Values->Insert("filter_last3days",this->last3DaysFilter);
+	localSettings->Values->Insert("filter_rating5Higher", this->rating5Higher);
+	localSettings->Values->Insert("filter_todoTag", this->todoTagsFilter);
+	localSettings->Values->Insert("filter_baseTag", this->baseTagsFilter);
+	localSettings->Values->Insert("filter_notBaseTag", this->notBaseTagsFilter);
+
+	localSettings->Values->Insert("sort_index", this->SortingList->SelectedIndex);
 }
 
 
@@ -180,24 +179,52 @@ void StrokeEditor::LibraryOverviewPage::RefreshList()
 	if (db)
 	{
 		ideaLibrary->Clear();
-		std::string charQuery = "SELECT * FROM summary "; // *FROM summary ORDER BY"; // modified DESC, name ASC;";
-		
-		if (last3DaysFilter || rating5Higher || baseTagsFilter)
+		std::string charQuery;
+
+		// сначала определяем фильтры, постепенно формируя строку запроса
+		bool tmp = false;
+		if (last3DaysFilter)
 		{
-			charQuery += "WHERE ";
 			long long t;
 			_time64(&t);
-			if (last3DaysFilter) { charQuery = charQuery + "(modified > " + std::to_string(t - 260000) + ")"; }
-			if (last3DaysFilter && rating5Higher) { charQuery = charQuery + " AND "; }
-			if (rating5Higher) { charQuery = charQuery + "(rating > " + std::to_string(5)+")"; }
-			if ((last3DaysFilter || rating5Higher) && baseTagsFilter) { charQuery = charQuery + " AND "; }
-			if (baseTagsFilter) { charQuery = charQuery + "((NOT (tags LIKE '%base%')) OR (tags IS NULL))"; }
+			charQuery = charQuery + "(modified > " + std::to_string(t - 60*60*24*3) + ")";
+			tmp = true;
+		}
+		
+		if (rating5Higher)
+		{
+			if (tmp) { charQuery = charQuery + " AND "; }
+			else { tmp = true; }
+			charQuery = charQuery + "(rating > " + std::to_string(5)+")";
+		}
+		
+		if (todoTagsFilter)
+		{ 
+			if (tmp) { charQuery = charQuery + " AND "; }
+			else { tmp = true; }
+			charQuery = charQuery + "((tags LIKE '%todo%'))"; 
 		}
 
+		if (baseTagsFilter && !notBaseTagsFilter)
+		{
+			if (tmp) { charQuery = charQuery + " AND "; }
+			else { tmp = true; }
+			charQuery = charQuery + "((tags LIKE '%base%'))";
+		}
+		if (notBaseTagsFilter && !baseTagsFilter)
+		{ 
+			if (tmp) { charQuery = charQuery + " AND "; }
+			else { tmp = true; }
+			charQuery = charQuery + "((NOT (tags LIKE '%base%')) OR (tags IS NULL))";
+		}
+
+		if (charQuery != "") { charQuery = "SELECT * FROM summary WHERE " + charQuery; }
+		else { charQuery = "SELECT * FROM summary"; }
+		
 		switch (this->SortingList->SelectedIndex)
 		{
 		case 1:
-			charQuery += " ORDER BY rating DESC, modified DESC";
+			charQuery += " ORDER BY rating DESC, modified DESC;";
 			break;
 		case 0:
 		default: charQuery += " ORDER BY modified DESC, name ASC;"; break;
@@ -249,11 +276,12 @@ void StrokeEditor::LibraryOverviewPage::CreateEntryBtn_Click(Platform::Object^ s
 
 void StrokeEditor::LibraryOverviewPage::FilterList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
 {
-	for (auto i : e->AddedItems)
+	for (auto&& i : e->AddedItems)
 	{
-		unsigned int index;
-		FilterList->Items->IndexOf(i, &index);
-		switch (index)
+		//unsigned int index;
+		//FilterList->Items->IndexOf(i, &index);
+		FrameworkElement^ item = dynamic_cast<TextBlock^>(static_cast<Object^>(i));
+		switch (std::stoi(((String^)item->Tag)->Data()))
 		{
 		case 0:
 			// фильтрация по дате - последние три дня
@@ -263,16 +291,22 @@ void StrokeEditor::LibraryOverviewPage::FilterList_SelectionChanged(Platform::Ob
 			rating5Higher = true;
 			break;
 		case 2:
+			todoTagsFilter = true;
+			break;
+		case 3:
 			baseTagsFilter = true;
+			break;
+		case 4:
+			notBaseTagsFilter = true;
 			break;
 		}
 	}
 
-	for (auto i : e->RemovedItems)
+	for (auto&& i : e->RemovedItems)
 	{
-		unsigned int index;
-		FilterList->Items->IndexOf(i, &index);
-		switch (index)
+		//unsigned int index;
+		FrameworkElement^ item = dynamic_cast<TextBlock^>(static_cast<Object^>(i));
+		switch (std::stoi(((String^)item->Tag)->Data()))
 		{
 		case 0:
 			// фильтрация по дате - последние три дня
@@ -282,7 +316,13 @@ void StrokeEditor::LibraryOverviewPage::FilterList_SelectionChanged(Platform::Ob
 			rating5Higher = false;
 			break;
 		case 2:
+			todoTagsFilter = false;
+			break;
+		case 3:
 			baseTagsFilter = false;
+			break;
+		case 4:
+			notBaseTagsFilter = false;
 			break;
 		}
 	}

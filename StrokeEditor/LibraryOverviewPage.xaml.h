@@ -23,7 +23,8 @@ namespace StrokeEditor
 
 	protected:
 		virtual void OnNavigatedTo(NavigationEventArgs^ e) override;
-	
+		virtual void OnNavigatedFrom(NavigationEventArgs^ e) override;
+
 	public:
 		//int PushIdea(SketchMusic::Idea^ idea);	// послать в бд
 		//int UpdateIdea(SketchMusic::Idea^ idea);	// послать в бд
@@ -47,7 +48,9 @@ namespace StrokeEditor
 
 		bool last3DaysFilter;
 		bool rating5Higher;
+		bool todoTagsFilter;
 		bool baseTagsFilter;
+		bool notBaseTagsFilter;
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
