@@ -125,10 +125,10 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		else
 		{
 			// изменения в идее
-			int rc = ((App^)App::Current)->UpdateIdea(idea);
+			int rc = ((App^)App::Current)->InsertIdea(idea);
 			if (rc != SQLITE_OK)
 			{
-				((App^)App::Current)->InsertIdea(idea);
+				((App^)App::Current)->UpdateIdea(idea);
 			}
 		}
 	}
