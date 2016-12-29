@@ -25,6 +25,8 @@ using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace Windows::UI::Notifications;
+using namespace Windows::Data::Xml::Dom;
 
 // Шаблон пустого приложения задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234227
 
@@ -35,63 +37,15 @@ using namespace Windows::UI::Xaml::Navigation;
 App::App()
 {
 	InitializeComponent();
+	InitializeApp();
+}
+
+void StrokeEditor::App::InitializeApp()
+{
 	Suspending += ref new SuspendingEventHandler(this, &App::OnSuspending);
+	Resuming += ref new EventHandler<Platform::Object^>(this, &App::OnResuming);
 
-	// ? Не уверен, что это нужно оставлять здесь
-	// создание базы данных, если отсутствует
-	//sqlite3* libraryDB; // объявление в хидере
-	String^ fullPath = Windows::Storage::ApplicationData::Current->LocalFolder->Path + "\\ideaLibrary.db";
-	int size_needed = WideCharToMultiByte(CP_UTF8, 0, fullPath->Data(), fullPath->Length(), NULL, 0, NULL, NULL);
-	char *pathC = new char[size_needed + 1];
-	WideCharToMultiByte(CP_UTF8, 0, fullPath->Data(), fullPath->Length(), pathC, size_needed, NULL, NULL);
-	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-	pathC[size_needed] = '\0';
-
-	if (sqlite3_open(pathC, &libraryDB))
-	{
-		fprintf(stderr, "Ошибка открытия/создания БД: %s\n", sqlite3_errmsg(libraryDB));
-		sqlite3_close(libraryDB);
-	}
-
-	if (libraryDB)
-	{
-		char *zErrMsg = 0;
-
-		// инициализация
-		// - создание таблицы если нету
-		int rc = sqlite3_exec(libraryDB, "CREATE TABLE IF NOT EXISTS `summary` ("
-			"`hash` INTEGER NOT NULL PRIMARY KEY,"
-			"`name` TEXT,"
-			"'category' INTEGER,"
-			"'content' BLOB,"
-			"'parent' INTEGER,"
-			"'tags' TEXT,"
-			"'projects' TEXT,"
-			"'created' TEXT,"
-			"'modified' TEXT,"
-			"'description' TEXT,"
-			"'rating' INTEGER);", NULL, 0, &zErrMsg);
-		if (rc != SQLITE_OK) {
-			fprintf(stderr, "SQL error: %s\n", zErrMsg);
-			sqlite3_free(zErrMsg);
-		}
-
-		// delete all
-		//rc = sqlite3_exec(db, "DELETE FROM summary", NULL, 0, &zErrMsg);
-		//if (rc != SQLITE_OK) {
-		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		//	sqlite3_free(zErrMsg);
-		//}
-		//rc = sqlite3_exec(db, "VACUUM", NULL, 0, &zErrMsg);
-		//if (rc != SQLITE_OK) {
-		//	fprintf(stderr, "SQL error: %s\n", zErrMsg);
-		//	sqlite3_free(zErrMsg);
-		//}
-	}
-
-	delete[] pathC;
-
-	// Удостоверяемся, что БД содержит те колонки, что нам нужны
+	OpenLibrary("\\ideaLibrary.db");
 }
 
 /// <summary>
@@ -175,6 +129,11 @@ void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 	sqlite3_close(libraryDB);
 }
 
+void StrokeEditor::App::OnResuming(Platform::Object ^ sender, Platform::Object ^ args)
+{
+	OpenLibrary("\\ideaLibrary.db");
+}
+
 /// <summary>
 /// Вызывается в случае сбоя навигации на определенную страницу
 /// </summary>
@@ -183,6 +142,51 @@ void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 void App::OnNavigationFailed(Platform::Object ^sender, Windows::UI::Xaml::Navigation::NavigationFailedEventArgs ^e)
 {
 	throw ref new FailureException("Failed to load Page " + e->SourcePageType.Name);
+}
+
+void StrokeEditor::App::OpenLibrary(Platform::String ^ dbName)
+{
+	// создание базы данных, если отсутствует
+	//sqlite3* libraryDB; // объявление в хидере
+	String^ fullPath = Windows::Storage::ApplicationData::Current->LocalFolder->Path + dbName;
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, fullPath->Data(), fullPath->Length(), NULL, 0, NULL, NULL);
+	char *pathC = new char[size_needed + 1];
+	WideCharToMultiByte(CP_UTF8, 0, fullPath->Data(), fullPath->Length(), pathC, size_needed, NULL, NULL);
+	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
+	pathC[size_needed] = '\0';
+
+	if (sqlite3_open(pathC, &libraryDB))
+	{
+		fprintf(stderr, "Ошибка открытия/создания БД: %s\n", sqlite3_errmsg(libraryDB));
+		sqlite3_close(libraryDB);
+	}
+
+	if (libraryDB)
+	{
+		char *zErrMsg = 0;
+
+		// инициализация
+		// - создание таблицы если нету
+		// Удостоверяемся, что БД содержит те колонки, что нам нужны
+		int rc = sqlite3_exec(libraryDB, "CREATE TABLE IF NOT EXISTS `summary` ("
+			"`hash` INTEGER NOT NULL PRIMARY KEY,"
+			"`name` TEXT,"
+			"'category' INTEGER,"
+			"'content' BLOB,"
+			"'parent' INTEGER,"
+			"'tags' TEXT,"
+			"'projects' TEXT,"
+			"'created' TEXT,"
+			"'modified' TEXT,"
+			"'description' TEXT,"
+			"'rating' INTEGER);", NULL, 0, &zErrMsg);
+		if (rc != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+	}
+
+	delete[] pathC;
 }
 
 int StrokeEditor::App::InsertIdea(SketchMusic::Idea ^ idea)
@@ -228,6 +232,21 @@ int StrokeEditor::App::DeleteIdea(SketchMusic::Idea ^ idea)
 	}
 	delete[] charQuery;
 	return rc;
+}
+
+void StrokeEditor::App::ShowNotification(Platform::String ^ message)
+{
+	auto templ = Windows::UI::Notifications::ToastTemplateType::ToastText01;
+	auto toastXml = Windows::UI::Notifications::ToastNotificationManager::GetTemplateContent(templ);
+	auto textNodes = toastXml->GetElementsByTagName("text");
+	for (auto i : textNodes)
+	{
+		String^ text = message;
+		i->AppendChild(toastXml->CreateTextNode(text));
+	}
+
+	auto toast = ref new ToastNotification(toastXml);
+	ToastNotificationManager::CreateToastNotifier()->Show(toast);
 }
 
 int StrokeEditor::App::UpdateIdea(SketchMusic::Idea ^ idea)

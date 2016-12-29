@@ -236,6 +236,7 @@ void StrokeEditor::LibraryOverviewPage::RefreshList()
 			fprintf(stderr, "SQL error: %s\n", zErrMsg);
 			sqlite3_free(zErrMsg);
 		}
+
 		LibView->ItemsSource = ideaLibrary;
 	}
 

@@ -16,6 +16,9 @@ namespace StrokeEditor
 	/// </summary>
 	ref class App sealed
 	{
+	public:
+		void InitializeApp();
+		//virtual void OnResuming(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e) override;
 	protected:
 		virtual void OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEventArgs^ e) override;
 		
@@ -24,12 +27,15 @@ namespace StrokeEditor
 
 		sqlite3* libraryDB;
 
+		void OpenLibrary(Platform::String^ dbName);
 		int InsertIdea(SketchMusic::Idea^ idea);
 		int UpdateIdea(SketchMusic::Idea^ idea);
 		int DeleteIdea(SketchMusic::Idea^ idea);
+		void ShowNotification(Platform::String^ message);
 
 	private:
 		void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);
+		void OnResuming(Platform::Object^ sender, Platform::Object^ args);
 		void OnNavigationFailed(Platform::Object ^sender, Windows::UI::Xaml::Navigation::NavigationFailedEventArgs ^e);
 	};
 
