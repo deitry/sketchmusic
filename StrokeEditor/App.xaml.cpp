@@ -189,13 +189,6 @@ int StrokeEditor::App::InsertIdea(SketchMusic::Idea ^ idea)
 {
 	sqlite3* db = this->libraryDB;
 	char *zErrMsg = 0;
-	// отладить, если захочешь передавать всё
-
-	idea->SerializedContent = idea->Content ? idea->Content->serialize()->Stringify() : "";
-
-	//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,description,created,modified) "
-	//	"VALUES (" + idea->Hash +",'"+ idea->Name + "'," + static_cast<int>(idea->Category).ToString() + "," +
-	//				"'"+idea->SerializedContent+"','" +idea->Description + "'," + idea->CreationTime + "," + idea->ModifiedTime + ")";
 
 	String^ sqlQuery = L"INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
 		"VALUES (" + idea->Hash + ",'" + idea->Name + "'," + static_cast<int>(idea->Category).ToString() + ",'" + idea->SerializedContent + "'," + idea->Parent +
@@ -219,10 +212,7 @@ int StrokeEditor::App::DeleteIdea(SketchMusic::Idea ^ idea)
 {
 	sqlite3* db = this->libraryDB;
 	char *zErrMsg = 0;
-	// отладить, если захочешь передавать всё
-	//String^ sqlQuery = "INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
-	//	"VALUE (" + idea->Hash+"," + idea->Name + "," + idea->Category.ToString() + "," + idea->Content->serializeToString() + "," + idea->Parent + "," + idea->Tags + "," + idea->Projects + "," +
-	//	idea->CreationTime + idea->ModifiedTime + idea->Description + idea->Rating + ")";
+	
 	String^ sqlQuery = "DELETE FROM summary WHERE "
 		"hash=" + idea->Hash + ";";
 
@@ -242,7 +232,7 @@ int StrokeEditor::App::DeleteIdea(SketchMusic::Idea ^ idea)
 
 int StrokeEditor::App::UpdateIdea(SketchMusic::Idea ^ idea)
 {
-	sqlite3* db = this->libraryDB;//((App^)App::Current)
+	sqlite3* db = this->libraryDB;
 	char *zErrMsg = 0;
 	String^ sqlQuery = "UPDATE summary SET "
 		"name='" + idea->Name + "',"
