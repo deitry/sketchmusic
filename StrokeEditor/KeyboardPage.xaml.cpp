@@ -78,7 +78,7 @@ KeyboardPage::KeyboardPage()
 	
 	//VisualStateManager::GoToState(_position, "Normal", true);
 
-	_manager = ref new SketchMusic::Commands::CommandManager;
+	((App^)App::Current)->_manager = ref new SketchMusic::Commands::CommandManager;
 
 	moveSym = ref new SketchMusic::Commands::Handler([=](Object^ args) -> void
 	{
@@ -104,18 +104,13 @@ KeyboardPage::KeyboardPage()
 		_textRow->Backspace();
 	});
 
-	auto init = concurrency::create_task([this]
-	{
-		_player = ref new SketchMusic::Player::Player;
-	});
-
 	//_text = testText();
 	_texts = ref new Platform::Collections::Vector < Text^ > ;
 
-	_texts->Append(ref new Text("grand_piano.sf2"));
-	_texts->Append(ref new Text("acoustic_guitar.sf2"));
-	_texts->Append(ref new Text("Epiphone_Pick_Bass.sf2"));
-	_texts->Append(ref new Text("Solo_Viola.sf2"));
+	_texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
+	_texts->Append(ref new Text(ref new Instrument("acoustic_guitar.sf2")));
+	_texts->Append(ref new Text(ref new Instrument("Epiphone_Pick_Bass.sf2")));
+	_texts->Append(ref new Text(ref new Instrument("Solo_Viola.sf2")));
 
 	ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
 	if (list)

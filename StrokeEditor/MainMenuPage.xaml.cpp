@@ -4,7 +4,6 @@
 //
 
 #include "pch.h"
-#include "KeyboardPage.xaml.h"
 #include "MainMenuPage.xaml.h"
 #include "AboutPage.xaml.h"
 #include "LibraryOverviewPage.xaml.h"
@@ -30,19 +29,6 @@ MainMenuPage::MainMenuPage()
 {
 	InitializeComponent();
 }
-
-
-void StrokeEditor::MainMenuPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
-{
-
-}
-
-
-void StrokeEditor::MainMenuPage::OpenEditorBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
-{
-	this->Frame->Navigate(TypeName(StrokeEditor::KeyboardPage::typeid));
-}
-
 
 void StrokeEditor::MainMenuPage::OpenLibraryBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {

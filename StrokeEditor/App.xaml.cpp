@@ -4,7 +4,6 @@
 //
 
 #include "pch.h"
-#include "KeyboardPage.xaml.h"
 #include "MainMenuPage.xaml.h"
 
 #include <cvt/wstring>
@@ -45,7 +44,15 @@ void StrokeEditor::App::InitializeApp()
 	Suspending += ref new SuspendingEventHandler(this, &App::OnSuspending);
 	Resuming += ref new EventHandler<Platform::Object^>(this, &App::OnResuming);
 
+	// TODO : в качестве аргумента - или ещё лучше (?) в качестве возвращаемого значения - передавать хендлер
 	OpenLibrary("\\ideaLibrary.db");
+
+	// создание глобальных объектов
+	auto init = concurrency::create_task([this]
+	{
+		((App^)App::Current)->_player = ref new SketchMusic::Player::Player;
+	});
+	((App^)App::Current)->_manager = ref new SketchMusic::Commands::CommandManager;
 }
 
 /// <summary>

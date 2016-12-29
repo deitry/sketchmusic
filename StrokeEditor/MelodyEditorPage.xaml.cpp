@@ -33,8 +33,37 @@ MelodyEditorPage::MelodyEditorPage()
 
 void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
-	_manager = ref new SketchMusic::Commands::CommandManager;
+	InitializePage();
 
+	_texts = ref new Platform::Collections::Vector < Text^ >;
+	_idea = (Idea^)e->Parameter;
+	
+	if (_idea->Content == nullptr)
+	{
+		_idea->Content = ref new Text(ref new Instrument("grand_piano.sf2"));
+		// восстанавливаем из сериализованного состояния
+		if (_idea->SerializedContent != nullptr)
+		{
+			_idea->Content->deserialize(_idea->SerializedContent);
+		}
+	}
+	else {
+		// принудительно, пока нет выбора других инструментов
+		_idea->Content->instrument = ref new Instrument("grand_piano.sf2");
+	}
+	_texts->Append(_idea->GetContent());
+
+	//ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
+	//if (list)
+	//{
+	//	list->DataContext = _texts;
+	//}
+
+	_textRow->SetText(_texts, nullptr);
+}
+
+void StrokeEditor::MelodyEditorPage::InitializePage()
+{
 	moveSym = ref new SketchMusic::Commands::Handler([=](Object^ args) -> void
 	{
 		SketchMusic::Commands::SymbolHandlerArgs^ symArgs = dynamic_cast<SketchMusic::Commands::SymbolHandlerArgs^>(args);
@@ -59,42 +88,6 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		_textRow->Backspace();
 	});
 
-	auto init = concurrency::create_task([this]
-	{
-		_player = ref new SketchMusic::Player::Player;
-	});
-
-	//_text = testText();
-	_texts = ref new Platform::Collections::Vector < Text^ >;
-	_idea = (Idea^)e->Parameter;
-	
-	
-	if (_idea->Content == nullptr)
-	{
-		_idea->Content = ref new Text("grand_piano.sf2");
-		// восстанавливаем из сериализованного состояния
-		if (_idea->SerializedContent != nullptr)
-		{
-			_idea->Content->deserialize(_idea->SerializedContent);
-		}
-	}
-	else {
-		// принудительно, пока нет выбора других инструментов
-		_idea->Content->instrument = ref new Instrument("grand_piano.sf2");
-	}
-	_texts->Append(_idea->GetContent());
-	//_texts->Append(ref new Text("acoustic_guitar.sf2"));
-	//_texts->Append(ref new Text("Epiphone_Pick_Bass.sf2"));
-	//_texts->Append(ref new Text("Solo_Viola.sf2"));
-
-	//ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
-	//if (list)
-	//{
-	//	list->DataContext = _texts;
-	//}
-
-	_textRow->SetText(_texts, nullptr);
-
 	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyPressed += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
 		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MelodyEditorPage::_keyboard_KeyboardPressed);
 	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyReleased += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
@@ -105,9 +98,9 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	// остановить проигрывание, если идёт
-	_player->cycling = false;
-	_player->stop();
-	_player->stopKeyboard();
+	((App^)App::Current)->_player->cycling = false;
+	((App^)App::Current)->_player->stop();
+	((App^)App::Current)->_player->stopKeyboard();
 
 	// открыть страницу со сведениями о данной идее
 	_idea->Content = this->_texts->GetAt(0);
@@ -121,8 +114,8 @@ void StrokeEditor::MelodyEditorPage::playAll_Click()
 	{
 		auto async = concurrency::create_task([this]
 		{
-			this->_player->stop();
-			this->_player->playText(this->_texts, ref new SketchMusic::Cursor);
+			((App^)App::Current)->_player->stop();
+			((App^)App::Current)->_player->playText(this->_texts, ref new SketchMusic::Cursor(_textRow->currentPosition));
 		});
 	}));
 }
@@ -135,7 +128,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		{
 		case SketchMusic::View::KeyType::metronome:
 		{
-			_player->needMetronome = (bool)args->key->value;
+			((App^)App::Current)->_player->needMetronome = (bool)args->key->value;
 			break;
 		}
 		case SketchMusic::View::KeyType::note:
@@ -145,7 +138,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			SketchMusic::ISymbol^ sym = ref new SketchMusic::SNote(args->key->value);
 
 			SketchMusic::Player::NoteOff^ noteOff = ref new SketchMusic::Player::NoteOff;
-			_player->playSingleNote((SketchMusic::SNote^) sym, _textRow->current->instrument, 0, noteOff);
+			((App^)App::Current)->_player->playSingleNote((SketchMusic::SNote^) sym, _textRow->current->instrument, 0, noteOff);
 			// сохраняем noteOff где-нибудь, ассоциированно с нажатой клавишей
 			notesPlayingMap.insert(std::make_pair(args->key, noteOff));
 
@@ -153,11 +146,11 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			if (recording)
 			{
 				// создаём команду на добавление ноты в текст и сохраняем её в истории
-				_manager->AddCommand(ref new SMC::CommandState(
+				((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
 					ref new SMC::Command(addSym, nullptr, nullptr),
 					ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
 						ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
-				_manager->ExecuteLast();
+				((App^)App::Current)->_manager->ExecuteLast();
 				this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
 					+ " / tick = " + _textRow->currentPosition->getTick();
 
@@ -168,7 +161,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 					{
 						auto delay = concurrency::create_task([this]
 						{
-							unsigned int timeout = 300 * 60 / _player->_BPM / _textRow->scale;
+							unsigned int timeout = 300 * 60 / ((App^)App::Current)->_player->_BPM / _textRow->scale;
 							concurrency::wait(timeout);
 							Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=] {
 								this->appending = false;
@@ -183,11 +176,11 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		}
 		case SketchMusic::View::KeyType::enter:
 			// создаём команду на добавление ноты в текст и сохраняем её в истории
-			_manager->AddCommand(ref new SMC::CommandState(
+			((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
 				ref new SMC::Command(addSym, nullptr, nullptr),
 				ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), ref new SNewLine))));
-			_manager->ExecuteLast();
+			((App^)App::Current)->_manager->ExecuteLast();
 			this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
 				+ " / tick = " + _textRow->currentPosition->getTick();
 			break;
@@ -212,28 +205,28 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			break;
 		case SketchMusic::View::KeyType::deleteSym:
 		{
-			_manager->AddCommand(ref new SMC::CommandState(
+			((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
 				ref new SMC::Command(deleteSym, nullptr, nullptr),
 				ref new SMC::SymbolHandlerArgs(_textRow->current,
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), nullptr),
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition->getBeat() - 1), nullptr))));
-			_manager->ExecuteLast();
+			((App^)App::Current)->_manager->ExecuteLast();
 			this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
 				+ " / tick = " + _textRow->currentPosition->getTick();
 			break;
 		}
 		case SketchMusic::View::KeyType::stop:
-			_player->stop();
-			_player->stopKeyboard();
+			((App^)App::Current)->_player->stop();
+			((App^)App::Current)->_player->stopKeyboard();
 			break;
 		case SketchMusic::View::KeyType::play:
 			playAll_Click();
 			break;
 		case SketchMusic::View::KeyType::cycling:
-			_player->cycling = args->key->value;
+			((App^)App::Current)->_player->cycling = args->key->value;
 			break;
 		case SketchMusic::View::KeyType::tempo:
-			_player->_BPM = args->key->value;
+			((App^)App::Current)->_player->_BPM = args->key->value;
 			break;
 		case SketchMusic::View::KeyType::zoom:
 			_textRow->SetScale(args->key->value * 2);

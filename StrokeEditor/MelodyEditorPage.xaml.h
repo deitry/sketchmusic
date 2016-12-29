@@ -6,10 +6,18 @@
 #pragma once
 
 #include "MelodyEditorPage.g.h"
-#include "KeyboardPage.xaml.h"
 
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Navigation;
+
+template<>
+struct std::less<SketchMusic::View::Key^>
+{
+	bool operator() (SketchMusic::View::Key^ x, SketchMusic::View::Key^ y) const { return x->type < y->type; }
+	typedef SketchMusic::View::Key^ first_argument_type;
+	typedef SketchMusic::View::Key^ second_argument_type;
+	typedef bool result_type;
+};
 
 namespace StrokeEditor
 {
@@ -24,15 +32,13 @@ namespace StrokeEditor
 
 	protected:
 		virtual void OnNavigatedTo(NavigationEventArgs^ e) override;
+		void InitializePage();
 
 	private:
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		//void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
 
-		SketchMusic::Player::Player^ _player;
 		Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ _texts;
-
-		SketchMusic::Commands::CommandManager^ _manager;
 
 		SketchMusic::Commands::Handler^ moveSym;
 		SketchMusic::Commands::Handler^ addSym;

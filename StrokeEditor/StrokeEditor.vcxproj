@@ -163,9 +163,6 @@
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include="KeyboardPage.xaml.h">
-      <DependentUpon>KeyboardPage.xaml</DependentUpon>
-    </ClInclude>
     <ClInclude Include="sqlite3.h" />
   </ItemGroup>
   <ItemGroup>
@@ -182,9 +179,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainMenuPage.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="KeyboardPage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MelodyEditorPage.xaml">
@@ -222,9 +216,6 @@
     </ClCompile>
     <ClCompile Include="MainMenuPage.xaml.cpp">
       <DependentUpon>MainMenuPage.xaml</DependentUpon>
-    </ClCompile>
-    <ClCompile Include="KeyboardPage.xaml.cpp">
-      <DependentUpon>KeyboardPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="MelodyEditorPage.xaml.cpp">
       <DependentUpon>MelodyEditorPage.xaml</DependentUpon>

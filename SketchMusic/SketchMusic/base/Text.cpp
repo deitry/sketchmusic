@@ -21,11 +21,11 @@ SketchMusic::Text::Text(Instrument^ instrument)
 	this->instrument = instrument;
 }
 
-SketchMusic::Text::Text(String^ instrumentName)
-{
-	this->curPosition = ref new Cursor;
-	this->instrument = ref new Instrument(instrumentName);
-}
+//SketchMusic::Text::Text(String^ instrumentName)
+//{
+//	this->curPosition = ref new Cursor;
+//	this->instrument = ref new Instrument(instrumentName);
+//}
 
 void SketchMusic::Text::deleteSymbol(Cursor^ cur, ISymbol^ sym)
 {

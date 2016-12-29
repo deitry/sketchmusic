@@ -40,7 +40,7 @@ public:
 	Text();
 	Text(Windows::Data::Json::JsonObject^ json) {}
 	Text(Instrument^ instrument);
-	Text(String^ instrumentName);
+	//Text(String^ instrumentName);
 		// TODO : так ли важен используемый инструмент для определения текста?
 		// Если использовать этот класс для определения содержимого произвольной идеи,
 		// то инструмент может сам по себе быть идеей, а может не играть никакой роли вообще

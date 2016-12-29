@@ -24,10 +24,10 @@ namespace StrokeEditor
 	public ref class KeyboardPage sealed
 	{
 	private:
-		SketchMusic::Player::Player^ _player;
+		//SketchMusic::Player::Player^ _player;
 		Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ _texts;
 
-		SketchMusic::Commands::CommandManager^ _manager;
+		//SketchMusic::Commands::CommandManager^ _manager;
 		
 		SketchMusic::Commands::Handler^ moveSym;
 		SketchMusic::Commands::Handler^ addSym;

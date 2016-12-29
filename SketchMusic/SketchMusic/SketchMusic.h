@@ -65,6 +65,7 @@ namespace SketchMusic
 
 	ref class Sample;
 	ref class Instrument;
+	ref class InstrumentToTextConverter;
 
 	/**
 	"Облегченная" версия класса Composition. Нужна для определения альбома

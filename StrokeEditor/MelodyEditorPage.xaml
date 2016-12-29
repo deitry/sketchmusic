@@ -11,7 +11,7 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <local:InstrumentToTextConverter x:Key="instr2text"/>
+        <sm:InstrumentToTextConverter x:Key="instr2text"/>
     </Page.Resources>
 
     <StackPanel x:Name="grid" 
