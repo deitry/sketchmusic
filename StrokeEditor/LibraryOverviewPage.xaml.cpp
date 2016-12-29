@@ -76,24 +76,36 @@ LibraryOverviewPage::LibraryOverviewPage()
 	LibView->ItemsSource = ideaLibrary;
 }
 
-void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
+void StrokeEditor::LibraryOverviewPage::InitializePage()
 {
 	// получение настроек навроде параметров фильтрации
 	Windows::Storage::ApplicationDataContainer^ localSettings =
 		Windows::Storage::ApplicationData::Current->LocalSettings;
 
-	if (localSettings->Values->HasKey("filter_last3days")) 
-	{ this->last3DaysFilter = (bool)localSettings->Values->Lookup("filter_last3days"); }
-	if (localSettings->Values->HasKey("filter_rating5Higher")) 
-	{ this->rating5Higher = (bool)localSettings->Values->Lookup("filter_rating5Higher"); }
-	if (localSettings->Values->HasKey("filter_todoTag")) 
-	{ this->todoTagsFilter = (bool)localSettings->Values->Lookup("filter_todoTag"); }
-	if (localSettings->Values->HasKey("filter_baseTag")) 
-	{ this->baseTagsFilter = (bool)localSettings->Values->Lookup("filter_baseTag"); }
-	if (localSettings->Values->HasKey("filter_notBaseTag")) 
-	{ this->notBaseTagsFilter = (bool)localSettings->Values->Lookup("filter_notBaseTag"); }
-	if (localSettings->Values->HasKey("sort_index")) 
-	{ this->SortingList->SelectedIndex = (int)localSettings->Values->Lookup("sort_index"); }
+	if (localSettings->Values->HasKey("filter_last3days"))
+	{
+		this->last3DaysFilter = (bool)localSettings->Values->Lookup("filter_last3days");
+	}
+	if (localSettings->Values->HasKey("filter_rating5Higher"))
+	{
+		this->rating5Higher = (bool)localSettings->Values->Lookup("filter_rating5Higher");
+	}
+	if (localSettings->Values->HasKey("filter_todoTag"))
+	{
+		this->todoTagsFilter = (bool)localSettings->Values->Lookup("filter_todoTag");
+	}
+	if (localSettings->Values->HasKey("filter_baseTag"))
+	{
+		this->baseTagsFilter = (bool)localSettings->Values->Lookup("filter_baseTag");
+	}
+	if (localSettings->Values->HasKey("filter_notBaseTag"))
+	{
+		this->notBaseTagsFilter = (bool)localSettings->Values->Lookup("filter_notBaseTag");
+	}
+	if (localSettings->Values->HasKey("sort_index"))
+	{
+		this->SortingList->SelectedIndex = (int)localSettings->Values->Lookup("sort_index");
+	}
 
 	for (auto&& i : FilterList->Items)
 	{
@@ -107,6 +119,16 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		case 4: if (notBaseTagsFilter) FilterList->SelectedItems->Append(i);break;
 		}
 	}
+	// привязываем надпись на кнопке "воспроизвести" к состоянию плеера
+	Binding^ playBtnBinding = ref new Binding();
+	playBtnBinding->Source = ((App^)App::Current)->_player->_state;
+	playBtnBinding->Converter = ref new SketchMusic::Player::PlayerStateToPlayBtnContentConverter;
+	PlayBtn->SetBinding(PlayBtn->ContentProperty, playBtnBinding);
+}
+
+void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
+{
+	InitializePage();
 
 	// если в качестве параметра нам передали идею, то или заменяем в списке уже имеющуюся,
 	// или создаём новую
@@ -256,8 +278,7 @@ void StrokeEditor::LibraryOverviewPage::RefreshBtn_Click(Platform::Object^ sende
 
 void StrokeEditor::LibraryOverviewPage::LibView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
 {
-	// открыть страницу со сведениями о данной идее
-	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(e->ClickedItem,false));
+	
 }
 
 
@@ -327,4 +348,39 @@ void StrokeEditor::LibraryOverviewPage::FilterList_SelectionChanged(Platform::Ob
 			break;
 		}
 	}
+}
+
+
+void StrokeEditor::LibraryOverviewPage::EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	// открыть страницу со сведениями о данной идее
+	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(LibView->SelectedItem, false));
+}
+
+
+void StrokeEditor::LibraryOverviewPage::PlayBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	if (((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::STOP)
+	{
+		((App^)App::Current)->_player->stop();
+		this->PlayBtn->Content = "Воспроизвести";
+		return;
+	}
+
+	this->PlayBtn->Content = "Остановить";
+	auto item = (SketchMusic::Idea^)LibView->SelectedItem;
+	if (item == nullptr) return;
+	if (item->Content == nullptr && (item->SerializedContent == nullptr || item->SerializedContent == "")) return;
+
+	auto text = item->Content ? item->Content : SketchMusic::Text::deserialize(item->SerializedContent);
+	auto texts = ref new Platform::Collections::Vector<SketchMusic::Text^>(1, text);
+
+	this->Dispatcher->RunAsync(
+		Windows::UI::Core::CoreDispatcherPriority::Normal,
+		ref new Windows::UI::Core::DispatchedHandler([=]() {
+			concurrency::create_task([=]
+			{
+				((App^)App::Current)->Play(texts, ref new SketchMusic::Cursor);
+			});
+	}));
 }

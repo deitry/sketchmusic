@@ -621,9 +621,39 @@ namespace SketchMusic
 	namespace Player
 	{
 		// состояния плеера
-		const int S_STOP = 0;	// стоит - совсем
-		const int S_PLAY = 1;	// проигрывает
-		const int S_WAIT = 2;	// останавливается - нужен для проверок на наличие нот. При их наличии продолжает играть
+		//[Windows::UI::Xaml::Data::Bindable]
+		public enum class PlayerState
+		{
+			STOP = 0,	// стоит - совсем
+			PLAY = 1,	// проигрывает
+			WAIT = 2,	// останавливается - нужен для проверок на наличие нот. При их наличии продолжает играть
+		};
+
+		public ref class PlayerStateToPlayBtnContentConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+		{
+		public:
+			virtual Object^ Convert(Platform::Object ^value, Windows::UI::Xaml::Interop::TypeName targetType, Platform::Object ^parameter, Platform::String ^language)
+			{
+				SketchMusic::Player::PlayerState state = (SketchMusic::Player::PlayerState) value;
+				switch (state)
+				{
+				case SketchMusic::Player::PlayerState::STOP:
+					return "Воспроизвести";
+				case SketchMusic::Player::PlayerState::PLAY:
+				case SketchMusic::Player::PlayerState::WAIT:
+					return "Остановить";
+				}
+				return nullptr;
+			}
+
+			virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+			{
+				return nullptr;
+			}
+
+			PlayerStateToPlayBtnContentConverter() {}
+		};
+
 
 		ref class Player;
 		interface class ISoundEngine;

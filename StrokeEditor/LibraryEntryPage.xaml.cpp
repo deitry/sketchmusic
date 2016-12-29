@@ -31,6 +31,11 @@ LibraryEntryPage::LibraryEntryPage()
 	InitializeComponent();
 }
 
+void StrokeEditor::LibraryEntryPage::InitializePage()
+{
+	
+}
+
 void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
 	//e->

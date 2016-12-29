@@ -18,7 +18,7 @@ private:
 	void playMetronome();
 	
 public:
-	property int _state;
+	property SketchMusic::Player::PlayerState _state;
 	property bool cycling;
 	property float _BPM;
 	property bool needMetronome;

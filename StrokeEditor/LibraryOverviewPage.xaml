@@ -12,6 +12,8 @@
         <sm:IdeaCategoryToStrConverter x:Key="IdeaCategoryToStrConverter"/>
         <sm:TimeToStrConverter x:Key="TimeToStrConverter"/>
         <local:RatingToColorConverter x:Key="RatingToColorConverter"/>
+        <local:ObjectToBoolConverter x:Key="ObjectToBoolConverter"/>
+        
         <Style x:Key="ItemStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI Light"/>
             <Setter Property="FontSize" Value="14.667"/>
@@ -63,12 +65,23 @@
             </Button>
 
             <Button Name="RefreshBtn" Content="Обновить" Click="RefreshBtn_Click"/>
+
             <!--<TextBlock Name="SizeTxt" VerticalAlignment="Center" Margin="10,0,10,0"/>-->
         </StackPanel>
 
+        <StackPanel Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right">
+            <Button Name="PlayBtn" Content="Воспроизвести" HorizontalAlignment="Right"
+                    IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" 
+                    Click="PlayBtn_Click"/>
+            <Button Name="EditBtn" Content="Редактировать" HorizontalAlignment="Right" 
+                    IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" 
+                    Click="EditBtn_Click"/>
+        </StackPanel>
+        
         <ScrollViewer Grid.Row="1" VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Auto">
-            <GridView Name="LibView" ItemClick="LibView_ItemClick" IsItemClickEnabled="True">
-                <!-- ScrollViewer.VerticalScrollBarVisibility="Visible"
+            <GridView Name="LibView" IsItemClickEnabled="True" ItemClick="LibView_ItemClick">
+                <!-- 
+                        ScrollViewer.VerticalScrollBarVisibility="Visible"
                       ScrollViewer.VerticalScrollMode="Enabled"
                       ScrollViewer.HorizontalScrollMode="Disabled" -->
                 <!--<GridView.ItemsPanel>

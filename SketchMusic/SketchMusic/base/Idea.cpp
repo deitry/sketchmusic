@@ -82,9 +82,8 @@ SketchMusic::Text ^ SketchMusic::Idea::GetContent()
 {
 	if ((Content == nullptr) && (SerializedContent != nullptr))
 	{
-		Content = ref new Text();
-		Content->deserialize(SerializedContent);
-		SerializedContent = nullptr;	// чтобы не казалось, что мы можем просто вз€ть это значение
+		Content = SketchMusic::Text::deserialize(SerializedContent);
+		//SerializedContent = nullptr;	// чтобы не казалось, что мы можем просто вз€ть это значение
 			// ѕредполагаетс€, что если мы всЄ это делаем, то хотим изменить идею.
 	}
 	return Content;

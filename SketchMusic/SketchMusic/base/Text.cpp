@@ -101,13 +101,14 @@ IJsonValue^ SketchMusic::Text::serialize()
 	return json;
 }
 
-void SketchMusic::Text::deserialize(Platform::String^ str)
+SketchMusic::Text^ SketchMusic::Text::deserialize(Platform::String^ str)
 {
+	SketchMusic::Text^ text = ref new SketchMusic::Text;
 	JsonObject^ json = ref new JsonObject();
 	if (JsonObject::TryParse(str, &json))
 	{
 		//use the JsonObject json
-		this->instrument = ref new Instrument(json->GetNamedString(t::INSTR));
+		text->instrument = ref new Instrument(json->GetNamedString(t::INSTR));
 		auto jArr = json->GetNamedArray(t::NOTES_ARRAY);
 		// проходимся по массиву и создаём нотки
 		for (auto i : jArr)
@@ -121,12 +122,12 @@ void SketchMusic::Text::deserialize(Platform::String^ str)
 
 				auto sym = ISymbolFactory::Deserialize(jEl);
 
-				_t.insert(std::make_pair(pos, sym));
+				text->_t.insert(std::make_pair(pos, sym));
 			}
 		}
+		return text;
 	}
-	
-	return;
+	else return nullptr;
 }
 
 void SketchMusic::Text::moveSymbol(SketchMusic::PositionedSymbol^ psym, SketchMusic::Cursor^ newpos)

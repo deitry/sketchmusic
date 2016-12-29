@@ -23,6 +23,7 @@ namespace StrokeEditor
 		property Platform::Boolean _isRead;
 
 	protected:
+		void InitializePage();
 		virtual void OnNavigatedTo(NavigationEventArgs^ e) override;
 
 	private:

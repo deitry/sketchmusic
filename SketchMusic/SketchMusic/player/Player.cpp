@@ -14,6 +14,7 @@
 typedef std::chrono::high_resolution_clock Clock;
 
 using namespace Windows::Foundation::Collections;
+typedef SketchMusic::Player::PlayerState s;
 
 SketchMusic::Player::Player::Player()
 {
@@ -93,7 +94,7 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 	// - - создать по соурс войсу на каждый семпл
 	// - - если такой инструмент уже проинициализирован, не трогать
 	// - пройтись по всем нотам
-	this->_state = SketchMusic::Player::S_PLAY;
+	this->_state = s::PLAY;
 	
 
 	SketchMusic::Cursor^ cursor = ref new SketchMusic::Cursor(pos);
@@ -137,18 +138,18 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 	})
 		.then([this, iterMap, cursor]
 	{
-		int tempState = SketchMusic::Player::S_PLAY;
+		auto tempState = s::PLAY;
 		int pbeat = -1;
 		
 		clock_t pclock = clock();
 		auto pClock = Clock::now();
 
-		while (tempState == SketchMusic::Player::S_PLAY)
+		while (tempState == s::PLAY)
 		{
 			// запустить асинхронно
 			//concurrency::parallel_for_each(iterList->begin(), iterList->end(), [this](Windows::Foundation::Collections::IIterator<SketchMusic::PositionedSymbol^>^ iter)
 			// - один итератор = один текст = один инструмент = один саунденжин = несколько нот
-			tempState = S_WAIT;
+			tempState = s::WAIT;
 			for (auto iter = iterMap->begin(); iter < iterMap->end(); iter++)
 			{
 				auto pIter = iter->second.first;
@@ -211,9 +212,10 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 			cursor->incTick(offset);
 			
 
-			if (this->cycling && (tempState == S_WAIT))
+			if (this->cycling && (tempState == s::WAIT))
 			{
-				tempState = S_PLAY;
+				tempState = s::PLAY;
+				pbeat = -1;
 				cursor->moveTo(ref new Cursor(0, 0));
 				for (auto iter = iterMap->begin(); iter != iterMap->end(); iter++)
 				{
@@ -240,7 +242,7 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 
 void SketchMusic::Player::Player::stop()
 {
-	this->_state = SketchMusic::Player::S_STOP;
+	this->_state = s::STOP;
 }
 
 void SketchMusic::Player::Player::stopKeyboard()

@@ -47,6 +47,8 @@ public:
 		// ! Однако инструмент требуется в любом случае, если мы захотим прослушать то, что в тексте написано.
 		// Соответственно без указания инструмента для озвучивания остаётся только использовать некий "дефолтный" инструмент
 
+	static SketchMusic::Text^ deserialize(Platform::String^ str);
+
 	property SketchMusic::Instrument^ instrument;	// инструмент, который связывается с данной дорожкой
 	property SketchMusic::Cursor^ curPosition;
 
@@ -66,8 +68,7 @@ public:
 	//Platform::Collections::Vector<PositionedSymbol^>^ getText();
 	
 	Windows::Data::Json::IJsonValue^ serialize();
-	void deserialize(Platform::String^ str);
-
+	
 	// TODO : функции вставки одного текста в другой, объединение, "вырезание" и так далее
 	// Потребуются, когда можно будет идеи объединять друг с другом
 };

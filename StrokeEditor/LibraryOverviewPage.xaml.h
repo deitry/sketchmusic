@@ -22,6 +22,7 @@ namespace StrokeEditor
 		LibraryOverviewPage();
 
 	protected:
+		void InitializePage();
 		virtual void OnNavigatedTo(NavigationEventArgs^ e) override;
 		virtual void OnNavigatedFrom(NavigationEventArgs^ e) override;
 
@@ -51,6 +52,8 @@ namespace StrokeEditor
 		bool todoTagsFilter;
 		bool baseTagsFilter;
 		bool notBaseTagsFilter;
+		void EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void PlayBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
@@ -83,5 +86,21 @@ namespace StrokeEditor
 		}
 
 		RatingToColorConverter() {}
+	};
+
+	public ref class ObjectToBoolConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+	{
+	public:
+		virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+		{
+			if (value) return true;
+			else return false;
+		}
+		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+		{
+			return nullptr;
+		}
+
+		ObjectToBoolConverter() {}
 	};
 }

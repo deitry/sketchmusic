@@ -256,6 +256,15 @@ void StrokeEditor::App::ShowNotification(Platform::String ^ message)
 	ToastNotificationManager::CreateToastNotifier()->Show(toast);
 }
 
+void StrokeEditor::App::Play(Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ texts, SketchMusic::Cursor ^ cursor)
+{
+	//auto async = concurrency::create_task([this,texts, cursor]
+	//{
+		this->_player->stop();
+		this->_player->playText(texts, cursor);
+	//});
+}
+
 int StrokeEditor::App::UpdateIdea(SketchMusic::Idea ^ idea)
 {
 	sqlite3* db = this->libraryDB;
