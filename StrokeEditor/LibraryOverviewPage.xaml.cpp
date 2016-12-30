@@ -119,11 +119,11 @@ void StrokeEditor::LibraryOverviewPage::InitializePage()
 		case 4: if (notBaseTagsFilter) FilterList->SelectedItems->Append(i);break;
 		}
 	}
-	// привязываем надпись на кнопке "воспроизвести" к состоянию плеера
-	Binding^ playBtnBinding = ref new Binding();
-	playBtnBinding->Source = ((App^)App::Current)->_player->_state;
-	playBtnBinding->Converter = ref new SketchMusic::Player::PlayerStateToPlayBtnContentConverter;
-	PlayBtn->SetBinding(PlayBtn->ContentProperty, playBtnBinding);
+	
+	// Обработка изменения состояния плеера
+	playerStateChangeToken =
+		((App^)App::Current)->_player->StateChanged += 
+		ref new Windows::Foundation::EventHandler<SketchMusic::Player::PlayerState>(this, &StrokeEditor::LibraryOverviewPage::OnStateChanged);
 }
 
 void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
@@ -171,6 +171,7 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedFrom(NavigationEventArgs ^ e)
 	localSettings->Values->Insert("filter_notBaseTag", this->notBaseTagsFilter);
 
 	localSettings->Values->Insert("sort_index", this->SortingList->SelectedIndex);
+	((App^)App::Current)->_player->StateChanged -= playerStateChangeToken;
 }
 
 
@@ -300,8 +301,6 @@ void StrokeEditor::LibraryOverviewPage::FilterList_SelectionChanged(Platform::Ob
 {
 	for (auto&& i : e->AddedItems)
 	{
-		//unsigned int index;
-		//FilterList->Items->IndexOf(i, &index);
 		FrameworkElement^ item = dynamic_cast<TextBlock^>(static_cast<Object^>(i));
 		switch (std::stoi(((String^)item->Tag)->Data()))
 		{
@@ -326,7 +325,6 @@ void StrokeEditor::LibraryOverviewPage::FilterList_SelectionChanged(Platform::Ob
 
 	for (auto&& i : e->RemovedItems)
 	{
-		//unsigned int index;
 		FrameworkElement^ item = dynamic_cast<TextBlock^>(static_cast<Object^>(i));
 		switch (std::stoi(((String^)item->Tag)->Data()))
 		{
@@ -363,11 +361,9 @@ void StrokeEditor::LibraryOverviewPage::PlayBtn_Click(Platform::Object^ sender, 
 	if (((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::STOP)
 	{
 		((App^)App::Current)->_player->stop();
-		this->PlayBtn->Content = "Воспроизвести";
 		return;
 	}
 
-	this->PlayBtn->Content = "Остановить";
 	auto item = (SketchMusic::Idea^)LibView->SelectedItem;
 	if (item == nullptr) return;
 	if (item->Content == nullptr && (item->SerializedContent == nullptr || item->SerializedContent == "")) return;
@@ -378,9 +374,26 @@ void StrokeEditor::LibraryOverviewPage::PlayBtn_Click(Platform::Object^ sender, 
 	this->Dispatcher->RunAsync(
 		Windows::UI::Core::CoreDispatcherPriority::Normal,
 		ref new Windows::UI::Core::DispatchedHandler([=]() {
-			concurrency::create_task([=]
+			auto play = concurrency::create_task([=]
 			{
 				((App^)App::Current)->Play(texts, ref new SketchMusic::Cursor);
 			});
+		}));
+}
+
+
+void StrokeEditor::LibraryOverviewPage::OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args)
+{
+	this->Dispatcher->RunAsync(
+		Windows::UI::Core::CoreDispatcherPriority::Normal,
+		ref new Windows::UI::Core::DispatchedHandler([=]() {
+			switch (args)
+			{
+			case SketchMusic::Player::PlayerState::PLAY:
+				this->PlayBtn->Content = "Остановить"; break;
+			case SketchMusic::Player::PlayerState::STOP:
+			case SketchMusic::Player::PlayerState::WAIT:
+				this->PlayBtn->Content = "Воспроизвести"; break;
+			}
 	}));
 }

@@ -33,6 +33,8 @@ namespace StrokeEditor
 		//int DeleteIdea(SketchMusic::Idea^ idea);	// послать в бд
 
 	private:
+		Windows::Foundation::EventRegistrationToken playerStateChangeToken;
+
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
 		void RefreshList();	// Обновить список в соответствии с выбранным фильтром
@@ -54,6 +56,7 @@ namespace StrokeEditor
 		bool notBaseTagsFilter;
 		void EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void PlayBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]

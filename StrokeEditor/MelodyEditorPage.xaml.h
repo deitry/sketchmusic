@@ -33,8 +33,10 @@ namespace StrokeEditor
 	protected:
 		virtual void OnNavigatedTo(NavigationEventArgs^ e) override;
 		void InitializePage();
-
+		
 	private:
+		Windows::Foundation::EventRegistrationToken playerStateChangeToken;
+
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		//void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
 
@@ -61,5 +63,6 @@ namespace StrokeEditor
 		//void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
 		SketchMusic::Idea^ _idea;
+		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
 	};
 }

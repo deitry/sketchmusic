@@ -727,6 +727,8 @@ namespace SketchMusic
 			shift			= 3,
 			octaveInc		= 4,
 			octaveDec		= 5,
+			play			= 6,	// для связи состояния плеера с состояниями клавиатуры
+			stop			= 7,	// для связи состояния плеера с состояниями клавиатуры
 			absoluteNote	= 10,	// для смены раскладок
 			relativeNote	= 11,
 			genericNote		= 12,

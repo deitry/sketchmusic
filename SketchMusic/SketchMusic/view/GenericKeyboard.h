@@ -287,6 +287,7 @@ private:
 	void OnKeyboardPressed(SketchMusic::View::Key^ key);
 	void OnControlPressed(SketchMusic::View::Key^ key);
 	void OnNormalState(SketchMusic::View::Key^ key);
+	void OnPlayStopState(SketchMusic::View::Key^ key);
 
 	SketchMusic::View::KeyboardState^ currentState;	// состояние клавиатуры. Изменяется при нажатии всяких контрол, шифт и так далее
 
@@ -296,35 +297,17 @@ private:
 	std::multimap<SketchMusic::View::Key^, bool> _keys;	// сохраняем ссылки на клавиши, чтобы уведомлять их об изменении состояния
 		// вторым параметром отмечаем, что клавиша в данный момент нажата
 
-	concurrency::cancellation_token_source releaseToken;
-
-	// цвета
-	//property Windows::UI::Xaml::Media::SolidColorBrush^ keyBackground;
-	//property Windows::UI::Xaml::Media::SolidColorBrush^ blackKeyBackground;
-	//property Windows::UI::Xaml::Media::SolidColorBrush^ foreground;
-	//property Windows::UI::Xaml::Media::SolidColorBrush^ pressedKeyBackground;
-	//property Windows::UI::Xaml::Media::SolidColorBrush^ disabledKeyBackground;
-	//property Windows::UI::Xaml::Media::SolidColorBrush^ ctrlKeyForeground;
-	//property Windows::UI::Xaml::Media::SolidColorBrush^ actionKeyForeground;
-	//property Windows::UI::Xaml::Media::SolidColorBrush^ disabledCtrlKeyForeground;
-
-protected:
-	void OnKeyboardStateChanged(Object^ object, SketchMusic::View::KeyboardState ^ state);
-
+	concurrency::cancellation_token_source releaseToken;	
 
 public:
 	GenericKeyboard();
-
-	//property bool recording;
-	//property bool cycling;
-	//property bool metronome;
-	//property bool control;
 
 	virtual event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyPressed;	// нажатие на одну клавишу
 	virtual event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyReleased;	// отпускание одной клавиши
 	virtual event EventHandler<Windows::Foundation::Collections::IVector<SketchMusic::View::Key^>^>^ KeyboardReleased; // "отпускание" всех клавиш
 	virtual event EventHandler<SketchMusic::View::KeyboardState^>^ KeyboardStateChanged;
 
+	void OnKeyboardStateChanged(Object^ object, SketchMusic::View::KeyboardState ^ state);
 	virtual void OnApplyTemplate() override;
 	
 	// для тача

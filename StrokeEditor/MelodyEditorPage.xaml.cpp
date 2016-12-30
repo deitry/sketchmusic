@@ -45,11 +45,13 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		{
 			_idea->Content = _idea->Content->deserialize(_idea->SerializedContent);
 		}
+		else
+		{
+			// принудительно, пока нет выбора других инструментов
+			_idea->Content = ref new Text(ref new Instrument("grand_piano.sf2"));
+		}
 	}
-	else {
-		// принудительно, пока нет выбора других инструментов
-		_idea->Content = ref new Text(ref new Instrument("grand_piano.sf2"));
-	}
+
 	_texts->Append(_idea->GetContent());
 
 	//ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
@@ -86,11 +88,15 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 	{
 		_textRow->Backspace();
 	});
-
+	
 	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyPressed += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
 		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MelodyEditorPage::_keyboard_KeyboardPressed);
 	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyReleased += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
 		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MelodyEditorPage::_keyboard_KeyReleased);
+
+	playerStateChangeToken=
+		((App^)App::Current)->_player->StateChanged += 
+		ref new Windows::Foundation::EventHandler<SketchMusic::Player::PlayerState>(this, &StrokeEditor::MelodyEditorPage::OnStateChanged);
 }
 
 
@@ -104,16 +110,26 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	// открыть страницу со сведениями о данной идее
 	_idea->Content = this->_texts->GetAt(0);
 	_idea->SerializedContent = _idea->Content->serialize()->Stringify();
+	
+	// отписка от события
+	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
+
 	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(_idea, true));
 }
 
 void StrokeEditor::MelodyEditorPage::playAll_Click()
 {
+	if (((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::STOP)
+	{
+		((App^)App::Current)->_player->stop();
+		return;
+	}
+
 	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([this]()
 	{
 		auto async = concurrency::create_task([this]
 		{
-			((App^)App::Current)->_player->stop();
+			//((App^)App::Current)->_player->stop();
 			((App^)App::Current)->_player->playText(this->_texts, ref new SketchMusic::Cursor(_textRow->currentPosition));
 		});
 	}));
@@ -251,4 +267,22 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyReleased(Platform::Object^ sen
 			break;
 		}
 	}
+}
+
+void StrokeEditor::MelodyEditorPage::OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args)
+{
+	this->Dispatcher->RunAsync(
+		Windows::UI::Core::CoreDispatcherPriority::Normal,
+		ref new Windows::UI::Core::DispatchedHandler([=]() {
+		switch (args)
+		{
+		case SketchMusic::Player::PlayerState::PLAY:
+			this->_keyboard->OnKeyboardStateChanged(this, ref new SketchMusic::View::KeyboardState(SketchMusic::View::KeyboardStateEnum::play));
+			break;
+		case SketchMusic::Player::PlayerState::STOP:
+		case SketchMusic::Player::PlayerState::WAIT:
+			this->_keyboard->OnKeyboardStateChanged(this, ref new SketchMusic::View::KeyboardState(SketchMusic::View::KeyboardStateEnum::stop));
+			break;
+		}
+	}));
 }

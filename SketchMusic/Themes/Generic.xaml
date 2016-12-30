@@ -121,10 +121,12 @@
                                                 Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                                     Converter={StaticResource ctrlKeyState2color}}"
                                                 Width="{StaticResource CtrlWidth}" Tag="12000"/>
-                                <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                <ContentControl Style="{StaticResource KeyboardBtnStyle}"
+                                                Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+                                                    Converter={StaticResource ctrlKeyState2color}}"
                                                 Width="{StaticResource CtrlWidth}" Tag="7000"/>
-                                <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
-                                                Width="{StaticResource CtrlWidth}" Tag="8000"/>
+                                <!--<ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Width="{StaticResource CtrlWidth}" Tag="8000"/>-->
                                 <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
                                                 Width="{StaticResource CtrlWidth}" Tag="13000"/>
                                 <ContentControl Style="{StaticResource KeyboardBtnStyle}" 

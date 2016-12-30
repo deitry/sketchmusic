@@ -15,7 +15,6 @@
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="KeyboardPage.xaml.cpp" />
     <ClCompile Include="AboutPage.xaml.cpp" />
     <ClCompile Include="LibraryEntryPage.xaml.cpp" />
     <ClCompile Include="LibraryOverviewPage.xaml.cpp" />
@@ -26,7 +25,6 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="App.xaml.h" />
-    <ClInclude Include="KeyboardPage.xaml.h" />
     <ClInclude Include="AboutPage.xaml.h" />
     <ClInclude Include="LibraryEntryPage.xaml.h" />
     <ClInclude Include="LibraryOverviewPage.xaml.h" />

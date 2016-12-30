@@ -127,6 +127,23 @@ void GenericKeyboard::OnNormalState(SketchMusic::View::Key^ key)
 	}
 }
 
+void SketchMusic::View::GenericKeyboard::OnPlayStopState(SketchMusic::View::Key ^ key)
+{
+	switch (key->type)
+	{
+	case SketchMusic::View::KeyType::play:
+		key->type = SketchMusic::View::KeyType::stop;
+		key->value = 1;
+		UpdateParent(key);
+		break;
+	case SketchMusic::View::KeyType::stop:
+		key->type = SketchMusic::View::KeyType::play;
+		key->value = 0;
+		UpdateParent(key);
+		break;
+	}
+}
+
 void SketchMusic::View::GenericKeyboard::OnKeyboardStateChanged(Object^ object, SketchMusic::View::KeyboardState ^ state)
 {
 	// проходимся по всем кнопкам и меняем их состояние согласно их типу
@@ -149,6 +166,10 @@ void SketchMusic::View::GenericKeyboard::OnKeyboardStateChanged(Object^ object, 
 			break;
 		case SketchMusic::View::KeyboardStateEnum::normal:
 			OnNormalState(key);
+			break;
+		case SketchMusic::View::KeyboardStateEnum::play:
+		case SketchMusic::View::KeyboardStateEnum::stop:
+			OnPlayStopState(key);
 			break;
 		}	
 	}
