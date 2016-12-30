@@ -13,6 +13,15 @@
     <SolidColorBrush x:Key="ctrlKeyForeground" x:Name="ctrlKeyForeground" Color="Blue"/>
     <SolidColorBrush x:Key="actionKeyForeground" x:Name="actionKeyForeground" Color="Red"/>
 
+    <SolidColorBrush x:Key="textBrush" x:Name="textBrush" Color="Black"/>
+    <SolidColorBrush x:Key="draggedForegroundBrush" x:Name="draggedForegroundBrush" Color="White" Opacity="0.4"/>
+    <SolidColorBrush x:Key="noteBackground" x:Name="noteBackground" Color="DarkOrange"/>
+    <SolidColorBrush x:Key="noteBackground2" x:Name="noteBackground2" Color="Blue"/>
+    <SolidColorBrush x:Key="noteBackground3" x:Name="noteBackground3" Color="Green"/>
+    <SolidColorBrush x:Key="noteBackground4" x:Name="noteBackground4" Color="Yellow"/>
+    <SolidColorBrush x:Key="tempoBackground" x:Name="tempoBackground" Color="DarkCyan"/>
+
+
     <local:OnSymbolToStringConverter x:Key="sym2string"/>
     <local:OnKeyToStringConverter x:Key="key2string"/>
     <local:OnPositionedSymbolToTextConverter x:Key="possym2text"/>
@@ -27,13 +36,15 @@
     <local:BoolToColorConverter     x:Key="bool2color"
                                     KeyBrush="{StaticResource keyBackground}"
                                     PressedKeyBrush="{StaticResource pressedKeyBackground}"/>
-    
+
     <x:Double x:Key="NoteWidth">90.0</x:Double>
     <x:Double x:Key="CtrlWidth">70.0</x:Double>
     <x:Double x:Key="NoteHeight">60.0</x:Double>
-    <x:Double x:Key="RowHeight">50.0</x:Double>
+    <x:Double x:Key="RowHeight">70.0</x:Double>
     <x:Double x:Key="BeatWidth">45.0</x:Double>
     <x:Double x:Key="PlaceholderWidth">25.0</x:Double>
+    <x:Double x:Key="SymbolWidth">25.0</x:Double>
+    <x:Double x:Key="SymbolHeight">20.0</x:Double>
     
     <Flyout x:Key="TempoFlyout">
         <StackPanel Orientation="Vertical">
@@ -45,6 +56,7 @@
                     Maximum="300"
                     Value="120"/>
             <CheckBox x:Name="metroNeed" Content="Metronome" IsChecked="True"/>
+            <Button x:Name="Ok" Content="Ok"/>
         </StackPanel>
     </Flyout>
 
@@ -273,6 +285,7 @@
 
     <Style TargetType="StackPanel" x:Key="RowPanel">
         <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="Margin" Value="5,10,5,10"/>
         <Setter Property="Height" Value="{StaticResource RowHeight}"/>
     </Style>
 
@@ -280,7 +293,7 @@
         <Border Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}">
-            <Grid>
+            <Grid VerticalAlignment="Center">
                 <Rectangle Fill="{TemplateBinding Background}"/>
                 <TextBlock x:Name="placeholderTextBlock"
                            HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
@@ -295,11 +308,13 @@
     <Style TargetType="ContentControl" x:Key="PlaceholderControlStyle">
         <Setter Property="Template" Value="{StaticResource PlaceholderControlTemplate}"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="BorderBrush" Value="Beige"/>
+        <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Foreground" Value="AntiqueWhite"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Width" Value="{StaticResource BeatWidth}"/>
-        <Setter Property="Height" Value="100"/>
+        <Setter Property="Height" Value="{StaticResource RowHeight}"/>
         <Setter Property="Content" Value="|"/>
         <Setter Property="Tag" Value="phold"/>
     </Style>
@@ -322,12 +337,18 @@
                     </VisualState>
                 </VisualStateGroup>
             </VisualStateManager.VisualStateGroups>
-            <Ellipse x:Name="symbolEllipse" Fill="{TemplateBinding Background}" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+            <Ellipse x:Name="symbolEllipse" 
+                     Fill="{TemplateBinding Background}" 
+                     Width="{TemplateBinding Width}" 
+                     Height="{TemplateBinding Height}"/>
+            <Ellipse x:Name="foregroundEllipse" 
+                     Fill="{TemplateBinding Foreground}" 
+                     Width="{TemplateBinding Width}" 
+                     Height="{TemplateBinding Height}"/>
 
-            </Ellipse>
             <TextBlock x:Name="symbolTextBlock"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Foreground="{TemplateBinding Foreground}">
+                           Foreground="{StaticResource textBrush}">
                     <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"></Run>
             </TextBlock>
         </Grid>
@@ -335,10 +356,10 @@
 
     <Style TargetType="ContentControl" x:Key="SymbolControlStyle">
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
-        <Setter Property="Foreground" Value="DarkBlue"/>
+        <Setter Property="Foreground" Value="Transparent"/>
         <Setter Property="Background" Value="DarkOrange"/>
-        <Setter Property="Width" Value="{StaticResource PlaceholderWidth}"/>
-        <Setter Property="Height" Value="20"/>
+        <Setter Property="Width" Value="{StaticResource SymbolWidth}"/>
+        <Setter Property="Height" Value="{StaticResource SymbolHeight}"/>
         <Setter Property="Padding" Value="10,10,10,10"/>
         <Setter Property="Template" Value="{StaticResource SymbolControlTemplate}"/>
         <!--<Setter Property="Tag" Value="Note"/>-->

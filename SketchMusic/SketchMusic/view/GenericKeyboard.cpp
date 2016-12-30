@@ -234,10 +234,14 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 				break;
 			case SketchMusic::View::KeyType::tempo:
 			{
-				auto flyout = Flyout::FlyoutBase::GetAttachedFlyout(ctrl);
-				flyout->Opened += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnOpened);
-				flyout->Closed += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnClosed);
-				flyout->ShowAt(ctrl);
+				// TODO : переместить их куда-нибудь отсюда
+				if (tempoFlyout == nullptr)
+				{
+					tempoFlyout = Flyout::FlyoutBase::GetAttachedFlyout(ctrl);
+					tempoFlyout->Opened += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnOpened);
+					tempoFlyout->Closed += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnClosed);
+				}
+				tempoFlyout->ShowAt(ctrl);
 				break;
 			}
 			case SketchMusic::View::KeyType::enter:
@@ -350,11 +354,9 @@ void SketchMusic::View::GenericKeyboard::OnPointerExited(Platform::Object ^sende
 
 void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 {
-	Windows::UI::Xaml::Controls::ContentControl^ ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(static_cast<Object^>(sender));
-	//if (ctrl)
-	//{
-	//	ctrl->Background = keyBackground;
-	//}
+	Windows::UI::Xaml::Controls::ContentControl^ ctrl = 
+		dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(static_cast<Object^>(sender));
+
 	
 	pressedKeys--;
 
@@ -363,8 +365,6 @@ void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 		return;
 
 	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
-	//args->key = key;
-	//args->keysPressed = this->pressedKeys;
 
 	KeyReleased(this, args);
 
@@ -381,30 +381,30 @@ void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 
 void SketchMusic::View::GenericKeyboard::OnClosed(Platform::Object ^sender, Platform::Object ^args)
 {
-	// отправляем выбранное значение темпа
 	Flyout^ flyout = dynamic_cast<Flyout^>(sender);
 	if (flyout == nullptr)
 		return;
 	
 	StackPanel^ panel = dynamic_cast<StackPanel^>(flyout->Content);
+	
 	for (auto&& child : panel->Children)
 	{
-		Slider^ slider = dynamic_cast<Slider^>(static_cast<Object^>(child));
-		if (slider)
+		if (tempoPressed)
 		{
-			auto key = ref new SketchMusic::View::Key(KeyType::tempo, slider->Value);
-			auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
-			//args->key = key;
-			//args->keysPressed = this->pressedKeys;
-			KeyPressed(this, args);
+			Slider^ slider = dynamic_cast<Slider^>(static_cast<Object^>(child));
+			if (slider)
+			{
+				auto key = ref new SketchMusic::View::Key(KeyType::tempo, slider->Value);
+				auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
+				KeyPressed(this, args);
+				tempoPressed = false;
+			}
 		}
 		CheckBox^ checkBox = dynamic_cast<CheckBox^>(static_cast<Object^>(child));
 		if (checkBox)
 		{
 			auto key = ref new SketchMusic::View::Key(KeyType::metronome, (int)checkBox->IsChecked->Value);
 			auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
-			//args->key = key;
-			//args->keysPressed = this->pressedKeys;
 			KeyPressed(this, args);
 		}
 	}
@@ -413,5 +413,28 @@ void SketchMusic::View::GenericKeyboard::OnClosed(Platform::Object ^sender, Plat
 
 void SketchMusic::View::GenericKeyboard::OnOpened(Platform::Object ^sender, Platform::Object ^args)
 {
-	
+	Flyout^ flyout = dynamic_cast<Flyout^>(sender);
+	if (flyout == nullptr)
+		return;
+
+	StackPanel^ panel = dynamic_cast<StackPanel^>(flyout->Content);
+	for (auto&& child : panel->Children)
+	{
+		Button^ btn = dynamic_cast<Button^>(static_cast<Object^>(child));
+		if (btn)
+		{
+			btn->Tag = nullptr;
+			btn->Click += ref new Windows::UI::Xaml::RoutedEventHandler(this, &SketchMusic::View::GenericKeyboard::OnClick);
+		}
+	}
+}
+
+
+void SketchMusic::View::GenericKeyboard::OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
+{
+	if (tempoFlyout)
+	{
+		tempoPressed = true;
+		tempoFlyout->Hide();
+	}
 }

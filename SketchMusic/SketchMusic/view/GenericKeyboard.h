@@ -279,6 +279,7 @@ public ref class SketchMusic::View::GenericKeyboard sealed : public Windows::UI:
 {
 private:
 	bool input;
+	bool tempoPressed;
 	//std::vector<SketchMusic::View::Key^> inputBuffer;
 	//int octaveModificator;
 
@@ -298,6 +299,7 @@ private:
 		// вторым параметром отмечаем, что клавиша в данный момент нажата
 
 	concurrency::cancellation_token_source releaseToken;	
+	Windows::UI::Xaml::Controls::Primitives::FlyoutBase^ tempoFlyout;
 
 public:
 	GenericKeyboard();
@@ -319,4 +321,5 @@ public:
 	void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 	void OnClosed(Platform::Object ^sender, Platform::Object ^args);
 	void OnOpened(Platform::Object ^sender, Platform::Object ^args);
+	void OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 };

@@ -17,8 +17,10 @@ private:
 
 	void playMetronome();
 	SketchMusic::Player::PlayerState m_state;
+	float m_bpm;
 public:
 	event EventHandler<SketchMusic::Player::PlayerState>^ StateChanged;
+	event EventHandler<float>^ BpmChanged;
 	
 	property SketchMusic::Player::PlayerState _state
 	{
@@ -33,7 +35,17 @@ public:
 	}
 	
 	property bool cycling;
-	property float _BPM;
+	property float _BPM
+	{
+		float get() { return m_bpm; }
+		void set(float _bpm)
+		{
+			if (m_bpm != _bpm)
+			{
+				m_bpm = _bpm; BpmChanged(this, m_bpm);
+			}
+		}
+	}
 	property bool needMetronome;
 
 	property SketchMusic::Cursor^ _cursor;

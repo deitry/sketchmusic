@@ -26,6 +26,7 @@ void SketchMusic::View::TextRow::OnApplyTemplate()
 	_dict->Source = ref new Uri("ms-appx:///SketchMusic/Themes/Generic.xaml");
 	BeatWidth = (double)(_dict->Lookup("BeatWidth"));
 	PlaceholderWidth = (double)(_dict->Lookup("PlaceholderWidth"));
+	RowHeight = (double)(_dict->Lookup("RowHeight"));
 
 	_mainPanel = (StackPanel^)GetTemplateChild("_mainPanel");
 	_mainPanel->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
@@ -105,7 +106,10 @@ void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Wind
 
 	_dragged = ctrl;
 	_isMoving = true;
-	_dragged->Background = ref new SolidColorBrush(Windows::UI::Colors::Orange);
+	if (_dict->HasKey("draggedForegroundBrush"))
+	{
+		_dragged->Foreground = (Windows::UI::Xaml::Media::Brush^)_dict->Lookup("draggedForegroundBrush");
+	}
 	_canvas->CapturePointer(e->Pointer);
 }
 
@@ -139,7 +143,7 @@ void SketchMusic::View::TextRow::OnPointerMoved(Platform::Object ^sender, Window
 		Point point = GetCoordinatsOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
 		_snapPoint->Visibility = Windows::UI::Xaml::Visibility::Visible;
 		Canvas::SetLeft(_snapPoint, point.X);
-		Canvas::SetTop(_snapPoint, point.Y + 10);
+		Canvas::SetTop(_snapPoint, point.Y - 10);
 	}
 
 	// - связываем выделенный элемент с курсором
@@ -160,14 +164,11 @@ void SketchMusic::View::TextRow::OnPointerReleased(Platform::Object ^sender, Win
 	if (_currentSnapPoint != nullptr)
 	{
 		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(_dragged->Content);
-		INote^ inote = dynamic_cast<INote^>(psym->_sym);
+		//INote^ inote = dynamic_cast<INote^>(psym->_sym);
 		// привязываем к ближайшей точке привязки
 		auto point = GetCoordinatsOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
 		_canvas->SetLeft(_dragged, point.X - PlaceholderWidth/2);
-		int offsetY = -((inote->_val) % 12);
-		if (offsetY > 6) offsetY -= 12;
-		if (offsetY < -6) offsetY += 12;
-		offsetY *= 5;
+		double offsetY = GetOffsetY(psym->_sym);
 		_canvas->SetTop(_dragged, point.Y + offsetY);
 
 		// перемещаем символ "фактически"
@@ -190,7 +191,8 @@ void SketchMusic::View::TextRow::OnPointerReleased(Platform::Object ^sender, Win
 	}
 
 	_isMoving = false;
-	SetBackgroundColor(_dragged);
+	_dragged->Foreground = nullptr;
+	//SetBackgroundColor(_dragged);
 	_dragged = nullptr;
 	_scrollViewer->HorizontalScrollMode = ScrollMode::Enabled;
 

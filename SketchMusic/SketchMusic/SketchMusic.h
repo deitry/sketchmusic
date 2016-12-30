@@ -101,8 +101,8 @@ namespace SketchMusic
 		SCALE,		// текущая гамма
 		NLINE,		// новая строка - для визуального отображения
 		SPACE,		// "пробел" - для визуального отображения
-		//npart,		// новый раздел - для отделения частей одна от другой
-		//tempo,		// задание темпа
+		NPART,		// новый раздел - для отделения частей одна от другой
+		TEMPO,		// задание темпа
 		STRING		// для вставки строки
 	};
 
@@ -239,6 +239,30 @@ namespace SketchMusic
 		virtual SymbolType GetSymType() { return SymbolType::SPACE; }
 		virtual Platform::String^ ToString() { return "Space"; }
 		//virtual Platform::String^ Serialize() { return "space"; }
+	};
+
+	public ref class SNewPart sealed : public SketchMusic::ISymbol
+	{
+	public:
+		SNewPart() {}
+		SNewPart(String^ _name) { name = _name; }
+
+		property String^ name;
+
+		virtual SymbolType GetSymType() { return SymbolType::NPART; }
+		virtual Platform::String^ ToString() { return name; }
+	};
+
+	public ref class STempo sealed : public SketchMusic::ISymbol
+	{
+	public:
+		STempo() {}
+		STempo(float t) { value = t; }
+
+		property float value;
+
+		virtual SymbolType GetSymType() { return SymbolType::TEMPO; }
+		virtual Platform::String^ ToString() { return value.ToString(); }
 	};
 
 	public ref class SRNote sealed : public ISymbol, public SketchMusic::INote
@@ -788,7 +812,7 @@ namespace SketchMusic
 		ref class BlackKeyToColorConverter;
 		ref class KeyStateToColorConverter;
 		ref class OnPositionedSymbolToTextConverter;
-
+		
 		// контейнеры
 		ref class MultiRowStackPanel;
 

@@ -81,6 +81,9 @@
                 <TextBlock x:Name="CurPos">
                         Здесь будет отображаться текущая позиция курсора.
                 </TextBlock>
+                <TextBlock x:Name="BPMText">
+                        Здесь будет отображаться текущее значение текста.
+                </TextBlock>
                 <!--<TextBlock x:Name="RealPos">
                         Здесь будет отображаться текущая позиция курсора.
                 </TextBlock>

@@ -17,6 +17,9 @@ public ref class SketchMusic::View::TextRow sealed : public Windows::UI::Xaml::C
 private:
 	double BeatWidth;
 	double PlaceholderWidth;
+	double RowHeight;
+	double SymbolHeight;
+
 
 	Windows::Foundation::Collections::IVector<Text^>^ _texts;	// список нужен для отображения нескольких дорожек 
 
@@ -66,6 +69,9 @@ internal:
 	void InsertLineBreak(Cursor^ pos);
 	void DeleteLineBreak(Cursor^ pos);
 	void SetBackgroundColor(ContentControl^ ctrl);
+
+	double GetOffsetY(ISymbol^ sym);
+	void SetNoteOnCanvas(ContentControl^ note);
 
 public:
 	property Cursor^ currentPosition;
@@ -127,10 +133,21 @@ public:
 		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
 		if (psym == nullptr) return "";
 
-		SketchMusic::INote^ note = dynamic_cast<SketchMusic::INote^>(psym->_sym);
-		if (note == nullptr) return "";
+		Platform::String^ str = "";
+	
+		SketchMusic::STempo^ tempo = dynamic_cast<SketchMusic::STempo^>(psym->_sym);
+		if (tempo)
+		{
+			str = "" + tempo->value;
+		}
 
-		return "" + note->_val;
+		SketchMusic::INote^ note = dynamic_cast<SketchMusic::INote^>(psym->_sym);
+		if (note)
+		{
+			str = "" + note->_val;
+		}
+
+		return str;
 	}
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
 	{

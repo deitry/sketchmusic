@@ -52,6 +52,7 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		}
 	}
 
+	//_idea->Content->addSymbol(ref new Cursor, ref new STempo(120.));
 	_texts->Append(_idea->GetContent());
 
 	//ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
@@ -97,6 +98,8 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 	playerStateChangeToken=
 		((App^)App::Current)->_player->StateChanged += 
 		ref new Windows::Foundation::EventHandler<SketchMusic::Player::PlayerState>(this, &StrokeEditor::MelodyEditorPage::OnStateChanged);
+	bpmChangeToken = 
+		((App^)App::Current)->_player->BpmChanged += ref new Windows::Foundation::EventHandler<float>(this, &StrokeEditor::MelodyEditorPage::OnBpmChanged);
 }
 
 
@@ -189,6 +192,24 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			}
 			break;
 		}
+		case SketchMusic::View::KeyType::tempo:
+		{
+			SketchMusic::ISymbol^ sym = ref new SketchMusic::STempo(args->key->value);
+
+			// надо добавлять сразу аккордами
+			if (recording)
+			{
+				// создаём команду на добавление ноты в текст и сохраняем её в истории
+				((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
+					ref new SMC::Command(addSym, nullptr, nullptr),
+					ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
+						ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
+				((App^)App::Current)->_manager->ExecuteLast();
+				this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+					+ " / tick = " + _textRow->currentPosition->getTick();
+			}
+			break;
+		}
 		case SketchMusic::View::KeyType::enter:
 			// создаём команду на добавление ноты в текст и сохраняем её в истории
 			((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
@@ -240,9 +261,6 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		case SketchMusic::View::KeyType::cycling:
 			((App^)App::Current)->_player->cycling = args->key->value;
 			break;
-		case SketchMusic::View::KeyType::tempo:
-			((App^)App::Current)->_player->_BPM = args->key->value;
-			break;
 		case SketchMusic::View::KeyType::zoom:
 			_textRow->SetScale(args->key->value * 2);
 			break;
@@ -284,5 +302,15 @@ void StrokeEditor::MelodyEditorPage::OnStateChanged(Platform::Object ^sender, Sk
 			this->_keyboard->OnKeyboardStateChanged(this, ref new SketchMusic::View::KeyboardState(SketchMusic::View::KeyboardStateEnum::stop));
 			break;
 		}
+	}));
+}
+
+
+void StrokeEditor::MelodyEditorPage::OnBpmChanged(Platform::Object ^sender, float args)
+{
+	this->Dispatcher->RunAsync(
+		Windows::UI::Core::CoreDispatcherPriority::Normal,
+		ref new Windows::UI::Core::DispatchedHandler([=]() {
+		this->BPMText->Text = "" + ((App^)App::Current)->_player->_BPM;
 	}));
 }

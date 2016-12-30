@@ -42,11 +42,6 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			{
 			case SymbolType::NOTE:
 			{
-				//jval = obj->GetNamedValue("v");
-				//if (jval)
-				//{
-				//	val = static_cast<int>(jval->GetNumber());
-				//}
 				val = obj->GetNamedNumber(t::NOTE_VALUE);
 				vel = obj->GetNamedNumber(t::NOTE_VELOCITY,0);
 				voi = obj->GetNamedNumber(t::NOTE_VOICE,0);
@@ -65,6 +60,16 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 				vel = obj->GetNamedNumber(t::NOTE_VELOCITY,0);
 				voi = obj->GetNamedNumber(t::NOTE_VOICE,0);
 				return ref new SGNote(val);
+			}
+			case SymbolType::NPART:
+			{
+				auto str = obj->GetNamedString(t::NOTE_VELOCITY, "");
+				return ref new SNewPart(str);
+			}
+			case SymbolType::TEMPO:
+			{
+				vel = obj->GetNamedNumber(t::NOTE_VELOCITY, 120.);
+				return ref new STempo(vel);
 			}
 			case SymbolType::END:
 			{

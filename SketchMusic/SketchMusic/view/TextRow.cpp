@@ -290,22 +290,9 @@ void SketchMusic::View::TextRow::RedrawText()
 {
 	// перерисовываем ноты
 	// чтобы не создавать новые объекты
-	
 	for (auto note : notes)
 	{
-		PositionedSymbol^ psym = dynamic_cast<PositionedSymbol^>(note->Content);
-
-		auto point = GetCoordinatsOfPosition(psym->_pos);
-		//double offsetX = psym->_pos->getTick() * scale % 32 * BeatWidth /32;
-		// TODO : смещать ноты по вертикали
-		// согласно высоте? или исходя из общего количества нот в данной точке?
-		_canvas->SetLeft(note, point.X - PlaceholderWidth / 2); // + offsetX
-		INote^ inote = dynamic_cast<INote^>(psym->_sym);
-		int offsetY = -((inote->_val) % 12);
-		if (offsetY > 6) offsetY -= 12;
-		if (offsetY < -6) offsetY += 12;
-		offsetY *= 5;
-		_canvas->SetTop(note, point.Y + offsetY);
+		SetNoteOnCanvas(note);
 	}
 
 	// перерисовываем положение курсора
@@ -359,20 +346,7 @@ void SketchMusic::View::TextRow::AddSymbol(PositionedSymbol^ sym)
 	_canvas->Children->Append(bt);
 	notes.push_back(bt);
 
-	//auto point = GetCoordinatsOfPosition(currentPosition); // WTF?
-	auto point = GetCoordinatsOfPosition(sym->_pos); // WTF?
-	_canvas->SetLeft(bt, point.X - PlaceholderWidth / 2); // + sym->_pos->getTick()* initialised / 32/ BeatWidth
-	INote^ inote = dynamic_cast<INote^>(sym->_sym);
-	int offsetY = 0;
-	if (inote)
-	{
-		offsetY = -((inote->_val) % 12);
-	}
-	if (offsetY > 6) offsetY -= 12;
-	if (offsetY < -6) offsetY += 12;
-	offsetY *= 5;
-	_canvas->SetTop(bt, point.Y + offsetY);
-	
+	SetNoteOnCanvas(bt);
 }
 
 // скрыть ненужные точки привязки
@@ -539,23 +513,86 @@ Point SketchMusic::View::TextRow::GetCoordinatsOfControl(Windows::UI::Xaml::Cont
 
 void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 {
-	unsigned int ndx;
-	if (_texts->IndexOf(current, &ndx))
+	auto psym = reinterpret_cast<SketchMusic::PositionedSymbol^>(ctrl->Content);
+	switch (psym->_sym->GetSymType())
 	{
-		switch (ndx)
+	case SketchMusic::SymbolType::NOTE:
+	case SketchMusic::SymbolType::RNOTE:
+	case SketchMusic::SymbolType::GNOTE:
+		// не хочется делать проверки на каждый noteBackground. Считаем, что если один нашёлся, то и остальные будут
+		if (_dict->HasKey("noteBackground"))
 		{
-		case 0:
-			ctrl->Background = ref new SolidColorBrush(Windows::UI::Colors::DarkOrange);
-			break;
-		case 1:
-			ctrl->Background = ref new SolidColorBrush(Windows::UI::Colors::Blue);
-			break;
-		case 2:
-			ctrl->Background = ref new SolidColorBrush(Windows::UI::Colors::Green);
-			break;
-		case 3:
-			ctrl->Background = ref new SolidColorBrush(Windows::UI::Colors::Yellow);
-			break;
+			unsigned int ndx;
+			if (_texts->IndexOf(current, &ndx))
+			{
+				Windows::UI::Xaml::Media::Brush^ brush;
+				switch (ndx)
+				{
+				case 0:
+					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground"));
+					ctrl->Background = brush;
+					break;
+				case 1:
+					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground2"));
+					ctrl->Background = brush;
+					break;
+				case 2:
+					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground3"));
+					ctrl->Background = brush;
+					break;
+				case 3:
+					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground4"));
+					ctrl->Background = brush;
+					break;
+				}
+			}
+		}
+		break;
+	case SketchMusic::SymbolType::TEMPO:
+		if (_dict->HasKey("tempoBackground"))
+		{
+			auto brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("tempoBackground"));
+			ctrl->Background = brush;
+		}
+		break;
+	}
+
+	
+}
+
+double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
+{
+	double offsetY = 0;
+	// если обрабатываемый символ - нота
+	INote^ inote = dynamic_cast<INote^>(sym);
+	if (inote)
+	{
+		// TODO : сделать расчёт похитрее, чтобы выглядело как на нотном стане
+		// В том числе разрещить вылезать за пределы, увеличивая тем самым высоту строки
+		// (чтобы строки не налезали друг на друга)
+		offsetY = -abs(((inote->_val) % 12));
+		offsetY *= RowHeight / 12;
+		offsetY += RowHeight - 5;
+		//if (offsetY > 6) offsetY -= 12;
+		//if (offsetY < -6) offsetY += 12;
+		
+	} else {
+		STempo^ tempo = dynamic_cast<STempo^>(sym);
+		if (tempo)
+		{
+			offsetY = -0.6*RowHeight;
 		}
 	}
+	return offsetY;
+}
+
+void SketchMusic::View::TextRow::SetNoteOnCanvas(ContentControl ^ note)
+{
+	PositionedSymbol^ psym = dynamic_cast<PositionedSymbol^>(note->Content);
+	if (psym == nullptr) return;
+
+	auto point = GetCoordinatsOfPosition(psym->_pos);
+	_canvas->SetLeft(note, point.X - PlaceholderWidth / 2);
+	double offsetY = GetOffsetY(psym->_sym);
+	_canvas->SetTop(note, point.Y + offsetY);
 }

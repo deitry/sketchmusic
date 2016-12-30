@@ -119,10 +119,16 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 			// TODO : отдельно стоит отслеживать ближайший к старту (ПЕРЕД стартом)
 			// символ начала строки - там будет храниться информация о темпе, гамме и т.д.
 			auto iter = symbols->First();
+			_BPM = 120;
 			while (iter->HasCurrent)
 			{
 				if (iter->Current->_pos->LT(cursor))
 				{
+					auto tempo = dynamic_cast<STempo^>(iter->Current->_sym);
+					if (tempo)
+					{
+						_BPM = tempo->value;
+					}
 					iter->MoveNext();
 				}
 				else
@@ -168,6 +174,14 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 							if (note)
 							{
 								notes->Append(note);
+							}
+							else // чтобы не опрашивать лишний раз. Ноты попадаются намного чаще, чем всякие системные символы
+							{
+								auto tempo = dynamic_cast<SketchMusic::STempo^>(pIter->Current->_sym);
+								if (tempo)
+								{
+									_BPM = tempo->value;
+								}
 							}
 							pIter->MoveNext();
 						} while (pIter->HasCurrent && pIter->Current->_pos->LE(cursor));

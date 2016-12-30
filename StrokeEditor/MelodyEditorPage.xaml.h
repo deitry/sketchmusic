@@ -36,6 +36,7 @@ namespace StrokeEditor
 		
 	private:
 		Windows::Foundation::EventRegistrationToken playerStateChangeToken;
+		Windows::Foundation::EventRegistrationToken bpmChangeToken;
 
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		//void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
@@ -64,5 +65,6 @@ namespace StrokeEditor
 
 		SketchMusic::Idea^ _idea;
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
+		void OnBpmChanged(Platform::Object ^sender, float args);
 	};
 }
