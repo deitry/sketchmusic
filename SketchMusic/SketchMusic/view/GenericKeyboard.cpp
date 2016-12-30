@@ -24,7 +24,7 @@ using namespace Windows::UI::Xaml::Media;
 GenericKeyboard::GenericKeyboard()
 {
 	DefaultStyleKey = "SketchMusic.View.GenericKeyboard";
-	recording = false;
+	//recording = false;
 	currentState = ref new KeyboardState(KeyboardStateEnum::normal);
 
 	// TODO ? переделать на КвадКейборд?
@@ -42,7 +42,7 @@ inline void UpdateParent(SketchMusic::View::Key^ key)
 	ctrl->Content = key;
 }
 
-inline void OnKeyboardPressed(SketchMusic::View::Key^ key)
+void GenericKeyboard::OnKeyboardPressed(SketchMusic::View::Key^ key)
 {
 	switch (key->type)
 	{
@@ -55,9 +55,27 @@ inline void OnKeyboardPressed(SketchMusic::View::Key^ key)
 			// использовать конвертер тип состояния -> стиль кнопки
 			auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
 			ctrl->IsEnabled = false;
-			ctrl->Background = ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Gray);
 			break;
 		}
+	}
+}
+
+void SketchMusic::View::GenericKeyboard::OnControlPressed(SketchMusic::View::Key ^ key)
+{
+	switch (key->type)
+	{
+	case KeyType::control:
+		key->value = !key->value;
+		UpdateParent(key);
+		break;
+	case KeyType::octave:
+		key->type = KeyType::zoom;
+		UpdateParent(key);
+		break;
+	case KeyType::zoom:
+		key->type = KeyType::octave;
+		UpdateParent(key);
+		break;
 	}
 }
 
@@ -91,7 +109,7 @@ inline void OnOctaveDec(SketchMusic::View::Key^ key)
 	}
 }
 
-inline void OnNormalState(SketchMusic::View::Key^ key)
+void GenericKeyboard::OnNormalState(SketchMusic::View::Key^ key)
 {
 	switch (key->type)
 	{
@@ -104,7 +122,6 @@ inline void OnNormalState(SketchMusic::View::Key^ key)
 			// использовать конвертер тип состояния -> стиль кнопки
 			auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
 			ctrl->IsEnabled = true;
-			ctrl->Background = ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::DarkOrange);
 			break;
 		}
 	}
@@ -118,6 +135,9 @@ void SketchMusic::View::GenericKeyboard::OnKeyboardStateChanged(Object^ object, 
 		auto key = pkey.first;
 		switch (state->state)
 		{
+		case SketchMusic::View::KeyboardStateEnum::control:
+			OnControlPressed(key);
+			break;
 		case SketchMusic::View::KeyboardStateEnum::pressed:
 			OnKeyboardPressed(key);
 			break;
@@ -144,20 +164,13 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 	ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
 	if (ctrl)
 	{
-		ctrl->Background = ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::AntiqueWhite);
-		// по тегу мы должны понять, что теперь делать
-		// цифры - нота
-		// del - удалить ноту
-		// ...
-		// может быть вообще что угодно, поэтому нужно сделать подобие key со значением клавиши
-		// и передавать её 
 		SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(ctrl->Content);
 
-		auto send = ref new SketchMusic::View::Key(key->type, key->value);
-		KeyboardEventArgs^ args = ref new KeyboardEventArgs;
-		args->key = send;
-		args->keysPressed = this->pressedKeys;
-
+		//auto send = ref new SketchMusic::View::Key(key->type, key->value);
+		KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
+		//args->key = send;
+		//args->keysPressed = this->pressedKeys;
+		
 		if (key)
 		{
 			switch (key->type)
@@ -165,7 +178,6 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 			case SketchMusic::View::KeyType::note:
 			case SketchMusic::View::KeyType::genericNote:
 			case SketchMusic::View::KeyType::relativeNote:
-				args->key->value += octaveModificator * 12;
 				KeyPressed(this, args);
 				if (pressedKeys == 1)
 				{
@@ -174,46 +186,29 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 				}
 				break;
 			case SketchMusic::View::KeyType::octave:
-				//this->octaveModificator += key->value;
-				if (!control)
-				{
-					// в обычном режиме меняем октавы
-					this->currentState->state = (key->value > 0)
-						? KeyboardStateEnum::octaveInc
-						: KeyboardStateEnum::octaveDec;
-					KeyboardStateChanged(this, currentState);
-				}
-				else
-				{
-					// если нажат контрол - зуммируем
-					args->key->type = SketchMusic::View::KeyType::zoom;
-					KeyPressed(this, args);
-				}
+				this->currentState->state = (key->value > 0)
+					? KeyboardStateEnum::octaveInc
+					: KeyboardStateEnum::octaveDec;
+				KeyboardStateChanged(this, currentState);
+				break;
+			case SketchMusic::View::KeyType::zoom:
+				KeyPressed(this, args);
 				break;
 			case SketchMusic::View::KeyType::record:
-				recording = !recording;
-				ctrl->Foreground = recording 
-					? ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Red)
-					: ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::White);
-				args->key->value = recording ? 1 : 0;
+				key->value = !key->value;
+				UpdateParent(key);
+
 				KeyPressed(this, args);
 				break;
 			case SketchMusic::View::KeyType::control:
-				// TODO : менять состояние на ctrl
-				// уведомлять об этом кнопки? чтобы они меняли своё состояние
-				control = !control;
-				ctrl->Foreground = control
-					? ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Blue)
-					: ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::White);
-				args->key->value = control ? 1 : 0;
-				KeyPressed(this, args);
+				this->currentState->state = KeyboardStateEnum::control;	// TODO : выглядит очень плохо.
+					// Надо будет понять, что вообще имеется в виду под state
+				KeyboardStateChanged(this, currentState);
 				break;
 			case SketchMusic::View::KeyType::cycling:
-				cycling = !cycling;
-				ctrl->Foreground = cycling
-					? ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Blue)
-					: ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::White);
-				args->key->value = cycling ? 1 : 0;
+				key->value = !key->value;
+				UpdateParent(key);
+
 				KeyPressed(this, args);
 				break;
 			case SketchMusic::View::KeyType::tempo:
@@ -335,10 +330,10 @@ void SketchMusic::View::GenericKeyboard::OnPointerExited(Platform::Object ^sende
 void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 {
 	Windows::UI::Xaml::Controls::ContentControl^ ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(static_cast<Object^>(sender));
-	if (ctrl)
-	{
-		ctrl->Background = ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::DarkOrange);
-	}
+	//if (ctrl)
+	//{
+	//	ctrl->Background = keyBackground;
+	//}
 	
 	pressedKeys--;
 
@@ -346,9 +341,9 @@ void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 	if (key == nullptr)
 		return;
 
-	KeyboardEventArgs^ args = ref new KeyboardEventArgs;
-	args->key = key;
-	args->keysPressed = this->pressedKeys;
+	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
+	//args->key = key;
+	//args->keysPressed = this->pressedKeys;
 
 	KeyReleased(this, args);
 
@@ -377,18 +372,18 @@ void SketchMusic::View::GenericKeyboard::OnClosed(Platform::Object ^sender, Plat
 		if (slider)
 		{
 			auto key = ref new SketchMusic::View::Key(KeyType::tempo, slider->Value);
-			auto args = ref new KeyboardEventArgs;
-			args->key = key;
-			args->keysPressed = this->pressedKeys;
+			auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
+			//args->key = key;
+			//args->keysPressed = this->pressedKeys;
 			KeyPressed(this, args);
 		}
 		CheckBox^ checkBox = dynamic_cast<CheckBox^>(static_cast<Object^>(child));
 		if (checkBox)
 		{
 			auto key = ref new SketchMusic::View::Key(KeyType::metronome, (int)checkBox->IsChecked->Value);
-			auto args = ref new KeyboardEventArgs;
-			args->key = key;
-			args->keysPressed = this->pressedKeys;
+			auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
+			//args->key = key;
+			//args->keysPressed = this->pressedKeys;
 			KeyPressed(this, args);
 		}
 	}

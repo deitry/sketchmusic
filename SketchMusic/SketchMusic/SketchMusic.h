@@ -748,9 +748,22 @@ namespace SketchMusic
 		
 		public ref class KeyboardEventArgs sealed
 		{
+		private:
+			SketchMusic::View::Key^ m_key;
+
 		public:
-			property SketchMusic::View::Key^ key;
+			property SketchMusic::View::Key^ key
+			{
+				SketchMusic::View::Key^ get() {
+					return m_key;
+				}
+			}
 			property int keysPressed;
+
+			KeyboardEventArgs(SketchMusic::View::Key^ _key, int _keysPressed) : m_key(_key)
+			{
+				keysPressed = _keysPressed;
+			}
 		};
 
 		// не уверен, стоит ли выделять отдельный класс, но где-то это должно быть
@@ -769,7 +782,9 @@ namespace SketchMusic
 		// конвертеры значений
 		ref class OnSymbolToStringConverter;
 		ref class OnKeyToStringConverter;
-		ref class OnKeyToColorConverter;
+		ref class BoolToColorConverter;
+		ref class BlackKeyToColorConverter;
+		ref class KeyStateToColorConverter;
 		ref class OnPositionedSymbolToTextConverter;
 
 		// контейнеры
@@ -782,9 +797,6 @@ namespace SketchMusic
 		// ref class ContinuumKeyboard;
 
 		ref class TextRow;		// единичная строка для отображения текста
-		//ref class TextMultiRow;	// множество строк для отображения текста
-			// отдельный класс нужен, чтобы удобно работать с текстом, разбивая на отдельные строки
-			// и собирая обратно для проигрывания
 	}
 
 	/**

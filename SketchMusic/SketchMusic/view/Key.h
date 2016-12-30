@@ -7,37 +7,11 @@ using namespace SketchMusic::View;
 
 public ref class SketchMusic::View::Key sealed
 {
-protected:
-	void UpdateState(KeyboardState^ keyboard)
-	{
-		switch (keyboard->state)
-		{
-		case KeyboardStateEnum::octaveInc:
-			switch (this->type)
-			{
-			case KeyType::note:
-			case KeyType::relativeNote:
-				this->value += 12;
-				break;
-			}
-
-			break;
-		case KeyboardStateEnum::octaveDec:
-			switch (this->type)
-			{
-			case KeyType::note:
-			case KeyType::relativeNote:
-				this->value -= 12;
-				break;
-			}
-			break;
-		}
-	}
 public:
 	property KeyType type;
 	property int value;
-	property int shift;	// ранее известно как striked - аналог повышения регистра при нажатии шифта
-	property Object^ parent;
+	property int shift;	// аналог повышения регистра при нажатии шифта
+	property Object^ parent;	// ? ссылка на ctrl, который визуально представляет кнопку
 
 	Key(int keyNum)
 	{

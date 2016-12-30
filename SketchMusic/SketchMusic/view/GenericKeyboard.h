@@ -85,6 +85,16 @@ public:
 				result += L"\ue108";
 			}
 			break;
+		case KeyType::zoom:
+			if (key->value >= 0)
+			{
+				result += L"\ue8a3";
+			}
+			else
+			{
+				result += L"\ue71f";
+			}
+			break;
 		case KeyType::space:
 			result += L"\u2423";
 			break;
@@ -154,9 +164,36 @@ public:
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::OnKeyToColorConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+public ref class SketchMusic::View::BoolToColorConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 {
 public:
+	property Windows::UI::Xaml::Media::Brush^ KeyBrush;
+	property Windows::UI::Xaml::Media::Brush^ PressedKeyBrush;
+
+	// на основе клавиши выдаёт её графическое отображение
+	// TODO : для всякого рода перемещений, стрелочек и так далее сделать красиво
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	{
+		bool isEnabled = (bool)value;
+		Windows::UI::Xaml::Media::Brush^ brush = isEnabled ? KeyBrush : PressedKeyBrush;
+
+		return brush;
+	}
+
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	{
+		return nullptr;
+	}
+
+	BoolToColorConverter() {}
+};
+
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+public ref class SketchMusic::View::BlackKeyToColorConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+{
+public:
+	property Windows::UI::Xaml::Media::Brush^ BlackKeyBrush;
+
 	// на основе клавиши выдаёт её графическое отображение
 	// TODO : для всякого рода перемещений, стрелочек и так далее сделать красиво
 	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
@@ -180,23 +217,58 @@ public:
 		{
 		case 1: case 4: case 6: case 9: case 11:
 		case -1: case -3: case -6: case -8: case -11:
-			brush = ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::DarkRed);
+			brush = BlackKeyBrush;
 			break;
 		default:
-			brush = ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::DarkOrange);
 			break;
 		}
 
 		return brush;
 	}
 
-	// обращаю внимание, что при данном подходе не получится сделать convert и convertBack и получить тот же результат
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
 	{
 		return nullptr;
 	}
 
-	OnKeyToColorConverter() {}
+	BlackKeyToColorConverter() {}
+};
+
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+public ref class SketchMusic::View::KeyStateToColorConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+{
+public:
+	property Windows::UI::Xaml::Media::Brush^ KeyBrush;
+	property Windows::UI::Xaml::Media::Brush^ PressedKeyBrush;
+
+	// на основе клавиши выдаёт её графическое отображение
+	// TODO : для всякого рода перемещений, стрелочек и так далее сделать красиво
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	{
+		SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(value);
+		if (key == nullptr) return nullptr;
+		auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
+		if (ctrl == nullptr) return nullptr;
+
+		Windows::UI::Xaml::Media::Brush^ brush = nullptr;
+
+		if (key->value)
+		{
+			brush = KeyBrush;
+		} 
+		else
+		{
+			brush = PressedKeyBrush;
+		}
+		return brush;
+	}
+
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	{
+		return nullptr;
+	}
+
+	KeyStateToColorConverter() {}
 };
 
 /**
@@ -208,10 +280,13 @@ public ref class SketchMusic::View::GenericKeyboard sealed : public Windows::UI:
 private:
 	bool input;
 	//std::vector<SketchMusic::View::Key^> inputBuffer;
-	int octaveModificator;
+	//int octaveModificator;
 
 	void PushKey(Object^ object);
 	void ReleaseKey(Object^ object);
+	void OnKeyboardPressed(SketchMusic::View::Key^ key);
+	void OnControlPressed(SketchMusic::View::Key^ key);
+	void OnNormalState(SketchMusic::View::Key^ key);
 
 	SketchMusic::View::KeyboardState^ currentState;	// состояние клавиатуры. Изменяется при нажатии всяких контрол, шифт и так далее
 
@@ -223,6 +298,16 @@ private:
 
 	concurrency::cancellation_token_source releaseToken;
 
+	// цвета
+	//property Windows::UI::Xaml::Media::SolidColorBrush^ keyBackground;
+	//property Windows::UI::Xaml::Media::SolidColorBrush^ blackKeyBackground;
+	//property Windows::UI::Xaml::Media::SolidColorBrush^ foreground;
+	//property Windows::UI::Xaml::Media::SolidColorBrush^ pressedKeyBackground;
+	//property Windows::UI::Xaml::Media::SolidColorBrush^ disabledKeyBackground;
+	//property Windows::UI::Xaml::Media::SolidColorBrush^ ctrlKeyForeground;
+	//property Windows::UI::Xaml::Media::SolidColorBrush^ actionKeyForeground;
+	//property Windows::UI::Xaml::Media::SolidColorBrush^ disabledCtrlKeyForeground;
+
 protected:
 	void OnKeyboardStateChanged(Object^ object, SketchMusic::View::KeyboardState ^ state);
 
@@ -230,10 +315,10 @@ protected:
 public:
 	GenericKeyboard();
 
-	property bool recording;
-	property bool cycling;
-	property bool metronome;
-	property bool control;
+	//property bool recording;
+	//property bool cycling;
+	//property bool metronome;
+	//property bool control;
 
 	virtual event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyPressed;	// нажатие на одну клавишу
 	virtual event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyReleased;	// отпускание одной клавиши

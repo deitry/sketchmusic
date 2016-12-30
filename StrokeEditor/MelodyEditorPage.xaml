@@ -11,7 +11,13 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <sm:InstrumentToTextConverter x:Key="instr2text"/>
+        <ResourceDictionary>
+            <sm:InstrumentToTextConverter x:Key="instr2text"/>
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../SketchMusic/Themes/Generic.xml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Page.Resources>
 
     <StackPanel x:Name="grid" 
@@ -67,6 +73,7 @@
                                  Width="auto"
                                  VerticalAlignment="Bottom"
                                  HorizontalAlignment="Left"
+                                 Style="{StaticResource GenericKeyboardStyle}"
                                          />
             
             <StackPanel Orientation="Vertical"
@@ -74,12 +81,12 @@
                 <TextBlock x:Name="CurPos">
                         Здесь будет отображаться текущая позиция курсора.
                 </TextBlock>
-                <TextBlock x:Name="RealPos">
+                <!--<TextBlock x:Name="RealPos">
                         Здесь будет отображаться текущая позиция курсора.
                 </TextBlock>
                 <TextBlock x:Name="Version">
                         Версия 2016.12.16-17.
-                </TextBlock>
+                </TextBlock>-->
             </StackPanel>
         </StackPanel>
     </StackPanel>
