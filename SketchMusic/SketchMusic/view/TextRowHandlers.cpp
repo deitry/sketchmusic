@@ -46,7 +46,7 @@ void SketchMusic::View::TextRow::OnApplyTemplate()
 
 	_scrollViewer = (ScrollViewer^)GetTemplateChild("_scrollViewer");
 
-	if (this->_texts->Size > 0)
+	if (this->data->texts->Size > 0)
 	{
 		AllocateSnapPoints(this->GetText(), 1);
 	}

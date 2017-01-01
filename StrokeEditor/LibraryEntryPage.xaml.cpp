@@ -58,7 +58,7 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	creationTB->IsReadOnly = true;
 	//ratingTB->IsReadOnly = _isRead;
 	descrTB->IsReadOnly = _isRead;
-	serContTB->IsReadOnly = true;	//this->Resources->Insert("_isRead", Platform::Boolean(args->isRead));
+	serContTB->IsReadOnly = false; // TODO : заглушка, чтобы можно было вручную изменять текст, а в частности инструменты
 	tagsTB->IsReadOnly = _isRead;
 	//_isRead = args->isRead;
 	//this->UpdateLayout();

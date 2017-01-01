@@ -29,10 +29,10 @@
                                     BlackKeyBrush="{StaticResource blackKeyBackground}"/>
     <local:KeyStateToColorConverter x:Key="ctrlKeyState2color"
                                     KeyBrush="{StaticResource ctrlKeyForeground}"
-                                    PressedKeyBrush="{StaticResource keyForeground}"/>
+                                    PressedKeyBrush="{StaticResource SystemControlBackgroundBaseHighBrush}"/>
     <local:KeyStateToColorConverter x:Key="actionKeyState2color"
                                     KeyBrush="{StaticResource actionKeyForeground}"
-                                    PressedKeyBrush="{StaticResource keyForeground}"/>
+                                    PressedKeyBrush="{StaticResource SystemControlBackgroundBaseHighBrush}"/>
     <local:BoolToColorConverter     x:Key="bool2color"
                                     KeyBrush="{StaticResource keyBackground}"
                                     PressedKeyBrush="{StaticResource pressedKeyBackground}"/>
@@ -348,7 +348,7 @@
 
             <TextBlock x:Name="symbolTextBlock"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Foreground="{StaticResource textBrush}">
+                           Foreground="{StaticResource SystemControlBackgroundBaseHighBrush}">
                     <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"></Run>
             </TextBlock>
         </Grid>

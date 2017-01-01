@@ -52,7 +52,7 @@ public:
 
 	Player();
 	
-	void playText(Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ text, SketchMusic::Cursor^ start);
+	void playText(SketchMusic::CompositionData^ text, SketchMusic::Cursor^ start);
 	void playSingleNote(SketchMusic::INote^ note, SketchMusic::Instrument^ instrument, int duration, SketchMusic::Player::NoteOff^ stop); // для проигрывания ноты с клавиатуры
 
 	void stop();

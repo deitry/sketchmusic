@@ -188,9 +188,6 @@
     <None Include="resources\acoustic_guitar.sf2">
       <Filter>Resources</Filter>
     </None>
-    <None Include="resources\Bass_Drum_Hard1.sf2">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="resources\Ensemble_Pad.sf2">
       <Filter>Resources</Filter>
     </None>
@@ -200,19 +197,43 @@
     <None Include="resources\Jazz_GM.sf2">
       <Filter>Resources</Filter>
     </None>
-    <None Include="resources\Rock_Screams.sf2">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="resources\Sax_full_range.sf2">
       <Filter>Resources</Filter>
     </None>
     <None Include="resources\Solo_Viola.sf2">
       <Filter>Resources</Filter>
     </None>
-    <None Include="resources\Warwick_Headless_Slap.sf2">
+    <None Include="resources\grand_piano.sf2">
       <Filter>Resources</Filter>
     </None>
-    <None Include="resources\grand_piano.sf2">
+    <None Include="resources\drum_kit_01.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\DubKit.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Guitar Distortion.SF2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\HammondC3.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\HardRockDrums.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Jazz_Guitar.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\MelottiDrums.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\RealAcousticDrums_1.SF2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Rhodes.sf2">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="resources\Elec_Percussion.sf2">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

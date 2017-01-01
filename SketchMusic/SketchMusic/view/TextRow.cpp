@@ -215,8 +215,8 @@ void SketchMusic::View::TextRow::SetText(SketchMusic::Text^ text)
 	// добавляем текст в список
 	// делаем его "главным"
 	unsigned int ndx = 0;
-	if (!_texts->IndexOf(text, &ndx))
-		this->_texts->Append(text);
+	if (!data->texts->IndexOf(text, &ndx))
+		this->data->texts->Append(text);
 
 	current = text;
 
@@ -228,12 +228,12 @@ void SketchMusic::View::TextRow::SetText(SketchMusic::Text^ text)
 	RedrawText();
 }
 
-void SketchMusic::View::TextRow::SetText(Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ textCollection, SketchMusic::Text^ format)
+void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textCollection, SketchMusic::Text^ format)
 {
-	if (_texts == textCollection)
+	if (data == textCollection)
 		return;
 
-	_texts = textCollection;
+	data = textCollection;
 	
 	if (format)
 	{
@@ -242,7 +242,7 @@ void SketchMusic::View::TextRow::SetText(Windows::Foundation::Collections::IVect
 	}
 	else
 	{
-		this->format = textCollection->First()->Current;
+		this->format = textCollection->texts->First()->Current;
 		this->current = this->format;
 	}
 
@@ -257,7 +257,7 @@ void SketchMusic::View::TextRow::InvalidateText()
 	// отрисовываем объекты согласно тексту
 	// чтобы не делать лишнюю работу, нужна функция, которая сразу принимала бы
 	// список текстов для отрисовки и текст, который нужно взять за основу форматирования
-	if (this->_texts->Size == 0)
+	if (this->data->texts->Size == 0)
 		return;
 
 	// приводим набор нот в соответствие с текстом
@@ -523,15 +523,11 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 		if (_dict->HasKey("noteBackground"))
 		{
 			unsigned int ndx;
-			if (_texts->IndexOf(current, &ndx))
+			if (data->texts->IndexOf(current, &ndx))
 			{
 				Windows::UI::Xaml::Media::Brush^ brush;
 				switch (ndx)
 				{
-				case 0:
-					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground"));
-					ctrl->Background = brush;
-					break;
 				case 1:
 					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground2"));
 					ctrl->Background = brush;
@@ -542,6 +538,11 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 					break;
 				case 3:
 					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground4"));
+					ctrl->Background = brush;
+					break;
+				case 0:
+				default:
+					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground"));
 					ctrl->Background = brush;
 					break;
 				}

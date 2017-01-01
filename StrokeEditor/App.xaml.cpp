@@ -256,7 +256,7 @@ void StrokeEditor::App::ShowNotification(Platform::String ^ message)
 	ToastNotificationManager::CreateToastNotifier()->Show(toast);
 }
 
-void StrokeEditor::App::Play(Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ texts, SketchMusic::Cursor ^ cursor)
+void StrokeEditor::App::Play(SketchMusic::CompositionData^ texts, SketchMusic::Cursor ^ cursor)
 {
 	//auto async = concurrency::create_task([this,texts, cursor]
 	//{

@@ -5,7 +5,6 @@
     xmlns:local="using:StrokeEditor"
     xmlns:sm="using:SketchMusic"
     xmlns:smv="using:SketchMusic.View"
-    xmlns:smvgk="using:SketchMusic.View.GenericKeyboard"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -33,17 +32,18 @@
                     BorderThickness="5"
                     BorderBrush="Black"
                     Width="40">
-
-           <!-- <Button Content="Texts"
-                    Padding="5,20,5,20">
+            <Button Name="GoBackBtn" Content="Вернуться назад" Click="GoBackBtn_Click" Padding="0" Width="60" Height="90"/>
+            
+            <Button Content="Texts"
+                    Padding="0"
+                    Height="90">
                 <Button.Flyout>
                     <Flyout x:Name="TextsFlyout">
-                        <ListView ItemsSource="{Binding}" SelectionChanged="ListView_SelectionChanged">
+                        <ListView ItemsSource="{Binding}" x:Name="TextsList" SelectionChanged="ListView_SelectionChanged" Width="auto">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderThickness="1" BorderBrush="AliceBlue" Margin="2" Padding="4">
-                                        <TextBlock FontSize="14" Foreground="Black">
-                                            <Span>Instrument: </Span>
+                                    <Border BorderThickness="1" BorderBrush="AliceBlue">
+                                        <TextBlock FontSize="14" Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
                                             <Run Text="{Binding instrument, Converter={StaticResource instr2text}}"/>
                                         </TextBlock>
                                     </Border>
@@ -52,8 +52,43 @@
                         </ListView>
                     </Flyout>
                 </Button.Flyout>
-            </Button>-->
-            <Button Name="GoBackBtn" Content="Вернуться назад" Click="GoBackBtn_Click" Width="60" Height="90"/>
+            </Button>
+
+            <Button Content="Add"
+                    Padding="0"
+                    Height="90">
+                <Button.Flyout>
+                    <Flyout x:Name="InstrumentsFlyout">
+                        <ListView x:Name="InstrumentList"
+                                  ItemsSource="{Binding}"
+                                  IsItemClickEnabled="True"
+                                  SelectionMode="None"
+                                  ItemClick="ListView_ItemClick"
+                                  Width="auto">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderThickness="1" BorderBrush="AliceBlue">
+                                        <TextBlock FontSize="14" Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
+                                            <Run Text="{Binding _name}"/>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+
+            <Button Content="Delete"
+                    Padding="0"
+                    Height="90">
+                <Button.Flyout>
+                    <Flyout x:Name="DeleteTextFlyout">
+                        <Button x:Name="DeleteTextBtn" Content="Ок" Click="DeleteTextBtn_Click"/>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+
         </StackPanel>
 
         <StackPanel

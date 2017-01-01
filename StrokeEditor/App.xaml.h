@@ -36,7 +36,7 @@ namespace StrokeEditor
 		int DeleteIdea(SketchMusic::Idea^ idea);
 		void ShowNotification(Platform::String^ message);
 
-		void Play(Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ texts, SketchMusic::Cursor^ cursor);
+		void Play(SketchMusic::CompositionData^ texts, SketchMusic::Cursor^ cursor);
 
 	private:
 		void OnSuspending(Platform::Object^ sender, Windows::ApplicationModel::SuspendingEventArgs^ e);

@@ -47,8 +47,6 @@ public:
 		// ! Однако инструмент требуется в любом случае, если мы захотим прослушать то, что в тексте написано.
 		// Соответственно без указания инструмента для озвучивания остаётся только использовать некий "дефолтный" инструмент
 
-	static SketchMusic::Text^ deserialize(Platform::String^ str);
-
 	property SketchMusic::Instrument^ instrument;	// инструмент, который связывается с данной дорожкой
 	property SketchMusic::Cursor^ curPosition;
 
@@ -63,10 +61,13 @@ public:
 	// Работа с долями - вставка, удаление
 	void addBeat(Cursor^ position, Cursor^ offset);
 	void deleteBeat(Cursor^ position, Cursor^ offset);
-
+	
+	unsigned int getSize() { return _t.size(); }
 	IVector<PositionedSymbol^>^ getText();
 	//Platform::Collections::Vector<PositionedSymbol^>^ getText();
 	
+	static SketchMusic::Text^ deserialize(Platform::String^ str);
+	static SketchMusic::Text^ deserialize(Windows::Data::Json::JsonObject^ json);
 	Windows::Data::Json::IJsonValue^ serialize();
 	
 	// TODO : функции вставки одного текста в другой, объединение, "вырезание" и так далее

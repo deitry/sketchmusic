@@ -46,7 +46,7 @@ SketchMusic::Idea::Idea(String ^ _name, IdeaCategoryEnum _cat)
 
 // "Загрузка" идеи из данных о ней
 SketchMusic::Idea::Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String ^ _desc, int _parent, byte _rating,
-						SketchMusic::Text ^ _content, String ^ _tags, String ^ _projects, long long _created, long long _modified)
+	CompositionData^ _content, String ^ _tags, String ^ _projects, long long _created, long long _modified)
 {
 	Hash = _hash;
 	Name = _name;
@@ -63,7 +63,7 @@ SketchMusic::Idea::Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String
 
 // "Загрузка" идеи из данных о ней
 SketchMusic::Idea::Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String ^ _desc, int _parent, byte _rating,
-	Platform::String ^ _content, String ^ _tags, String ^ _projects, long long _created, long long _modified)
+	String ^ _content, String ^ _tags, String ^ _projects, long long _created, long long _modified)
 {
 	Hash = _hash;
 	Name = _name;
@@ -78,11 +78,11 @@ SketchMusic::Idea::Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String
 	ModifiedTime = _modified;
 }
 
-SketchMusic::Text ^ SketchMusic::Idea::GetContent()
+CompositionData^ SketchMusic::Idea::GetContent()
 {
 	if ((Content == nullptr) && (SerializedContent != nullptr))
 	{
-		Content = SketchMusic::Text::deserialize(SerializedContent);
+		//Content = SketchMusic::Text::deserialize(SerializedContent);
 		//SerializedContent = nullptr;	// чтобы не казалось, что мы можем просто взять это значение
 			// Предполагается, что если мы всё это делаем, то хотим изменить идею.
 	}

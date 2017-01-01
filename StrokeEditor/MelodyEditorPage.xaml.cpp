@@ -35,7 +35,6 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
 	InitializePage();
 
-	_texts = ref new Platform::Collections::Vector < Text^ >;
 	_idea = (Idea^)e->Parameter;
 	
 	if (_idea->Content == nullptr)
@@ -43,23 +42,50 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		// восстанавливаем из сериализованного состояния
 		if (_idea->SerializedContent != nullptr)
 		{
-			_idea->Content = _idea->Content->deserialize(_idea->SerializedContent);
+			_idea->Content = SketchMusic::CompositionData::deserialize(_idea->SerializedContent);
 		}
 		else
 		{
 			// принудительно, пока нет выбора других инструментов
-			_idea->Content = ref new Text(ref new Instrument("grand_piano.sf2"));
+			_idea->Content = ref new CompositionData();
 		}
 	}
+	
+	_texts = _idea->Content;
+	
+	// TODO : собирать список автоматически
+	availableInstruments = ref new Platform::Collections::Vector<Instrument^>(16);
+	availableInstruments->SetAt(0, ref new Instrument("grand_piano.sf2"));
+	availableInstruments->SetAt(1, ref new Instrument("Rhodes.sf2"));
+	availableInstruments->SetAt(2, ref new Instrument("HammondC3.sf2"));
 
-	//_idea->Content->addSymbol(ref new Cursor, ref new STempo(120.));
-	_texts->Append(_idea->GetContent());
+	availableInstruments->SetAt(3, ref new Instrument("acoustic_guitar.sf2"));
+	availableInstruments->SetAt(4, ref new Instrument("Guitar Distortion.sf2"));
+	availableInstruments->SetAt(5, ref new Instrument("Jazz_Guitar.sf2"));
+	availableInstruments->SetAt(6, ref new Instrument("Epiphone_Pick_Bass.sf2"));
 
-	//ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
-	//if (list)
-	//{
-	//	list->DataContext = _texts;
-	//}
+	availableInstruments->SetAt(7, ref new Instrument("Sax_full_range.sf2"));
+	availableInstruments->SetAt(8, ref new Instrument("Solo_Viola.sf2"));
+	availableInstruments->SetAt(9, ref new Instrument("Ensemble_Pad.sf2"));
+
+	availableInstruments->SetAt(10, ref new Instrument("DubKit.sf2"));
+	availableInstruments->SetAt(11, ref new Instrument("HardRockDrums.sf2"));
+	availableInstruments->SetAt(12, ref new Instrument("RealAcousticDrums_1.sf2"));
+	availableInstruments->SetAt(13, ref new Instrument("MelottiDrums.sf2"));
+	availableInstruments->SetAt(14, ref new Instrument("drum_kit_01.sf2"));
+	availableInstruments->SetAt(15, ref new Instrument("Elec_Percussion.sf2"));
+
+	ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
+	if (list)
+	{
+		list->DataContext = _texts->texts;
+	}
+	
+	list = dynamic_cast<ListView^>(InstrumentsFlyout->Content);
+	if (list)
+	{
+		list->DataContext = availableInstruments;
+	}
 
 	_textRow->SetText(_texts, nullptr);
 }
@@ -111,7 +137,6 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	((App^)App::Current)->_player->stopKeyboard();
 
 	// открыть страницу со сведениями о данной идее
-	_idea->Content = this->_texts->GetAt(0);
 	_idea->SerializedContent = _idea->Content->serialize()->Stringify();
 	
 	// отписка от события
@@ -313,4 +338,49 @@ void StrokeEditor::MelodyEditorPage::OnBpmChanged(Platform::Object ^sender, floa
 		ref new Windows::UI::Core::DispatchedHandler([=]() {
 		this->BPMText->Text = "" + ((App^)App::Current)->_player->_BPM;
 	}));
+}
+
+void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+{
+	Text^ text = dynamic_cast<Text^>(TextsList->SelectedItem); // e->AddedItems->First()->Current
+	if (text)
+	{
+		_textRow->SetText(text);
+	}
+	TextsFlyout->Hide();
+}
+
+void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
+{
+	auto instr = dynamic_cast<Instrument^>(e->ClickedItem);
+	if (instr)
+	{
+		this->_texts->texts->Append(ref new Text(ref new Instrument(instr->_name)));
+	}
+	InstrumentsFlyout->Hide();
+}
+
+
+void StrokeEditor::MelodyEditorPage::DeleteTextBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	auto list = dynamic_cast<ListView^>(TextsFlyout->Content);
+	if (list)
+	{
+		Text^ text = dynamic_cast<Text^>(list->SelectedItem);
+		auto size = _texts->texts->Size;
+		if (text && (size > 1)) // последний удалить нельзя
+		{
+			unsigned int index;
+			_texts->texts->IndexOf(text, &index);
+			unsigned int new_index = index;
+			if (new_index> (size - 1)) { new_index = size - 1; }
+			TextsList->SelectedIndex = new_index;
+
+			//_textRow->SetText(_texts->texts->GetAt(new_index));
+
+			_texts->texts->RemoveAt(index);
+
+		}
+		DeleteTextFlyout->Hide();
+	}
 }

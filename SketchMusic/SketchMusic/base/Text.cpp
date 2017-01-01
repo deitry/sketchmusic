@@ -80,10 +80,10 @@ IJsonValue^ SketchMusic::Text::serialize()
 {
 	JsonObject^ json = ref new JsonObject();
 	json->Insert(t::INSTR, JsonValue::CreateStringValue(instrument->_name));	
-		// TODO : ключи для поиска значений должны НЕ быть встроенными! Вынести отдельно
 	JsonArray^ jsonNotes = ref new JsonArray;
 	for (auto sym : this->_t)
 	{
+		// не вызываем сериализацию для каждого элемента в отдельности, чтобы немного сэкономить на объектах.
 		JsonObject^ jsym = ref new JsonObject;
 		jsym->Insert(t::BEAT, JsonValue::CreateNumberValue(sym.first->getBeat()));
 		jsym->Insert(t::TICK, JsonValue::CreateNumberValue(sym.first->getTick()));
@@ -103,31 +103,35 @@ IJsonValue^ SketchMusic::Text::serialize()
 
 SketchMusic::Text^ SketchMusic::Text::deserialize(Platform::String^ str)
 {
-	SketchMusic::Text^ text = ref new SketchMusic::Text;
 	JsonObject^ json = ref new JsonObject();
 	if (JsonObject::TryParse(str, &json))
 	{
-		//use the JsonObject json
-		text->instrument = ref new Instrument(json->GetNamedString(t::INSTR));
-		auto jArr = json->GetNamedArray(t::NOTES_ARRAY);
-		// проходимся по массиву и создаём нотки
-		for (auto i : jArr)
-		{
-			JsonObject^ jEl = i->GetObject();
-			if (jEl)
-			{
-				int pos_tick = static_cast<int>(jEl->GetNamedNumber(t::BEAT));
-				int pos_beat = static_cast<int>(jEl->GetNamedNumber(t::TICK));
-				auto pos = ref new Cursor(pos_tick, pos_beat);
-
-				auto sym = ISymbolFactory::Deserialize(jEl);
-
-				text->_t.insert(std::make_pair(pos, sym));
-			}
-		}
-		return text;
+		return SketchMusic::Text::deserialize(json);
 	}
 	else return nullptr;
+}
+
+SketchMusic::Text ^ SketchMusic::Text::deserialize(Windows::Data::Json::JsonObject ^ json)
+{
+	SketchMusic::Text^ text = ref new SketchMusic::Text;
+	text->instrument = ref new Instrument(json->GetNamedString(t::INSTR));
+	auto jArr = json->GetNamedArray(t::NOTES_ARRAY);
+	// проходимся по массиву и создаём нотки
+	for (auto i : jArr)
+	{
+		JsonObject^ jEl = i->GetObject();
+		if (jEl)
+		{
+			int pos_tick = static_cast<int>(jEl->GetNamedNumber(t::BEAT));
+			int pos_beat = static_cast<int>(jEl->GetNamedNumber(t::TICK));
+			auto pos = ref new Cursor(pos_tick, pos_beat);
+
+			auto sym = ISymbolFactory::Deserialize(jEl);
+
+			text->_t.insert(std::make_pair(pos, sym));
+		}
+	}
+	return text;
 }
 
 void SketchMusic::Text::moveSymbol(SketchMusic::PositionedSymbol^ psym, SketchMusic::Cursor^ newpos)

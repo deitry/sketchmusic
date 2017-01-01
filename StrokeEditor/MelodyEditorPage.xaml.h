@@ -41,7 +41,7 @@ namespace StrokeEditor
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		//void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
 
-		Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ _texts;
+		SketchMusic::CompositionData^ _texts;
 
 		SketchMusic::Commands::Handler^ moveSym;
 		SketchMusic::Commands::Handler^ addSym;
@@ -60,11 +60,15 @@ namespace StrokeEditor
 		void playAll_Click();
 		void _keyboard_KeyboardPressed(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ e);
 		void _keyboard_KeyReleased(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ e);
-		//void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
+		void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
 		//void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
 		SketchMusic::Idea^ _idea;
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
 		void OnBpmChanged(Platform::Object ^sender, float args);
+
+		Windows::Foundation::Collections::IVector<SketchMusic::Instrument^>^ availableInstruments;
+		void ListView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
+		void DeleteTextBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }

@@ -77,6 +77,19 @@ namespace SketchMusic
 		property String^ description;
 	};
 
+	public ref class CompositionData sealed
+	{
+	public:
+		// TODO : добавить дорожку с "системными" данными? - вносить туда всё, что касается композиции в целом
+		// один текст воспринимается как одна дорожка
+		property Windows::Foundation::Collections::IVector<Text^>^ texts;
+
+		static CompositionData^ deserialize(Platform::String^ str);
+		Windows::Data::Json::IJsonValue^ serialize();
+
+		CompositionData();
+	};
+
 	/**
 	Целиком определяет всю композицию
 	*/
@@ -84,8 +97,7 @@ namespace SketchMusic
 	{
 	internal:
 		CompositionHeader^ _header;
-		// один текст воспринимается как единая дорожка
-		Windows::Foundation::Collections::IVector<Text^>^ _tracks;
+		CompositionData^ _tracks;
 	};
 
 	// внутренняя структура
@@ -372,14 +384,15 @@ namespace SketchMusic
 
 	namespace SerializationTokens
 	{
-		static Platform::String^ INSTR = "instr";
-		static Platform::String^ BEAT = "p1";
-		static Platform::String^ TICK = "p2";
-		static Platform::String^ SYMBOL_TYPE = "t";
-		static Platform::String^ NOTE_VALUE = "v";
-		static Platform::String^ NOTE_VELOCITY = "y";
-		static Platform::String^ NOTE_VOICE = "o";
-		static Platform::String^ NOTES_ARRAY = "notes";
+		static Platform::String^ TEXT = "text";		// чтобы можно было в одну строку несколько текстов
+		static Platform::String^ INSTR = "instr";		// название инструмента
+		static Platform::String^ BEAT = "p1";			// beat
+		static Platform::String^ TICK = "p2";			// tick
+		static Platform::String^ SYMBOL_TYPE = "t";		// тип символа
+		static Platform::String^ NOTE_VALUE = "v";		// значение
+		static Platform::String^ NOTE_VELOCITY = "y";	// динамика
+		static Platform::String^ NOTE_VOICE = "o";		// номер голоса
+		static Platform::String^ NOTES_ARRAY = "notes";	// обозначение массива с нотами
 	}
 
 	// классы для обеспечения модели синтеза SoundFont

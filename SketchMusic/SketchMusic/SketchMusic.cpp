@@ -1,6 +1,7 @@
 ﻿// Class1.cpp
 #include "pch.h"
 #include "SketchMusic.h"
+#include "base/Text.h"
 
 using namespace SketchMusic;
 using namespace Platform;
@@ -63,7 +64,7 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			}
 			case SymbolType::NPART:
 			{
-				auto str = obj->GetNamedString(t::NOTE_VELOCITY, "");
+				auto str = obj->GetNamedString(t::NOTE_VALUE, "");
 				return ref new SNewPart(str);
 			}
 			case SymbolType::TEMPO:
@@ -160,3 +161,54 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 	return nullptr;
 }*/
 
+CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ str)
+{
+	SketchMusic::CompositionData^ data = nullptr;
+	auto json = ref new JsonArray();
+	if (JsonArray::TryParse(str, &json))
+	{
+		data = ref new SketchMusic::CompositionData;
+		for (auto i : json)
+		{
+			auto obj = i->GetObject();
+			auto text = SketchMusic::Text::deserialize(obj);
+			if (text)
+			{
+				data->texts->Append(text);
+			}
+		}
+	}
+	else
+	{
+		// не смогли получить массив - считаем, что только один
+		auto obj = ref new JsonObject();
+		if (JsonObject::TryParse(str, &obj))
+		{
+			auto text = SketchMusic::Text::deserialize(obj);
+			if (text)
+			{
+				data = ref new SketchMusic::CompositionData;
+				data->texts->Append(text);
+			}
+		}
+	}
+	return data;
+}
+
+Windows::Data::Json::IJsonValue ^ SketchMusic::CompositionData::serialize()
+{
+	auto json = ref new JsonArray();
+	for (auto&& text : texts)
+	{
+		if (text->getSize())
+		{
+			json->Append(static_cast<SketchMusic::Text^>(text)->serialize());
+		}
+	}
+	return json;
+}
+
+SketchMusic::CompositionData::CompositionData()
+{
+	this->texts = ref new Platform::Collections::Vector < Text^ >;
+}

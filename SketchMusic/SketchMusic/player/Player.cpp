@@ -88,7 +88,7 @@ void SketchMusic::Player::Player::playMetronome()
 ѕринимает текст и проигрывает его начина€ со start либо до конца, либо пока не придЄт
 команда остановитьс€.
 */
-void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ texts, SketchMusic::Cursor^ pos)
+void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::Cursor^ pos)
 {
 	// - дл€ каждой из дорожек инициализировать инструмент
 	// - - создать по соурс войсу на каждый семпл
@@ -107,9 +107,9 @@ void SketchMusic::Player::Player::playText(Windows::Foundation::Collections::IVe
 	auto iterMap 
 		= new std::vector< std::pair<SketchMusic::Player::ISoundEngine^, std::pair<IIterator < SketchMusic::PositionedSymbol^ > ^, IVector< SketchMusic::PositionedSymbol^ > ^> > >;
 
-	auto getIterators = concurrency::create_task([texts, iterMap, this, cursor]
+	auto getIterators = concurrency::create_task([data, iterMap, this, cursor]
 	{
-		for (auto text : texts)
+		for (auto text : data->texts)
 		{
 			
 			// получаем список символов в данном тексте

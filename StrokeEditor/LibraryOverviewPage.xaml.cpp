@@ -368,8 +368,7 @@ void StrokeEditor::LibraryOverviewPage::PlayBtn_Click(Platform::Object^ sender, 
 	if (item == nullptr) return;
 	if (item->Content == nullptr && (item->SerializedContent == nullptr || item->SerializedContent == "")) return;
 
-	auto text = item->Content ? item->Content : SketchMusic::Text::deserialize(item->SerializedContent);
-	auto texts = ref new Platform::Collections::Vector<SketchMusic::Text^>(1, text);
+	auto texts = item->Content ? item->Content : SketchMusic::CompositionData::deserialize(item->SerializedContent);
 
 	this->Dispatcher->RunAsync(
 		Windows::UI::Core::CoreDispatcherPriority::Normal,

@@ -21,7 +21,7 @@ private:
 	double SymbolHeight;
 
 
-	Windows::Foundation::Collections::IVector<Text^>^ _texts;	// список нужен для отображения нескольких дорожек 
+	CompositionData^ data;	// список нужен для отображения нескольких дорожек 
 
 	int currentEditing;	// индекс текста, с которым идёт основная работа
 	int currentFormat;	// индекс текста, чьё форматирование берётся за основу
@@ -88,7 +88,7 @@ public:
 	// а формат из другого - чтобы легче было работать с несколькими дорожками	SketchMusic::Text^ GetText();
 
 	// универсальная функция
-	void SetText(Windows::Foundation::Collections::IVector<SketchMusic::Text^>^ textCollection, SketchMusic::Text^ format);
+	void SetText(CompositionData^ textCollection, SketchMusic::Text^ format);
 	SketchMusic::Text^ GetText();
 
 	// работа с отдельными символами
