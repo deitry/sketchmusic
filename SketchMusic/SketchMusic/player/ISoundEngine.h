@@ -19,7 +19,7 @@ public:
 		// нужна для проигрывания сразу нескольких нот, например, при воспроизведении текста
 	void Stop();
 	SketchMusic::Instrument^ getInstrument();
-
+	void SetPreset(Platform::String^ preset);
 	//void setEffect();
 
 	// функции по работе с формой волны? Изменение атаки, затухания и т.д. - изменение буфера

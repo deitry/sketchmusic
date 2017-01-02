@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../SketchMusic.h"
+#include "SoundFont.h"
 
-ref class SketchMusic::SFReader::SFData sealed
+public ref class SketchMusic::SFReader::SFData sealed
 {
 private:
 
@@ -20,9 +21,12 @@ internal:
 	unsigned int sampleSize;
 	Platform::String^ name;
 	//Platform::String^ fileName;
+	
+	Platform::Array<uint8>^ sdta;
 	Windows::Foundation::Collections::IVector<Platform::String^>^ info;
-	Windows::Foundation::Collections::IVector<SFPreset^>^ presets;
 	Windows::Foundation::Collections::IVector<SFInstrument^>^ instruments;
 	Windows::Foundation::Collections::IVector<SFSample^>^ samples;
-	Platform::Array<uint8>^ sdta;
+public:
+	property Windows::Foundation::Collections::IVector<SFPreset^>^ presets;
+	
 };

@@ -472,6 +472,9 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 						zone->sample->origPitch = gen.second->val.sword;
 					}
 					break;
+				case SketchMusic::SFReader::SFGeneratorID::sampleModes:
+					zone->sampleMode = gen.second->val.uword;
+					break;
 				}
 			}
 		}

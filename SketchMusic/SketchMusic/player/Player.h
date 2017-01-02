@@ -57,6 +57,8 @@ public:
 
 	void stop();
 	void stopKeyboard();
+	
+	SketchMusic::SFReader::SFData^ GetSFData(SketchMusic::Instrument^ instrument);
 
 	SketchMusic::Cursor^ getCursor() { return this->_cursor; }
 };

@@ -188,7 +188,8 @@ internal:
 	}
 };
 
-ref class SketchMusic::SFReader::SFPreset sealed
+//[Windows::UI::Xaml::Data::Bindable]
+public ref class SketchMusic::SFReader::SFPreset sealed
 {
 internal:
 	static SFPreset^ ReadPreset(Windows::Storage::Streams::DataReader^ dataReader)
@@ -206,7 +207,6 @@ internal:
 	}
 
 	//SketchMusic::SoundFont^ parent;
-	Platform::String^ name;
 	unsigned short bank;
 	unsigned short number;
 	unsigned short zndx;	// индекс пресета
@@ -220,6 +220,10 @@ internal:
 
 	void noteOn(int key, int vel);
 	void updateParams();
+
+public:
+	property Platform::String^ name;
+
 };
 
 ref class SketchMusic::SFReader::SFInstrumentZone sealed
@@ -247,6 +251,7 @@ internal:
 	unsigned short modCnt;
 
 	unsigned short sampleNum;
+	unsigned short sampleMode;
 
 	//Windows::Foundation::Collections::IMap<SFGeneratorID, SFGenAmount^>^ generators;
 	std::map<SFGeneratorID, SFGenAmount^> generators;
@@ -304,6 +309,10 @@ internal:
 			gen->amount->val.range.hi = dataReader->ReadByte();
 		}
 		else if (gen->id == SFGeneratorID::instrument)
+		{
+			gen->amount->val.uword = dataReader->ReadUInt16();
+		}
+		else if (gen->id == SFGeneratorID::sampleModes)
 		{
 			gen->amount->val.uword = dataReader->ReadUInt16();
 		}

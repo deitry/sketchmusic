@@ -356,7 +356,58 @@ void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender
 	auto instr = dynamic_cast<Instrument^>(e->ClickedItem);
 	if (instr)
 	{
-		this->_texts->texts->Append(ref new Text(ref new Instrument(instr->_name)));
+		// спрашиваем у плеера, загружен ли такой инструмент и есть ли у него пресеты
+		// - выводим окошко со списком доступных пресетов
+		this->Dispatcher->RunAsync(
+			Windows::UI::Core::CoreDispatcherPriority::Normal,
+			ref new Windows::UI::Core::DispatchedHandler([=]() {
+			
+			auto init = concurrency::create_task([=]
+			{
+				// такая обёртка, если асинхронно будем читать данные, если они ешё не созданы
+				return ((App^)App::Current)->_player->GetSFData(instr);
+			}).then([=](SketchMusic::SFReader::SFData^ data)->void {
+				this->Dispatcher->RunAsync(
+					Windows::UI::Core::CoreDispatcherPriority::Normal,
+					ref new Windows::UI::Core::DispatchedHandler([=]() {
+				
+					if (data == nullptr) return;
+
+					//auto data = sfdata.get();
+					ContentDialog^ presetListDlg = ref new ContentDialog;
+					Grid^ grid = ref new Grid;
+					ListView^ list = ref new ListView;
+					list->ItemTemplate = (DataTemplate^) this->Resources->Lookup("myResourceTemplate");
+					list->ItemsSource = data->presets;
+					list->IsItemClickEnabled = true;
+					list->ItemClick += ref new Windows::UI::Xaml::Controls::ItemClickEventHandler([=](Object^, ItemClickEventArgs^)
+					{
+						presetListDlg->Hide();
+					});
+
+					grid->Children->Append(list);
+					presetListDlg->Content = grid;
+
+					auto dialog = concurrency::create_task(presetListDlg->ShowAsync());
+					dialog.then([=](concurrency::task<ContentDialogResult> t)
+					{
+						ContentDialogResult result = t.get();
+
+						if (list->SelectedItem)// result == ContentDialogResult::Primary)
+						{
+							auto preset = dynamic_cast<SketchMusic::SFReader::SFPreset^>(list->SelectedItem);
+							if (preset)
+							{
+								this->_texts->texts->Append(ref new Text(ref new Instrument(instr->_name, preset->name)));
+								list->SelectedItem = nullptr;
+							}
+						}
+					});
+				}));
+			});
+		}));
+		
+		
 	}
 	InstrumentsFlyout->Hide();
 }

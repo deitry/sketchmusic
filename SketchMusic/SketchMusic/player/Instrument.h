@@ -22,13 +22,12 @@ namespace SketchMusic
 	public:
 		Instrument() {}
 		Instrument(Platform::String^ name) { _name = name; }
+		Instrument(Platform::String^ name, Platform::String^ pset) { _name = name; preset = pset; }
 
-		property Platform::String^ _name;		// название инструмента
-		// property Platform::String^ category;
+		bool EQ(SketchMusic::Instrument^ instr) { if ((this->_name == instr->_name) && (this->preset == instr->preset)) { return true; } else { return false; } }
 
-		//void addSample(Platform::String^ sampleName);
-		//void deleteSample(Platform::String^ sampleName);	
-		//Windows::Foundation::Collections::IVector<Platform::String^>^ getSamples();
+		property Platform::String^ _name;	// название инструмента
+		property Platform::String^ preset;	// номер пресета - для выбора в sf2
 	};
 
 	public ref class InstrumentToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
@@ -39,7 +38,7 @@ namespace SketchMusic
 			SketchMusic::Instrument^ instr = dynamic_cast<SketchMusic::Instrument^>(value);
 			if (instr == nullptr) return "";
 
-			return instr->_name;
+			return instr->_name + " : " + instr->preset;
 		}
 		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
 		{

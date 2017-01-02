@@ -386,6 +386,7 @@ namespace SketchMusic
 	{
 		static Platform::String^ TEXT = "text";		// чтобы можно было в одну строку несколько текстов
 		static Platform::String^ INSTR = "instr";		// название инструмента
+		static Platform::String^ INSTR_PRESET = "pset";		// название инструмента
 		static Platform::String^ BEAT = "p1";			// beat
 		static Platform::String^ TICK = "p2";			// tick
 		static Platform::String^ SYMBOL_TYPE = "t";		// тип символа
@@ -658,7 +659,6 @@ namespace SketchMusic
 	namespace Player
 	{
 		// состояния плеера
-		//[Windows::UI::Xaml::Data::Bindable]
 		public enum class PlayerState
 		{
 			STOP = 0,	// стоит - совсем

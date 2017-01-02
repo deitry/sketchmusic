@@ -56,4 +56,5 @@ public:
 	{
 		return ref new SimpleSoundEngine(this);
 	}
+	virtual void SetPreset(Platform::String^ preset) {}
 };

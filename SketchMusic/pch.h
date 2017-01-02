@@ -16,3 +16,4 @@
 #include "SketchMusic\player\Instrument.h"
 #include "SketchMusic\base\Idea.h"
 #include "SketchMusic\base\Text.h"
+#include "SketchMusic\player\SoundFont.h"

@@ -6,6 +6,8 @@
 #include "../base/Text.h"
 #include "ISoundEngine.h"
 #include "SoundEnginePool.h"
+#include "SoundFont.h"
+#include "SFSoundEngine.h"
 #include "Instrument.h"
 #include "agents.h"
 #include "ppltasks.h"
@@ -277,4 +279,15 @@ void SketchMusic::Player::Player::stopKeyboard()
 	{
 		this->_keyboardEngine->Stop();
 	}
+}
+
+// Запрашиваем у СаундПула данные о SF, чтобы иметь возможность их обрабатывать - например, получать список пресетов
+SketchMusic::SFReader::SFData ^ SketchMusic::Player::Player::GetSFData(SketchMusic::Instrument ^ instrument)
+{
+	auto sf2engine = dynamic_cast<SketchMusic::Player::SFSoundEngine^>(_engines->GetSoundEngine(instrument));
+	if (sf2engine)
+	{
+		return sf2engine->_soundFontData;
+	}
+	return nullptr;
 }

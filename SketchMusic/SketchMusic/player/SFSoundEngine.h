@@ -4,6 +4,8 @@
 #include "ISoundEngine.h"
 #include "SoundFont.h"
 #include <xaudio2.h>
+#include "SFData.h"
+
 
 #define MIDIKEYTOA4 69
 
@@ -59,4 +61,29 @@ public:
 	{
 		return ref new SFSoundEngine(this);
 	}
+
+	virtual void SetPreset(Platform::String^ preset)
+	{
+		if (_soundFontData)
+		{
+			if (preset == nullptr || preset == "")
+			{
+				_sfPreset = this->_soundFontData->presets->GetAt(0);
+				_sfPreset->updateParams();
+				return;
+			}
+
+			for (auto pset : _soundFontData->presets)
+			{
+				if (pset->name == preset)
+				{
+					_sfPreset = pset;
+					_sfPreset->updateParams();
+					return;
+				}
+			}
+		}
+	}
+
+	property SFData^ _soundFontData;
 };

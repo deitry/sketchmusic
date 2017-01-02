@@ -23,10 +23,10 @@ SketchMusic::Player::SFSoundEngine::SFSoundEngine(Microsoft::WRL::ComPtr<IXAudio
 	if (data == nullptr)
 		throw ref new Exception(0, "Не удалось создать объект");
 
-	_sfPreset = data->presets->GetAt(0);
-	_sfPreset->updateParams();
 	this->_sData = data->sdta;
-	
+	this->_soundFontData = data;
+	this->SetPreset(instrument->preset);
+
 	// это не очень правильно, но предполагаем, что все семплы в файле будут одного формата
 	auto pZone = _sfPreset->zones->GetAt(0);
 	auto zSample = pZone->instrument->zones->GetAt(0)->sample;
@@ -57,6 +57,7 @@ SketchMusic::Player::SFSoundEngine::SFSoundEngine(SFSoundEngine^ engine)
 	this->waveformat = engine->waveformat;
 	this->_sfPreset = engine->_sfPreset;
 	this->_sData = engine->_sData;
+	this->_soundFontData = engine->_soundFontData;
 	
 	this->InitializeVoices();
 	this->stopToken = new concurrency::cancellation_token_source;
@@ -133,7 +134,7 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 				IXAudio2SourceVoice* voice = this->GetVoice();
 				if (voice == nullptr) return;
 
-				XAUDIO2_BUFFER _buffer = { 0 }; 
+				XAUDIO2_BUFFER _buffer = { 0 };
 
 				// генераторы
 				for (auto iter = iZone->generators.begin(); iter != iZone->generators.end(); iter++)
@@ -404,18 +405,18 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 						break;
 
 					case SFGeneratorID::endloopAddrsOffset:
-					//case SFGeneratorID::endloopAddrsCoarseOffset:
-						//if (voice->sample != NULL) {
-						//	z = (voice->sample->loopend
-						//		+ (int)_GEN(voice, GEN_ENDLOOPADDROFS)
-						//		+ 32768 * (int)_GEN(voice, GEN_ENDLOOPADDRCOARSEOFS));
-						//	UPDATE_RVOICE_I1(fluid_rvoice_set_loopend, z);
-						//}
-						
-						//_buffer.LoopLength = iter->second->val.uword;
-						//_buffer.LoopLength = iter->second->val.uword / 2 - _buffer.LoopBegin;
-						//_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
-						
+						//case SFGeneratorID::endloopAddrsCoarseOffset:
+							//if (voice->sample != NULL) {
+							//	z = (voice->sample->loopend
+							//		+ (int)_GEN(voice, GEN_ENDLOOPADDROFS)
+							//		+ 32768 * (int)_GEN(voice, GEN_ENDLOOPADDRCOARSEOFS));
+							//	UPDATE_RVOICE_I1(fluid_rvoice_set_loopend, z);
+							//}
+
+							//_buffer.LoopLength = iter->second->val.uword;
+							//_buffer.LoopLength = iter->second->val.uword / 2 - _buffer.LoopBegin;
+							//_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
+
 						break;
 
 						// Conversion functions differ in range limit
@@ -511,12 +512,14 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 						//	count, 1.0f, count ? -1.0f / count : 0.0f, 0.0f, 2.0f);
 
 						break;
+					case SFGeneratorID::sampleModes:
+						break;
 					}
 				}
 
 				// модуляторы
-				
-				
+
+
 				//static int flag = 1;
 				auto smpl = iZone->sample;
 
@@ -527,10 +530,19 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 				_buffer.Flags = XAUDIO2_END_OF_STREAM;
 				_buffer.PlayBegin = smpl->start;
 				_buffer.PlayLength = smpl->end;
-				_buffer.LoopBegin = smpl->loopStart;
-				_buffer.LoopLength = smpl->loopEnd;
-				_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
 
+				if (iZone->sampleMode)
+				{
+					_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
+					_buffer.LoopBegin = smpl->loopStart;
+					_buffer.LoopLength = smpl->loopEnd;
+				}
+				else
+				{
+					_buffer.LoopCount = 0;
+					_buffer.LoopBegin = XAUDIO2_NO_LOOP_REGION;
+					_buffer.LoopLength = 0;
+				}
 				// 440 = midi 69 = SNote 0
 				float orig = smpl->origPitch;
 				double origFreq = 440 * pow(2., (orig - MIDIKEYTOA4) / 12.);

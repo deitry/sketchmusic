@@ -79,7 +79,9 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 IJsonValue^ SketchMusic::Text::serialize()
 {
 	JsonObject^ json = ref new JsonObject();
-	json->Insert(t::INSTR, JsonValue::CreateStringValue(instrument->_name));	
+	json->Insert(t::INSTR, JsonValue::CreateStringValue(instrument->_name));
+	if (instrument->preset && instrument->preset != "") { json->Insert(t::INSTR_PRESET, JsonValue::CreateStringValue(instrument->preset)); }
+
 	JsonArray^ jsonNotes = ref new JsonArray;
 	for (auto sym : this->_t)
 	{
@@ -119,7 +121,9 @@ SketchMusic::Text^ SketchMusic::Text::deserialize(Platform::String^ str)
 SketchMusic::Text ^ SketchMusic::Text::deserialize(Windows::Data::Json::JsonObject ^ json)
 {
 	SketchMusic::Text^ text = ref new SketchMusic::Text;
-	text->instrument = ref new Instrument(json->GetNamedString(t::INSTR));
+	text->instrument = ref new Instrument(json->GetNamedString(t::INSTR), 
+										  json->GetNamedString(t::INSTR_PRESET,nullptr));
+
 	auto jArr = json->GetNamedArray(t::NOTES_ARRAY);
 	// проходимся по массиву и создаём нотки
 	for (auto i : jArr)

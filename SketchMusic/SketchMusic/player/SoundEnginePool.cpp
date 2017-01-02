@@ -3,6 +3,7 @@
 #include "SFSoundEngine.h"
 #include "SimpleSoundEngine.h"
 #include "Instrument.h"
+#include "SoundFont.h"
 
 using namespace SketchMusic::Player;
 
@@ -42,9 +43,11 @@ ISoundEngine^ SoundEnginePool::GetSoundEngine(Instrument^ instrument)
 			if (res == nullptr)
 			{
 				// создаём новую копию этого енжина
-				return engine->Copy();
+				res = engine->Copy();
 			}
-			else return res;
+			// устанавливаем пресет, соответствующий выбранному инструменту
+			res->SetPreset(instrument->preset);
+			return res;
 		}
 	}
 
@@ -72,7 +75,8 @@ void SoundEnginePool::AddSoundEngine(Instrument^ instrument)
 {
 	// проверяем, нету ли такого инструмента
 	for (auto engine : _engines)
-	{
+	{	
+		// здесь пробиваем только по имени
 		if (engine->getInstrument()->_name == instrument->_name)
 			return;
 	}
