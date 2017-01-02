@@ -122,14 +122,26 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			_BPM = 120;
 			while (iter->HasCurrent)
 			{
-				if (iter->Current->_pos->LT(cursor))
+				auto p = iter->Current->_pos;
+				if (p->LT(cursor))
 				{
+					// обработка системных параметров - учитываем все возможные модуляции
 					auto tempo = dynamic_cast<STempo^>(iter->Current->_sym);
 					if (tempo)
 					{
 						_BPM = tempo->value;
 					}
+					// проматываем
+					
 					iter->MoveNext();
+
+					// если мы достигли последней ноты, а наш курсор ещё дальше
+					if ((iter->HasCurrent == false) && (p->LT(cursor)))
+					{
+						// играем сначала
+						cursor->setPos(0);
+						iter = symbols->First();
+					}
 				}
 				else
 				{

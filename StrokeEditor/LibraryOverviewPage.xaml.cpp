@@ -363,18 +363,20 @@ void StrokeEditor::LibraryOverviewPage::PlayBtn_Click(Platform::Object^ sender, 
 		((App^)App::Current)->_player->stop();
 		return;
 	}
-
+	
 	auto item = (SketchMusic::Idea^)LibView->SelectedItem;
 	if (item == nullptr) return;
 	if (item->Content == nullptr && (item->SerializedContent == nullptr || item->SerializedContent == "")) return;
 
 	auto texts = item->Content ? item->Content : SketchMusic::CompositionData::deserialize(item->SerializedContent);
+	if (texts == nullptr) return;
 
 	this->Dispatcher->RunAsync(
 		Windows::UI::Core::CoreDispatcherPriority::Normal,
 		ref new Windows::UI::Core::DispatchedHandler([=]() {
 			auto play = concurrency::create_task([=]
 			{
+				((App^)App::Current)->_player->needMetronome = false;
 				((App^)App::Current)->Play(texts, ref new SketchMusic::Cursor);
 			});
 		}));

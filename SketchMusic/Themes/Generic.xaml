@@ -54,7 +54,9 @@
                     Height="100"
                     Minimum="30"
                     Maximum="300"
-                    Value="120"/>
+                    Value="120"
+                    StepFrequency="5"
+                    TickFrequency="15"/>
             <CheckBox x:Name="metroNeed" Content="Metronome" IsChecked="True"/>
             <Button x:Name="Ok" Content="Ok"/>
         </StackPanel>

@@ -69,7 +69,7 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			}
 			case SymbolType::TEMPO:
 			{
-				vel = obj->GetNamedNumber(t::NOTE_VELOCITY, 120.);
+				vel = obj->GetNamedNumber(t::NOTE_VALUE, 120.);
 				return ref new STempo(vel);
 			}
 			case SymbolType::END:

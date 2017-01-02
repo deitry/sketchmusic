@@ -48,10 +48,12 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		{
 			// принудительно, пока нет выбора других инструментов
 			_idea->Content = ref new CompositionData();
+			_idea->Content->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
 		}
 	}
 	
 	_texts = _idea->Content;
+	((App^)App::Current)->_player->needMetronome = true;
 	
 	// TODO : собирать список автоматически
 	availableInstruments = ref new Platform::Collections::Vector<Instrument^>(16);
@@ -221,18 +223,17 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		{
 			SketchMusic::ISymbol^ sym = ref new SketchMusic::STempo(args->key->value);
 
-			// надо добавлять сразу аккордами
-			if (recording)
-			{
-				// создаём команду на добавление ноты в текст и сохраняем её в истории
-				((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
-					ref new SMC::Command(addSym, nullptr, nullptr),
-					ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
-						ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
-				((App^)App::Current)->_manager->ExecuteLast();
-				this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-					+ " / tick = " + _textRow->currentPosition->getTick();
-			}
+			//if (recording)
+			//{
+			// создаём команду на добавление ноты в текст и сохраняем её в истории
+			((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
+				ref new SMC::Command(addSym, nullptr, nullptr),
+				ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
+					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
+			((App^)App::Current)->_manager->ExecuteLast();
+			this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+				+ " / tick = " + _textRow->currentPosition->getTick();
+			//}
 			break;
 		}
 		case SketchMusic::View::KeyType::enter:

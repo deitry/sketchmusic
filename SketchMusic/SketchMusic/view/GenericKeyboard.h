@@ -131,7 +131,7 @@ public:
 			//result += L"\ue1cс";	// однократный повтор
 			break;
 		case KeyType::deleteSym:
-			result += L"\ue150";
+			result += L"\ue750";
 			break;
 		case KeyType::control:
 			result += "Ctrl";

@@ -571,7 +571,9 @@ double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
 		// TODO : сделать расчёт похитрее, чтобы выглядело как на нотном стане
 		// В том числе разрещить вылезать за пределы, увеличивая тем самым высоту строки
 		// (чтобы строки не налезали друг на друга)
-		offsetY = -abs(((inote->_val) % 12));
+		offsetY = inote->_val >= 0 ?
+			-abs(inote->_val) % 12 :
+			- 12*((inote->_val % 12) != 0) + abs(inote->_val) % 12;
 		offsetY *= RowHeight / 12;
 		offsetY += RowHeight - 5;
 		//if (offsetY > 6) offsetY -= 12;

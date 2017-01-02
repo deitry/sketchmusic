@@ -76,7 +76,9 @@ namespace SketchMusic
 			//t.tm_hour -= 4;
 			//printf_s("%04i/%02i/%02i %02i:%02i:%02i\n\n", t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
 			// TODO : сделать через форматирование
-			Platform::String^ str = "" + t.tm_year + "." + t.tm_mon + "." + t.tm_mday + " " +
+			Platform::String^ str = "" + t.tm_year + "." + 
+				((t.tm_mon < 10) ? "0" : "") + t.tm_mon + "." + 
+				((t.tm_mday < 10) ? "0" : "") + t.tm_mday + " " +
 				t.tm_hour;
 			str += ":" + ((t.tm_min < 10) ? "0" : "") + t.tm_min + ":" +
 						 ((t.tm_sec<10) ? "0" : "") + t.tm_sec;

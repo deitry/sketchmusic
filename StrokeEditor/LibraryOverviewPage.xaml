@@ -13,7 +13,8 @@
         <sm:TimeToStrConverter x:Key="TimeToStrConverter"/>
         <local:RatingToColorConverter x:Key="RatingToColorConverter"/>
         <local:ObjectToBoolConverter x:Key="ObjectToBoolConverter"/>
-        
+        <local:ObjectToBoolStrConverter x:Key="ObjectToBoolStrConverter"/>
+
         <Style x:Key="ItemStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI Light"/>
             <Setter Property="FontSize" Value="14.667"/>
@@ -106,7 +107,7 @@
                                 <ColumnDefinition Width="30"/>
                             </Grid.ColumnDefinitions>
 
-                            <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" HorizontalAlignment="Left" VerticalAlignment="Top"
+                            <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" HorizontalAlignment="Left" VerticalAlignment="Top"
                                           VerticalScrollMode="auto" VerticalScrollBarVisibility="Auto" IsVerticalScrollChainingEnabled="False">
                                 <StackPanel>
                                     <TextBlock Style="{StaticResource ItemStyle}" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left">
@@ -126,6 +127,11 @@
                             <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                                         Style="{StaticResource ItemStyle}" Text="{Binding Tags}"
                                         HorizontalAlignment="Right" VerticalAlignment="Bottom" Opacity="60" FontSize="10.5"
+                                        Margin="2"/>
+                            <TextBlock Grid.Row="4" Grid.Column="0"
+                                        Style="{StaticResource ItemStyle}" Text="{Binding SerializedContent, Converter={StaticResource ObjectToBoolStrConverter}}"
+                                        TextWrapping="NoWrap" Width="50" FontFamily="Segoe MDL2 Assets"
+                                        HorizontalAlignment="Left" VerticalAlignment="Bottom" Opacity="60" FontSize="10.5"
                                         Margin="2"/>
                             <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
                                         Style="{StaticResource ItemStyle}" Text="{Binding ModifiedTime, Converter={StaticResource TimeToStrConverter}}"

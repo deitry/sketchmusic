@@ -106,4 +106,20 @@ namespace StrokeEditor
 
 		ObjectToBoolConverter() {}
 	};
+
+	public ref class ObjectToBoolStrConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+	{
+	public:
+		virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+		{
+			if (value) return L"\uE73A";
+			else return L"\uE739";
+		}
+		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+		{
+			return nullptr;
+		}
+
+		ObjectToBoolStrConverter() {}
+	};
 }

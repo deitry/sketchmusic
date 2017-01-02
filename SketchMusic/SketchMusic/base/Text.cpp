@@ -88,6 +88,11 @@ IJsonValue^ SketchMusic::Text::serialize()
 		jsym->Insert(t::BEAT, JsonValue::CreateNumberValue(sym.first->getBeat()));
 		jsym->Insert(t::TICK, JsonValue::CreateNumberValue(sym.first->getTick()));
 		jsym->Insert(t::SYMBOL_TYPE, JsonValue::CreateNumberValue(static_cast<int>(sym.second->GetSymType())));
+		auto tempo = dynamic_cast<STempo^>(sym.second);
+		if (tempo)
+		{
+			jsym->Insert(t::NOTE_VALUE, JsonValue::CreateNumberValue(tempo->value));
+		}
 		auto note = dynamic_cast<INote^>(sym.second);
 		if (note)
 		{
