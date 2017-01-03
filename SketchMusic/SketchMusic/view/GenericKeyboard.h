@@ -300,6 +300,9 @@ private:
 
 	concurrency::cancellation_token_source releaseToken;	
 	Windows::UI::Xaml::Controls::Primitives::FlyoutBase^ tempoFlyout;
+	Windows::UI::Xaml::ResourceDictionary^ _dict;
+	Windows::UI::Xaml::Media::Brush^ pressedBackground;
+	Windows::UI::Xaml::Media::Brush^ normalBackground;
 
 public:
 	GenericKeyboard();

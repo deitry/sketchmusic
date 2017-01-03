@@ -29,8 +29,6 @@ using namespace Windows::UI::Xaml::Interop;
 using Windows::Foundation::Collections::IVector;
 using Platform::Collections::Vector;
 
-Windows::Foundation::Collections::IVector<SketchMusic::Idea^>^ StrokeEditor::LibraryOverviewPage::ideaLibrary = nullptr;
-
 // Шаблон элемента пустой страницы задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234238
 inline String^ StringFromAscIIChars(char* chars) //StrokeEditor::LibraryOverviewPage::
 {
@@ -63,7 +61,7 @@ int StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback(void *unused, i
 	idea->CreationTime = data[7] ? std::stol(data[7]) : 0;	// создан
 	idea->ModifiedTime= data[8] ? std::stol(data[8]) : 0;	// изменён	
 
-	ideaLibrary->Append(idea);
+	((App^)App::Current)->ideaLibrary->Append(idea);
 	
 	return 0;
 }
@@ -71,9 +69,6 @@ int StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback(void *unused, i
 LibraryOverviewPage::LibraryOverviewPage()
 {
 	InitializeComponent();
-
-	ideaLibrary = ref new Vector<SketchMusic::Idea^>();
-	LibView->ItemsSource = ideaLibrary;
 }
 
 void StrokeEditor::LibraryOverviewPage::InitializePage()
@@ -151,11 +146,22 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 			if (rc != SQLITE_OK)
 			{
 				((App^)App::Current)->UpdateIdea(idea);
+			} else {
+				if (((App^)App::Current)->ideaLibrary) ((App^)App::Current)->ideaLibrary->Append(idea);
 			}
 		}
 	}
+	if (((App^)App::Current)->ideaLibrary->Size == 0)
+	{
+		RefreshList();
+	}
+	else
+	{
+		LibView->ItemsSource = ((App^)App::Current)->ideaLibrary;
+	}
 
-	RefreshList();
+	// отказываемся от регулярного обновления в пользу быстродействия
+	//RefreshList();
 }
 
 void StrokeEditor::LibraryOverviewPage::OnNavigatedFrom(NavigationEventArgs ^ e)
@@ -201,7 +207,7 @@ void StrokeEditor::LibraryOverviewPage::RefreshList()
 	sqlite3* db = ((App^)App::Current)->libraryDB;
 	if (db)
 	{
-		ideaLibrary->Clear();
+		((App^)App::Current)->ideaLibrary->Clear();
 		std::string charQuery;
 
 		// сначала определяем фильтры, постепенно формируя строку запроса
@@ -260,7 +266,7 @@ void StrokeEditor::LibraryOverviewPage::RefreshList()
 			sqlite3_free(zErrMsg);
 		}
 
-		LibView->ItemsSource = ideaLibrary;
+		LibView->ItemsSource = ((App^)App::Current)->ideaLibrary;
 	}
 
 	//SizeTxt->Text = "Кол-во в массиве: " + ideaLibrary->Size + " + Кол-во в отображении: " + LibView->Items->Size;

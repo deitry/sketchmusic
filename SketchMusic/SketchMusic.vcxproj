@@ -278,6 +278,9 @@
     <Page Include="Themes\Generic.xaml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="resources\1General Midi.SF2">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="resources\acoustic_guitar.sf2">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -308,9 +311,6 @@
     <None Include="resources\Jazz_GM.sf2">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
     </None>
-    <None Include="resources\drum_kit_01.sf2">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-    </None>
     <None Include="resources\Jazz_Guitar.sf2">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
     </None>
@@ -318,9 +318,6 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
     </None>
     <None Include="resources\RealAcousticDrums_1.SF2">
-      <DeploymentContent>true</DeploymentContent>
-    </None>
-    <None Include="resources\Rhodes.sf2">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="resources\Sax_full_range.sf2">

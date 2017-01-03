@@ -744,7 +744,7 @@ namespace SketchMusic
 			move			= 5,	// вместо left и right - на сколько надо сдвинуть будет определяться тегом
 			enter			= 6,
 			play			= 7,	// любое неотрицательное - плей, любое отрицательное - реверс плей
-			stop			= 8,
+			stop			= 8,	// остановка плеера
 			beat			= 9,
 			shift			= 10,
 			record			= 11,
@@ -754,6 +754,7 @@ namespace SketchMusic
 			tempo			= 15,
 			zoom			= 16,
 			metronome		= 17,
+			end				= 20,	// конец ноты - остановка звучания
 		};
 
 		public enum class KeyboardStateEnum

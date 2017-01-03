@@ -102,7 +102,7 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 			ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerPressed);
 			ctrl->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
 			ctrl->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("PlaceholderControlStyle"));
-
+			ctrl->Content = (prev + i + 1);
 			row->Children->Append(ctrl);
 		}
 
@@ -242,8 +242,11 @@ void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textColle
 	}
 	else
 	{
-		this->format = textCollection->texts->First()->Current;
-		this->current = this->format;
+		if (textCollection->texts && textCollection->texts->Size > 0)
+		{
+			this->format = textCollection->texts->First()->Current;
+			this->current = this->format;
+		}
 	}
 
 	InvalidateText();

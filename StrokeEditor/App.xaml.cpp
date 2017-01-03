@@ -27,6 +27,10 @@ using namespace Windows::UI::Xaml::Navigation;
 using namespace Windows::UI::Notifications;
 using namespace Windows::Data::Xml::Dom;
 
+using Windows::Foundation::Collections::IVector;
+using Platform::Collections::Vector;
+
+
 // Шаблон пустого приложения задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234227
 
 /// <summary>
@@ -46,6 +50,8 @@ void StrokeEditor::App::InitializeApp()
 
 	// TODO : в качестве аргумента - или ещё лучше (?) в качестве возвращаемого значения - передавать хендлер
 	OpenLibrary("\\ideaLibrary.db");
+
+	((App^)App::Current)->ideaLibrary = ref new Vector<SketchMusic::Idea^>();
 
 	// создание глобальных объектов
 	auto init = concurrency::create_task([this]

@@ -125,6 +125,7 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 		for (auto pZone : this->_sfPreset->zones)
 		{
 			if (!(pZone->inZone(note->_val + MIDIKEYTOA4, 100))) continue;
+			// обработка генераторов pZone?
 
 			for (auto iZone : pZone->instrument->zones)
 			{
@@ -136,6 +137,26 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 
 				XAUDIO2_BUFFER _buffer = { 0 };
 
+				auto smpl = iZone->sample;
+
+				// Формируем буфер для отправки
+				// - загружаем данные по семплу
+				_buffer.pAudioData = _sData->begin();
+				_buffer.AudioBytes = _sData->Length;
+				_buffer.Flags = XAUDIO2_END_OF_STREAM;
+				_buffer.PlayBegin = smpl->start;
+				_buffer.PlayLength = smpl->end;
+
+				// если окажется, что оно нам не надо, то выкинем потом
+				_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
+				_buffer.LoopBegin = smpl->loopStart;
+				_buffer.LoopLength = smpl->loopEnd;
+				
+				// 440 = midi 69 = SNote 0
+				float orig = smpl->origPitch;
+				double origFreq = 440 * pow(2., (orig - MIDIKEYTOA4) / 12.);
+				double freq = 440 * pow(2., (note->_val) / 12.);
+				
 				// генераторы
 				for (auto iter = iZone->generators.begin(); iter != iZone->generators.end(); iter++)
 				{
@@ -167,7 +188,11 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 
 						//case SFGeneratorID::pitch: // используетя в fluid под номером 59 ...
 					case SFGeneratorID::coarseTune:
+						freq *= pow(2., (iter->second->val.sword) / 12.);
+						break;
 					case SFGeneratorID::fineTune:
+						freq *= pow(2., (iter->second->val.sword/100) / 12.); // ???
+						
 						// The testing for allowed range is done in 'fluid_ct2hz'
 						//voice->pitch = (_GEN(voice, GEN_PITCH)
 						//	+ 100.0f * _GEN(voice, GEN_COARSETUNE)
@@ -197,6 +222,8 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 						// NOTE: origpitch sets MIDI root note while pitchadj is a fine tuning amount
 						// which offsets the original rate.  This means that the fine tuning is
 						// inverted with respect to the root note (so subtract it, not add).
+
+						origFreq = 440 * pow(2., (iter->second->val.sword - MIDIKEYTOA4) / 12.);
 
 						//if (voice->gen[GEN_OVERRIDEROOTKEY].val > -1) {   //FIXME: use flag instead of -1
 						//	voice->root_pitch = voice->gen[GEN_OVERRIDEROOTKEY].val * 100.0f
@@ -373,17 +400,17 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 						// move the loop start point forward => valid again.
 
 					case SFGeneratorID::startAddrsOffset:              /* SF2.01 section 8.1.3 # 0 */
-					//case SFGeneratorID::startAddrsCoarseOffset:        /* SF2.01 section 8.1.3 # 4 */
-						if (this->_sData != nullptr) {
-							//z = (voice->sample->start
-							//	+ (int)_GEN(voice, GEN_STARTADDROFS)
-							//	+ 32768 * (int)_GEN(voice, GEN_STARTADDRCOARSEOFS));
-							//UPDATE_RVOICE_I1(fluid_rvoice_set_start, z);
-							//_buffer.LoopBegin = iter->second->val.uword / 2;
-						}
+						_buffer.PlayBegin += iter->second->val.sword;
+						
+					case SFGeneratorID::startAddrsCoarseOffset:
+						_buffer.PlayBegin += iter->second->val.sword * 32768;	
 						break;
 					case SFGeneratorID::endAddrsOffset:                 /* SF2.01 section 8.1.3 # 1 */
-					//case SFGeneratorID::endAddrsCoarseOffset:           /* SF2.01 section 8.1.3 # 12 */
+						_buffer.PlayLength += iter->second->val.sword;
+						break;
+					case SFGeneratorID::endAddrsCoarseOffset:           /* SF2.01 section 8.1.3 # 12 */
+						_buffer.PlayLength += iter->second->val.sword * 32768;
+						
 						//if (voice->sample != NULL) {
 						//	z = (voice->sample->end
 						//		+ (int)_GEN(voice, GEN_ENDADDROFS)
@@ -393,30 +420,16 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 						//_buffer.LoopLength = iter->second->val.uword / 2;
 						break;
 					case SFGeneratorID::startloopAddrsOffset:           /* SF2.01 section 8.1.3 # 2 */
-					//case SFGeneratorID::startloopAddrsCoarseOffset:     /* SF2.01 section 8.1.3 # 45 */
-						//if (voice->sample != NULL) {
-						//	z = (voice->sample->loopstart
-						//		+ (int)_GEN(voice, GEN_STARTLOOPADDROFS)
-						//		+ 32768 * (int)_GEN(voice, GEN_STARTLOOPADDRCOARSEOFS));
-						//	UPDATE_RVOICE_I1(fluid_rvoice_set_loopstart, z);
-						//}
-						//_buffer.PlayBegin = iter->second->val.uword ;
-						//_buffer.LoopBegin = iter->second->val.uword / 2;
+						_buffer.LoopBegin += iter->second->val.sword;
 						break;
-
+					case SFGeneratorID::startloopAddrsCoarseOffset:     /* SF2.01 section 8.1.3 # 45 */
+						_buffer.LoopBegin += 32768*iter->second->val.sword;
+						break;
 					case SFGeneratorID::endloopAddrsOffset:
-						//case SFGeneratorID::endloopAddrsCoarseOffset:
-							//if (voice->sample != NULL) {
-							//	z = (voice->sample->loopend
-							//		+ (int)_GEN(voice, GEN_ENDLOOPADDROFS)
-							//		+ 32768 * (int)_GEN(voice, GEN_ENDLOOPADDRCOARSEOFS));
-							//	UPDATE_RVOICE_I1(fluid_rvoice_set_loopend, z);
-							//}
-
-							//_buffer.LoopLength = iter->second->val.uword;
-							//_buffer.LoopLength = iter->second->val.uword / 2 - _buffer.LoopBegin;
-							//_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
-
+						_buffer.LoopLength += iter->second->val.sword;
+						break;
+					case SFGeneratorID::endloopAddrsCoarseOffset:
+						_buffer.LoopLength += 32768*iter->second->val.sword;
 						break;
 
 						// Conversion functions differ in range limit
@@ -513,6 +526,7 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 
 						break;
 					case SFGeneratorID::sampleModes:
+						iZone->sampleMode = iter->second->val.uword;
 						break;
 					}
 				}
@@ -520,35 +534,15 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 				// модуляторы
 
 
-				//static int flag = 1;
-				auto smpl = iZone->sample;
-
-				// последние приготовления
-				// - загружаем данные по семплу
-				_buffer.pAudioData = _sData->begin();
-				_buffer.AudioBytes = _sData->Length;
-				_buffer.Flags = XAUDIO2_END_OF_STREAM;
-				_buffer.PlayBegin = smpl->start;
-				_buffer.PlayLength = smpl->end;
-
-				if (iZone->sampleMode)
-				{
-					_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
-					_buffer.LoopBegin = smpl->loopStart;
-					_buffer.LoopLength = smpl->loopEnd;
-				}
-				else
+				// финальная подготовка
+				if (iZone->sampleMode == 0)
 				{
 					_buffer.LoopCount = 0;
 					_buffer.LoopBegin = XAUDIO2_NO_LOOP_REGION;
 					_buffer.LoopLength = 0;
 				}
-				// 440 = midi 69 = SNote 0
-				float orig = smpl->origPitch;
-				double origFreq = 440 * pow(2., (orig - MIDIKEYTOA4) / 12.);
-				double freq = 440 * pow(2., (note->_val) / 12.);
 				this->setFrequency(voice, freq, origFreq);
-				
+
 				HRESULT hr = voice->SubmitSourceBuffer(&_buffer);
 				if (FAILED(hr))
 				{

@@ -88,7 +88,10 @@
                     Height="90">
                 <Button.Flyout>
                     <Flyout x:Name="DeleteTextFlyout">
-                        <Button x:Name="DeleteTextBtn" Content="Ок" Click="DeleteTextBtn_Click"/>
+                        <StackPanel>
+                            <TextBlock Text="Удалить?"/>
+                            <Button x:Name="DeleteTextBtn" Content="Ок" Click="DeleteTextBtn_Click"/>
+                        </StackPanel>
                     </Flyout>
                 </Button.Flyout>
             </Button>

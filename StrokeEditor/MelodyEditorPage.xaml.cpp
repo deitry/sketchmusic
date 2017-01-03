@@ -56,9 +56,9 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	((App^)App::Current)->_player->needMetronome = true;
 	
 	// TODO : собирать список автоматически
-	availableInstruments = ref new Platform::Collections::Vector<Instrument^>(16);
+	availableInstruments = ref new Platform::Collections::Vector<Instrument^>(15);
 	availableInstruments->SetAt(0, ref new Instrument("grand_piano.sf2"));
-	availableInstruments->SetAt(1, ref new Instrument("Rhodes.sf2"));
+	availableInstruments->SetAt(1, ref new Instrument("1General Midi.sf2"));
 	availableInstruments->SetAt(2, ref new Instrument("HammondC3.sf2"));
 
 	availableInstruments->SetAt(3, ref new Instrument("acoustic_guitar.sf2"));
@@ -74,8 +74,7 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	availableInstruments->SetAt(11, ref new Instrument("HardRockDrums.sf2"));
 	availableInstruments->SetAt(12, ref new Instrument("RealAcousticDrums_1.sf2"));
 	availableInstruments->SetAt(13, ref new Instrument("MelottiDrums.sf2"));
-	availableInstruments->SetAt(14, ref new Instrument("drum_kit_01.sf2"));
-	availableInstruments->SetAt(15, ref new Instrument("Elec_Percussion.sf2"));
+	availableInstruments->SetAt(14, ref new Instrument("Elec_Percussion.sf2"));
 
 	ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
 	if (list)
@@ -167,6 +166,8 @@ void StrokeEditor::MelodyEditorPage::playAll_Click()
 
 void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ args)
 {
+	if (_textRow->current == nullptr) return;
+
 	if (args->key)
 	{
 		switch (args->key->type)
@@ -376,16 +377,27 @@ void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender
 					//auto data = sfdata.get();
 					ContentDialog^ presetListDlg = ref new ContentDialog;
 					Grid^ grid = ref new Grid;
+					grid->ColumnDefinitions->Append(ref new ColumnDefinition);
+					grid->ColumnDefinitions->Append(ref new ColumnDefinition);
 					ListView^ list = ref new ListView;
 					list->ItemTemplate = (DataTemplate^) this->Resources->Lookup("myResourceTemplate");
 					list->ItemsSource = data->presets;
 					list->IsItemClickEnabled = true;
-					list->ItemClick += ref new Windows::UI::Xaml::Controls::ItemClickEventHandler([=](Object^, ItemClickEventArgs^)
+					list->ItemClick += ref new Windows::UI::Xaml::Controls::ItemClickEventHandler([=](Object^, Object^)
+					{
+						presetListDlg->Hide();
+					});
+					Button^ btn = ref new Button;
+					btn->Content = "Отмена";
+					btn->Click += ref new Windows::UI::Xaml::RoutedEventHandler([=](Object^, Object^)
 					{
 						presetListDlg->Hide();
 					});
 
 					grid->Children->Append(list);
+					grid->Children->Append(btn);
+					btn->SetValue(Grid::ColumnProperty, 1);
+
 					presetListDlg->Content = grid;
 
 					auto dialog = concurrency::create_task(presetListDlg->ShowAsync());
@@ -406,8 +418,6 @@ void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender
 				}));
 			});
 		}));
-		
-		
 	}
 	InstrumentsFlyout->Hide();
 }
@@ -425,13 +435,10 @@ void StrokeEditor::MelodyEditorPage::DeleteTextBtn_Click(Platform::Object^ sende
 			unsigned int index;
 			_texts->texts->IndexOf(text, &index);
 			unsigned int new_index = index;
-			if (new_index> (size - 1)) { new_index = size - 1; }
+			if (new_index> (size - 2)) { new_index = size - 2; }	// size-1 = крайний элемент; size-1-1 = крайний элемент после удаления
 			TextsList->SelectedIndex = new_index;
-
-			//_textRow->SetText(_texts->texts->GetAt(new_index));
-
 			_texts->texts->RemoveAt(index);
-
+			_textRow->SetText(_texts->texts->GetAt(new_index));
 		}
 		DeleteTextFlyout->Hide();
 	}

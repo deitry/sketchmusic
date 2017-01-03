@@ -28,7 +28,7 @@ namespace StrokeEditor
 		sqlite3* libraryDB;
 		SketchMusic::Player::Player^ _player;
 		SketchMusic::Commands::CommandManager^ _manager;
-
+		Windows::Foundation::Collections::IVector<SketchMusic::Idea^>^ ideaLibrary;
 
 		void OpenLibrary(Platform::String^ dbName);
 		int InsertIdea(SketchMusic::Idea^ idea);

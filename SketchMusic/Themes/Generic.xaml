@@ -63,7 +63,7 @@
     </Flyout>
 
     <Style x:Key="KeyboardBtnStyle" TargetType="ContentControl">
-        <Setter Property="Background" Value="DarkOrange"/>
+        <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
@@ -75,9 +75,10 @@
                         >
                         <Grid>
                             <Rectangle Fill="{Binding IsEnabled, RelativeSource={RelativeSource TemplatedParent}, 
-                                Converter={StaticResource bool2color}}" Opacity="1"/>
+                                Converter={StaticResource bool2color}}" Opacity="1.0"/>
                             <Rectangle Fill="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
                                 Converter={StaticResource blackKey2color}}" Opacity="0.5"/>
+                            <Rectangle Fill="{TemplateBinding Background}" Opacity="0.8"/>
                             <TextBlock
                                 FontFamily="Segoe MDL2 Assets"
                                 FontSize="{TemplateBinding FontSize}"

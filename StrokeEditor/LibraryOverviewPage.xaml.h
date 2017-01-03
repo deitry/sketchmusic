@@ -39,7 +39,6 @@ namespace StrokeEditor
 
 		void RefreshList();	// Обновить список в соответствии с выбранным фильтром
 
-		static Windows::Foundation::Collections::IVector<SketchMusic::Idea^>^ ideaLibrary;
 		void RefreshBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
 		//static Platform::String^ StringFromAscIIChars(std::string & chars);

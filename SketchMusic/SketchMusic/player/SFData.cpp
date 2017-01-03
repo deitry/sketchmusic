@@ -160,13 +160,15 @@ bool SketchMusic::SFReader::SFData::ReadPdta(DataReader^ dataReader)
 			for (int i = phdr->size / SFPHDRSIZE; i > 0; i--) // -1
 			{
 				SFPreset^ preset = SFPreset::ReadPreset(dataReader);
-				this->presets->Append(preset);
-
+				
 				if (previous)
 					previous->zCnt = preset->zndx - previous->zndx;
 				// если отрицательное - плохо
+				
+				if (i > 1)
+					this->presets->Append(preset);	// добавляем все, кроме последнего, от него требовался только zndx
+
 				previous = preset;
-				// терминальный также записываем, чтобы сохранить его zndx
 			}
 			//SFPreset^ terminal = SFPreset::ReadPreset(dataReader); // последняя запись - не является пресетом
 		} // phdr
@@ -291,15 +293,17 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 		for (int i = ihdr->size / SFIHDRSIZE; i > 0; i--) // -1
 		{
 			SFInstrument^ instrument = SFInstrument::ReadInstrument(dataReader);
-			this->instruments->Append(instrument);
-
+			
 			if (previous)
 			{
 				previous->zCnt = instrument->zNdx - previous->zNdx;
 			}
 			// если отрицательное - плохо
+
+			if (i > 1)
+				this->instruments->Append(instrument); // добавляем все, кроме последнего, от него требовался только zndx
+
 			previous = instrument;
-			// терминальный также записываем, чтобы сохранить его zndx
 		}
 	} // ihdr
 
@@ -471,9 +475,6 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 					{
 						zone->sample->origPitch = gen.second->val.sword;
 					}
-					break;
-				case SketchMusic::SFReader::SFGeneratorID::sampleModes:
-					zone->sampleMode = gen.second->val.uword;
 					break;
 				}
 			}

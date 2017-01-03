@@ -59,7 +59,7 @@ void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note, Sketc
 	auto playNote = concurrency::create_task([=]
 	{
 		// если имеющийся не устраивает
-		if (_keyboardEngine && (_keyboardEngine->getInstrument()->_name != instrument->_name))
+		if (_keyboardEngine && (!_keyboardEngine->getInstrument()->EQ(instrument)))
 		{
 			_engines->ReleaseSoundEngine(_keyboardEngine);
 			_keyboardEngine = nullptr;

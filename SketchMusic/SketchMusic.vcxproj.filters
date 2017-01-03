@@ -206,9 +206,6 @@
     <None Include="resources\grand_piano.sf2">
       <Filter>Resources</Filter>
     </None>
-    <None Include="resources\drum_kit_01.sf2">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="resources\DubKit.sf2">
       <Filter>Resources</Filter>
     </None>
@@ -230,10 +227,10 @@
     <None Include="resources\RealAcousticDrums_1.SF2">
       <Filter>Resources</Filter>
     </None>
-    <None Include="resources\Rhodes.sf2">
+    <None Include="resources\Elec_Percussion.sf2">
       <Filter>Resources</Filter>
     </None>
-    <None Include="resources\Elec_Percussion.sf2">
+    <None Include="resources\1General Midi.SF2">
       <Filter>Resources</Filter>
     </None>
   </ItemGroup>

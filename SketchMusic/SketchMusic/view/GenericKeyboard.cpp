@@ -23,6 +23,11 @@ using namespace Windows::UI::Xaml::Media;
 
 GenericKeyboard::GenericKeyboard()
 {
+	_dict = ref new ResourceDictionary;
+	_dict->Source = ref new Uri("ms-appx:///SketchMusic/Themes/Generic.xaml");
+	pressedBackground = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("draggedForegroundBrush"));
+	normalBackground = nullptr;//reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("keyBackground"));
+
 	DefaultStyleKey = "SketchMusic.View.GenericKeyboard";
 	//recording = false;
 	currentState = ref new KeyboardState(KeyboardStateEnum::normal);
@@ -200,6 +205,7 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 			case SketchMusic::View::KeyType::genericNote:
 			case SketchMusic::View::KeyType::relativeNote:
 				KeyPressed(this, args);
+				ctrl->Background = pressedBackground;
 				if (pressedKeys == 1)
 				{
 					currentState->state = SketchMusic::View::KeyboardStateEnum::pressed;
@@ -367,6 +373,7 @@ void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
 
 	KeyReleased(this, args);
+	ctrl->Background = normalBackground;
 
 	if (pressedKeys <= 0)
 	{
