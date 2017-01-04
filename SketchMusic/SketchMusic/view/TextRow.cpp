@@ -299,15 +299,26 @@ void SketchMusic::View::TextRow::RedrawText()
 	}
 
 	// перерисовываем положение курсора
-	auto point = GetCoordinatsOfPosition(currentPosition);
-	_canvas->SetLeft(_cursor, point.X);
-	_canvas->SetTop(_cursor, point.Y);
+	SetCursor(nullptr);
 }
 
 SketchMusic::Text^ SketchMusic::View::TextRow::GetText()
 { 
 	// возвращаем "главный" текст
 	return current;
+}
+
+void SketchMusic::View::TextRow::SetCursor(SketchMusic::Cursor^ pos)
+{
+	if (pos)
+	{
+		currentPosition->moveTo(pos);
+	}
+
+	// перерисовываем положение курсора
+	auto point = GetCoordinatsOfPosition(currentPosition);
+	_canvas->SetLeft(_cursor, point.X);
+	_canvas->SetTop(_cursor, point.Y);
 }
 
 // работа с отдельными символами

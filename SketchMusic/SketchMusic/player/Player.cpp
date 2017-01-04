@@ -24,6 +24,7 @@ SketchMusic::Player::Player::Player()
 	needMetronome = true;
 	_BPM = 120;
 	cycling = false;
+	quantize = 4.;
 
 	// do - чтобы можно было "скипнуть" инициализацию, если то-то не удалось
 	do
@@ -113,13 +114,10 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 	{
 		for (auto text : data->texts)
 		{
-			
 			// получаем список символов в данном тексте
 			auto symbols = text->getText();
 			// находим ближайший к старту символ (ПОСЛЕ старта)
 			
-			// TODO : отдельно стоит отслеживать ближайший к старту (ПЕРЕД стартом)
-			// символ начала строки - там будет храниться информация о темпе, гамме и т.д.
 			auto iter = symbols->First();
 			_BPM = 120;
 			while (iter->HasCurrent)
@@ -134,7 +132,6 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						_BPM = tempo->value;
 					}
 					// проматываем
-					
 					iter->MoveNext();
 
 					// если мы достигли последней ноты, а наш курсор ещё дальше
@@ -177,11 +174,11 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 				{
 					tempState = this->_state;
 					SketchMusic::Cursor^ pos = pIter->Current->_pos;
-					
+
 					// выбираем все ноты в данной точке
 					if (pos->LE(cursor))
 					{
-						Windows::Foundation::Collections::IVector<SketchMusic::INote^>^ notes = ref new Platform::Collections::Vector < SketchMusic::INote^ > ;
+						Windows::Foundation::Collections::IVector<SketchMusic::INote^>^ notes = ref new Platform::Collections::Vector < SketchMusic::INote^ >;
 						do
 						{
 							auto note = dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym);
@@ -199,7 +196,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 							}
 							pIter->MoveNext();
 						} while (pIter->HasCurrent && pIter->Current->_pos->LE(cursor));
-						
+
 						// TODO : конкретизация относительных нот.
 						// Они должны конкретизирваться относительно нот вводимых в данный момент
 						// Заодно нужно отделить функцию проигрывания текущей позиции / одной доли?,
@@ -212,10 +209,10 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 							pIter->MoveNext();
 							if (!(pIter->HasCurrent)) break;
 						}
-					} 
+					}
 
 					// метроном
-					if (needMetronome &&((cursor->getBeat() - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
+					if (needMetronome && ((cursor->getBeat() - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
 					{
 						playMetronome();
 					}
@@ -236,9 +233,23 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			auto nClock = Clock::now();
 			auto dif = (std::chrono::duration_cast<std::chrono::microseconds>(nClock - pClock).count());
 			pClock = nClock;
-			float offset = dif * _BPM * TICK_IN_BEAT /60 /1000000;
+			float offset = dif * _BPM * TICK_IN_BEAT / 60 / 1000000;
 			cursor->incTick(offset);
-			
+
+			// квантизация
+			if (quantize)
+			{
+				static int prevQuant = -1;
+				int quant = cursor->getTick() / quantize;
+				if (quant != prevQuant)
+				{
+					CursorPosChanged(this, cursor);
+					prevQuant = quant;
+				}
+			} 
+			//else { // без квантизации сообщаем каждый раз
+			//	CursorPosChanged(this, cursor);
+			//}
 
 			if (this->cycling && (tempState == s::WAIT))
 			{

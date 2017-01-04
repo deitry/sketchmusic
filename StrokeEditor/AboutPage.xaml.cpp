@@ -24,6 +24,8 @@ using namespace Windows::UI::Xaml::Navigation;
 AboutPage::AboutPage()
 {
 	InitializeComponent();
+
+	VersionTxt->Text = Windows::ApplicationModel::Package::Current->InstalledDate.ToString();
 }
 
 

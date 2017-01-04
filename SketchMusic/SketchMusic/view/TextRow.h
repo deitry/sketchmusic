@@ -90,7 +90,8 @@ public:
 	// универсальная функция
 	void SetText(CompositionData^ textCollection, SketchMusic::Text^ format);
 	SketchMusic::Text^ GetText();
-
+	void SetCursor(SketchMusic::Cursor^ pos);
+	
 	// работа с отдельными символами
 	void AddSymbol(PositionedSymbol^ symbol);
 	//void DeleteSymbol(PositionedSymbol^ symbol);

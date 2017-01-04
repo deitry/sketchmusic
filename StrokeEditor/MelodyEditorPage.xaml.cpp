@@ -24,6 +24,10 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace Windows::UI::Xaml::Interop;
 
+using namespace concurrency;
+using namespace Windows::Storage;
+using namespace Windows::Storage::Streams;
+
 // Шаблон элемента пустой страницы задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234238
 
 MelodyEditorPage::MelodyEditorPage()
@@ -53,40 +57,57 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	}
 	
 	_texts = _idea->Content;
-	((App^)App::Current)->_player->needMetronome = true;
 	
+	Windows::Storage::ApplicationDataContainer^ localSettings =
+		Windows::Storage::ApplicationData::Current->LocalSettings;
+	if (localSettings->Values->HasKey("need_metronome"))
+	{
+		((App^)App::Current)->_player->needMetronome = (bool)localSettings->Values->Lookup("need_metronome");
+	} else {
+		((App^)App::Current)->_player->needMetronome = true;
+	}
+
 	// TODO : собирать список автоматически
-	availableInstruments = ref new Platform::Collections::Vector<Instrument^>(15);
-	availableInstruments->SetAt(0, ref new Instrument("grand_piano.sf2"));
-	availableInstruments->SetAt(1, ref new Instrument("1General Midi.sf2"));
-	availableInstruments->SetAt(2, ref new Instrument("HammondC3.sf2"));
-
-	availableInstruments->SetAt(3, ref new Instrument("acoustic_guitar.sf2"));
-	availableInstruments->SetAt(4, ref new Instrument("Guitar Distortion.sf2"));
-	availableInstruments->SetAt(5, ref new Instrument("Jazz_Guitar.sf2"));
-	availableInstruments->SetAt(6, ref new Instrument("Epiphone_Pick_Bass.sf2"));
-
-	availableInstruments->SetAt(7, ref new Instrument("Sax_full_range.sf2"));
-	availableInstruments->SetAt(8, ref new Instrument("Solo_Viola.sf2"));
-	availableInstruments->SetAt(9, ref new Instrument("Ensemble_Pad.sf2"));
-
-	availableInstruments->SetAt(10, ref new Instrument("DubKit.sf2"));
-	availableInstruments->SetAt(11, ref new Instrument("HardRockDrums.sf2"));
-	availableInstruments->SetAt(12, ref new Instrument("RealAcousticDrums_1.sf2"));
-	availableInstruments->SetAt(13, ref new Instrument("MelottiDrums.sf2"));
-	availableInstruments->SetAt(14, ref new Instrument("Elec_Percussion.sf2"));
-
+	//this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([this]()
+	//{
+		auto async = create_task([=]
+		{
+			auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
+			return create_task(folder->GetFolderAsync("SketchMusic\\resources\\"));
+		}).then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
+		{
+			auto resourceFolder = resourceFolderTask.get();
+			return create_task(resourceFolder->GetFilesAsync());
+		}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
+		{
+			availableInstruments = ref new Platform::Collections::Vector<Instrument^>;
+			auto list = resourceListTask.get();
+			for (auto&& file : list)
+			{
+				availableInstruments->Append(ref new Instrument(file->Name));
+			}
+		});
+	//}));
+	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
+	{
+		async.get();
+		auto listView = dynamic_cast<ListView^>(InstrumentsFlyout->Content);
+		if (listView)
+		{
+			listView->DataContext = availableInstruments;
+		}
+	}));
 	ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
 	if (list)
 	{
 		list->DataContext = _texts->texts;
 	}
 	
-	list = dynamic_cast<ListView^>(InstrumentsFlyout->Content);
-	if (list)
-	{
-		list->DataContext = availableInstruments;
-	}
+	//list = dynamic_cast<ListView^>(InstrumentsFlyout->Content);
+	//if (list)
+	//{
+	//	list->DataContext = availableInstruments;
+	//}
 
 	_textRow->SetText(_texts, nullptr);
 }
@@ -121,8 +142,11 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MelodyEditorPage::_keyboard_KeyboardPressed);
 	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyReleased += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
 		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MelodyEditorPage::_keyboard_KeyReleased);
-
-	playerStateChangeToken=
+	
+	curPosChangeToken = 
+		((App^)App::Current)->_player->CursorPosChanged += 
+		ref new Windows::Foundation::EventHandler<SketchMusic::Cursor ^>(this, &StrokeEditor::MelodyEditorPage::OnCursorPosChanged);
+	playerStateChangeToken =
 		((App^)App::Current)->_player->StateChanged += 
 		ref new Windows::Foundation::EventHandler<SketchMusic::Player::PlayerState>(this, &StrokeEditor::MelodyEditorPage::OnStateChanged);
 	bpmChangeToken = 
@@ -137,9 +161,15 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	((App^)App::Current)->_player->stop();
 	((App^)App::Current)->_player->stopKeyboard();
 
-	// открыть страницу со сведениями о данной идее
+	// сохраняем данные в виде текста
 	_idea->SerializedContent = _idea->Content->serialize()->Stringify();
 	
+	// сохраняем настройки
+	Windows::Storage::ApplicationDataContainer^ localSettings =
+		Windows::Storage::ApplicationData::Current->LocalSettings;
+
+	localSettings->Values->Insert("metronome", ((App^)App::Current)->_player->needMetronome);
+
 	// отписка от события
 	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
 
@@ -339,6 +369,17 @@ void StrokeEditor::MelodyEditorPage::OnBpmChanged(Platform::Object ^sender, floa
 		Windows::UI::Core::CoreDispatcherPriority::Normal,
 		ref new Windows::UI::Core::DispatchedHandler([=]() {
 		this->BPMText->Text = "" + ((App^)App::Current)->_player->_BPM;
+	}));
+}
+
+void StrokeEditor::MelodyEditorPage::OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor^ pos)
+{
+	this->Dispatcher->RunAsync(
+		Windows::UI::Core::CoreDispatcherPriority::Normal,
+		ref new Windows::UI::Core::DispatchedHandler([=]() {
+			_textRow->SetCursor(pos);
+			//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+			//	+ " / tick = " + _textRow->currentPosition->getTick();
 	}));
 }
 

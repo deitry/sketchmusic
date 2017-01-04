@@ -16,6 +16,8 @@
             <TextBlock Text="SketchMusic для Windows 10."/>
             <TextBlock Text="Автор: deitry"/>
             <TextBlock Text="e-mail: dm.s.vornychev@gmail.com"/>
+            <TextBlock Text="Текущая версия:"/>
+            <TextBlock Name="VersionTxt"/>
         </StackPanel>
         <Button Grid.Row="1" Name="GoBackBtn" Content="Вернуться в меню" Click="GoBackBtn_Click" Margin="0,20" HorizontalAlignment="Center"/>
     </Grid>

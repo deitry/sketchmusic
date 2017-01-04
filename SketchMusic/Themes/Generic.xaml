@@ -7,13 +7,13 @@
 
     <SolidColorBrush x:Key="keyBackground" x:Name="keyBackground" Color="DarkOrange"/>
     <SolidColorBrush x:Key="blackKeyBackground" x:Name="blackKeyBackground" Color="DarkRed"/>
-    <SolidColorBrush x:Key="keyForeground" x:Name="keyForeground" Color="Black"/>
+    <SolidColorBrush x:Key="keyForeground" x:Name="keyForeground" Color="{ThemeResource SystemControlBackgroundBaseHighBrush}"/>
     <SolidColorBrush x:Key="pressedKeyBackground" x:Name="pressedKeyBackground" Color="Gray"/>
     <SolidColorBrush x:Key="disabledKeyBackground" x:Name="disabledKeyBackground" Color="AntiqueWhite"/>
     <SolidColorBrush x:Key="ctrlKeyForeground" x:Name="ctrlKeyForeground" Color="Blue"/>
     <SolidColorBrush x:Key="actionKeyForeground" x:Name="actionKeyForeground" Color="Red"/>
 
-    <SolidColorBrush x:Key="textBrush" x:Name="textBrush" Color="Black"/>
+    <SolidColorBrush x:Key="textBrush" x:Name="textBrush" Color="{ThemeResource SystemControlBackgroundBaseHighBrush}"/>
     <SolidColorBrush x:Key="draggedForegroundBrush" x:Name="draggedForegroundBrush" Color="White" Opacity="0.4"/>
     <SolidColorBrush x:Key="noteBackground" x:Name="noteBackground" Color="DarkOrange"/>
     <SolidColorBrush x:Key="noteBackground2" x:Name="noteBackground2" Color="Blue"/>
@@ -312,9 +312,9 @@
         <Setter Property="Template" Value="{StaticResource PlaceholderControlTemplate}"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="BorderBrush" Value="Beige"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource SystemControlBackgroundBaseLowBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="AntiqueWhite"/>
+        <Setter Property="Foreground" Value="{ThemeResource SystemControlBackgroundBaseHighBrush}"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Width" Value="{StaticResource BeatWidth}"/>
         <Setter Property="Height" Value="{StaticResource RowHeight}"/>
@@ -351,7 +351,7 @@
 
             <TextBlock x:Name="symbolTextBlock"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Foreground="{StaticResource SystemControlBackgroundBaseHighBrush}">
+                           Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
                     <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"></Run>
             </TextBlock>
         </Grid>
@@ -371,7 +371,7 @@
     <Style TargetType="ContentControl" x:Key="SnapPointStyle">
         <Setter Property="Height" Value="20"/>
         <Setter Property="Width" Value="4"/>
-        <Setter Property="Background" Value="AntiqueWhite"/>
+        <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundChromeMediumBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
