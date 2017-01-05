@@ -240,11 +240,14 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			if (quantize)
 			{
 				static int prevQuant = -1;
-				int quant = cursor->getTick() / quantize;
-				if (quant != prevQuant)
+				static int prevBeat = -1;
+				int quant = cursor->getTick() * quantize / TICK_IN_BEAT;
+				int beat = cursor->getBeat();
+				if ((quant != prevQuant) || (beat != prevBeat))
 				{
 					CursorPosChanged(this, cursor);
 					prevQuant = quant;
+					prevBeat = beat;
 				}
 			} 
 			//else { // без квантизации сообщаем каждый раз

@@ -120,6 +120,10 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 void StrokeEditor::MelodyEditorPage::InitializePage()
 {
+	// подгоняем ширину TextRow
+	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width - mySplitView->CompactPaneLength;
+	_textRow->Width = width;
+
 	moveSym = ref new SketchMusic::Commands::Handler([=](Object^ args) -> void
 	{
 		SketchMusic::Commands::SymbolHandlerArgs^ symArgs = dynamic_cast<SketchMusic::Commands::SymbolHandlerArgs^>(args);
@@ -523,4 +527,17 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 	{
 		//myFrame->Navigate(settingsItem->GetType());
 	}
+}
+
+
+void StrokeEditor::MelodyEditorPage::_textRow_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
+{
+	
+}
+
+
+void StrokeEditor::MelodyEditorPage::Page_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
+{
+	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width - mySplitView->CompactPaneLength;
+	_textRow->Width = width;
 }

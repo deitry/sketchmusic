@@ -54,7 +54,6 @@
             <Setter Property="Orientation" Value="Horizontal"/>
             <Setter Property="Margin" Value="5,10,5,10"/>
             <Setter Property="Height" Value="{StaticResource RowHeight}"/>
-            <Setter Property="MaxWidth" Value="1024"/>
         </Style>
 
         <ControlTemplate TargetType="ContentControl" x:Key="CursorPositionTemplate">
@@ -163,20 +162,21 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
-        <Border Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
+    
+        <Border BorderBrush="{StaticResource TextBoxButtonForegroundThemeBrush}" BorderThickness="2">
             <ScrollViewer x:Name="_scrollViewer"
                           ZoomMode="Disabled"
                           VerticalScrollMode="Auto"
                           HorizontalScrollMode="Enabled"
                           HorizontalScrollBarVisibility="Visible"
-                          Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
+                          Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}"
+                          MaxWidth="{Binding RelativeSource={RelativeSource Self}, Path=MaxWidth}">
 
-                <Grid Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
+                <Grid>
                     <StackPanel x:Name="_mainPanel"
                                 Orientation="Vertical"
-                                Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
-                        <StackPanel Style="{StaticResource RowPanel}">
+                                />
+                <!--<StackPanel Style="{StaticResource RowPanel}">
                             <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
                             <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
                             <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
@@ -204,11 +204,11 @@
                             <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
                             <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
                             <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
-                        </StackPanel>
-                    </StackPanel>
+                        </StackPanel>-->
 
-                    <Canvas x:Name="_canvas"
-                            Height="100">
+
+                <Canvas x:Name="_canvas"
+                        Height="100">
                         <ContentControl x:Name="_cursor"
                                         Style="{StaticResource CursorPositionStyle}"
                                         Canvas.Left="0"
@@ -217,5 +217,5 @@
                 </Grid>
             </ScrollViewer>
         </Border>
-    </Grid>
+    
 </UserControl>
