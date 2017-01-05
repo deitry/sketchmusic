@@ -9,6 +9,7 @@
 #include <ppltasks.h>
 #include "SketchMusic\SketchMusic.h"
 #include "SketchMusic\view\RadialKeyboard.h"
+#include "SketchMusic\view\Converters.h"
 #include "SketchMusic\view\GenericKeyboard.xaml.h"
 #include "SketchMusic\view\TextRow.xaml.h"
 #include "SketchMusic\view\TextMultiRow.h"

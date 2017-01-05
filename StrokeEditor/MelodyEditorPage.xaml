@@ -22,16 +22,6 @@
         </ResourceDictionary>
     </Page.Resources>
 
-    <!--<Page.TopAppBar>
-        <CommandBar x:Name="commandBar">
-            <CommandBar.Content>
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="На главную"/>
-                </StackPanel>
-            </CommandBar.Content>
-        </CommandBar>
-    </Page.TopAppBar>-->
-
     <Grid x:Name="grid" 
                 Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
                 BorderThickness="5"
@@ -165,7 +155,6 @@
                     <smv:GenericKeyboard x:Name="_keyboard" BorderBrush="OrangeRed"
                                  BorderThickness="1"
                                  Background="Orange"
-                                 Height="400"
                                  Width="auto"
                                  VerticalAlignment="Bottom"
                                  HorizontalAlignment="Left"
@@ -180,12 +169,6 @@
                         <TextBlock x:Name="BPMText">
                         Здесь будет отображаться текущее значение текста.
                         </TextBlock>
-                        <!--<TextBlock x:Name="RealPos">
-                        Здесь будет отображаться текущая позиция курсора.
-                </TextBlock>
-                <TextBlock x:Name="Version">
-                        Версия 2016.12.16-17.
-                </TextBlock>-->
                     </StackPanel>
                 </Grid>
             </SplitView.Content>

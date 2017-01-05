@@ -5,6 +5,7 @@
 
 #include "pch.h"
 #include "GenericKeyboard.xaml.h"
+#include <string>
 
 using namespace SketchMusic::View;
 
@@ -62,7 +63,7 @@ void SketchMusic::View::GenericKeyboard::OnKeyboardPressed(SketchMusic::View::Ke
 	{
 		// использовать конвертер тип состояния -> стиль кнопки
 		auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
-		ctrl->IsEnabled = false;
+		if (ctrl) ctrl->IsEnabled = false;
 		break;
 	}
 	}
@@ -129,7 +130,7 @@ void SketchMusic::View::GenericKeyboard::OnNormalState(SketchMusic::View::Key^ k
 	{
 		// использовать конвертер тип состояния -> стиль кнопки
 		auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
-		ctrl->IsEnabled = true;
+		if (ctrl) ctrl->IsEnabled = true;
 		break;
 	}
 	}
@@ -195,10 +196,7 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 	{
 		SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(ctrl->Content);
 
-		//auto send = ref new SketchMusic::View::Key(key->type, key->value);
 		KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
-		//args->key = send;
-		//args->keysPressed = this->pressedKeys;
 
 		if (key)
 		{
@@ -243,7 +241,13 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 				break;
 			case SketchMusic::View::KeyType::tempo:
 			{
-				// TODO : переместить их куда-нибудь отсюда
+				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
+				if (flyout)
+					flyout->ShowAt(ctrl);
+				break;
+			}
+			case SketchMusic::View::KeyType::quantization:
+			{
 				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
 				if (flyout)
 					flyout->ShowAt(ctrl);
@@ -301,12 +305,13 @@ void SketchMusic::View::GenericKeyboard::InitializePage()
 			ContentControl^ ctrl = dynamic_cast<ContentControl^>(static_cast<Object^>(element));
 			if (ctrl)
 			{
-				int num = std::stoi(((String^)ctrl->Tag)->Data());
-				SketchMusic::View::Key^ key = ref new SketchMusic::View::Key(num);
-				ctrl->Content = key;
-				key->parent = ctrl;
-				_keys.insert(std::make_pair(key, false));
-
+				SketchMusic::View::Key^ key = dynamic_cast<Key^>(ctrl->Content);
+				if (key)
+				{
+					key->parent = ctrl;
+					_keys.insert(std::make_pair(key, false));
+				}
+				
 				// позже для оптимизации можно будет часть клавиш держать в одном массиве, часть в другом
 				// сейчас ещё не до конца понятно, какие клавиши во что будем превращать
 
@@ -317,36 +322,6 @@ void SketchMusic::View::GenericKeyboard::InitializePage()
 				// для мыши	
 				ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::onKeyboardControlPressed);
 				ctrl->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::OnPointerReleased);
-				// как?- подписать ctrl на событие изменения состояния клавиатуры
-
-				if (auto flyout = Flyout::GetAttachedFlyout(ctrl))
-				{
-					if (flyout && (key->type == SketchMusic::View::KeyType::tempo))
-					{
-						flyout->Opened += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnOpened);
-						flyout->Closed += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnClosed);
-
-						//StackPanel^ panel = dynamic_cast<StackPanel^>(flyout->Content);
-						//for (auto&& child : panel->Children)
-						//{
-						//	Button^ btn = dynamic_cast<Button^>(static_cast<Object^>(child));
-						//	if (btn)
-						//	{
-						//		btn->Tag = nullptr;
-						//		btn->Click += ref new Windows::UI::Xaml::RoutedEventHandler(this, &SketchMusic::View::GenericKeyboard::OnClick);
-						//		//ref new RoutedEventHandler([=](Object^ obj, RoutedEventArgs^ args)
-						//		//{
-						//		//	tempoPressed = true;
-						//		//	flyout->Hide();
-						//		//});
-						//	}
-						//}
-					}
-					if (flyout && (key->type == SketchMusic::View::KeyType::quantization))
-					{
-
-					}
-				}
 			}
 		}
 	}
@@ -395,7 +370,7 @@ void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
 
 	KeyReleased(this, args);
-	ctrl->Background = keyBackground;
+	ctrl->Background = nullptr;
 
 	if (pressedKeys <= 0)
 	{
@@ -448,9 +423,37 @@ void SketchMusic::View::GenericKeyboard::OnOpened(Platform::Object ^sender, Plat
 
 void SketchMusic::View::GenericKeyboard::OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
 {
-	//if (tempoFlyout)
-	//{
-	//	tempoPressed = true;
-	//	tempoFlyout->Hide();
-	//}
+	tempoPressed = true;
+	TempoFlyout->Hide();
+}
+
+void SketchMusic::View::GenericKeyboard::OnQuantizeClick(Platform::Object ^ sender, Windows::UI::Xaml::RoutedEventArgs ^ e)
+{
+	// 
+	auto bt = dynamic_cast<Button^>(e->OriginalSource);
+	if (bt)
+	{
+		quantizeNeed->IsChecked = true;
+
+		// на сколько надо поделить
+		int div = std::stoi(((String^)bt->Tag)->Data());
+
+		auto key = ref new SketchMusic::View::Key(KeyType::quantization, div);
+		auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
+		KeyPressed(this, args);
+
+		QuantizeFlyout->Hide();
+	}
+}
+
+
+void SketchMusic::View::GenericKeyboard::quantizeNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	quantizeNeed->IsChecked = !quantizeNeed->IsChecked;
+}
+
+
+void SketchMusic::View::GenericKeyboard::QuantizeFlyout_Closed(Platform::Object^ sender, Platform::Object^ e)
+{
+
 }

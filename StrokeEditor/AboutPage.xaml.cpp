@@ -25,7 +25,8 @@ AboutPage::AboutPage()
 {
 	InitializeComponent();
 
-	VersionTxt->Text = Windows::ApplicationModel::Package::Current->InstalledDate.ToString();
+	auto formatter = ref new Windows::Globalization::DateTimeFormatting::DateTimeFormatter("shortdate shorttime");
+	VersionTxt->Text = formatter->Format(Windows::ApplicationModel::Package::Current->InstalledDate);
 }
 
 

@@ -30,6 +30,7 @@ namespace SketchMusic
 		property Platform::String^ preset;	// номер пресета - для выбора в sf2
 	};
 
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class InstrumentToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 	{
 	public:

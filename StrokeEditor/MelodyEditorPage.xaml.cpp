@@ -174,7 +174,7 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	Windows::Storage::ApplicationDataContainer^ localSettings =
 		Windows::Storage::ApplicationData::Current->LocalSettings;
 
-	localSettings->Values->Insert("metronome", ((App^)App::Current)->_player->needMetronome);
+	localSettings->Values->Insert("need_metronome", ((App^)App::Current)->_player->needMetronome);
 
 	// отписка от события
 	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
@@ -211,6 +211,11 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		case SketchMusic::View::KeyType::metronome:
 		{
 			((App^)App::Current)->_player->needMetronome = (bool)args->key->value;
+			break;
+		}
+		case SketchMusic::View::KeyType::quantization:
+		{
+			((App^)App::Current)->_player->quantize= (int)args->key->value;
 			break;
 		}
 		case SketchMusic::View::KeyType::note:

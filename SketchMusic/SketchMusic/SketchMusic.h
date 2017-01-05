@@ -70,6 +70,7 @@ namespace SketchMusic
 	/**
 	"Облегченная" версия класса Composition. Нужна для определения альбома
 	*/
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class CompositionHeader sealed
 	{
 	public:
@@ -77,6 +78,7 @@ namespace SketchMusic
 		property String^ description;
 	};
 
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class CompositionData sealed
 	{
 	public:
@@ -666,6 +668,7 @@ namespace SketchMusic
 			WAIT = 2,	// останавливается - нужен для проверок на наличие нот. При их наличии продолжает играть
 		};
 
+		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 		public ref class PlayerStateToPlayBtnContentConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 		{
 		public:
@@ -823,6 +826,7 @@ namespace SketchMusic
 		// конвертеры значений
 		ref class OnSymbolToStringConverter;
 		ref class OnKeyToStringConverter;
+		ref class TagToKeyConverter;		// как keytostring, только наоборот. Не понял как можно тот же конвертер в обратную сторону использовать
 		ref class BoolToColorConverter;
 		ref class BlackKeyToColorConverter;
 		ref class KeyStateToColorConverter;

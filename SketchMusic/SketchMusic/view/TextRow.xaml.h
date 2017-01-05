@@ -13,7 +13,7 @@ using namespace SketchMusic;
 using namespace Windows::UI::Xaml::Controls;
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::TextRow sealed : public Windows::UI::Xaml::Controls::Control
+public ref class SketchMusic::View::TextRow sealed //: public Windows::UI::Xaml::Controls::Control
 {
 private:
 	double BeatWidth;
