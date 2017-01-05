@@ -24,24 +24,11 @@
         </Style>
     </Page.Resources>
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-        </Grid.RowDefinitions>
-        
-        <StackPanel Name ="ToolBar" Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Top">
-            <!--<Button Name="GoBackBtn" Content="Вернуться назад" Click="GoBackBtn_Click"/>-->
-            <Button Name="GoMenuBtn" Content="В меню" Click="GoMenuBtn_Click"/>
-            <Button Name="CreateEntryBtn" Content="Создать новую идею" Click="CreateEntryBtn_Click"/>
-            <!--  <TextBlock Text="Фильтр : "/>
-           <ListBox Margin="20">
-                <TextBlock Text="по категории"/>
-                <TextBlock Text="по дате"/>
-                <TextBlock Text="по оценке"/>
-            </ListBox>-->
-            <Button Content="Сортировка">
+    <Page.TopAppBar>
+        <CommandBar x:Name="commandBar">
+            <AppBarButton Name="GoMenuBtn" Label="В меню" Click="GoMenuBtn_Click" Icon="Home"/>
+            <AppBarSeparator/>
+            <AppBarButton Label="Сортировка" Icon="Sort">
                 <Button.Flyout>
                     <Flyout x:Name="SortingFlyout">
                         <ListView Name="SortingList">
@@ -50,8 +37,8 @@
                         </ListView>
                     </Flyout>
                 </Button.Flyout>
-            </Button>
-            <Button Content="Фильтрация">
+            </AppBarButton>
+            <AppBarButton Label="Фильтрация" Icon="Filter">
                 <Button.Flyout>
                     <Flyout x:Name="FilterFlyout">
                         <ListView Name="FilterList" SelectionMode="Multiple" SelectionChanged="FilterList_SelectionChanged">
@@ -59,42 +46,35 @@
                             <TextBlock Text="оценка 6 и выше" Tag="1"/>
                             <TextBlock Text="имеет тег 'todo'" Tag="2"/>
                             <TextBlock Text="имеет тег 'base'" Tag="3"/>
-                            <TextBlock Text="не имеет тега 'base'" Tag="4"/>                        
+                            <TextBlock Text="не имеет тега 'base'" Tag="4"/>
                         </ListView>
                     </Flyout>
                 </Button.Flyout>
-            </Button>
+            </AppBarButton>
+            <AppBarButton Name="RefreshBtn" Label="Обновить" Icon="Refresh" Click="RefreshBtn_Click"/>
+            <AppBarSeparator/>
+            <AppBarButton Name="CreateEntryBtn" Label="Создать новую идею" Icon="Add" Click="CreateEntryBtn_Click"/>
+            <AppBarSeparator/>
+            <AppBarButton Name="PlayBtn" Label="Воспроизвести" Icon="Play" HorizontalAlignment="Right"
+                        IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" 
+                        Click="PlayBtn_Click"/>
+            <AppBarButton Name="EditBtn" Label="Редактировать" Icon="Edit" HorizontalAlignment="Right" 
+                                IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" 
+                                Click="EditBtn_Click"/>
+        </CommandBar>
+    </Page.TopAppBar>
+    
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
 
-            <Button Name="RefreshBtn" Content="Обновить" Click="RefreshBtn_Click"/>
-
-            <!--<TextBlock Name="SizeTxt" VerticalAlignment="Center" Margin="10,0,10,0"/>-->
-        </StackPanel>
-
-        <StackPanel Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Right">
-            <Button Name="PlayBtn" Content="Воспроизвести" HorizontalAlignment="Right"
-                    IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" 
-                    Click="PlayBtn_Click"/>
-            <Button Name="EditBtn" Content="Редактировать" HorizontalAlignment="Right" 
-                    IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" 
-                    Click="EditBtn_Click"/>
-        </StackPanel>
-        
-        <ScrollViewer Grid.Row="1" VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Grid.Row="0" VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Auto">
             <GridView Name="LibView" IsItemClickEnabled="True" ItemClick="LibView_ItemClick">
-                <!-- 
-                        ScrollViewer.VerticalScrollBarVisibility="Visible"
-                      ScrollViewer.VerticalScrollMode="Enabled"
-                      ScrollViewer.HorizontalScrollMode="Disabled" -->
-                <!--<GridView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VariableSizedWrapGrid  Orientation="Horizontal" 
-                                                ItemWidth="{Binding ElementName=AGridView, Path=ItemWidth}"
-                                                MaximumRowsOrColumns="{Binding ElementName=AGridView, Path=MaxRowsOrColumns}"/>
-                    </ItemsPanelTemplate>
-                </GridView.ItemsPanel>-->
                 <GridView.ItemTemplate>
                     <DataTemplate>
-                        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Left" Height="130" Width="180" BorderBrush="{ThemeResource AppBarSeparatorForeground}" BorderThickness="1">
+                        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Left" Height="130" Width="180" 
+                              BorderBrush="{ThemeResource AppBarSeparatorForeground}" BorderThickness="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>

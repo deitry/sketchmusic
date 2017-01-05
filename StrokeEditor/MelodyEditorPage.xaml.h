@@ -72,5 +72,13 @@ namespace StrokeEditor
 		Windows::Foundation::Collections::IVector<SketchMusic::Instrument^>^ availableInstruments;
 		void ListView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
 		void DeleteTextBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+
+	private:
+
+		void HamburgerButton_Click(Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+		{
+			mySplitView->IsPaneOpen = !mySplitView->IsPaneOpen;
+		}
+		void menu_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
 	};
 }

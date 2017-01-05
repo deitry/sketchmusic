@@ -397,10 +397,14 @@ void StrokeEditor::LibraryOverviewPage::OnStateChanged(Platform::Object ^sender,
 			switch (args)
 			{
 			case SketchMusic::Player::PlayerState::PLAY:
-				this->PlayBtn->Content = "Остановить"; break;
+				this->PlayBtn->Icon = ref new SymbolIcon(Symbol::Pause);
+				this->PlayBtn->Content = "Остановить";
+				break;
 			case SketchMusic::Player::PlayerState::STOP:
 			case SketchMusic::Player::PlayerState::WAIT:
-				this->PlayBtn->Content = "Воспроизвести"; break;
+				this->PlayBtn->Icon = ref new SymbolIcon(Symbol::Play);
+				this->PlayBtn->Content = "Воспроизвести";
+				break;
 			}
 	}));
 }

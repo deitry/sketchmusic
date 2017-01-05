@@ -16,6 +16,9 @@
             <DataTemplate x:Key="myResourceTemplate" x:DataType="sf:SFPreset">
                 <TextBlock Text="{x:Bind name}"/>
             </DataTemplate>
+
+            <x:Double x:Key="MenuSymbolFontSize">20</x:Double>
+            <x:Double x:Key="MenuFontSize">15</x:Double>
             
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="../SketchMusic/Themes/Generic.xaml"/>
@@ -23,14 +26,182 @@
         </ResourceDictionary>
     </Page.Resources>
 
-    <StackPanel x:Name="grid" 
+    <!--<Page.TopAppBar>
+        <CommandBar x:Name="commandBar">
+            <CommandBar.Content>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="На главную"/>
+                </StackPanel>
+            </CommandBar.Content>
+        </CommandBar>
+    </Page.TopAppBar>-->
+
+    <Grid x:Name="grid" 
                 Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
                 BorderThickness="5"
                 BorderBrush="Black"
                 RenderTransformOrigin="0,1"
-                Orientation="Horizontal"
                 MaxWidth="1280">
 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        
+        <RelativePanel>
+            <Button x:Name="HamburgerButton" RelativePanel.AlignLeftWithPanel="True"
+                    FontFamily="Segoe MDL2 Assets" FontSize="{StaticResource MenuSymbolFontSize}"
+                    Background="{Binding ElementName=menu, Path=Background}"
+                    Content="&#xE700;" Click="HamburgerButton_Click" ></Button>
+
+            <TextBlock Name="TitleTextBlock" RelativePanel.RightOf="HamburgerButton"
+                       FontSize="{StaticResource MenuFontSize}" FontWeight="Bold" Margin="30 5 0 0" />
+        </RelativePanel>
+        
+        <SplitView Name="mySplitView" Grid.Row="1" OpenPaneLength="240"
+                   DisplayMode="CompactOverlay" CompactPaneLength="41">
+            <SplitView.Pane>
+                <ListView x:Name="menu" SelectionMode="None" IsItemClickEnabled="True" ItemClick="menu_ItemClick">
+                    <ContentControl Name="homeItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE80F;"/>
+                            <TextBlock FontSize="{StaticResource MenuFontSize}" Name="GoBackTxt" Text="Вернуться назад" Margin="10 0 0 0"/>
+                        </StackPanel>
+                    </ContentControl>
+
+                    <ContentControl Name="textsItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE72D;" />
+                            <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Дорожки" Margin="10 0 0 0"
+                                       Name="textsCtrl">
+                                <FlyoutBase.AttachedFlyout>
+                                    <Flyout x:Name="TextsFlyout">
+                                        <ListView ItemsSource="{Binding}" x:Name="TextsList" SelectionChanged="ListView_SelectionChanged" Width="auto">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderThickness="1" BorderBrush="AliceBlue">
+                                                        <TextBlock FontSize="14" Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
+                                                            <Run Text="{Binding instrument, Converter={StaticResource instr2text}}"/>
+                                                        </TextBlock>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </Flyout>
+                                </FlyoutBase.AttachedFlyout>
+                            </TextBlock>
+                        </StackPanel>
+                    </ContentControl>
+
+                    <ContentControl Name="addItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE80F;"/>
+                            <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Добавить дорожку" Margin="10 0 0 0"
+                                       Name="addCtrl">
+                                <FlyoutBase.AttachedFlyout>
+                                    <Flyout x:Name="InstrumentsFlyout">
+                                        <ListView x:Name="InstrumentList"
+                                  ItemsSource="{Binding}"
+                                  IsItemClickEnabled="True"
+                                  SelectionMode="None"
+                                  ItemClick="ListView_ItemClick"
+                                  Width="auto">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderThickness="1" BorderBrush="AliceBlue">
+                                                        <TextBlock FontSize="14" Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
+                                            <Run Text="{Binding _name}"/>
+                                                        </TextBlock>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </Flyout>
+                                </FlyoutBase.AttachedFlyout>
+                            </TextBlock>
+                        </StackPanel>
+                    </ContentControl>
+
+                    <ContentControl Name="deleteItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE74D;"/>
+                            <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Delete" Margin="10 0 0 0"
+                                       Name="deleteCtrl">
+                                <FlyoutBase.AttachedFlyout>
+                                    <Flyout x:Name="DeleteTextFlyout">
+                                        <StackPanel>
+                                            <TextBlock Text="Удалить?"/>
+                                            <Button x:Name="DeleteTextBtn" Content="Ок" Click="DeleteTextBtn_Click"/>
+                                        </StackPanel>
+                                    </Flyout>
+                                </FlyoutBase.AttachedFlyout>
+                            </TextBlock>
+                        </StackPanel>
+                    </ContentControl>
+
+                    <ContentControl Name="settingsItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE713;" />
+                            <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Настройки" Margin="10 0 0 0" />
+                        </StackPanel>
+                    </ContentControl>
+                </ListView>
+            </SplitView.Pane>
+            <SplitView.Content>
+                <Grid Grid.Row="1" Grid.Column="1"      
+              BorderThickness="0"
+              BorderBrush="Black" Width="950">
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+
+                    <smv:TextRow x:Name="_textRow"
+                         BorderThickness="1"
+                         BorderBrush="White"
+                         Height="180"
+                         HorizontalAlignment="Left"
+                         Margin="1,40,10,10"
+                         Grid.Row="0"/>
+
+                    <smv:GenericKeyboard x:Name="_keyboard"
+                                 BorderBrush="OrangeRed"
+                                 BorderThickness="1"
+                                 Background="Orange"
+                                 Width="auto"
+                                 VerticalAlignment="Bottom"
+                                 HorizontalAlignment="Left"
+                                 Style="{StaticResource GenericKeyboardStyle}"
+                                 Grid.Row="1"/>
+
+                    <StackPanel Orientation="Vertical"
+                        VerticalAlignment="Bottom"
+                        Grid.Row="2">
+                        <TextBlock x:Name="CurPos">
+                        Здесь будет отображаться текущая позиция курсора.
+                        </TextBlock>
+                        <TextBlock x:Name="BPMText">
+                        Здесь будет отображаться текущее значение текста.
+                        </TextBlock>
+                        <!--<TextBlock x:Name="RealPos">
+                        Здесь будет отображаться текущая позиция курсора.
+                </TextBlock>
+                <TextBlock x:Name="Version">
+                        Версия 2016.12.16-17.
+                </TextBlock>-->
+                    </StackPanel>
+                </Grid>
+            </SplitView.Content>
+        </SplitView>
+
+        <!--
         <StackPanel x:Name="HelpfulBar"
                     Orientation="Vertical"
                     BorderThickness="5"
@@ -58,6 +229,7 @@
                 </Button.Flyout>
             </Button>
 
+            
             <Button Content="Add"
                     Padding="0"
                     Height="90">
@@ -97,42 +269,7 @@
             </Button>
 
         </StackPanel>
-
-        <StackPanel
-                    BorderThickness="5"
-                    BorderBrush="Black" Width="950">
-            <smv:TextRow x:Name="_textRow"
-                         BorderThickness="2"
-                         BorderBrush="White"
-                         Height="180"
-                         HorizontalAlignment="Left"
-                         Margin="10,40,10,10"/>
-            
-            <smv:GenericKeyboard x:Name="_keyboard"
-                                 BorderBrush="OrangeRed"
-                                 BorderThickness="1"
-                                 Background="Orange"
-                                 Width="auto"
-                                 VerticalAlignment="Bottom"
-                                 HorizontalAlignment="Left"
-                                 Style="{StaticResource GenericKeyboardStyle}"
-                                         />
-            
-            <StackPanel Orientation="Vertical"
-                        VerticalAlignment="Bottom">
-                <TextBlock x:Name="CurPos">
-                        Здесь будет отображаться текущая позиция курсора.
-                </TextBlock>
-                <TextBlock x:Name="BPMText">
-                        Здесь будет отображаться текущее значение текста.
-                </TextBlock>
-                <!--<TextBlock x:Name="RealPos">
-                        Здесь будет отображаться текущая позиция курсора.
-                </TextBlock>
-                <TextBlock x:Name="Version">
-                        Версия 2016.12.16-17.
-                </TextBlock>-->
-            </StackPanel>
-        </StackPanel>
-    </StackPanel>
+-->
+        
+    </Grid>
 </Page>

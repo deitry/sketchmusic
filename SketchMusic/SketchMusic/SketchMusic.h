@@ -754,6 +754,7 @@ namespace SketchMusic
 			tempo			= 15,
 			zoom			= 16,
 			metronome		= 17,
+			quantization	= 18,
 			end				= 20,	// конец ноты - остановка звучания
 		};
 

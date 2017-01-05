@@ -39,6 +39,8 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
 	InitializePage();
 
+	//((App^)App::Current)->ShowNotification("Загрузка страницы");
+	
 	_idea = (Idea^)e->Parameter;
 	
 	if (_idea->Content == nullptr)
@@ -58,37 +60,44 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	
 	_texts = _idea->Content;
 	
+	//((App^)App::Current)->ShowNotification("Загрузка параметров");
+	
 	Windows::Storage::ApplicationDataContainer^ localSettings =
 		Windows::Storage::ApplicationData::Current->LocalSettings;
-	if (localSettings->Values->HasKey("need_metronome"))
+
+	if (localSettings)
 	{
-		((App^)App::Current)->_player->needMetronome = (bool)localSettings->Values->Lookup("need_metronome");
-	} else {
-		((App^)App::Current)->_player->needMetronome = true;
+		if (localSettings->Values->HasKey("need_metronome"))
+		{
+			((App^)App::Current)->_player->needMetronome = (bool)localSettings->Values->Lookup("need_metronome");
+		}
+		else {
+			((App^)App::Current)->_player->needMetronome = true;
+		}
 	}
 
-	// TODO : собирать список автоматически
-	//this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([this]()
-	//{
-		auto async = create_task([=]
+	//((App^)App::Current)->ShowNotification("Загрузка инструментов");
+
+	auto async = create_task([=]
+	{
+		auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
+		return create_task(folder->GetFolderAsync("SketchMusic\\resources\\"));
+	}).then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
+	{
+		auto resourceFolder = resourceFolderTask.get();
+		return create_task(resourceFolder->GetFilesAsync());
+	}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
+	{
+		availableInstruments = ref new Platform::Collections::Vector<Instrument^>;
+		auto list = resourceListTask.get();
+		for (auto&& file : list)
 		{
-			auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
-			return create_task(folder->GetFolderAsync("SketchMusic\\resources\\"));
-		}).then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
-		{
-			auto resourceFolder = resourceFolderTask.get();
-			return create_task(resourceFolder->GetFilesAsync());
-		}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
-		{
-			availableInstruments = ref new Platform::Collections::Vector<Instrument^>;
-			auto list = resourceListTask.get();
-			for (auto&& file : list)
-			{
-				availableInstruments->Append(ref new Instrument(file->Name));
-			}
-		});
-	//}));
-	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
+			availableInstruments->Append(ref new Instrument(file->Name));
+		}
+	});
+
+	//((App^)App::Current)->ShowNotification("Почти");
+	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Low, ref new Windows::UI::Core::DispatchedHandler([=]()
 	{
 		async.get();
 		auto listView = dynamic_cast<ListView^>(InstrumentsFlyout->Content);
@@ -96,19 +105,16 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		{
 			listView->DataContext = availableInstruments;
 		}
+
+		//((App^)App::Current)->ShowNotification("Составлен список инструментов");
 	}));
+
 	ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
 	if (list)
 	{
 		list->DataContext = _texts->texts;
 	}
 	
-	//list = dynamic_cast<ListView^>(InstrumentsFlyout->Content);
-	//if (list)
-	//{
-	//	list->DataContext = availableInstruments;
-	//}
-
 	_textRow->SetText(_texts, nullptr);
 }
 
@@ -482,5 +488,30 @@ void StrokeEditor::MelodyEditorPage::DeleteTextBtn_Click(Platform::Object^ sende
 			_textRow->SetText(_texts->texts->GetAt(new_index));
 		}
 		DeleteTextFlyout->Hide();
+	}
+}
+
+
+void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
+{
+	if (homeItem == (ContentControl^)e->ClickedItem)
+	{
+		GoBackBtn_Click(this, nullptr);
+	}
+	else if (textsItem == (ContentControl^)e->ClickedItem)
+	{
+		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(textsCtrl);
+	}
+	else if (addItem == (ContentControl^)e->ClickedItem)
+	{
+		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(addCtrl);
+	}
+	else if (deleteItem == (ContentControl^)e->ClickedItem)
+	{
+		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(deleteCtrl);
+	}
+	else if (settingsItem == (ContentControl^)e->ClickedItem)
+	{
+		//myFrame->Navigate(settingsItem->GetType());
 	}
 }

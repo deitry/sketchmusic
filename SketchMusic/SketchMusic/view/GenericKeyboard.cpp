@@ -36,7 +36,6 @@ GenericKeyboard::GenericKeyboard()
 	// и в зависимости от параметра - какой тип клавиатуры нужен, в случае больших / бесконечных
 	// (как в случае "гитарной", "баянной" и т.д.) создавать динамически
 	this->KeyboardStateChanged += ref new Windows::Foundation::EventHandler<SketchMusic::View::KeyboardState ^>(this, &SketchMusic::View::GenericKeyboard::OnKeyboardStateChanged);
-	// TODO : обработка клавиш клавиатуры
 }
 
 inline void UpdateParent(SketchMusic::View::Key^ key)
@@ -241,13 +240,9 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 			case SketchMusic::View::KeyType::tempo:
 			{
 				// TODO : переместить их куда-нибудь отсюда
-				if (tempoFlyout == nullptr)
-				{
-					tempoFlyout = Flyout::FlyoutBase::GetAttachedFlyout(ctrl);
-					tempoFlyout->Opened += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnOpened);
-					tempoFlyout->Closed += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnClosed);
-				}
-				tempoFlyout->ShowAt(ctrl);
+				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
+				if (flyout)
+					flyout->ShowAt(ctrl);
 				break;
 			}
 			case SketchMusic::View::KeyType::enter:
@@ -321,16 +316,45 @@ void SketchMusic::View::GenericKeyboard::OnApplyTemplate()
 				ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::onKeyboardControlPressed);
 				ctrl->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::OnPointerReleased);
 				// как?- подписать ctrl на событие изменения состояния клавиатуры
-
 			}
 		}
 	}
+
+	if (_dict->HasKey("TempoFlyout"))
+	{
+		auto flyout = (Flyout^)_dict->Lookup("TempoFlyout");
+		if (flyout)
+		{
+			flyout->Opened += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnOpened);
+			flyout->Closed += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnClosed);
+
+			StackPanel^ panel = dynamic_cast<StackPanel^>(flyout->Content);
+			for (auto&& child : panel->Children)
+			{
+				Button^ btn = dynamic_cast<Button^>(static_cast<Object^>(child));
+				if (btn)
+				{
+					btn->Tag = nullptr;
+					//btn->Click += ref new RoutedEventHandler([=](Object^ obj, RoutedEventArgs^ args)
+					//{
+					//	tempoPressed = true;
+					//	flyout->Hide();
+					//});
+				}
+			}
+		}
+	}
+	if (_dict->HasKey("QuantizeFlyout"))
+	{
+		auto flyout = (Flyout^)_dict->Lookup("QuantizeFlyout");
+		if (flyout)
+		{
+			
+		}
+	}
+
 	// специально проверяем на тот случай если курсор убегает за пределы клавиш и мы не знаем, отпустили его или нет
 	//grid->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::OnPointerReleased);
-
-	// находим Flyout, который управляет темпом
-	// и связываем значение темпа и ползунок слайдера
-	// или хотя бы вешаем на ползунок обработчик ValueChanged и не забываем при показе Flyout устанавливать текущее значение темпа
 }
 
 
@@ -420,28 +444,15 @@ void SketchMusic::View::GenericKeyboard::OnClosed(Platform::Object ^sender, Plat
 
 void SketchMusic::View::GenericKeyboard::OnOpened(Platform::Object ^sender, Platform::Object ^args)
 {
-	Flyout^ flyout = dynamic_cast<Flyout^>(sender);
-	if (flyout == nullptr)
-		return;
-
-	StackPanel^ panel = dynamic_cast<StackPanel^>(flyout->Content);
-	for (auto&& child : panel->Children)
-	{
-		Button^ btn = dynamic_cast<Button^>(static_cast<Object^>(child));
-		if (btn)
-		{
-			btn->Tag = nullptr;
-			btn->Click += ref new Windows::UI::Xaml::RoutedEventHandler(this, &SketchMusic::View::GenericKeyboard::OnClick);
-		}
-	}
+	
 }
 
 
 void SketchMusic::View::GenericKeyboard::OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
 {
-	if (tempoFlyout)
-	{
-		tempoPressed = true;
-		tempoFlyout->Hide();
-	}
+	//if (tempoFlyout)
+	//{
+	//	tempoPressed = true;
+	//	tempoFlyout->Hide();
+	//}
 }

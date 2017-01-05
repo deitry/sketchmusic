@@ -19,22 +19,22 @@
         <Style x:Key="TextBoxStyle" TargetType="TextBox">
             <Setter Property="Margin" Value="10"/>
         </Style>
-        <Style x:Key="CtrlButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="40"/>
-        </Style>
     </Page.Resources>
-    
+
+    <Page.TopAppBar>
+        <CommandBar x:Name="commandBar">
+            <AppBarButton  Icon="Delete" Label="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
+            <AppBarSeparator/>
+            <AppBarButton Icon="Up" Label="Развить" Name="ExtendBtn" Click="ExtendBtn_Click"/>
+            <AppBarButton Icon="Edit" Label="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
+            <AppBarSeparator/>
+            <AppBarButton Icon="Back" Label="Назад" Name="CancelBtn" Click="CancelBtn_Click"/>
+            <AppBarButton Icon="Save" Label="Сохранить" Name="SaveBtn" Click="SaveBtn_Click"/>
+            <AppBarButton Icon="Accept" Label="ОК" Name="OkBtn" Click="OkBtn_Click"/>
+        </CommandBar>
+    </Page.TopAppBar>
+
     <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
-            <Button Style="{StaticResource CtrlButtonStyle}" Content="Назад" Name="GoBackBtn" Click="GoBackBtn_Click"/>
-            <Button Style="{StaticResource CtrlButtonStyle}" Content="Отмена" Name="CancelBtn" Click="CancelBtn_Click"/>
-            <Button Style="{StaticResource CtrlButtonStyle}" Content="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
-            <Button Style="{StaticResource CtrlButtonStyle}" Content="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
-            <Button Style="{StaticResource CtrlButtonStyle}" Content="Развить" Name="ExtendBtn" Click="ExtendBtn_Click"/>
-            <Button Style="{StaticResource CtrlButtonStyle}" Content="Сохранить" Name="SaveBtn" Click="SaveBtn_Click"/>
-            <Button Style="{StaticResource CtrlButtonStyle}" Content="ОК" Name="OkBtn" Click="OkBtn_Click"/>
-        </StackPanel>
-        
         <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="100,10,10,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>

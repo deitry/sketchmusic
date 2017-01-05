@@ -46,7 +46,7 @@
     <x:Double x:Key="SymbolWidth">25.0</x:Double>
     <x:Double x:Key="SymbolHeight">20.0</x:Double>
     
-    <Flyout x:Key="TempoFlyout">
+    <Flyout x:Key="TempoFlyout" x:Name="TempoFlyout">
         <StackPanel Orientation="Vertical">
             <TextBlock Text="BPM"/>
             <Slider x:Name="TempoSlider"
@@ -59,6 +59,47 @@
                     TickFrequency="15"/>
             <CheckBox x:Name="metroNeed" Content="Metronome" IsChecked="True"/>
             <Button x:Name="Ok" Content="Ok"/>
+        </StackPanel>
+    </Flyout>
+
+    <Flyout x:Key="QuantizeFlyout">
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Quantization"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="1"
+                        Grid.Row="0" Grid.Column="0"/>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="2"
+                        Grid.Row="0" Grid.Column="1"/>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="4"
+                        Grid.Row="0" Grid.Column="2"/>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="8"
+                        Grid.Row="0" Grid.Column="3"/>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="16"
+                        Grid.Row="0" Grid.Column="4"/>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="1t"
+                        Grid.Row="1" Grid.Column="0"/>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="2t"
+                        Grid.Row="1" Grid.Column="1"/>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="4t"
+                        Grid.Row="1" Grid.Column="2"/>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="8t"
+                        Grid.Row="1" Grid.Column="3"/>
+                <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="16t"
+                        Grid.Row="1" Grid.Column="4"/>
+            </Grid>
+            <CheckBox x:Name="quantizeNeed" Content="Metronome" IsChecked="True"/>
+            <Button x:Name="qOk" Content="Ok"/>
         </StackPanel>
     </Flyout>
 
