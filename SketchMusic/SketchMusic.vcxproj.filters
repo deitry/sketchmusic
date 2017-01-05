@@ -20,9 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="SketchMusic\view\GenericKeyboard.cpp">
-      <Filter>view</Filter>
-    </ClCompile>
     <ClCompile Include="SketchMusic\view\MultiRowStackPanel.cpp">
       <Filter>view</Filter>
     </ClCompile>
@@ -33,9 +30,6 @@
       <Filter>view</Filter>
     </ClCompile>
     <ClCompile Include="SketchMusic\view\TextMultiRow.cpp">
-      <Filter>view</Filter>
-    </ClCompile>
-    <ClCompile Include="SketchMusic\view\TextRow.cpp">
       <Filter>view</Filter>
     </ClCompile>
     <ClCompile Include="SketchMusic\view\TextRowHandlers.cpp">
@@ -78,12 +72,11 @@
     <ClCompile Include="SketchMusic\base\Idea.cpp">
       <Filter>base</Filter>
     </ClCompile>
+    <ClCompile Include="SketchMusic\view\GenericKeyboard.xaml.cpp" />
+    <ClCompile Include="SketchMusic\view\TextRow.xaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SketchMusic\view\GenericKeyboard.h">
-      <Filter>view</Filter>
-    </ClInclude>
     <ClInclude Include="SketchMusic\view\Key.h">
       <Filter>view</Filter>
     </ClInclude>
@@ -100,9 +93,6 @@
       <Filter>view</Filter>
     </ClInclude>
     <ClInclude Include="SketchMusic\view\TextMultiRow.h">
-      <Filter>view</Filter>
-    </ClInclude>
-    <ClInclude Include="SketchMusic\view\TextRow.h">
       <Filter>view</Filter>
     </ClInclude>
     <ClInclude Include="SketchMusic\base\Cursor.h">
@@ -175,6 +165,11 @@
     <ClInclude Include="SketchMusic\base\Idea.h">
       <Filter>base</Filter>
     </ClInclude>
+    <ClInclude Include="SketchMusic\view\Converters.h">
+      <Filter>view</Filter>
+    </ClInclude>
+    <ClInclude Include="SketchMusic\view\GenericKeyboard.xaml.h" />
+    <ClInclude Include="SketchMusic\view\TextRow.xaml.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="SketchMusic\commands\DelegateCommand.txt">
@@ -182,7 +177,12 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Themes\Generic.xaml" />
+    <Page Include="SketchMusic\view\TextRow.xaml">
+      <Filter>view</Filter>
+    </Page>
+    <Page Include="SketchMusic\view\GenericKeyboard.xaml">
+      <Filter>view</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\acoustic_guitar.sf2">

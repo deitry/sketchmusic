@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "TextRow.h"
+#include "TextRow.xaml.h"
 #include "../base/Text.h"
 
 using namespace SketchMusic;
@@ -22,29 +22,34 @@ void SketchMusic::View::TextRow::OnLoaded(Platform::Object ^sender, Windows::UI:
 
 void SketchMusic::View::TextRow::OnApplyTemplate()
 {
-	_dict = ref new ResourceDictionary;
-	_dict->Source = ref new Uri("ms-appx:///SketchMusic/Themes/Generic.xaml");
-	BeatWidth = (double)(_dict->Lookup("BeatWidth"));
-	PlaceholderWidth = (double)(_dict->Lookup("PlaceholderWidth"));
-	RowHeight = (double)(_dict->Lookup("RowHeight"));
+	
+}
 
-	_mainPanel = (StackPanel^)GetTemplateChild("_mainPanel");
+void SketchMusic::View::TextRow::InitializePage()
+{
+	_dict = this->Resources;
+	
+	BeatWidth = 45; //(double)(_dict->Lookup("BeatWidth"));
+	PlaceholderWidth = 25; //(double)(_dict->Lookup("PlaceholderWidth"));
+	RowHeight = 70; //(double)(_dict->Lookup("RowHeight"));
+
+	//_mainPanel = (StackPanel^)GetTemplateChild("_mainPanel");
 	_mainPanel->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
 	_mainPanel->PointerWheelChanged += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerWheelChanged);
-	
-	_canvas = (Canvas^)GetTemplateChild("_canvas");
+
+	//_canvas = (Canvas^)GetTemplateChild("_canvas");
 	_canvas->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
 	_canvas->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerReleased);
-	
+
 	_snapPoint = ref new ContentControl;
 	_snapPoint->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerPressed);
 	_snapPoint->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("SnapPointStyle"));
 	_snapPoint->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
 	_canvas->Children->Append(_snapPoint);
-	
-	_cursor = (ContentControl^)GetTemplateChild("_cursor");
 
-	_scrollViewer = (ScrollViewer^)GetTemplateChild("_scrollViewer");
+	//_cursor = (ContentControl^)GetTemplateChild("_cursor");
+
+	//_scrollViewer = (ScrollViewer^)GetTemplateChild("_scrollViewer");
 
 	if (this->data->texts->Size > 0)
 	{
@@ -60,7 +65,7 @@ void SketchMusic::View::TextRow::OnPointerWheelChanged(Platform::Object ^sender,
 {
 	// ! - тут не обрбабатываются касания двумя пальцами
 
-	auto point = e->GetCurrentPoint(this);
+	auto point = e->GetCurrentPoint(nullptr);	// this
 	auto properties = point->Properties;
 	auto delta = properties->MouseWheelDelta;
 

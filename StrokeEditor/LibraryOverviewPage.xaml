@@ -56,21 +56,23 @@
             <AppBarButton Name="CreateEntryBtn" Label="Создать новую идею" Icon="Add" Click="CreateEntryBtn_Click"/>
             <AppBarSeparator/>
             <AppBarButton Name="PlayBtn" Label="Воспроизвести" Icon="Play" HorizontalAlignment="Right"
-                        IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" 
+                        IsEnabled="False" 
                         Click="PlayBtn_Click"/>
+            <!-- IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" -->
             <AppBarButton Name="EditBtn" Label="Редактировать" Icon="Edit" HorizontalAlignment="Right" 
-                                IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" 
+                                IsEnabled="False" 
                                 Click="EditBtn_Click"/>
         </CommandBar>
     </Page.TopAppBar>
     
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
 
         <ScrollViewer Grid.Row="0" VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Auto">
-            <GridView Name="LibView" IsItemClickEnabled="True" ItemClick="LibView_ItemClick">
+            <GridView Name="LibView" IsItemClickEnabled="True" SelectionChanged="LibView_SelectionChanged">
                 <GridView.ItemTemplate>
                     <DataTemplate>
                         <Grid VerticalAlignment="Stretch" HorizontalAlignment="Left" Height="130" Width="180" 

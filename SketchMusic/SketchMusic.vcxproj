@@ -232,14 +232,19 @@
     <ClInclude Include="SketchMusic\player\SoundEnginePool.h" />
     <ClInclude Include="SketchMusic\player\SoundFont.h" />
     <ClInclude Include="SketchMusic\SketchMusic.h" />
-    <ClInclude Include="SketchMusic\view\GenericKeyboard.h" />
+    <ClInclude Include="SketchMusic\view\Converters.h" />
+    <ClInclude Include="SketchMusic\view\GenericKeyboard.xaml.h">
+      <DependentUpon>SketchMusic\view\GenericKeyboard.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="SketchMusic\view\Key.h" />
     <ClInclude Include="SketchMusic\view\Keyboard.h" />
     <ClInclude Include="SketchMusic\view\MultiRowStackPanel.h" />
     <ClInclude Include="SketchMusic\view\RadialKeyboard.h" />
     <ClInclude Include="SketchMusic\view\StrokeEditor.h" />
     <ClInclude Include="SketchMusic\view\TextMultiRow.h" />
-    <ClInclude Include="SketchMusic\view\TextRow.h" />
+    <ClInclude Include="SketchMusic\view\TextRow.xaml.h">
+      <DependentUpon>SketchMusic\view\TextRow.xaml</DependentUpon>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -263,19 +268,29 @@
     <ClCompile Include="SketchMusic\player\SoundEnginePool.cpp" />
     <ClCompile Include="SketchMusic\player\SoundFont.cpp" />
     <ClCompile Include="SketchMusic\SketchMusic.cpp" />
-    <ClCompile Include="SketchMusic\view\GenericKeyboard.cpp" />
+    <ClCompile Include="SketchMusic\view\GenericKeyboard.xaml.cpp">
+      <DependentUpon>SketchMusic\view\GenericKeyboard.xaml</DependentUpon>
+    </ClCompile>
     <ClCompile Include="SketchMusic\view\MultiRowStackPanel.cpp" />
     <ClCompile Include="SketchMusic\view\RadialKeyboard.cpp" />
     <ClCompile Include="SketchMusic\view\StrokeEditor.cpp" />
     <ClCompile Include="SketchMusic\view\TextMultiRow.cpp" />
-    <ClCompile Include="SketchMusic\view\TextRow.cpp" />
+    <ClCompile Include="SketchMusic\view\TextRow.xaml.cpp">
+      <DependentUpon>SketchMusic\view\TextRow.xaml</DependentUpon>
+    </ClCompile>
     <ClCompile Include="SketchMusic\view\TextRowHandlers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="SketchMusic\commands\DelegateCommand.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Themes\Generic.xaml" />
+    <Page Include="SketchMusic\view\GenericKeyboard.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SketchMusic\view\TextRow.xaml">
+      <SubType>Designer</SubType>
+      <FileType>PageXaml</FileType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\1General Midi.SF2">

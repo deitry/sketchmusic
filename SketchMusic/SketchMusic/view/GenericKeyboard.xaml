@@ -1,0 +1,287 @@
+﻿<UserControl
+    x:Class="SketchMusic.View.GenericKeyboard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SketchMusic.View"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="1045">
+
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="keyBackground" x:Name="keyBackground" Color="DarkOrange"/>
+        <SolidColorBrush x:Key="blackKeyBackground" x:Name="blackKeyBackground" Color="DarkRed"/>
+        <SolidColorBrush x:Key="keyForeground" x:Name="keyForeground" Color="{ThemeResource SystemControlBackgroundBaseHighBrush}"/>
+        <SolidColorBrush x:Key="pressedKeyBackground" x:Name="pressedKeyBackground" Color="Gray"/>
+        <SolidColorBrush x:Key="disabledKeyBackground" x:Name="disabledKeyBackground" Color="AntiqueWhite"/>
+        <SolidColorBrush x:Key="ctrlKeyForeground" x:Name="ctrlKeyForeground" Color="Blue"/>
+        <SolidColorBrush x:Key="actionKeyForeground" x:Name="actionKeyForeground" Color="Red"/>
+
+        <SolidColorBrush x:Key="textBrush" x:Name="textBrush" Color="{ThemeResource SystemControlBackgroundBaseHighBrush}"/>
+        <SolidColorBrush x:Key="draggedForegroundBrush" x:Name="draggedForegroundBrush" Color="White" Opacity="0.4"/>
+        <SolidColorBrush x:Key="noteBackground" x:Name="noteBackground" Color="DarkOrange"/>
+        <SolidColorBrush x:Key="noteBackground2" x:Name="noteBackground2" Color="Blue"/>
+        <SolidColorBrush x:Key="noteBackground3" x:Name="noteBackground3" Color="Green"/>
+        <SolidColorBrush x:Key="noteBackground4" x:Name="noteBackground4" Color="Yellow"/>
+        <SolidColorBrush x:Key="tempoBackground" x:Name="tempoBackground" Color="DarkCyan"/>
+
+
+        <local:OnSymbolToStringConverter x:Key="sym2string"/>
+        <local:OnKeyToStringConverter x:Key="key2string"/>
+        <local:OnPositionedSymbolToTextConverter x:Key="possym2text"/>
+        <local:BlackKeyToColorConverter x:Key="blackKey2color"
+                                        BlackKeyBrush="{StaticResource blackKeyBackground}"/>
+        <local:KeyStateToColorConverter x:Key="ctrlKeyState2color"
+                                        KeyBrush="{StaticResource ctrlKeyForeground}"
+                                        PressedKeyBrush="{StaticResource SystemControlBackgroundBaseHighBrush}"/>
+        <local:KeyStateToColorConverter x:Key="actionKeyState2color"
+                                        KeyBrush="{StaticResource actionKeyForeground}"
+                                        PressedKeyBrush="{StaticResource SystemControlBackgroundBaseHighBrush}"/>
+        <local:BoolToColorConverter     x:Key="bool2color"
+                                        KeyBrush="{StaticResource keyBackground}"
+                                        PressedKeyBrush="{StaticResource pressedKeyBackground}"/>
+
+        <x:Double x:Key="NoteWidth">90.0</x:Double>
+        <x:Double x:Key="CtrlWidth">70.0</x:Double>
+        <x:Double x:Key="NoteHeight">60.0</x:Double>
+        <x:Double x:Key="RowHeight">70.0</x:Double>
+        <x:Double x:Key="BeatWidth">45.0</x:Double>
+        <x:Double x:Key="PlaceholderWidth">25.0</x:Double>
+        <x:Double x:Key="SymbolWidth">25.0</x:Double>
+        <x:Double x:Key="SymbolHeight">20.0</x:Double>
+
+        <Style x:Key="KeyboardBtnStyle" TargetType="ContentControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        Height="{TemplateBinding Height}"
+                        Width="{TemplateBinding Width}"
+                        >
+                            <Grid>
+                                <Rectangle Fill="{Binding IsEnabled, RelativeSource={RelativeSource TemplatedParent}, 
+                                Converter={StaticResource bool2color}}" Opacity="1.0"/>
+                                <Rectangle Fill="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
+                                Converter={StaticResource blackKey2color}}" Opacity="0.5"/>
+                                <Rectangle Fill="{TemplateBinding Background}" Opacity="0.8"/>
+                                <TextBlock
+                                FontFamily="Segoe MDL2 Assets"
+                                FontSize="{TemplateBinding FontSize}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Foreground="{TemplateBinding Foreground}"
+                                >
+                                <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource key2string}}"/>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+            <Setter Property="Width" Value="{StaticResource NoteWidth}"/>
+            <Setter Property="Height" Value="{StaticResource NoteHeight}"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <!--<Flyout x:Key="TempoFlyoutResource">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="BPM"/>
+                <Slider Orientation="Vertical"
+                    Height="100"
+                    Minimum="30"
+                    Maximum="300"
+                    Value="120"
+                    StepFrequency="5"
+                    TickFrequency="15"/>
+                <CheckBox x:Name="metroNeed" Content="Metronome" IsChecked="True"/>
+                <Button x:Name="Ok" Content="Ok"/>
+            </StackPanel>
+        </Flyout>-->
+
+        <Flyout x:Key="QuantizeFlyout">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="Quantization"/>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="1"
+                        Grid.Row="0" Grid.Column="0"/>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="2"
+                        Grid.Row="0" Grid.Column="1"/>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="4"
+                        Grid.Row="0" Grid.Column="2"/>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="8"
+                        Grid.Row="0" Grid.Column="3"/>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="16"
+                        Grid.Row="0" Grid.Column="4"/>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="1t"
+                        Grid.Row="1" Grid.Column="0"/>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="2t"
+                        Grid.Row="1" Grid.Column="1"/>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="4t"
+                        Grid.Row="1" Grid.Column="2"/>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="8t"
+                        Grid.Row="1" Grid.Column="3"/>
+                    <Button Width="{StaticResource PlaceholderWidth}" Height="{StaticResource PlaceholderWidth}" Content="16t"
+                        Grid.Row="1" Grid.Column="4"/>
+                </Grid>
+                <CheckBox x:Name="quantizeNeed" Content="Metronome" IsChecked="True"/>
+                <Button x:Name="qOk" Content="Ok"/>
+            </StackPanel>
+        </Flyout>
+    </UserControl.Resources>
+
+
+    <StackPanel x:Name="mainPanel"
+                Margin="0,0,0,0"
+                Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                Orientation="Vertical">
+        <!-- System -->
+        <StackPanel
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+            <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+                                                    Converter={StaticResource ctrlKeyState2color}}"
+                                                Style="{StaticResource KeyboardBtnStyle}"
+                                                Width="{StaticResource CtrlWidth}" Tag="14000"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+                                                    Converter={StaticResource actionKeyState2color}}"
+                                                Width="{StaticResource CtrlWidth}" Tag="11000"/>
+
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Width="{StaticResource CtrlWidth}" Tag="-5001"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}"
+                                                Width="{StaticResource CtrlWidth}" Tag="5001"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}"
+                                                Width="{StaticResource CtrlWidth}" Tag="-3001"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Width="{StaticResource CtrlWidth}" Tag="3001"/>
+
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+                                                    Converter={StaticResource ctrlKeyState2color}}"
+                                                Width="{StaticResource CtrlWidth}" Tag="12000"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}"
+                                                Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+                                                    Converter={StaticResource ctrlKeyState2color}}"
+                                                Width="{StaticResource CtrlWidth}" Tag="7000"/>
+            <!--<ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Width="{StaticResource CtrlWidth}" Tag="8000"/>-->
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Width="{StaticResource CtrlWidth}" Tag="13000"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Width="{StaticResource CtrlWidth}" Tag="15000">
+                <FlyoutBase.AttachedFlyout>
+                    <Flyout x:Name="TempoFlyout">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="BPM"/>
+                            <Slider x:Name="TempoSlider"
+                                            Orientation="Vertical"
+                                            Height="100"
+                                            Minimum="30"
+                                            Maximum="300"
+                                            Value="120"
+                                            StepFrequency="5"
+                                            TickFrequency="15"/>
+                            <CheckBox x:Name="metroNeed" Content="Metronome" IsChecked="True"/>
+                            <Button x:Name="Ok" Content="Ok"/>
+                        </StackPanel>
+                    </Flyout>
+                </FlyoutBase.AttachedFlyout>
+            </ContentControl>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Width="{StaticResource CtrlWidth}" Tag="6000"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" 
+                                                Width="{StaticResource CtrlWidth}" Tag="18000">
+                <FlyoutBase.AttachedFlyout>
+                    <Flyout>
+
+                    </Flyout>
+                </FlyoutBase.AttachedFlyout>
+            </ContentControl>
+        </StackPanel>
+
+        <!-- Row 1 -->
+        <StackPanel
+                                Margin="55,0,0,0"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="11"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="12"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="13"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="14"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="15"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="16"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="17"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="18"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="19"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="20"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="21"/>
+        </StackPanel>
+
+        <!-- Row 2 -->
+        <StackPanel
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="7"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="8"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="9"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="10"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="11"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="12"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="13"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="14"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="15"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="16"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="17"/>
+        </StackPanel>
+        <!-- Row 3 -->
+        <StackPanel
+                                Margin="55,0,0,0"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="2"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="3"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="4"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="5"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="6"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="7"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="8"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="9"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="10"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="11"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="12"/>
+        </StackPanel>
+
+        <!-- Row 4 -->
+        <StackPanel
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="-2"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="-1"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="0"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="1"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="2"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="3"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="4"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="5"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="6"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="7"/>
+            <ContentControl Style="{StaticResource KeyboardBtnStyle}" Tag="8"/>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

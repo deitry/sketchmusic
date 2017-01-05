@@ -494,7 +494,11 @@ void StrokeEditor::MelodyEditorPage::DeleteTextBtn_Click(Platform::Object^ sende
 
 void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
 {
-	if (homeItem == (ContentControl^)e->ClickedItem)
+	if (HamburgerButton == (ContentControl^)e->ClickedItem)
+	{
+		mySplitView->IsPaneOpen = !mySplitView->IsPaneOpen;
+	}
+	else if (homeItem == (ContentControl^)e->ClickedItem)
 	{
 		GoBackBtn_Click(this, nullptr);
 	}

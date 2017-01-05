@@ -283,12 +283,6 @@ void StrokeEditor::LibraryOverviewPage::RefreshBtn_Click(Platform::Object^ sende
 }
 
 
-void StrokeEditor::LibraryOverviewPage::LibView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
-{
-	
-}
-
-
 void StrokeEditor::LibraryOverviewPage::GoMenuBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	// открыть страницу со сведениями о данной идее
@@ -407,4 +401,11 @@ void StrokeEditor::LibraryOverviewPage::OnStateChanged(Platform::Object ^sender,
 				break;
 			}
 	}));
+}
+
+
+void StrokeEditor::LibraryOverviewPage::LibView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+{
+	PlayBtn->IsEnabled = LibView->SelectedItem != nullptr;
+	EditBtn->IsEnabled = LibView->SelectedItem != nullptr;
 }

@@ -4,7 +4,7 @@
 //
 
 #include "pch.h"
-#include "TextRow.h"
+#include "TextRow.xaml.h"
 #include "../base/Text.h"
 
 using namespace SketchMusic;
@@ -24,13 +24,18 @@ using namespace Windows::UI::Xaml::Media;
 
 SketchMusic::View::TextRow::TextRow()
 {
+	InitializeComponent();
+
 	// инициализируем поля, которые не зависят от шаблона
-	DefaultStyleKey = "SketchMusic.View.TextRow";
+	//DefaultStyleKey = "SketchMusic.View.TextRow";
 
 	initialised = 0;
 	scale = 1;
 
 	currentPosition = ref new Cursor;
+	data = ref new CompositionData;
+
+	InitializePage();
 
 	// связываем с обработчиками
 	//this->PointerWheelChanged += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerWheelChanged);
@@ -41,7 +46,7 @@ SketchMusic::View::TextRow::TextRow()
 Создаём столько элементов привязки, сколько нужно
 Может вообще отдельные объекты создавать не надо, а можно обойтись по одному объекту на долю?
 При масштабировании увеличивать ширину объекта
-А точки привязки будут очень условные - 
+А точки привязки будут очень условные -
 - по обработчику движения (лучше PointerEntered?) мыши определяем текущий контрол - текущую долю
 - исходя из scale решаем сколько должно быть точек привязки и рисуем один-единственный кружок,
 соответствующий ближайшей к указателю точке
@@ -74,8 +79,8 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 	//for (auto&& sym : text->getText())
 	//{
 	//	maxBeat = sym->_pos->getBeat();
-		// TODO : вставлять разрывы строк принудительно, если продолжительность
-		// данной строки превышает N долей
+	// TODO : вставлять разрывы строк принудительно, если продолжительность
+	// данной строки превышает N долей
 	//	if (dynamic_cast<SketchMusic::SNewLine^>(static_cast<Object^>(sym->_sym)))
 	//	{
 	//		breakLine.push_back(sym);	// ref new PositionedSymbol - чтобы не ссылаться на тот же самый элемент
@@ -83,13 +88,13 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 	//}
 
 	// + ещё одна строка - последняя
-	breakLine.push_back(ref new PositionedSymbol(ref new Cursor(32),ref new SNewLine));	
+	breakLine.push_back(ref new PositionedSymbol(ref new Cursor(32), ref new SNewLine));
 
 	int prev = 0;
 
 	for (int rowCnt = 0; rowCnt < breakLine.size(); rowCnt++)
 	{
-		int current = breakLine[rowCnt]->_pos->getBeat(); 
+		int current = breakLine[rowCnt]->_pos->getBeat();
 		// добавляем новую строку
 		StackPanel^ row = ref new StackPanel;
 		row->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("RowPanel"));
@@ -195,7 +200,7 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 			// - если это была последняя строка, то обрезаем её до маскимума
 			// - вычисляем индекс нового крайнего элемента, удаляем элемент из вектора, 
 			// в котором хранятся разрывы строк, обновляем значение предыдущего
-			
+
 			// - удалем текущую строку
 			_mainPanel->Children->RemoveAt(rowCnt + 1);
 			breakLine[rowCnt]->_pos->moveTo(breakLine[rowCnt + 1]->_pos);
@@ -204,13 +209,13 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 		}
 		rowCnt++;
 	}
-	
+
 	// - перерисовываем текст
 	_mainPanel->UpdateLayout();
 	RedrawText();
 }
 
-void SketchMusic::View::TextRow::SetText(SketchMusic::Text^ text) 
+void SketchMusic::View::TextRow::SetText(SketchMusic::Text^ text)
 {
 	// добавляем текст в список
 	// делаем его "главным"
@@ -234,7 +239,7 @@ void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textColle
 		return;
 
 	data = textCollection;
-	
+
 	if (format)
 	{
 		this->format = format;
@@ -244,6 +249,7 @@ void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textColle
 	{
 		if (textCollection->texts && textCollection->texts->Size > 0)
 		{
+			AllocateSnapPoints(textCollection->texts->GetAt(0), 1);
 			this->format = textCollection->texts->First()->Current;
 			this->current = this->format;
 		}
@@ -274,13 +280,13 @@ void SketchMusic::View::TextRow::InvalidateText()
 	// TODO : add для символов форматирования - только для текста, чьё форматирование сейчас берётся за основу
 	//for (auto text : _texts)
 	//{
-		auto symbols = current->getText();
-		for (auto&& symbol : symbols)
-		{
-			// - проверка на то, что если текст отличен от текста форматирования и это не нота - пропускаем
-			
-			this->AddSymbol(symbol);
-		}
+	auto symbols = current->getText();
+	for (auto&& symbol : symbols)
+	{
+		// - проверка на то, что если текст отличен от текста форматирования и это не нота - пропускаем
+
+		this->AddSymbol(symbol);
+	}
 	//}
 	// перерисовываем
 	//RedrawText();
@@ -303,7 +309,7 @@ void SketchMusic::View::TextRow::RedrawText()
 }
 
 SketchMusic::Text^ SketchMusic::View::TextRow::GetText()
-{ 
+{
 	// возвращаем "главный" текст
 	return current;
 }
@@ -324,7 +330,7 @@ void SketchMusic::View::TextRow::SetCursor(SketchMusic::Cursor^ pos)
 // работа с отдельными символами
 void SketchMusic::View::TextRow::AddSymbol(PositionedSymbol^ sym)
 {
-	
+
 	// отыскиваем, куда нужно ставить
 	// вставляем
 	if (dynamic_cast<SketchMusic::SSpace^>(sym->_sym))
@@ -396,9 +402,9 @@ void SketchMusic::View::TextRow::InsertNoteObject(PositionedSymbol^ note)
 	// обрабатываем символы форматирования
 	if (dynamic_cast<SketchMusic::SSpace^>(sym->_sym))
 	{
-		Windows::UI::Xaml::Controls::Canvas^ cnv = _placeholders->GetAt(sym->_pos->getBeat() - 1);	// берём предыдущий плейсхолдер
-		cnv->Width += (double)(this->Resources->Lookup("PlaceholderWidth"));
-		return;
+	Windows::UI::Xaml::Controls::Canvas^ cnv = _placeholders->GetAt(sym->_pos->getBeat() - 1);	// берём предыдущий плейсхолдер
+	cnv->Width += (double)(this->Resources->Lookup("PlaceholderWidth"));
+	return;
 	}
 
 	// создаём объект символа
@@ -439,8 +445,8 @@ ContentControl^ SketchMusic::View::TextRow::GetControlAtPos(Cursor^ pos, int off
 		return nullptr;
 
 	for (auto&& row : _mainPanel->Children)
-	//auto iter = _mainPanel->Children->First();
-	//while (iter->HasCurrent)
+		//auto iter = _mainPanel->Children->First();
+		//while (iter->HasCurrent)
 	{
 		StackPanel^ rowPanel = dynamic_cast<StackPanel^>(static_cast<Object^>(row));
 		int max = rowPanel->Children->Size + currentIndex;
@@ -459,7 +465,7 @@ ContentControl^ SketchMusic::View::TextRow::GetControlAtPos(Cursor^ pos, int off
 
 float SketchMusic::View::TextRow::CalculateTick(float offsetX, ContentControl ^ ctrl)
 {
-	return ((int)((offsetX + ctrl->Width/scale / 4) / ctrl->Width * scale)) * TICK_IN_BEAT / scale;
+	return ((int)((offsetX + ctrl->Width / scale / 4) / ctrl->Width * scale)) * TICK_IN_BEAT / scale;
 	//int tick = (int)(offset.X / ctrl->Width * TICK_IN_BEAT * scale / TICK_IN_BEAT) * TICK_IN_BEAT / scale;
 }
 
@@ -498,22 +504,25 @@ Cursor^ SketchMusic::View::TextRow::GetPositionOfControl(Windows::UI::Xaml::Cont
 Point SketchMusic::View::TextRow::GetCoordinatsOfPosition(Cursor^ pos)
 {
 	ContentControl^ ctrl = this->GetControlAtPos(pos);
-	auto transform = ctrl->TransformToVisual(_canvas);
-	Point basePoint = Point(0, 0);
-	auto point = transform->TransformPoint(basePoint);
+	if (ctrl)
+	{
+		auto transform = ctrl->TransformToVisual(_canvas);
+		Point basePoint = Point(0, 0);
+		auto point = transform->TransformPoint(basePoint);
 
-	// смещение учитывая тики
-	point.X += ctrl->Width * pos->getTick() / TICK_IN_BEAT;
-
-	return point;
+		// смещение учитывая тики
+		point.X += ctrl->Width * pos->getTick() / TICK_IN_BEAT;
+		return point;
+	}
+	return Point(0,0);
 }
 
 // вспомогательная функция для тех случаев, когда у нас уже есть контрол и нам нужно только округлить x
 Point SketchMusic::View::TextRow::GetCoordinatsOfControl(Windows::UI::Xaml::Controls::ContentControl^ ctrl, Point offset)
 {
 	if ((_mainPanel == nullptr) || (ctrl == nullptr))
-		return Point(0,0);
-	
+		return Point(0, 0);
+
 	auto transform = _currentSnapPoint->TransformToVisual(_canvas);
 	Point basePoint = Point(0, 0);
 	auto point = transform->TransformPoint(basePoint);
@@ -572,7 +581,7 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 		break;
 	}
 
-	
+
 }
 
 double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
@@ -587,13 +596,14 @@ double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
 		// (чтобы строки не налезали друг на друга)
 		offsetY = inote->_val >= 0 ?
 			-abs(inote->_val) % 12 :
-			- 12*((inote->_val % 12) != 0) + abs(inote->_val) % 12;
+			-12 * ((inote->_val % 12) != 0) + abs(inote->_val) % 12;
 		offsetY *= RowHeight / 12;
 		offsetY += RowHeight - 5;
 		//if (offsetY > 6) offsetY -= 12;
 		//if (offsetY < -6) offsetY += 12;
-		
-	} else {
+
+	}
+	else {
 		STempo^ tempo = dynamic_cast<STempo^>(sym);
 		if (tempo)
 		{

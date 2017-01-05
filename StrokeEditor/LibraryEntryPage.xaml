@@ -26,10 +26,10 @@
             <AppBarButton  Icon="Delete" Label="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Up" Label="Развить" Name="ExtendBtn" Click="ExtendBtn_Click"/>
-            <AppBarButton Icon="Edit" Label="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Back" Label="Назад" Name="CancelBtn" Click="CancelBtn_Click"/>
             <AppBarButton Icon="Save" Label="Сохранить" Name="SaveBtn" Click="SaveBtn_Click"/>
+            <AppBarButton Icon="Edit" Label="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
             <AppBarButton Icon="Accept" Label="ОК" Name="OkBtn" Click="OkBtn_Click"/>
         </CommandBar>
     </Page.TopAppBar>

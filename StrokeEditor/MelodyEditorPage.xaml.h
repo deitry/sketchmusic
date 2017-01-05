@@ -75,10 +75,6 @@ namespace StrokeEditor
 
 	private:
 
-		void HamburgerButton_Click(Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
-		{
-			mySplitView->IsPaneOpen = !mySplitView->IsPaneOpen;
-		}
 		void menu_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
 	};
 }

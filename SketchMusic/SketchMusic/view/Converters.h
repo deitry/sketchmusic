@@ -142,6 +142,9 @@ public:
 		case KeyType::tempo:
 			result += L"\u23f3";
 			break;
+		case KeyType::quantization:
+			result += L"\uE8D6";
+			break;
 		default:
 			break;
 		}
@@ -271,58 +274,3 @@ public:
 	KeyStateToColorConverter() {}
 };
 
-/**
-TODO : нужно ли выделять квадкейбоард?
-*/
-[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::GenericKeyboard sealed : public Windows::UI::Xaml::Controls::Control, public SketchMusic::View::IKeyboard
-{
-private:
-	bool input;
-	bool tempoPressed;
-	//std::vector<SketchMusic::View::Key^> inputBuffer;
-	//int octaveModificator;
-
-	void PushKey(Object^ object);
-	void ReleaseKey(Object^ object);
-	void OnKeyboardPressed(SketchMusic::View::Key^ key);
-	void OnControlPressed(SketchMusic::View::Key^ key);
-	void OnNormalState(SketchMusic::View::Key^ key);
-	void OnPlayStopState(SketchMusic::View::Key^ key);
-
-	SketchMusic::View::KeyboardState^ currentState;	// состояние клавиатуры. Изменяется при нажатии всяких контрол, шифт и так далее
-
-	int pressedKeys;	// суммарное количество нажатых клавиш
-	
-
-	std::multimap<SketchMusic::View::Key^, bool> _keys;	// сохраняем ссылки на клавиши, чтобы уведомлять их об изменении состояния
-		// вторым параметром отмечаем, что клавиша в данный момент нажата
-
-	concurrency::cancellation_token_source releaseToken;	
-	
-	Windows::UI::Xaml::ResourceDictionary^ _dict;
-	Windows::UI::Xaml::Media::Brush^ pressedBackground;
-	Windows::UI::Xaml::Media::Brush^ normalBackground;
-
-public:
-	GenericKeyboard();
-
-	virtual event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyPressed;	// нажатие на одну клавишу
-	virtual event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyReleased;	// отпускание одной клавиши
-	virtual event EventHandler<Windows::Foundation::Collections::IVector<SketchMusic::View::Key^>^>^ KeyboardReleased; // "отпускание" всех клавиш
-	virtual event EventHandler<SketchMusic::View::KeyboardState^>^ KeyboardStateChanged;
-
-	void OnKeyboardStateChanged(Object^ object, SketchMusic::View::KeyboardState ^ state);
-	virtual void OnApplyTemplate() override;
-	
-	// для тача
-	void onKeyboardControlEntered(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
-	void OnPointerExited(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
-	
-	// для мыши
-	void onKeyboardControlPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
-	void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
-	void OnClosed(Platform::Object ^sender, Platform::Object ^args);
-	void OnOpened(Platform::Object ^sender, Platform::Object ^args);
-	void OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
-};

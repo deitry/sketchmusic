@@ -4,7 +4,7 @@
 //
 
 #include "pch.h"
-#include "GenericKeyboard.h"
+#include "GenericKeyboard.xaml.h"
 
 using namespace SketchMusic::View;
 
@@ -21,16 +21,20 @@ using namespace Windows::UI::Xaml::Media;
 
 // Документацию по шаблону элемента "Элемент управления на основе шаблона" см. по адресу http://go.microsoft.com/fwlink/?LinkId=234235
 
-GenericKeyboard::GenericKeyboard()
+SketchMusic::View::GenericKeyboard::GenericKeyboard()
 {
-	_dict = ref new ResourceDictionary;
-	_dict->Source = ref new Uri("ms-appx:///SketchMusic/Themes/Generic.xaml");
-	pressedBackground = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("draggedForegroundBrush"));
-	normalBackground = nullptr;//reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("keyBackground"));
+	InitializeComponent();
 
-	DefaultStyleKey = "SketchMusic.View.GenericKeyboard";
+	_dict = this->Resources;
+	//_dict->Source = ref new Uri("ms-appx:///SketchMusic/Themes/Generic.xaml");
+	//pressedBackground = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("draggedForegroundBrush"));
+	//normalBackground = nullptr;//reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("keyBackground"));
+
+	//DefaultStyleKey = "SketchMusic.View.GenericKeyboard";
 	//recording = false;
 	currentState = ref new KeyboardState(KeyboardStateEnum::normal);
+
+	InitializePage();
 
 	// TODO ? переделать на КвадКейборд?
 	// и в зависимости от параметра - какой тип клавиатуры нужен, в случае больших / бесконечных
@@ -46,7 +50,7 @@ inline void UpdateParent(SketchMusic::View::Key^ key)
 	ctrl->Content = key;
 }
 
-void GenericKeyboard::OnKeyboardPressed(SketchMusic::View::Key^ key)
+void SketchMusic::View::GenericKeyboard::OnKeyboardPressed(SketchMusic::View::Key^ key)
 {
 	switch (key->type)
 	{
@@ -55,12 +59,12 @@ void GenericKeyboard::OnKeyboardPressed(SketchMusic::View::Key^ key)
 	case SketchMusic::View::KeyType::relativeNote:
 		break;
 	default:
-		{
-			// использовать конвертер тип состояния -> стиль кнопки
-			auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
-			ctrl->IsEnabled = false;
-			break;
-		}
+	{
+		// использовать конвертер тип состояния -> стиль кнопки
+		auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
+		ctrl->IsEnabled = false;
+		break;
+	}
 	}
 }
 
@@ -113,7 +117,7 @@ inline void OnOctaveDec(SketchMusic::View::Key^ key)
 	}
 }
 
-void GenericKeyboard::OnNormalState(SketchMusic::View::Key^ key)
+void SketchMusic::View::GenericKeyboard::OnNormalState(SketchMusic::View::Key^ key)
 {
 	switch (key->type)
 	{
@@ -122,12 +126,12 @@ void GenericKeyboard::OnNormalState(SketchMusic::View::Key^ key)
 	case SketchMusic::View::KeyType::genericNote:
 		break;
 	default:
-		{
-			// использовать конвертер тип состояния -> стиль кнопки
-			auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
-			ctrl->IsEnabled = true;
-			break;
-		}
+	{
+		// использовать конвертер тип состояния -> стиль кнопки
+		auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
+		ctrl->IsEnabled = true;
+		break;
+	}
 	}
 }
 
@@ -175,7 +179,7 @@ void SketchMusic::View::GenericKeyboard::OnKeyboardStateChanged(Object^ object, 
 		case SketchMusic::View::KeyboardStateEnum::stop:
 			OnPlayStopState(key);
 			break;
-		}	
+		}
 	}
 }
 
@@ -195,7 +199,7 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 		KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
 		//args->key = send;
 		//args->keysPressed = this->pressedKeys;
-		
+
 		if (key)
 		{
 			switch (key->type)
@@ -204,7 +208,7 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 			case SketchMusic::View::KeyType::genericNote:
 			case SketchMusic::View::KeyType::relativeNote:
 				KeyPressed(this, args);
-				ctrl->Background = pressedBackground;
+				ctrl->Background = this->draggedForegroundBrush;
 				if (pressedKeys == 1)
 				{
 					currentState->state = SketchMusic::View::KeyboardStateEnum::pressed;
@@ -228,7 +232,7 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 				break;
 			case SketchMusic::View::KeyType::control:
 				this->currentState->state = KeyboardStateEnum::control;	// TODO : выглядит очень плохо.
-					// Надо будет понять, что вообще имеется в виду под state
+																		// Надо будет понять, что вообще имеется в виду под state
 				KeyboardStateChanged(this, currentState);
 				break;
 			case SketchMusic::View::KeyType::cycling:
@@ -263,7 +267,7 @@ void SketchMusic::View::GenericKeyboard::onKeyboardControlPressed(Platform::Obje
 	// нажатие мышкой - только для нот
 	if (e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Touch)
 		return;
-	
+
 	PushKey(sender);
 	//mousePressed = true;
 	auto el = dynamic_cast<Windows::UI::Xaml::FrameworkElement^>(sender);
@@ -275,16 +279,15 @@ void SketchMusic::View::GenericKeyboard::onKeyboardControlEntered(Platform::Obje
 	// нажатие тачем или мышкой, если она не отжималась
 	if ((e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse)
 		//&& (!mousePressed)	// оставим на будущее, когда я придумаю, как сделать отпускание.
-			// а может, эта штука вовсе не нужна
+		// а может, эта штука вовсе не нужна
 		)
 		return;
 
 	PushKey(sender);
 }
 
-void SketchMusic::View::GenericKeyboard::OnApplyTemplate()
+void SketchMusic::View::GenericKeyboard::InitializePage()
 {
-	StackPanel^ mainPanel = (StackPanel^)GetTemplateChild("_stackPanel");
 	if (mainPanel == nullptr) return;
 
 	for (auto&& row : mainPanel->Children)
@@ -310,46 +313,41 @@ void SketchMusic::View::GenericKeyboard::OnApplyTemplate()
 				// для тача
 				ctrl->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::onKeyboardControlEntered);
 				ctrl->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::OnPointerExited);
-				
 
 				// для мыши	
 				ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::onKeyboardControlPressed);
 				ctrl->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::OnPointerReleased);
 				// как?- подписать ctrl на событие изменения состояния клавиатуры
-			}
-		}
-	}
 
-	if (_dict->HasKey("TempoFlyout"))
-	{
-		auto flyout = (Flyout^)_dict->Lookup("TempoFlyout");
-		if (flyout)
-		{
-			flyout->Opened += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnOpened);
-			flyout->Closed += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnClosed);
-
-			StackPanel^ panel = dynamic_cast<StackPanel^>(flyout->Content);
-			for (auto&& child : panel->Children)
-			{
-				Button^ btn = dynamic_cast<Button^>(static_cast<Object^>(child));
-				if (btn)
+				if (auto flyout = Flyout::GetAttachedFlyout(ctrl))
 				{
-					btn->Tag = nullptr;
-					//btn->Click += ref new RoutedEventHandler([=](Object^ obj, RoutedEventArgs^ args)
-					//{
-					//	tempoPressed = true;
-					//	flyout->Hide();
-					//});
+					if (flyout && (key->type == SketchMusic::View::KeyType::tempo))
+					{
+						flyout->Opened += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnOpened);
+						flyout->Closed += ref new Windows::Foundation::EventHandler<Platform::Object ^>(this, &SketchMusic::View::GenericKeyboard::OnClosed);
+
+						//StackPanel^ panel = dynamic_cast<StackPanel^>(flyout->Content);
+						//for (auto&& child : panel->Children)
+						//{
+						//	Button^ btn = dynamic_cast<Button^>(static_cast<Object^>(child));
+						//	if (btn)
+						//	{
+						//		btn->Tag = nullptr;
+						//		btn->Click += ref new Windows::UI::Xaml::RoutedEventHandler(this, &SketchMusic::View::GenericKeyboard::OnClick);
+						//		//ref new RoutedEventHandler([=](Object^ obj, RoutedEventArgs^ args)
+						//		//{
+						//		//	tempoPressed = true;
+						//		//	flyout->Hide();
+						//		//});
+						//	}
+						//}
+					}
+					if (flyout && (key->type == SketchMusic::View::KeyType::quantization))
+					{
+
+					}
 				}
 			}
-		}
-	}
-	if (_dict->HasKey("QuantizeFlyout"))
-	{
-		auto flyout = (Flyout^)_dict->Lookup("QuantizeFlyout");
-		if (flyout)
-		{
-			
 		}
 	}
 
@@ -384,10 +382,10 @@ void SketchMusic::View::GenericKeyboard::OnPointerExited(Platform::Object ^sende
 
 void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 {
-	Windows::UI::Xaml::Controls::ContentControl^ ctrl = 
+	Windows::UI::Xaml::Controls::ContentControl^ ctrl =
 		dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(static_cast<Object^>(sender));
 
-	
+
 	pressedKeys--;
 
 	SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(ctrl->Content);
@@ -397,13 +395,13 @@ void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
 
 	KeyReleased(this, args);
-	ctrl->Background = normalBackground;
+	ctrl->Background = keyBackground;
 
 	if (pressedKeys <= 0)
 	{
 		pressedKeys = 0;	// на всякий случай принудительно
 
-		// уведомляем всех о том, что всё норм
+							// уведомляем всех о том, что всё норм
 		this->currentState->state = SketchMusic::View::KeyboardStateEnum::normal;
 		KeyboardStateChanged(this, currentState);
 	}
@@ -415,9 +413,9 @@ void SketchMusic::View::GenericKeyboard::OnClosed(Platform::Object ^sender, Plat
 	Flyout^ flyout = dynamic_cast<Flyout^>(sender);
 	if (flyout == nullptr)
 		return;
-	
+
 	StackPanel^ panel = dynamic_cast<StackPanel^>(flyout->Content);
-	
+
 	for (auto&& child : panel->Children)
 	{
 		if (tempoPressed)
@@ -444,7 +442,7 @@ void SketchMusic::View::GenericKeyboard::OnClosed(Platform::Object ^sender, Plat
 
 void SketchMusic::View::GenericKeyboard::OnOpened(Platform::Object ^sender, Platform::Object ^args)
 {
-	
+
 }
 
 

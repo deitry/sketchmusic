@@ -1,5 +1,5 @@
 ﻿//
-// TextRow.h
+// TextRow.xaml.h
 // Объявление класса TextRow.
 //
 
@@ -7,6 +7,7 @@
 
 #include "../SketchMusic.h"
 #include "../base/Cursor.h"
+#include "Generated Files\SketchMusic\view\TextRow.g.h"
 
 using namespace SketchMusic;
 using namespace Windows::UI::Xaml::Controls;
@@ -25,34 +26,31 @@ private:
 
 	int currentEditing;	// индекс текста, с которым идёт основная работа
 	int currentFormat;	// индекс текста, чьё форматирование берётся за основу
-	
+
 	std::vector<Windows::UI::Xaml::Controls::ContentControl^> notes;
-	Canvas^ _canvas;
-	ContentControl^ _cursor;
 	Windows::UI::Xaml::ResourceDictionary^ _dict;
 	ContentControl^ _dragged;
 	Windows::Foundation::Point _lastPoint;
 	ContentControl^ _currentSnapPoint;
 	ContentControl^ _snapPoint;
-	ScrollViewer^ _scrollViewer;
 	bool _isMoving;
 
 	// 1..32, 1 - 1 ктрл - одна доля, 32 - на одну долю 32 ктрла
 	int initialised;	// до какой степени масштаба инициализировано
 
-	//Cusror^ begin; // для выравнивания - перед положением курсора, отмеченным началом,
-		// могут быть ещё символы
+						//Cusror^ begin; // для выравнивания - перед положением курсора, отмеченным началом,
+						// могут быть ещё символы
 
 	Cursor^ _maxPos;
 
 	std::vector<PositionedSymbol^> breakLine;
-		// в отдельном массиве содержим символы, которые отмечают разрыв строки.
-		// В том числе здесь могут содержаться символы, определяющие вынужденный разрыв в результате того, закончилась ширина
+	// в отдельном массиве содержим символы, которые отмечают разрыв строки.
+	// В том числе здесь могут содержаться символы, определяющие вынужденный разрыв в результате того, закончилась ширина
 
 internal:
 	// вспомогательные функции для удобной работы с символами
 	//void InsertSpaceSymbol(PositionedSymbol^ symbol);	// нужно будет не просто делать один из плейсхолдеров шире,
-		// но ещё и перемещать "пробел", если в результате масштаба данный плейсхолдер окажется невидимым
+	// но ещё и перемещать "пробел", если в результате масштаба данный плейсхолдер окажется невидимым
 	//void CreateNoteObject(ISymbol^ note);
 	void InsertNoteObject(PositionedSymbol^ note);
 	ContentControl^ GetControlAtPos(Cursor^ pos, int offset = 0);
@@ -78,10 +76,10 @@ public:
 	property Text^ current;
 	property Text^ format;
 	property int scale;			// текущий уровень масштаба 
-	property StackPanel^ _mainPanel;
 
 	TextRow();
 	void OnApplyTemplate() override;
+	void InitializePage();
 
 	void SetText(SketchMusic::Text^ text);
 	//void SetFormat(SketchMusic::Text^ format);	// оставляем возможность ноты брать из одного текста, 
@@ -91,7 +89,7 @@ public:
 	void SetText(CompositionData^ textCollection, SketchMusic::Text^ format);
 	SketchMusic::Text^ GetText();
 	void SetCursor(SketchMusic::Cursor^ pos);
-	
+
 	// работа с отдельными символами
 	void AddSymbol(PositionedSymbol^ symbol);
 	//void DeleteSymbol(PositionedSymbol^ symbol);
@@ -135,7 +133,7 @@ public:
 		if (psym == nullptr) return "";
 
 		Platform::String^ str = "";
-	
+
 		SketchMusic::STempo^ tempo = dynamic_cast<SketchMusic::STempo^>(psym->_sym);
 		if (tempo)
 		{

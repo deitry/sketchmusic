@@ -43,7 +43,7 @@ namespace StrokeEditor
 
 		//static Platform::String^ StringFromAscIIChars(std::string & chars);
 		static int sqlite_readentry_callback(void *unused, int count, char **data, char **columns);
-		void LibView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
+
 		void GoMenuBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void CreateEntryBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void FilterList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
@@ -56,6 +56,7 @@ namespace StrokeEditor
 		void EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void PlayBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
+		void LibView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
