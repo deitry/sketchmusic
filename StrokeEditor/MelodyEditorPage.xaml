@@ -136,7 +136,7 @@
             <SplitView.Content>
                 <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"      
               BorderThickness="0"
-              BorderBrush="Black" Width="950">
+              BorderBrush="Black" Width="{Binding Width, ElementName=grid}">
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
@@ -144,13 +144,14 @@
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
 
-                    <smv:TextRow x:Name="_textRow"
-                         BorderThickness="1"
-                         BorderBrush="White"
-                         Height="250"
-                         HorizontalAlignment="Left"
-                         Margin="5,5,5,5"
-                         Grid.Row="0"/>
+                        <smv:TextRow x:Name="_textRow"
+                                     BorderThickness="1"
+                                     BorderBrush="White"
+                                     Height="250"
+                                     HorizontalAlignment="Left"
+                                     Margin="5,5,5,5"
+                                     Width="{Binding Width, ElementName=grid}"/>
+                    
                     
                     <smv:GenericKeyboard x:Name="_keyboard" BorderBrush="OrangeRed"
                                  BorderThickness="1"

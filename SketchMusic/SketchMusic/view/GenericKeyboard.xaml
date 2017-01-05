@@ -74,8 +74,7 @@
                                     FontFamily="Segoe MDL2 Assets"
                                     FontSize="{TemplateBinding FontSize}"
                                     HorizontalAlignment="Center" VerticalAlignment="Center"
-                                    Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
-                                                        Converter={StaticResource ctrlKeyState2color}}"
+                                    Foreground="{TemplateBinding Foreground}"
                                     >
                                     <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource key2string}}"/>
                                 </TextBlock>
@@ -100,15 +99,15 @@
         <!-- System -->
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Left">
-            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
-                            Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+            <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                                     Converter={StaticResource ctrlKeyState2color}}"
+                            Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}"
                             Width="{StaticResource CtrlWidth}" Tag="14000"/>
-            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+            <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                 Converter={StaticResource actionKeyState2color}}"
+                            Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="11000"/>
 
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
@@ -125,15 +124,15 @@
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="3001"/>
 
-            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+            <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+                                Converter={StaticResource ctrlKeyState2color}}"
+                            Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" 
-                            Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
-                                Converter={StaticResource ctrlKeyState2color}}"
                             Width="{StaticResource CtrlWidth}" Tag="12000"/>
-            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}"
-                            Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+            <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                 Converter={StaticResource ctrlKeyState2color}}"
+                            Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}"
                             Width="{StaticResource CtrlWidth}" Tag="7000"/>
             <!--<ContentControl Style="{StaticResource KeyboardBtnStyle}" 
                                                 Width="{StaticResource CtrlWidth}" Tag="8000"/>-->

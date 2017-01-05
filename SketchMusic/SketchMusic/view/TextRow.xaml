@@ -25,7 +25,7 @@
         <SolidColorBrush x:Key="noteBackground3" x:Name="noteBackground3" Color="Green"/>
         <SolidColorBrush x:Key="noteBackground4" x:Name="noteBackground4" Color="Yellow"/>
         <SolidColorBrush x:Key="tempoBackground" x:Name="tempoBackground" Color="DarkCyan"/>
-        
+
         <local:OnSymbolToStringConverter x:Key="sym2string"/>
         <local:OnKeyToStringConverter x:Key="key2string"/>
         <local:OnPositionedSymbolToTextConverter x:Key="possym2text"/>
@@ -54,6 +54,7 @@
             <Setter Property="Orientation" Value="Horizontal"/>
             <Setter Property="Margin" Value="5,10,5,10"/>
             <Setter Property="Height" Value="{StaticResource RowHeight}"/>
+            <Setter Property="MaxWidth" Value="1024"/>
         </Style>
 
         <ControlTemplate TargetType="ContentControl" x:Key="CursorPositionTemplate">
@@ -61,7 +62,7 @@
                        Width="{TemplateBinding Width}"
                        Height="{TemplateBinding Height}"/>
         </ControlTemplate>
-        
+
         <Style TargetType="ContentControl" x:Key="CursorPositionStyle">
             <Setter Property="Width" Value="3"/>
             <Setter Property="Height" Value="100"/>
@@ -101,7 +102,7 @@
 
         <ControlTemplate TargetType="ContentControl" x:Key="SymbolControlTemplate">
             <Grid>
-                <VisualStateManager.VisualStateGroups>
+                <!--<VisualStateManager.VisualStateGroups>
                     <VisualStateGroup x:Name="CommonStates">
                         <VisualState x:Name="Normal"/>
                         <VisualState x:Name="PointerOver">
@@ -116,7 +117,7 @@
                             </Storyboard>
                         </VisualState>
                     </VisualStateGroup>
-                </VisualStateManager.VisualStateGroups>
+                </VisualStateManager.VisualStateGroups>-->
                 <Ellipse x:Name="symbolEllipse" 
                      Fill="{TemplateBinding Background}" 
                      Width="{TemplateBinding Width}" 
@@ -161,28 +162,57 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    
-    <Grid>
-        <Border>
-            <ScrollViewer
-                            x:Name="_scrollViewer"
-                            ZoomMode="Disabled"
-                            VerticalScrollMode="Auto"
-                            HorizontalScrollMode="Enabled"
-                            HorizontalScrollBarVisibility="Visible">
-                
-                <Grid>
-                    <StackPanel x:Name="_mainPanel"
-                                            Orientation="Vertical">
 
+    <Grid Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
+        <Border Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
+            <ScrollViewer x:Name="_scrollViewer"
+                          ZoomMode="Disabled"
+                          VerticalScrollMode="Auto"
+                          HorizontalScrollMode="Enabled"
+                          HorizontalScrollBarVisibility="Visible"
+                          Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
+
+                <Grid Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
+                    <StackPanel x:Name="_mainPanel"
+                                Orientation="Vertical"
+                                Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}">
+                        <StackPanel Style="{StaticResource RowPanel}">
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                            <ContentControl Style="{StaticResource PlaceholderControlStyle}"/>
+                        </StackPanel>
                     </StackPanel>
 
                     <Canvas x:Name="_canvas"
-                                        Height="100">
+                            Height="100">
                         <ContentControl x:Name="_cursor"
-                                                    Style="{StaticResource CursorPositionStyle}"
-                                                    Canvas.Left="0"
-                                                    Canvas.Top="0"/>
+                                        Style="{StaticResource CursorPositionStyle}"
+                                        Canvas.Left="0"
+                                        Canvas.Top="0"/>
                     </Canvas>
                 </Grid>
             </ScrollViewer>

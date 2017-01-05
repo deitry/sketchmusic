@@ -305,7 +305,7 @@ void SketchMusic::View::TextRow::RedrawText()
 	}
 
 	// перерисовываем положение курсора
-	SetCursor(nullptr);
+	SetCursor(currentPosition);
 }
 
 SketchMusic::Text^ SketchMusic::View::TextRow::GetText()

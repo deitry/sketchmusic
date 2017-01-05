@@ -104,7 +104,8 @@ void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Wind
 		return;
 	}
 
-	_scrollViewer->HorizontalScrollMode = ScrollMode::Disabled;
+	//_scrollViewer->HorizontalScrollMode = ScrollMode::Disabled;
+	ScrollViewer::SetHorizontalScrollMode(_mainPanel, ScrollMode::Disabled);
 	_lastPoint = e->GetCurrentPoint(_canvas)->Position;
 	_lastPoint.X -= Canvas::GetLeft(ctrl);
 	_lastPoint.Y -= Canvas::GetTop(ctrl);
@@ -199,7 +200,8 @@ void SketchMusic::View::TextRow::OnPointerReleased(Platform::Object ^sender, Win
 	_dragged->Foreground = nullptr;
 	//SetBackgroundColor(_dragged);
 	_dragged = nullptr;
-	_scrollViewer->HorizontalScrollMode = ScrollMode::Enabled;
+	ScrollViewer::SetHorizontalScrollMode(_mainPanel, ScrollMode::Enabled);
+	//_scrollViewer->HorizontalScrollMode = ScrollMode::Enabled;
 
 	//VisualStateManager::GoToState(bt, "Normal", true);
 }
