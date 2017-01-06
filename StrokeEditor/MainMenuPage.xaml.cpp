@@ -7,7 +7,9 @@
 #include "MainMenuPage.xaml.h"
 #include "AboutPage.xaml.h"
 #include "LibraryOverviewPage.xaml.h"
-
+#include "LibraryEntryPage.xaml.h"
+#include "CompositionEditorPage.xaml.h"
+#include "CompositionOverviewPage.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -39,4 +41,23 @@ void StrokeEditor::MainMenuPage::OpenLibraryBtn_Click(Platform::Object^ sender, 
 void StrokeEditor::MainMenuPage::AboutBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	this->Frame->Navigate(TypeName(StrokeEditor::AboutPage::typeid));
+}
+
+
+void StrokeEditor::MainMenuPage::OpenCompositionLibraryBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	this->Frame->Navigate(TypeName(StrokeEditor::CompositionOverviewPage::typeid));
+}
+
+
+void StrokeEditor::MainMenuPage::CreateCompositionBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid));
+}
+
+
+void StrokeEditor::MainMenuPage::CreateIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	// открыть страницу со сведениями о новой идее
+	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(nullptr, false));
 }

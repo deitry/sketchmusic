@@ -74,6 +74,9 @@
     </ClCompile>
     <ClCompile Include="SketchMusic\view\GenericKeyboard.xaml.cpp" />
     <ClCompile Include="SketchMusic\view\TextRow.xaml.cpp" />
+    <ClCompile Include="SketchMusic\view\ChordView.cpp">
+      <Filter>view</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -170,6 +173,9 @@
     </ClInclude>
     <ClInclude Include="SketchMusic\view\GenericKeyboard.xaml.h" />
     <ClInclude Include="SketchMusic\view\TextRow.xaml.h" />
+    <ClInclude Include="SketchMusic\view\ChordView.h">
+      <Filter>view</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="SketchMusic\commands\DelegateCommand.txt">
@@ -183,6 +189,7 @@
     <Page Include="SketchMusic\view\GenericKeyboard.xaml">
       <Filter>view</Filter>
     </Page>
+    <Page Include="Themes\Generic.xaml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\acoustic_guitar.sf2">

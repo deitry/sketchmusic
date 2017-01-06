@@ -18,3 +18,4 @@
 #include "SketchMusic\base\Idea.h"
 #include "SketchMusic\base\Text.h"
 #include "SketchMusic\player\SoundFont.h"
+#include "SketchMusic\view\ChordView.h"

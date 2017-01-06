@@ -147,6 +147,12 @@
     <ClInclude Include="AboutPage.xaml.h">
       <DependentUpon>AboutPage.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="CompositionEditorPage.xaml.h">
+      <DependentUpon>CompositionEditorPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="CompositionOverviewPage.xaml.h">
+      <DependentUpon>CompositionOverviewPage.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="LibraryEntryPage.xaml.h">
       <DependentUpon>LibraryEntryPage.xaml</DependentUpon>
     </ClInclude>
@@ -170,6 +176,12 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="AboutPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CompositionEditorPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CompositionOverviewPage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="LibraryEntryPage.xaml">
@@ -225,6 +237,12 @@
     </ClCompile>
     <ClCompile Include="App.xaml.cpp">
       <DependentUpon>App.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="CompositionEditorPage.xaml.cpp">
+      <DependentUpon>CompositionEditorPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="CompositionOverviewPage.xaml.cpp">
+      <DependentUpon>CompositionOverviewPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="LibraryEntryPage.xaml.cpp">
       <DependentUpon>LibraryEntryPage.xaml</DependentUpon>

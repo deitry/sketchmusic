@@ -842,6 +842,7 @@ namespace SketchMusic
 		// ref class ContinuumKeyboard;
 
 		ref class TextRow;		// единичная строка для отображения текста
+		ref class ChordView;	// для отображения нескольких нот
 	}
 
 	/**

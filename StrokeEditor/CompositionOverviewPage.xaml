@@ -1,0 +1,61 @@
+﻿<Page
+    x:Class="StrokeEditor.CompositionOverviewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:StrokeEditor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.TopAppBar>
+        <CommandBar x:Name="commandBar">
+            <AppBarButton Name="GoMenuBtn" Label="В меню" Click="GoMenuBtn_Click" Icon="Home"/>
+            <AppBarButton Name="SetWorkingFolderBtn" Label="Выбрать папку с проектами" Click="SetWorkingFolderBtn_Click" Icon="Folder"/>
+            <AppBarSeparator/>
+            <AppBarButton Label="Сортировка" Icon="Sort">
+                <Button.Flyout>
+                    <Flyout x:Name="SortingFlyout">
+                        <ListView Name="SortingList">
+                            <TextBlock Text="по дате"/>
+                            <TextBlock Text="по оценке"/>
+                        </ListView>
+                    </Flyout>
+                </Button.Flyout>
+            </AppBarButton>
+            <AppBarButton Label="Фильтрация" Icon="Filter">
+                <Button.Flyout>
+                    <Flyout x:Name="FilterFlyout">
+                        <ListView Name="FilterList" SelectionMode="Multiple" SelectionChanged="FilterList_SelectionChanged">
+                            <TextBlock Text="последние 3 дня" Tag="0"/>
+                            <TextBlock Text="оценка 6 и выше" Tag="1"/>
+                            <TextBlock Text="имеет тег 'todo'" Tag="2"/>
+                        </ListView>
+                    </Flyout>
+                </Button.Flyout>
+            </AppBarButton>
+            <AppBarButton Name="RefreshBtn" Label="Обновить" Icon="Refresh" Click="RefreshBtn_Click"/>
+            <AppBarSeparator/>
+            <AppBarButton Name="CreateEntryBtn" Label="Создать новую идею" Icon="Add" Click="CreateEntryBtn_Click"/>
+            <AppBarSeparator/>
+            <AppBarButton Name="PlayBtn" Label="Воспроизвести" Icon="Play" HorizontalAlignment="Right"
+                        IsEnabled="False" 
+                        Click="PlayBtn_Click"/>
+            <!-- IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" -->
+            <AppBarButton Name="EditBtn" Label="Редактировать" Icon="Edit" HorizontalAlignment="Right" 
+                                IsEnabled="False" 
+                                Click="EditBtn_Click"/>
+        </CommandBar>
+    </Page.TopAppBar>
+    
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <ListView x:Name="CompositionListView" SelectionChanged="CompositionListView_SelectionChanged">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}" BorderThickness="1">
+                        <TextBlock Text="{Binding}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>

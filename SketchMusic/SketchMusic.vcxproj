@@ -232,6 +232,7 @@
     <ClInclude Include="SketchMusic\player\SoundEnginePool.h" />
     <ClInclude Include="SketchMusic\player\SoundFont.h" />
     <ClInclude Include="SketchMusic\SketchMusic.h" />
+    <ClInclude Include="SketchMusic\view\ChordView.h" />
     <ClInclude Include="SketchMusic\view\Converters.h" />
     <ClInclude Include="SketchMusic\view\GenericKeyboard.xaml.h">
       <DependentUpon>SketchMusic\view\GenericKeyboard.xaml</DependentUpon>
@@ -268,6 +269,7 @@
     <ClCompile Include="SketchMusic\player\SoundEnginePool.cpp" />
     <ClCompile Include="SketchMusic\player\SoundFont.cpp" />
     <ClCompile Include="SketchMusic\SketchMusic.cpp" />
+    <ClCompile Include="SketchMusic\view\ChordView.cpp" />
     <ClCompile Include="SketchMusic\view\GenericKeyboard.xaml.cpp">
       <DependentUpon>SketchMusic\view\GenericKeyboard.xaml</DependentUpon>
     </ClCompile>
@@ -291,6 +293,7 @@
       <SubType>Designer</SubType>
       <FileType>PageXaml</FileType>
     </Page>
+    <Page Include="Themes\Generic.xaml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\1General Midi.SF2">

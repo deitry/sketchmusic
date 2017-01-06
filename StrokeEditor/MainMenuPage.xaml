@@ -7,6 +7,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <Style x:Key="MenuBtnStyle" TargetType="Button">
+            <Setter Property="Margin" Value="0,10"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+    </Page.Resources>
+    
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 
           VerticalAlignment="Center" 
           HorizontalAlignment="Center"
@@ -17,7 +24,13 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Button Name="OpenLibraryBtn" Content="Открыть библиотеку" Click="OpenLibraryBtn_Click" Grid.Row="1" HorizontalAlignment="Center" Margin="0,10" />
-        <Button Name="AboutBtn" Content="О программе"  Click="AboutBtn_Click" Grid.Row="2" HorizontalAlignment="Center" Margin="0,10"/>
+        <StackPanel Grid.Row="1" HorizontalAlignment="Center" Orientation="Vertical">
+            <Button Name="CreateCompositionBtn" Content="Создать композицию" Click="CreateCompositionBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+            <Button Name="CreateIdeaBtn" Content="Записать идею" Click="CreateIdeaBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+
+            <Button Name="OpenCompositionLibraryBtn" Content="Обзор проектов" Click="OpenCompositionLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+            <Button Name="OpenLibraryBtn" Content="Открыть библиотеку" Click="OpenLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+            <Button Name="AboutBtn" Content="О программе"  Click="AboutBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+        </StackPanel>
     </Grid>
 </Page>

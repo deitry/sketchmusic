@@ -21,6 +21,7 @@
     <ClCompile Include="MainMenuPage.xaml.cpp" />
     <ClCompile Include="MelodyEditorPage.xaml.cpp" />
     <ClCompile Include="sqlite3.c" />
+    <ClCompile Include="CompositionEditorPage.xaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="MainMenuPage.xaml.h" />
     <ClInclude Include="MelodyEditorPage.xaml.h" />
     <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="CompositionEditorPage.xaml.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -80,5 +82,7 @@
     <Page Include="LibraryEntryPage.xaml" />
     <Page Include="AboutPage.xaml" />
     <Page Include="MelodyEditorPage.xaml" />
+    <Page Include="CompositionEditorPage.xaml" />
+    <Page Include="CompositionOverviewPage.xaml" />
   </ItemGroup>
 </Project>

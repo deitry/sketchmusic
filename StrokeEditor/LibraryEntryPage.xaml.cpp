@@ -9,6 +9,7 @@
 #include "LibraryEntryPage.xaml.h"
 #include "MelodyEditorPage.xaml.h"
 #include "LibraryOverviewPage.xaml.h"
+#include "MainMenuPage.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -204,4 +205,9 @@ void StrokeEditor::LibraryEntryPage::SaveBtn_Click(Platform::Object^ sender, Win
 	{
 		((App^)App::Current)->InsertIdea(this->_entry);
 	}
+}
+
+void StrokeEditor::LibraryEntryPage::HomeBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	this->Frame->Navigate(TypeName(StrokeEditor::MainMenuPage::typeid));
 }

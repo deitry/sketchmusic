@@ -40,6 +40,7 @@ namespace StrokeEditor
 		void SaveBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
 		//StrokeEditor::LibraryOverviewPage^ _library;
+		void HomeBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
 	public ref class LibraryEntryNavigationArgs sealed

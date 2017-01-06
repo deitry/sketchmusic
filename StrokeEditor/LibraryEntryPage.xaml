@@ -23,6 +23,8 @@
 
     <Page.TopAppBar>
         <CommandBar x:Name="commandBar">
+            <AppBarButton Icon="Home" Label="В меню" Name="HomeBtn" Click="HomeBtn_Click"/>
+            <AppBarSeparator/>
             <AppBarButton  Icon="Delete" Label="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
             <AppBarSeparator/>
             <AppBarButton Icon="Up" Label="Развить" Name="ExtendBtn" Click="ExtendBtn_Click"/>
