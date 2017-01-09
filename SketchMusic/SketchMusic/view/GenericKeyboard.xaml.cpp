@@ -27,12 +27,7 @@ SketchMusic::View::GenericKeyboard::GenericKeyboard()
 	InitializeComponent();
 
 	_dict = this->Resources;
-	//_dict->Source = ref new Uri("ms-appx:///SketchMusic/Themes/Generic.xaml");
-	//pressedBackground = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("draggedForegroundBrush"));
-	//normalBackground = nullptr;//reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("keyBackground"));
-
-	//DefaultStyleKey = "SketchMusic.View.GenericKeyboard";
-	//recording = false;
+	
 	currentState = ref new KeyboardState(KeyboardStateEnum::normal);
 
 	InitializePage();
@@ -206,7 +201,7 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 			case SketchMusic::View::KeyType::genericNote:
 			case SketchMusic::View::KeyType::relativeNote:
 				KeyPressed(this, args);
-				ctrl->Background = this->draggedForegroundBrush;
+				ctrl->Background = (SolidColorBrush^)_dict->Lookup("draggedForegroundBrush");
 				if (pressedKeys == 1)
 				{
 					currentState->state = SketchMusic::View::KeyboardStateEnum::pressed;
@@ -251,6 +246,27 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
 				if (flyout)
 					flyout->ShowAt(ctrl);
+				break;
+			}
+			case SketchMusic::View::KeyType::hide:
+			{
+				key->value = !key->value;
+				bool collapsed = _Row1->Visibility == Windows::UI::Xaml::Visibility::Collapsed;
+				if (collapsed)
+				{
+					_Row1->Visibility = Windows::UI::Xaml::Visibility::Visible;
+					_Row2->Visibility = Windows::UI::Xaml::Visibility::Visible;
+					_Row3->Visibility = Windows::UI::Xaml::Visibility::Visible;
+					_Row4->Visibility = Windows::UI::Xaml::Visibility::Visible;
+				}
+				else {
+					_Row1->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+					_Row2->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+					_Row3->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+					_Row4->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+				}
+				//if (_Row1->Visibility == Visibility::Collapsed)
+
 				break;
 			}
 			case SketchMusic::View::KeyType::enter:

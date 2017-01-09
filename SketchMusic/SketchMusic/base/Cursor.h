@@ -8,7 +8,7 @@ using namespace Windows::Data::Json;
 [Windows::UI::Xaml::Data::Bindable]
 public ref class SketchMusic::Cursor sealed
 {
-private:
+
 	int _beat;	// номер "крупного" тика.
 				// Разбиение на такты происходит в соответствии
 				// с системными символами.
@@ -26,6 +26,14 @@ public:
 	Cursor(int b) { _beat = b; _tick = 0; }
 	Cursor(int b, float t);
 	Cursor(Cursor^ cur) { _beat = cur->_beat; _tick = cur->_tick; }
+
+	property int Beat
+	{ int get() { return _beat; }
+	void set(int a) { _beat = a; }}
+	
+	property float Tick
+	{ float get() { return _tick; }
+	void set(float a) { _tick = a; }}
 
 	// доступ к полям
 	

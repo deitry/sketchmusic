@@ -37,6 +37,27 @@ void SketchMusic::Text::deleteSymbol(Cursor^ cur, ISymbol^ sym)
 	//this->_t[cur] = sym;
 }
 
+void SketchMusic::Text::deleteNLine(Cursor^ cur)
+{
+	// проходимся по всем нотам в этом месте
+	// если есть SNewLine - удаляем - только один!
+	auto psym = _t.find(cur);
+	if (psym == _t.end())
+		return;
+
+	auto left = _t.lower_bound(cur);
+	auto right = _t.upper_bound(cur);
+	for (; left != right; left++)
+	{
+		if (left->second->GetSymType() == SketchMusic::SymbolType::NLINE)
+		{
+			_t.erase(left);
+			return;
+		}
+	}
+	
+}
+
 void SketchMusic::Text::deleteSymbols(Cursor^ begin, Cursor^ end)
 {
 	if (begin->EQ(end))

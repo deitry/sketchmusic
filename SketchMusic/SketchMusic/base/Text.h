@@ -55,6 +55,7 @@ public:
 	ISymbol^ getSymbol(Cursor^ cur) { return _t.find(cur)->second; }
 	void deleteSymbol(Cursor^ cur, ISymbol^ sym);
 	void deleteSymbols(Cursor^ begin, Cursor^ end);
+	void deleteNLine(Cursor^ cur);
 	
 	void moveSymbol(PositionedSymbol^ psym, SketchMusic::Cursor^ newpos);
 	

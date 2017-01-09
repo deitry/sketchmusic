@@ -3,12 +3,20 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:StrokeEditor"
+    xmlns:smv="using:SketchMusic.View"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Button Name="GoBackBtn" Content="Вернуться в меню" Click="GoBackBtn_Click" Margin="0,20" HorizontalAlignment="Center"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
         
+        <Button Grid.Row="0" Name="GoBackBtn" Content="Вернуться в меню" Click="GoBackBtn_Click" Margin="0,20" HorizontalAlignment="Center"/>
+        <Border Grid.Row="1" BorderBrush="Blue" BorderThickness="2" >
+            <smv:ChordView x:Name="CurrentChordView" Width="200" Height="200"/>
+        </Border>
     </Grid>
 </Page>

@@ -11,6 +11,7 @@
 #include "SketchMusic\view\RadialKeyboard.h"
 #include "SketchMusic\view\Converters.h"
 #include "SketchMusic\view\GenericKeyboard.xaml.h"
+#include "SketchMusic\view\ChordView.xaml.h"
 #include "SketchMusic\view\TextRow.xaml.h"
 #include "SketchMusic\view\TextMultiRow.h"
 #include "SketchMusic\view\MultiRowStackPanel.h"
@@ -18,4 +19,4 @@
 #include "SketchMusic\base\Idea.h"
 #include "SketchMusic\base\Text.h"
 #include "SketchMusic\player\SoundFont.h"
-#include "SketchMusic\view\ChordView.h"
+

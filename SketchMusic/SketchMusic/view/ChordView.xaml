@@ -1,0 +1,91 @@
+﻿<UserControl
+    x:Name="ChordView"
+    x:Class="SketchMusic.View.ChordView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SketchMusic"
+    xmlns:smv="using:SketchMusic.View"
+    xmlns:coll="using:System.Collections"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ms-appx:///SketchMusic/SketchMusic/view/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+           <!-- <local:SNote x:Name="testNote" _val="6" _velocity="0" _voice="0" x:Key="testNote"/>
+            <local:Cursor x:Name="testCur" x:Key="testCur"/>
+            <local:PositionedSymbol x:Key="testPSym" _pos="{StaticResource testCur}" _sym="{StaticResource testNote}"/>
+
+            <Style TargetType="smv:ChordView" x:Key="BasicChordView">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <Grid Name="MainGrid"
+                                  BorderBrush="{Binding ElementName=ChordView, Path=BorderBrush}"
+                                  BorderThickness="{Binding ElementName=ChordView, Path=BorderThickness}"
+                                  Background="{Binding ElementName=ChordView, Path=Background}"
+                                  Width="{Binding ElementName=ChordView, Path=Width}"
+                                  Height="{Binding ElementName=ChordView, Path=Height}"
+                                >
+                                <Canvas>
+
+                                    <ContentControl x:Name="ContentControl"
+                                                    Style="{StaticResource SymbolControlStyle}" 
+                                                    Canvas.Left="50"
+                                                    Content="{StaticResource testPSym}"
+                                                    Canvas.Top="{Binding Content, Converter={StaticResource symbol2ypos}, 
+                                                                ConverterParameter={StaticResource RowHeight}}"
+                                                    />
+                                </Canvas>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>-->
+
+            <smv:PSymbolToVerticalPosConverter x:Key="psym2ypos"
+                                               LineSpacing="{StaticResource LineSpacing}"
+                                               AvailableHeight="{x:Bind Height}"/>
+            <smv:MultiplicatedLengthConverter x:Key="HalvedWidth" Multiplicator="0.45" Default="{x:Bind Width}"/>
+
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Border BorderBrush="Black" BorderThickness="3" x:Name="_CanvasBorder">
+        <ItemsControl x:Name="_ItemsControl">
+            
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas x:Name="_MyCanvas"
+                      Width="{Binding ElementName=ChordView, Path=Width}"
+                      Height="{Binding ElementName=ChordView, Path=Height}"
+                      Margin="{Binding ElementName=ChordView, Path=Margin}"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Top"
+                      Background="{Binding ElementName=ChordView, Path=Background}"
+                      />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <ContentControl Style="{StaticResource SymbolControlStyle}" HorizontalAlignment="Center">
+                        <ContentControl.RenderTransform>
+                            <TranslateTransform Y="{Binding Path=DataContext,
+                                                RelativeSource={RelativeSource TemplatedParent},
+                                                Converter={StaticResource psym2ypos}}"
+                                                X="{Binding Path=Width,
+                                                RelativeSource={RelativeSource TemplatedParent},
+                                                Converter={StaticResource HalvedWidth}}"/>
+                        </ContentControl.RenderTransform>
+                    </ContentControl>
+                </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    </Border>
+</UserControl>

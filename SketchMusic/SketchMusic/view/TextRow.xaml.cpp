@@ -88,7 +88,7 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 	//}
 
 	// + ещё одна строка - последняя
-	breakLine.push_back(ref new PositionedSymbol(ref new Cursor(32), ref new SNewLine));
+	breakLine.push_back(ref new PositionedSymbol(ref new Cursor(64), ref new SNewLine));
 
 	int prev = 0;
 
@@ -142,7 +142,7 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 			// - создаём новую строку, вставляем в _mainPanel
 			StackPanel^ newRow = ref new StackPanel;
 			newRow->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("RowPanel"));
-			_mainPanel->Children->InsertAt(i, newRow);
+			_mainPanel->Children->InsertAt(i, newRow); // новая строка встаёт ПЕРЕД старой
 
 			// - аналогично добавляем значение в массив "крайних точек"
 			auto psym = ref new PositionedSymbol(ref new Cursor(beat), ref new SNewLine);
@@ -152,8 +152,8 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 			// - переносим в новую строку все контролы после нового крайнего
 			while (rowEnd < rowPanel->Children->Size)
 			{
-				auto element = rowPanel->Children->GetAt(rowEnd);
-				rowPanel->Children->RemoveAt(rowEnd);
+				auto element = rowPanel->Children->GetAt(0);
+				rowPanel->Children->RemoveAt(0);
 				newRow->Children->Append(element);
 			}
 
@@ -256,6 +256,7 @@ void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textColle
 	}
 
 	InvalidateText();
+	SetCursor(currentPosition);
 }
 
 /*
@@ -276,6 +277,10 @@ void SketchMusic::View::TextRow::InvalidateText()
 	_canvas->Children->Clear();
 	_canvas->Children->Append(_snapPoint);
 	_canvas->Children->Append(_cursor);
+	
+	//breakLine.clear();
+	//breakLine.push_back(ref new PositionedSymbol(ref new Cursor(64), ref new SNewLine)); // конец доступного места
+	//	// TODO : сделать более гибко
 
 	// TODO : add для символов форматирования - только для текста, чьё форматирование сейчас берётся за основу
 	//for (auto text : _texts)
@@ -350,7 +355,6 @@ void SketchMusic::View::TextRow::AddSymbol(PositionedSymbol^ sym)
 		this->InsertLineBreak(sym->_pos);
 		return;
 	}
-
 	// создаём объект символа
 	Windows::UI::Xaml::Controls::ContentControl^ bt = ref new Windows::UI::Xaml::Controls::ContentControl;
 	bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("SymbolControlStyle"));
@@ -599,15 +603,12 @@ double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
 			-12 * ((inote->_val % 12) != 0) + abs(inote->_val) % 12;
 		offsetY *= RowHeight / 12;
 		offsetY += RowHeight - 5;
-		//if (offsetY > 6) offsetY -= 12;
-		//if (offsetY < -6) offsetY += 12;
-
 	}
 	else {
 		STempo^ tempo = dynamic_cast<STempo^>(sym);
 		if (tempo)
 		{
-			offsetY = -0.6*RowHeight;
+			offsetY = -14;
 		}
 	}
 	return offsetY;

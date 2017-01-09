@@ -17,7 +17,7 @@ using namespace Windows::UI::Xaml::Media;
 
 void SketchMusic::View::TextRow::OnLoaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
 {
-	InvalidateText();
+	//InvalidateText();
 }
 
 void SketchMusic::View::TextRow::OnApplyTemplate()
@@ -29,9 +29,9 @@ void SketchMusic::View::TextRow::InitializePage()
 {
 	_dict = this->Resources;
 	
-	BeatWidth = 45; //(double)(_dict->Lookup("BeatWidth"));
-	PlaceholderWidth = 25; //(double)(_dict->Lookup("PlaceholderWidth"));
-	RowHeight = 70; //(double)(_dict->Lookup("RowHeight"));
+	BeatWidth = (double)(_dict->Lookup("BeatWidth"));
+	PlaceholderWidth = (double)(_dict->Lookup("PlaceholderWidth"));
+	RowHeight = (double)(_dict->Lookup("RowHeight"));
 
 	//_mainPanel = (StackPanel^)GetTemplateChild("_mainPanel");
 	_mainPanel->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
@@ -312,6 +312,7 @@ void SketchMusic::View::TextRow::Backspace()
 		if (currentPosition->EQ(iter->_pos))
 		{
 			this->DeleteLineBreak(currentPosition);
+			this->current->deleteNLine(currentPosition);
 			return;
 		}
 	}

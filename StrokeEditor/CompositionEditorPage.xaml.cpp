@@ -18,12 +18,22 @@ using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace SketchMusic;
 
 // Шаблон элемента пустой страницы задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234238
 
 CompositionEditorPage::CompositionEditorPage()
 {
 	InitializeComponent();
+
+	//Object^ content = ref new SketchMusic::PositionedSymbol(ref new SketchMusic::Cursor, ref new SketchMusic::SNote(5));
+
+	auto Notes = ref new Platform::Collections::Vector<PositionedSymbol^>;
+	Notes->Append(ref new SketchMusic::PositionedSymbol(ref new Cursor, ref new SNote(6)));
+	Notes->Append(ref new SketchMusic::PositionedSymbol(ref new Cursor, ref new SNote(10)));
+	Notes->Append(ref new SketchMusic::PositionedSymbol(ref new Cursor, ref new SNote(13)));
+
+	CurrentChordView->SetNotes(Notes);
 }
 
 

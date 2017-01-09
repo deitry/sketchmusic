@@ -4,22 +4,4 @@
     xmlns:local="using:SketchMusic"
     xmlns:smv="using:SketchMusic.View">
 
-    <Style TargetType="smv:ChordView" >
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="smv:ChordView">
-                    <Border
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}">
-                        <Grid>
-                            <Canvas/>
-                        </Grid>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    
 </ResourceDictionary>

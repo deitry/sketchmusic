@@ -222,6 +222,7 @@ namespace SketchMusic
 		property SketchMusic::Cursor^ _pos;
 		property SketchMusic::ISymbol^ _sym;
 
+		PositionedSymbol() { }
 		PositionedSymbol(Cursor^ pos, ISymbol^ sym) { _pos = pos; _sym = sym; }
 	};
 
@@ -759,6 +760,8 @@ namespace SketchMusic
 			metronome		= 17,
 			quantization	= 18,
 			end				= 20,	// конец ноты - остановка звучания
+			hide			= 30,	// спрятать клавиатуру
+			layout			= 31,	// сменить раскладку клавиатуры
 		};
 
 		public enum class KeyboardStateEnum
@@ -831,6 +834,9 @@ namespace SketchMusic
 		ref class BlackKeyToColorConverter;
 		ref class KeyStateToColorConverter;
 		ref class OnPositionedSymbolToTextConverter;
+		ref class PSymbolToVerticalPosConverter;
+		ref class MultiplicatedLengthConverter;
+		ref class TestData;
 		
 		// контейнеры
 		ref class MultiRowStackPanel;

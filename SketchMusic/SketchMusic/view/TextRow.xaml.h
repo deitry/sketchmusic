@@ -123,36 +123,3 @@ public:
 	// Необычным будет только действие на текст
 };
 
-[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::OnPositionedSymbolToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
-{
-public:
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
-	{
-		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
-		if (psym == nullptr) return "";
-
-		Platform::String^ str = "";
-
-		SketchMusic::STempo^ tempo = dynamic_cast<SketchMusic::STempo^>(psym->_sym);
-		if (tempo)
-		{
-			str = "" + tempo->value;
-		}
-
-		SketchMusic::INote^ note = dynamic_cast<SketchMusic::INote^>(psym->_sym);
-		if (note)
-		{
-			str = "" + note->_val;
-		}
-
-		return str;
-	}
-	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
-	{
-		return nullptr;
-		//return ref new SketchMusic::PositionedSymbol(ref new SketchMusic::Cursor, ref new SketchMusic::SNote);
-	}
-
-	OnPositionedSymbolToTextConverter() {}
-};
