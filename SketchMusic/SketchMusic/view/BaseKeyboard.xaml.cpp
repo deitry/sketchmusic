@@ -193,6 +193,7 @@ void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 		SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(ctrl->Content);
 
 		KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
+		ctrl->Background = (SolidColorBrush^)_dict->Lookup("draggedForegroundBrush");
 
 		if (key)
 		{
@@ -202,7 +203,6 @@ void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 			case SketchMusic::View::KeyType::genericNote:
 			case SketchMusic::View::KeyType::relativeNote:
 				KeyPressed(this, args);
-				ctrl->Background = (SolidColorBrush^)_dict->Lookup("draggedForegroundBrush");
 				if (pressedKeys == 1)
 				{
 					currentState->state = SketchMusic::View::KeyboardStateEnum::pressed;
@@ -235,47 +235,14 @@ void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 
 				KeyPressed(this, args);
 				break;
-			case SketchMusic::View::KeyType::tempo:
-			{
-				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
-				if (flyout)
-					flyout->ShowAt(ctrl);
-				break;
-			}
-			case SketchMusic::View::KeyType::quantization:
-			{
-				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
-				if (flyout)
-					flyout->ShowAt(ctrl);
-				break;
-			}
-			case SketchMusic::View::KeyType::hide:
-			{
-				key->value = !key->value;
-				for (auto&& row : mainPanel->Children)
-				{
-					FrameworkElement^ el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
-					if (el)
-					{
-						auto tag = ((String^)el->Tag);
-						if (tag == L"CtrlPanel") continue;
-						auto tagType = static_cast<KeyboardType>(std::stoi(tag->Data()));
 
-						if (key->value == 0 && tagType == _layout) row->Visibility = Windows::UI::Xaml::Visibility::Visible;
-						else row->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-					}
-				}
-				KeyPressed(this, args);
-				break;
-			}
 			case SketchMusic::View::KeyType::layout:
-			{
-				// смена раскладки
-				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
-				if (flyout)
-					flyout->ShowAt(ctrl);
+			case SketchMusic::View::KeyType::tempo:
+			case SketchMusic::View::KeyType::quantization:
+			case SketchMusic::View::KeyType::hide:
+				// обработка этих клавиш идёт, когда мы отпускаем клавишу, а не нажимаем. Вызывать событие нажатия не требуется
 				break;
-			}
+			
 			case SketchMusic::View::KeyType::enter:
 			case SketchMusic::View::KeyType::play:
 			case SketchMusic::View::KeyType::move:
@@ -384,16 +351,75 @@ void SketchMusic::View::BaseKeyboard::ReleaseKey(Object^ sender)
 		dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(static_cast<Object^>(sender));
 
 
-	pressedKeys--;
-
 	SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(ctrl->Content);
 	if (key == nullptr)
 		return;
 
 	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
 
-	KeyReleased(this, args);
-	ctrl->Background = nullptr;
+	if (ctrl)
+	{
+		ctrl->Background = nullptr;
+
+		if (key)
+		{
+			switch (key->type)
+			{
+			case SketchMusic::View::KeyType::tempo:
+			{
+				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
+				if (flyout)
+					flyout->ShowAt(ctrl);
+				break;
+			}
+			case SketchMusic::View::KeyType::quantization:
+			{
+				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
+				if (flyout)
+					flyout->ShowAt(ctrl);
+				break;
+			}
+			case SketchMusic::View::KeyType::hide:
+			{
+				key->value = !key->value;
+				UpdateParent(key);
+
+				for (auto&& row : mainPanel->Children)
+				{
+					FrameworkElement^ el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
+					if (el)
+					{
+						auto tag = ((String^)el->Tag);
+						if (tag == L"CtrlPanel") continue;
+						auto tagType = static_cast<KeyboardType>(std::stoi(tag->Data()));
+
+						if (key->value == 0 && tagType == _layout) row->Visibility = Windows::UI::Xaml::Visibility::Visible;
+						else row->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+					}
+				}
+				KeyReleased(this, args);
+				break;
+			}
+			case SketchMusic::View::KeyType::layout:
+			{
+				// смена раскладки
+				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
+				if (flyout)
+					flyout->ShowAt(ctrl);
+				break;
+			}
+			case KeyType::note:
+			case KeyType::relativeNote:
+			case KeyType::genericNote:
+				KeyReleased(this, args);
+				break;
+			default:
+				KeyReleased(this, args);
+			}
+		}
+	}
+
+	pressedKeys--;
 
 	if (pressedKeys <= 0)
 	{

@@ -166,7 +166,7 @@
                                  HorizontalAlignment="Left"
                                  Grid.Row="1"/>
 
-                    <StackPanel Orientation="Vertical"
+                    <!--<StackPanel Orientation="Vertical"
                         VerticalAlignment="Bottom"
                         Grid.Row="2">
                         <TextBlock x:Name="CurPos">
@@ -175,7 +175,7 @@
                         <TextBlock x:Name="BPMText">
                         Здесь будет отображаться текущее значение .
                         </TextBlock>
-                    </StackPanel>
+                    </StackPanel>-->
                 </Grid>
             </SplitView.Content>
         </SplitView>

@@ -21,7 +21,7 @@
     </UserControl.Resources>
     
  <!-- ====================================================== -->
-    
+
     <StackPanel x:Name="mainPanel"
                 Margin="0,0,0,0"
                 Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -139,15 +139,15 @@
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="31000">
                 <FlyoutBase.AttachedFlyout>
-                    <MenuFlyout x:Name="LayoutFlyout">
-                        
+                    <Flyout x:Name="LayoutFlyout">
+                        <StackPanel>
                             <MenuFlyoutItem Text="Обычная раскладка" Tag="0" Click="MenuFlyoutItem_Click"/>
                             <MenuFlyoutItem Text="Ступени / Функции" IsEnabled="False"/>
                             <MenuFlyoutItem Text="Обобщённые ноты" Tag="2" Click="MenuFlyoutItem_Click"/>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Text="Настройки..." IsEnabled="False"/>
-                        
-                    </MenuFlyout>
+                        </StackPanel>
+                    </Flyout>
                 </FlyoutBase.AttachedFlyout>
             </ContentControl>
         </StackPanel>
@@ -352,8 +352,5 @@
                             Style="{StaticResource KeyboardBtnStyle}" Tag="2000"/>
         </StackPanel>
     </StackPanel>
-    
-    
-    
-    
+
 </UserControl>

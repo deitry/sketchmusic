@@ -159,8 +159,8 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 	playerStateChangeToken =
 		((App^)App::Current)->_player->StateChanged += 
 		ref new Windows::Foundation::EventHandler<SketchMusic::Player::PlayerState>(this, &StrokeEditor::MelodyEditorPage::OnStateChanged);
-	bpmChangeToken = 
-		((App^)App::Current)->_player->BpmChanged += ref new Windows::Foundation::EventHandler<float>(this, &StrokeEditor::MelodyEditorPage::OnBpmChanged);
+	//bpmChangeToken = 
+	//	((App^)App::Current)->_player->BpmChanged += ref new Windows::Foundation::EventHandler<float>(this, &StrokeEditor::MelodyEditorPage::OnBpmChanged);
 }
 
 
@@ -182,6 +182,7 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 
 	// отписка от события
 	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
+	(((App^)App::Current)->_player)->CursorPosChanged -= curPosChangeToken;
 
 	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(_idea, true));
 }
@@ -246,8 +247,8 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 					ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
 						ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
 				((App^)App::Current)->_manager->ExecuteLast();
-				this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-					+ " / tick = " + _textRow->currentPosition->getTick();
+				//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+				//	+ " / tick = " + _textRow->currentPosition->getTick();
 
 				if (!appending)
 				{
@@ -281,8 +282,8 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 				ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
 			((App^)App::Current)->_manager->ExecuteLast();
-			this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-				+ " / tick = " + _textRow->currentPosition->getTick();
+			//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+			//	+ " / tick = " + _textRow->currentPosition->getTick();
 			//}
 			break;
 		}
@@ -293,22 +294,22 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 				ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), ref new SNewLine))));
 			((App^)App::Current)->_manager->ExecuteLast();
-			this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-				+ " / tick = " + _textRow->currentPosition->getTick();
+			//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+			//	+ " / tick = " + _textRow->currentPosition->getTick();
 			break;
 		case SketchMusic::View::KeyType::move:
 		{
 			if (args->key->value >= 0)
 			{
 				_textRow->MoveCursorRight();
-				this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-					+ " / tick = " + _textRow->currentPosition->getTick();
+				//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+				//	+ " / tick = " + _textRow->currentPosition->getTick();
 			}
 			else
 			{
 				_textRow->MoveCursorLeft();
-				this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-					+ " / tick = " + _textRow->currentPosition->getTick();
+				//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+				//	+ " / tick = " + _textRow->currentPosition->getTick();
 			}
 			break;
 		}
@@ -323,8 +324,8 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), nullptr),
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition->getBeat() - 1), nullptr))));
 			((App^)App::Current)->_manager->ExecuteLast();
-			this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-				+ " / tick = " + _textRow->currentPosition->getTick();
+			//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+			//	+ " / tick = " + _textRow->currentPosition->getTick();
 			break;
 		}
 		case SketchMusic::View::KeyType::stop:
@@ -387,11 +388,11 @@ void StrokeEditor::MelodyEditorPage::OnStateChanged(Platform::Object ^sender, Sk
 
 void StrokeEditor::MelodyEditorPage::OnBpmChanged(Platform::Object ^sender, float args)
 {
-	this->Dispatcher->RunAsync(
-		Windows::UI::Core::CoreDispatcherPriority::Normal,
-		ref new Windows::UI::Core::DispatchedHandler([=]() {
-		this->BPMText->Text = "" + ((App^)App::Current)->_player->_BPM;
-	}));
+	//this->Dispatcher->RunAsync(
+	//	Windows::UI::Core::CoreDispatcherPriority::Normal,
+	//	ref new Windows::UI::Core::DispatchedHandler([=]() {
+	//	this->BPMText->Text = "" + ((App^)App::Current)->_player->_BPM;
+	//}));
 }
 
 void StrokeEditor::MelodyEditorPage::OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor^ pos)
