@@ -1,6 +1,6 @@
 ﻿//
-// GenericKeyboard.xaml.h
-// Объявление класса GenericKeyboard
+// BaseKeyboard.xaml.h
+// Объявление класса BaseKeyboard
 //
 
 #pragma once
@@ -22,7 +22,7 @@ namespace SketchMusic
 	namespace View
 	{
 		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-		public ref class GenericKeyboard sealed // : public SketchMusic::View::IKeyboard //: public Windows::UI::Xaml::Controls::Control
+		public ref class BaseKeyboard sealed // : public SketchMusic::View::IKeyboard //: public Windows::UI::Xaml::Controls::Control
 		{
 		private:
 			bool input;
@@ -49,8 +49,10 @@ namespace SketchMusic
 
 			Windows::UI::Xaml::ResourceDictionary^ _dict;
 
+			SketchMusic::View::KeyboardType _layout;
+
 		public:
-			GenericKeyboard();
+			BaseKeyboard();
 
 			event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyPressed;	// нажатие на одну клавишу
 			event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyReleased;	// отпускание одной клавиши
@@ -74,6 +76,7 @@ namespace SketchMusic
 		private:
 			void quantizeNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 			void QuantizeFlyout_Closed(Platform::Object^ sender, Platform::Object^ e);
+			void MenuFlyoutItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		};
 	}
 }

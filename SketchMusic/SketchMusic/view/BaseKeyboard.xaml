@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="SketchMusic.View.GenericKeyboard"
+    x:Class="SketchMusic.View.BaseKeyboard"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SketchMusic"
@@ -16,16 +16,21 @@
                 <ResourceDictionary Source="ms-appx:///SketchMusic/SketchMusic/view/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <x:Double x:Key="QuantizeBtnWidth">40.</x:Double>
+
         </ResourceDictionary>
     </UserControl.Resources>
-
+    
+ <!-- ====================================================== -->
+    
     <StackPanel x:Name="mainPanel"
                 Margin="0,0,0,0"
                 Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                Orientation="Vertical">
+                Orientation="Vertical"
+                >
         <!-- System -->
         <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Left">
+                    HorizontalAlignment="Left"
+                    Tag="CtrlPanel">
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                                     Converter={StaticResource ctrlKeyState2color}}"
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
@@ -125,19 +130,23 @@
                     </Flyout>
                 </FlyoutBase.AttachedFlyout>
             </ContentControl>
-            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+            <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+                                Converter={StaticResource ctrlKeyState2color}}"
+                            Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="30000"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="31000">
                 <FlyoutBase.AttachedFlyout>
-                    <MenuFlyout>
-                        <MenuFlyoutItem Text="Обычная раскладка"/>
-                        <MenuFlyoutItem Text="Ступени / Функции"/>
-                        <MenuFlyoutItem Text="Обобщённые ноты"/>
-                        <MenuFlyoutSeparator/>
-                        <MenuFlyoutItem Text="Настройки..."/>
+                    <MenuFlyout x:Name="LayoutFlyout">
+                        
+                            <MenuFlyoutItem Text="Обычная раскладка" Tag="0" Click="MenuFlyoutItem_Click"/>
+                            <MenuFlyoutItem Text="Ступени / Функции" IsEnabled="False"/>
+                            <MenuFlyoutItem Text="Обобщённые ноты" Tag="2" Click="MenuFlyoutItem_Click"/>
+                            <MenuFlyoutSeparator/>
+                            <MenuFlyoutItem Text="Настройки..." IsEnabled="False"/>
+                        
                     </MenuFlyout>
                 </FlyoutBase.AttachedFlyout>
             </ContentControl>
@@ -147,7 +156,8 @@
         <StackPanel x:Name="_Row1"
                     Margin="55,0,0,0"
                     Orientation="Horizontal"
-                    HorizontalAlignment="Left">
+                    HorizontalAlignment="Left"
+                    Tag="0">
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" Tag="11"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
@@ -175,7 +185,8 @@
         <!-- Row 2 -->
         <StackPanel x:Name="_Row2"
                     Orientation="Horizontal"
-                    HorizontalAlignment="Left">
+                    HorizontalAlignment="Left"
+                    Tag="0">
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" Tag="7"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
@@ -203,7 +214,8 @@
         <StackPanel x:Name="_Row3"
                     Margin="55,0,0,0"
                     Orientation="Horizontal"
-                    HorizontalAlignment="Left">
+                    HorizontalAlignment="Left"
+                    Tag="0">
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" Tag="2"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
@@ -231,7 +243,8 @@
         <!-- Row 4 -->
         <StackPanel x:Name="_Row4"
                     Orientation="Horizontal"
-                    HorizontalAlignment="Left">
+                    HorizontalAlignment="Left"
+                    Tag="0">
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" Tag="-2"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
@@ -255,5 +268,92 @@
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" Tag="8"/>
         </StackPanel>
+
+
+        <!-- СтакПанелы для других раскладок - очень плохо, надо делать их отдельными стилями (отдельными компонентами я их делать не хочу,
+    потому что -->
+
+        <!-- Row G1 -->
+        <StackPanel x:Name="_RowG1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Visibility="Collapsed"
+                    Tag="2">
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="-2401"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2400"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2401"/>
+        </StackPanel>
+        <!-- Row G2 -->
+        <StackPanel x:Name="_RowG2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Visibility="Collapsed"
+                    Tag="2"
+                    >
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="-2302"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="-2301"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2300"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2301"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2302"/>
+        </StackPanel>
+        <!-- Row G3 -->
+        <StackPanel x:Name="_RowG3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Visibility="Collapsed"
+                    Tag="2">
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="-2202"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="-2201"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2200"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2201"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2202"/>
+        </StackPanel>
+        <!-- Row G4 -->
+        <StackPanel x:Name="_RowG4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Visibility="Collapsed"
+                    Tag="2">
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="-2102"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="-2101"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2100"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2101"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2102"/>
+        </StackPanel>
+        <!-- Row G5 -->
+        <StackPanel x:Name="_RowG5"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Visibility="Collapsed"
+                    Tag="2">
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="-2001"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2000"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2000"/>
+        </StackPanel>
     </StackPanel>
+    
+    
+    
+    
 </UserControl>

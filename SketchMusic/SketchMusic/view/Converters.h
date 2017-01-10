@@ -1,6 +1,6 @@
 ﻿//
-// GenericKeyboard.h
-// Объявление класса GenericKeyboard.
+// BaseKeyboard.h
+// Объявление класса BaseKeyboard.
 //
 
 #pragma once
@@ -75,7 +75,7 @@ public:
 			result += "" + key->value + "r";
 			break;
 		case KeyType::genericNote:
-			result += "" + key->value + "g";
+			result += "(" + (abs(key->value)/100) + "," + (key->value % 100) + ")";
 			break;
 		case KeyType::octave:
 			if (key->value >= 0)
@@ -238,8 +238,8 @@ public:
 		{
 		case SketchMusic::View::KeyType::note:
 		case SketchMusic::View::KeyType::relativeNote:
-		case SketchMusic::View::KeyType::genericNote:
 			break;
+		case SketchMusic::View::KeyType::genericNote:
 		default:
 			return nullptr; // для остальных остаётся классический бэкграунд
 		}
@@ -313,21 +313,25 @@ public:
 		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
 		if (psym == nullptr) return "";
 
-		Platform::String^ str = "";
-
 		SketchMusic::STempo^ tempo = dynamic_cast<SketchMusic::STempo^>(psym->_sym);
 		if (tempo)
 		{
-			str = "" + tempo->value;
+			return L"" + tempo->value;
 		}
+
+		SketchMusic::SGNote^ gnote = dynamic_cast<SketchMusic::SGNote^>(psym->_sym);
+		if (gnote)
+		{
+			return L"" + gnote->_valX + "," + gnote->_valY;
+		} 
 
 		SketchMusic::INote^ note = dynamic_cast<SketchMusic::INote^>(psym->_sym);
 		if (note)
 		{
-			str = "" + note->_val;
+			return L"" + note->_val;
 		}
 
-		return str;
+		return L"";
 	}
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
 	{

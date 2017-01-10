@@ -1,10 +1,10 @@
 ﻿//
-// GenericKeyboard.cpp
-// Реализация класса GenericKeyboard.
+// BaseKeyboard.cpp
+// Реализация класса BaseKeyboard.
 //
 
 #include "pch.h"
-#include "GenericKeyboard.xaml.h"
+#include "BaseKeyboard.xaml.h"
 #include <string>
 
 using namespace SketchMusic::View;
@@ -22,20 +22,21 @@ using namespace Windows::UI::Xaml::Media;
 
 // Документацию по шаблону элемента "Элемент управления на основе шаблона" см. по адресу http://go.microsoft.com/fwlink/?LinkId=234235
 
-SketchMusic::View::GenericKeyboard::GenericKeyboard()
+SketchMusic::View::BaseKeyboard::BaseKeyboard()
 {
 	InitializeComponent();
 
 	_dict = this->Resources;
 	
 	currentState = ref new KeyboardState(KeyboardStateEnum::normal);
+	_layout = KeyboardType::Basic;
 
 	InitializePage();
 
 	// TODO ? переделать на КвадКейборд?
 	// и в зависимости от параметра - какой тип клавиатуры нужен, в случае больших / бесконечных
 	// (как в случае "гитарной", "баянной" и т.д.) создавать динамически
-	this->KeyboardStateChanged += ref new Windows::Foundation::EventHandler<SketchMusic::View::KeyboardState ^>(this, &SketchMusic::View::GenericKeyboard::OnKeyboardStateChanged);
+	this->KeyboardStateChanged += ref new Windows::Foundation::EventHandler<SketchMusic::View::KeyboardState ^>(this, &SketchMusic::View::BaseKeyboard::OnKeyboardStateChanged);
 }
 
 inline void UpdateParent(SketchMusic::View::Key^ key)
@@ -46,7 +47,7 @@ inline void UpdateParent(SketchMusic::View::Key^ key)
 	ctrl->Content = key;
 }
 
-void SketchMusic::View::GenericKeyboard::OnKeyboardPressed(SketchMusic::View::Key^ key)
+void SketchMusic::View::BaseKeyboard::OnKeyboardPressed(SketchMusic::View::Key^ key)
 {
 	switch (key->type)
 	{
@@ -64,7 +65,7 @@ void SketchMusic::View::GenericKeyboard::OnKeyboardPressed(SketchMusic::View::Ke
 	}
 }
 
-void SketchMusic::View::GenericKeyboard::OnControlPressed(SketchMusic::View::Key ^ key)
+void SketchMusic::View::BaseKeyboard::OnControlPressed(SketchMusic::View::Key ^ key)
 {
 	switch (key->type)
 	{
@@ -113,7 +114,7 @@ inline void OnOctaveDec(SketchMusic::View::Key^ key)
 	}
 }
 
-void SketchMusic::View::GenericKeyboard::OnNormalState(SketchMusic::View::Key^ key)
+void SketchMusic::View::BaseKeyboard::OnNormalState(SketchMusic::View::Key^ key)
 {
 	switch (key->type)
 	{
@@ -131,7 +132,7 @@ void SketchMusic::View::GenericKeyboard::OnNormalState(SketchMusic::View::Key^ k
 	}
 }
 
-void SketchMusic::View::GenericKeyboard::OnPlayStopState(SketchMusic::View::Key ^ key)
+void SketchMusic::View::BaseKeyboard::OnPlayStopState(SketchMusic::View::Key ^ key)
 {
 	switch (key->type)
 	{
@@ -148,7 +149,7 @@ void SketchMusic::View::GenericKeyboard::OnPlayStopState(SketchMusic::View::Key 
 	}
 }
 
-void SketchMusic::View::GenericKeyboard::OnKeyboardStateChanged(Object^ object, SketchMusic::View::KeyboardState ^ state)
+void SketchMusic::View::BaseKeyboard::OnKeyboardStateChanged(Object^ object, SketchMusic::View::KeyboardState ^ state)
 {
 	// проходимся по всем кнопкам и меняем их состояние согласно их типу
 	for (auto&& pkey : _keys)
@@ -182,7 +183,7 @@ void SketchMusic::View::GenericKeyboard::OnKeyboardStateChanged(Object^ object, 
 /**
 Нажатие на одну из клавиш клавиатуры
 */
-void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
+void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 {
 	pressedKeys++;
 
@@ -251,22 +252,28 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 			case SketchMusic::View::KeyType::hide:
 			{
 				key->value = !key->value;
-				bool collapsed = _Row1->Visibility == Windows::UI::Xaml::Visibility::Collapsed;
-				if (collapsed)
+				for (auto&& row : mainPanel->Children)
 				{
-					_Row1->Visibility = Windows::UI::Xaml::Visibility::Visible;
-					_Row2->Visibility = Windows::UI::Xaml::Visibility::Visible;
-					_Row3->Visibility = Windows::UI::Xaml::Visibility::Visible;
-					_Row4->Visibility = Windows::UI::Xaml::Visibility::Visible;
-				}
-				else {
-					_Row1->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-					_Row2->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-					_Row3->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-					_Row4->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-				}
-				//if (_Row1->Visibility == Visibility::Collapsed)
+					FrameworkElement^ el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
+					if (el)
+					{
+						auto tag = ((String^)el->Tag);
+						if (tag == L"CtrlPanel") continue;
+						auto tagType = static_cast<KeyboardType>(std::stoi(tag->Data()));
 
+						if (key->value == 0 && tagType == _layout) row->Visibility = Windows::UI::Xaml::Visibility::Visible;
+						else row->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+					}
+				}
+				KeyPressed(this, args);
+				break;
+			}
+			case SketchMusic::View::KeyType::layout:
+			{
+				// смена раскладки
+				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
+				if (flyout)
+					flyout->ShowAt(ctrl);
 				break;
 			}
 			case SketchMusic::View::KeyType::enter:
@@ -282,7 +289,7 @@ void SketchMusic::View::GenericKeyboard::PushKey(Object^ sender)
 	}
 }
 
-void SketchMusic::View::GenericKeyboard::onKeyboardControlPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
+void SketchMusic::View::BaseKeyboard::onKeyboardControlPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
 	// нажатие мышкой - только для нот
 	if (e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Touch)
@@ -294,7 +301,7 @@ void SketchMusic::View::GenericKeyboard::onKeyboardControlPressed(Platform::Obje
 	el->CapturePointer(e->Pointer);
 }
 
-void SketchMusic::View::GenericKeyboard::onKeyboardControlEntered(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
+void SketchMusic::View::BaseKeyboard::onKeyboardControlEntered(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
 	// нажатие тачем или мышкой, если она не отжималась
 	if ((e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse)
@@ -306,7 +313,7 @@ void SketchMusic::View::GenericKeyboard::onKeyboardControlEntered(Platform::Obje
 	PushKey(sender);
 }
 
-void SketchMusic::View::GenericKeyboard::InitializePage()
+void SketchMusic::View::BaseKeyboard::InitializePage()
 {
 	if (mainPanel == nullptr) return;
 
@@ -332,22 +339,22 @@ void SketchMusic::View::GenericKeyboard::InitializePage()
 				// сейчас ещё не до конца понятно, какие клавиши во что будем превращать
 
 				// для тача
-				ctrl->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::onKeyboardControlEntered);
-				ctrl->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::OnPointerExited);
+				ctrl->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::onKeyboardControlEntered);
+				ctrl->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::OnPointerExited);
 
 				// для мыши	
-				ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::onKeyboardControlPressed);
-				ctrl->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::OnPointerReleased);
+				ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::onKeyboardControlPressed);
+				ctrl->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::OnPointerReleased);
 			}
 		}
 	}
 
 	// специально проверяем на тот случай если курсор убегает за пределы клавиш и мы не знаем, отпустили его или нет
-	//grid->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::GenericKeyboard::OnPointerReleased);
+	//grid->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::OnPointerReleased);
 }
 
 
-void SketchMusic::View::GenericKeyboard::OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
+void SketchMusic::View::BaseKeyboard::OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
 {
 	//mousePressed = false;
 	// TODO : отключать и тогда, если "отжали" мышку вне гридов и контролов
@@ -359,7 +366,7 @@ void SketchMusic::View::GenericKeyboard::OnPointerReleased(Platform::Object ^sen
 	ReleaseKey(sender);
 }
 
-void SketchMusic::View::GenericKeyboard::OnPointerExited(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
+void SketchMusic::View::BaseKeyboard::OnPointerExited(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
 {
 	// отпускаем клавишу, если это тач или если мышь нажата и не отпускалась
 	if ((e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse)
@@ -371,7 +378,7 @@ void SketchMusic::View::GenericKeyboard::OnPointerExited(Platform::Object ^sende
 }
 
 
-void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
+void SketchMusic::View::BaseKeyboard::ReleaseKey(Object^ sender)
 {
 	Windows::UI::Xaml::Controls::ContentControl^ ctrl =
 		dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(static_cast<Object^>(sender));
@@ -399,7 +406,7 @@ void SketchMusic::View::GenericKeyboard::ReleaseKey(Object^ sender)
 }
 
 
-void SketchMusic::View::GenericKeyboard::OnClosed(Platform::Object ^sender, Platform::Object ^args)
+void SketchMusic::View::BaseKeyboard::OnClosed(Platform::Object ^sender, Platform::Object ^args)
 {
 	Flyout^ flyout = dynamic_cast<Flyout^>(sender);
 	if (flyout == nullptr)
@@ -431,19 +438,19 @@ void SketchMusic::View::GenericKeyboard::OnClosed(Platform::Object ^sender, Plat
 }
 
 
-void SketchMusic::View::GenericKeyboard::OnOpened(Platform::Object ^sender, Platform::Object ^args)
+void SketchMusic::View::BaseKeyboard::OnOpened(Platform::Object ^sender, Platform::Object ^args)
 {
 
 }
 
 
-void SketchMusic::View::GenericKeyboard::OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
+void SketchMusic::View::BaseKeyboard::OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
 {
 	tempoPressed = true;
 	TempoFlyout->Hide();
 }
 
-void SketchMusic::View::GenericKeyboard::OnQuantizeClick(Platform::Object ^ sender, Windows::UI::Xaml::RoutedEventArgs ^ e)
+void SketchMusic::View::BaseKeyboard::OnQuantizeClick(Platform::Object ^ sender, Windows::UI::Xaml::RoutedEventArgs ^ e)
 {
 	// 
 	auto bt = dynamic_cast<Button^>(e->OriginalSource);
@@ -463,13 +470,48 @@ void SketchMusic::View::GenericKeyboard::OnQuantizeClick(Platform::Object ^ send
 }
 
 
-void SketchMusic::View::GenericKeyboard::quantizeNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void SketchMusic::View::BaseKeyboard::quantizeNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	quantizeNeed->IsChecked = !quantizeNeed->IsChecked;
+	auto key = ref new SketchMusic::View::Key(KeyType::quantization, 0);	// 0 - опасно, но хочу попробовать
+	auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
+	KeyPressed(this, args);
 }
 
 
-void SketchMusic::View::GenericKeyboard::QuantizeFlyout_Closed(Platform::Object^ sender, Platform::Object^ e)
+void SketchMusic::View::BaseKeyboard::QuantizeFlyout_Closed(Platform::Object^ sender, Platform::Object^ e)
 {
 
+}
+
+/*
+*/
+
+
+
+void SketchMusic::View::BaseKeyboard::MenuFlyoutItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	auto el = dynamic_cast<FrameworkElement^>(e->OriginalSource);
+	if (el)
+	{
+		int type = std::stoi(((String^)el->Tag)->Data());
+		_layout = static_cast<KeyboardType>(type);
+
+		for (auto&& row : mainPanel->Children)
+		{
+			auto el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
+			if (el)
+			{
+				auto str = (String^)el->Tag;
+				if (str == "CtrlPanel") continue;
+
+				int type = std::stoi(str->Data());
+				KeyboardType tag = static_cast<KeyboardType>(type);
+				if (tag == _layout) el->Visibility = Windows::UI::Xaml::Visibility::Visible;
+				else el->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+			}
+		}
+	}
+
+	LayoutFlyout->Hide();
 }

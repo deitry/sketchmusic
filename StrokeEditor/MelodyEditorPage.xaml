@@ -28,10 +28,10 @@
     <Grid x:Name="grid" 
           Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           RenderTransformOrigin="0,1"
+          VerticalAlignment="Stretch"
           >
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -42,7 +42,8 @@
 
         <SplitView Name="mySplitView" Grid.Row="0" OpenPaneLength="240"
                    DisplayMode="CompactOverlay" CompactPaneLength="46"
-                   BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}" BorderThickness="2">
+                   BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}" BorderThickness="2"
+                   VerticalAlignment="Stretch">
             <SplitView.Pane>
                 <ListView x:Name="menu" SelectionMode="None" IsItemClickEnabled="True" ItemClick="menu_ItemClick">
                     <ContentControl Name="HamburgerButton"
@@ -136,9 +137,10 @@
                 </ListView>
             </SplitView.Pane>
             <SplitView.Content>
-                <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"      
-              BorderThickness="1"
-              BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}">
+                <Grid Grid.Column="1"      
+                      BorderThickness="1"
+                      BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                      VerticalAlignment="Stretch">
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -149,16 +151,14 @@
                         <smv:TextRow x:Name="_textRow"
                                      BorderThickness="1"
                                      BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
-                                     Height="250"
                                      HorizontalAlignment="Left"
                                      VerticalAlignment="Stretch"
                                      Margin="5,5,5,5"
-                                     Width="800"
                                      SizeChanged="_textRow_SizeChanged"
                                      />
 
 
-                    <smv:GenericKeyboard x:Name="_keyboard" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                    <smv:BaseKeyboard x:Name="_keyboard" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
                                  BorderThickness="1"
                                  Background="Orange"
                                  Width="auto"
@@ -173,7 +173,7 @@
                         Здесь будет отображаться текущая позиция курсора.
                         </TextBlock>
                         <TextBlock x:Name="BPMText">
-                        Здесь будет отображаться текущее значение текста.
+                        Здесь будет отображаться текущее значение .
                         </TextBlock>
                     </StackPanel>
                 </Grid>

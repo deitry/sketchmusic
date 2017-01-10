@@ -236,8 +236,8 @@
       <DependentUpon>SketchMusic\view\ChordView.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="SketchMusic\view\Converters.h" />
-    <ClInclude Include="SketchMusic\view\GenericKeyboard.xaml.h">
-      <DependentUpon>SketchMusic\view\GenericKeyboard.xaml</DependentUpon>
+    <ClInclude Include="SketchMusic\view\BaseKeyboard.xaml.h">
+      <DependentUpon>SketchMusic\view\BaseKeyboard.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="SketchMusic\view\Key.h" />
     <ClInclude Include="SketchMusic\view\Keyboard.h" />
@@ -274,8 +274,8 @@
     <ClCompile Include="SketchMusic\view\ChordView.xaml.cpp">
       <DependentUpon>SketchMusic\view\ChordView.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="SketchMusic\view\GenericKeyboard.xaml.cpp">
-      <DependentUpon>SketchMusic\view\GenericKeyboard.xaml</DependentUpon>
+    <ClCompile Include="SketchMusic\view\BaseKeyboard.xaml.cpp">
+      <DependentUpon>SketchMusic\view\BaseKeyboard.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="SketchMusic\view\MultiRowStackPanel.cpp" />
     <ClCompile Include="SketchMusic\view\RadialKeyboard.cpp" />
@@ -293,7 +293,7 @@
     <Page Include="SketchMusic\view\ChordView.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="SketchMusic\view\GenericKeyboard.xaml">
+    <Page Include="SketchMusic\view\BaseKeyboard.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SketchMusic\view\Styles.xaml">

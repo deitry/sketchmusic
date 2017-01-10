@@ -110,6 +110,73 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 	return nullptr;
 }
 
+ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType type, Object^ val)
+{
+	//SymbolType sym_type = static_cast<SymbolType>(type);
+	switch (type)
+	{
+	case SketchMusic::View::KeyType::note:
+	{
+		int ival = (int)val;
+		return ref new SNote(ival);
+	}
+	case SketchMusic::View::KeyType::relativeNote:
+	{
+		int ival = (int)val;
+		return ref new SRNote(ival);
+	}
+	case SketchMusic::View::KeyType::genericNote:
+	{
+		int ival = (int)val;
+		return ref new SGNote(ival);
+	}
+	case SketchMusic::View::KeyType::newPart:
+	{
+		auto str = (Platform::String^)val;
+		return ref new SNewPart(str);
+	}
+	case SketchMusic::View::KeyType::tempo:
+	{
+		int ival = 120;
+		if (val) ival = (int)val;
+		return ref new STempo(ival);
+	}
+	case SketchMusic::View::KeyType::end:
+	{
+		return ref new SNoteEnd();
+	}
+	case SketchMusic::View::KeyType::enter:
+	{
+		return ref new SNewLine();
+	}
+	case SketchMusic::View::KeyType::space:
+	{
+		return ref new SSpace();
+	}
+	//case KeyType::scale:
+		//	{
+		//		jval = obj->GetNamedValue("v");
+		//		if (jval)
+		//		{
+		//			val = static_cast<int>(jval->GetNumber());
+		//		}
+		//		return ref new SString(val);
+		//	}
+	//case SymbolType::STRING:
+		//	{
+		//		String^ str;
+		//		jval = obj->GetNamedValue("s");
+		//		if (jval)
+		//		{
+		//			str = jval->GetString();
+		//		}
+		//		return ref new SString(str);
+		//	}
+	default: return nullptr;
+	}
+	return nullptr;
+}
+
 /*ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(int type, int val)
 {
 	switch (type)

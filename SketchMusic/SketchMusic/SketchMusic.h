@@ -61,8 +61,6 @@ namespace SketchMusic
 		combo = 100		// идея определяет сразу кучу параметров
 	};
 
-
-
 	ref class Sample;
 	ref class Instrument;
 	ref class InstrumentToTextConverter;
@@ -311,7 +309,14 @@ namespace SketchMusic
 		SGNote(int gnote) { _val = gnote; _velocity = 0; _voice = 0; }
 		SGNote(int gtone, int velocity, int voice) { _val = gtone; _velocity = velocity; _voice = voice; }
 
-		virtual property int _val;
+		virtual property int _val
+		{
+			int get() { return (abs(_valX) + _valY * 100)* (_valX)/abs(_valX); }
+			void set(int val) { _valY = abs(val) / 100; _valX = val % 100; }
+		}
+		
+		property int _valX;
+		property int _valY;
 		virtual property int _velocity;
 		virtual property int _voice;
 
@@ -375,14 +380,6 @@ namespace SketchMusic
 		virtual SymbolType GetSymType() { return SymbolType::STRING; }
 		virtual Platform::String^ ToString() { return value; }
 		//virtual Platform::String^ Serialize() { return "string," + value; }
-	};
-
-	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-	public ref class ISymbolFactory sealed
-	{
-	public:
-		static ISymbol^ Deserialize(Windows::Data::Json::JsonObject^ val);	// принудительно запрашиваем
-		//static ISymbol^ CreateSymbol(int type, int val);
 	};
 
 	namespace SerializationTokens
@@ -760,6 +757,7 @@ namespace SketchMusic
 			metronome		= 17,
 			quantization	= 18,
 			end				= 20,	// конец ноты - остановка звучания
+			newPart			= 25,	// отметка о начале новой части
 			hide			= 30,	// спрятать клавиатуру
 			layout			= 31,	// сменить раскладку клавиатуры
 		};
@@ -814,10 +812,18 @@ namespace SketchMusic
 		};
 
 		// не уверен, стоит ли выделять отдельный класс, но где-то это должно быть
-		/*public enum class KeyboardType
+		// Визуальное отображение (радиальные клавиатуры, с произвольным расположением клавиш и т.д.) будут соответсвовать разным классам элементов управления.
+		// Каждый класс может использоваться для отображения любой (?) раскладки
+		public enum class KeyboardType
 		{
-
-		};*/
+			Basic		= 0,	// просто
+			Relative	= 1,	// подразумевается, что так будут вводиться "модулируемые" значения, абсолютное значение которых будет определяться "модуляторами"
+			Generic		= 2,	// обобщённые ноты
+			Modulators	= 5,	// "модуляторы" для "относительных" нот. Сейчас предполагается, что это будут значения двух видов - ступень текущей гаммы
+								// или {ступень текущей; ступень следующей гаммы} - для переходов между гаммами - ступень одной становится ступенью другой	
+								// ? будет полезно?
+		};
+		
 		public interface class IKeyboard
 		{
 			event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyPressed;	// нажатие на одну клавишу
@@ -843,7 +849,7 @@ namespace SketchMusic
 
 		// варианты клавиатур
 		ref class RadialKeyboard;
-		ref class GenericKeyboard;
+		ref class BaseKeyboard;
 		// ref class RandomKeyboard;
 		// ref class ContinuumKeyboard;
 
@@ -868,5 +874,13 @@ namespace SketchMusic
 	public:
 		property String^ name;
 		property Windows::Foundation::Collections::IVector<Album^>^ _albums;
+	};
+
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+	public ref class ISymbolFactory sealed
+	{
+	public:
+		static ISymbol^ Deserialize(Windows::Data::Json::JsonObject^ val);	// принудительно запрашиваем
+		static ISymbol^ CreateSymbol(SketchMusic::View::KeyType type, Object^ val);
 	};
 }

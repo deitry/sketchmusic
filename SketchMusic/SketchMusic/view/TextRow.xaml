@@ -32,7 +32,7 @@
                         />
 
             <Canvas x:Name="_canvas"
-                     Height="100">
+                    >
                 <ContentControl x:Name="_cursor"
                                 Style="{StaticResource CursorPositionStyle}"
                                 Canvas.Left="0"

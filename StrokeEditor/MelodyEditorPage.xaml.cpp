@@ -148,9 +148,9 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		_textRow->Backspace();
 	});
 	
-	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyPressed += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
+	(safe_cast<::SketchMusic::View::BaseKeyboard^>(this->_keyboard))->KeyPressed += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
 		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MelodyEditorPage::_keyboard_KeyboardPressed);
-	(safe_cast<::SketchMusic::View::GenericKeyboard^>(this->_keyboard))->KeyReleased += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
+	(safe_cast<::SketchMusic::View::BaseKeyboard^>(this->_keyboard))->KeyReleased += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
 		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MelodyEditorPage::_keyboard_KeyReleased);
 	
 	curPosChangeToken = 
@@ -226,12 +226,16 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		case SketchMusic::View::KeyType::relativeNote:
 		case SketchMusic::View::KeyType::genericNote:
 		{
-			SketchMusic::ISymbol^ sym = ref new SketchMusic::SNote(args->key->value);
+			SketchMusic::ISymbol^ sym = SketchMusic::ISymbolFactory::CreateSymbol(args->key->type, args->key->value);
 
-			SketchMusic::Player::NoteOff^ noteOff = ref new SketchMusic::Player::NoteOff;
-			((App^)App::Current)->_player->playSingleNote((SketchMusic::SNote^) sym, _textRow->current->instrument, 0, noteOff);
-			// сохраняем noteOff где-нибудь, ассоциированно с нажатой клавишей
-			notesPlayingMap.insert(std::make_pair(args->key, noteOff));
+			auto snote = dynamic_cast<SketchMusic::SNote^>(sym);
+			if (snote)
+			{
+				SketchMusic::Player::NoteOff^ noteOff = ref new SketchMusic::Player::NoteOff;
+				((App^)App::Current)->_player->playSingleNote(snote, _textRow->current->instrument, 0, noteOff);
+				// сохраняем noteOff где-нибудь, ассоциированно с нажатой клавишей
+				notesPlayingMap.insert(std::make_pair(args->key, noteOff));
+			}
 
 			// надо добавлять сразу аккордами
 			if (recording)
@@ -335,6 +339,9 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			break;
 		case SketchMusic::View::KeyType::zoom:
 			_textRow->SetScale(args->key->value * 2);
+			break;
+		case SketchMusic::View::KeyType::hide:
+			//_textRow->Height = 
 			break;
 		case SketchMusic::View::KeyType::octave:
 		case SketchMusic::View::KeyType::space:

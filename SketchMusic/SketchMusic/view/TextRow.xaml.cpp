@@ -357,7 +357,15 @@ void SketchMusic::View::TextRow::AddSymbol(PositionedSymbol^ sym)
 	}
 	// создаём объект символа
 	Windows::UI::Xaml::Controls::ContentControl^ bt = ref new Windows::UI::Xaml::Controls::ContentControl;
-	bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("SymbolControlStyle"));
+	switch (sym->_sym->GetSymType())
+	{
+	case SymbolType::GNOTE:
+		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("GenericNoteCtrlStyle"));
+		break;
+	default:
+		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("SymbolControlStyle"));
+		break;
+	}
 	bt->Content = sym;
 	bt->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerPressed);
 	bt->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
