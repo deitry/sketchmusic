@@ -631,6 +631,11 @@ double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
 			break;
 		}
 	}
+	case SymbolType::END:
+	{
+		offsetY = RowHeight - 14;
+		break;
+	}
 	default:
 	{
 		offsetY = -14;
