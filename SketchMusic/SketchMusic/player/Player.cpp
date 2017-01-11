@@ -121,11 +121,14 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			// находим ближайший к старту символ (ПОСЛЕ старта)
 			
 			auto iter = symbols->First();
+			auto startIter = symbols->First();
+
 			_BPM = 120;
 			while (iter->HasCurrent)
 			{
 				auto p = iter->Current->_pos;
-				if (p->LT(cursor))
+				
+				if (p->LE(cursor))
 				{
 					// обработка системных параметров - учитываем все возможные модуляции
 					auto tempo = dynamic_cast<STempo^>(iter->Current->_sym);
@@ -133,15 +136,18 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 					{
 						_BPM = tempo->value;
 					}
+
 					// проматываем
 					iter->MoveNext();
+					if (p->LT(cursor)) startIter->MoveNext();
 
 					// если мы достигли последней ноты, а наш курсор ещё дальше
-					if ((iter->HasCurrent == false) && (p->LT(cursor)))
+					if ((iter->HasCurrent == false) && (p->LE(cursor)))
 					{
 						// играем сначала
 						cursor->setPos(0);
 						iter = symbols->First();
+						startIter = symbols->First();
 					}
 				}
 				else
@@ -149,15 +155,44 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 					// отыскиваем среди енжинов подходящий
 					ISoundEngine^ engine = this->_engines->GetSoundEngine(text->instrument);
 					
-					iterMap->push_back(std::make_pair(engine, std::make_pair(iter, symbols)));
+					iterMap->push_back(std::make_pair(engine, std::make_pair(startIter, symbols)));
 					break;
 				}
 			}
 		}
 	})
+		.then([this, iterMap, cursor, data]
+	{
+		// прекаунт
+		if (precount && recording)
+		{
+			int pbeat = -1;
+			clock_t pclock = clock();
+			auto pClock = Clock::now();
+			int actualCount = precount;
+			Cursor^ tmp = ref new Cursor;
+
+			while (actualCount > 0 && _state != s::STOP)
+			{
+				// метроном
+				if (((tmp->getBeat() - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
+				{
+					playMetronome();
+					actualCount--;
+				}
+				pbeat = tmp->getBeat();
+
+				auto nClock = Clock::now();
+				auto dif = (std::chrono::duration_cast<std::chrono::microseconds>(nClock - pClock).count());
+				pClock = nClock;
+				float offset = (float)dif * _BPM*1.5 * TICK_IN_BEAT / 60 / 1000000;	// не знаю, почему, но для корректного воспроизведения надо умножать на полтора
+				tmp->incTick(offset);
+			}
+		}
+	})
 		.then([this, iterMap, cursor]
 	{
-		auto tempState = s::PLAY;
+		auto tempState = _state;
 		int pbeat = -1;
 		
 		clock_t pclock = clock();
@@ -222,11 +257,14 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						// Хотя в общем-то ничего больше вводить не надо, пошаговый ввод можно сделать уже на основе имеющихся функций.
 						iter->first->Play(notes);
 
-						while (pIter->HasCurrent && !(dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym)))
-						{
-							pIter->MoveNext();
-							if (!(pIter->HasCurrent)) break;
-						}
+						// проматываем до следующего элемента
+						// без проверки на INote будем ловить все символы, в т.ч. новые строки и так далее
+						// Может, так оно и правильнее.
+						//while (pIter->HasCurrent && !(dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym)))
+						//{
+						//	pIter->MoveNext();
+						//	if (!(pIter->HasCurrent)) break;
+						//}
 					}
 
 					// метроном

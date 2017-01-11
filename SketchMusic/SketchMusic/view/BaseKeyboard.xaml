@@ -84,7 +84,7 @@
                 <FlyoutBase.AttachedFlyout>
                     <Flyout x:Name="TempoFlyout">
                         <StackPanel Orientation="Vertical">
-                            <TextBlock Text="BPM"/>
+                            <TextBlock x:Name="BpmTxt" Text="BPM"/>
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition/>
@@ -96,6 +96,7 @@
                                 </Grid.RowDefinitions>
 
                                 <Slider x:Name="TempoSlider"
+                                        ValueChanged="TempoSlider_ValueChanged"
                                         Grid.Row="0" Grid.RowSpan="2"
                                         Grid.Column="0"
                                         Orientation="Vertical"
@@ -103,7 +104,7 @@
                                         Minimum="30"
                                         Maximum="300"
                                         Value="120"
-                                        StepFrequency="5"
+                                        StepFrequency="15"
                                         TickFrequency="15"
                                         Foreground="{StaticResource SystemControlBackgroundBaseHighBrush}"/>
                                 <Button Grid.Row="0" FontFamily="Segoe MDL2 Assets" Grid.Column="1" Content="&#xE948;" Click="Button_Click"/>
@@ -111,6 +112,7 @@
                             </Grid>
                             <CheckBox x:Name="metroNeed" Content="Метроном" IsChecked="True" Click="metroNeed_Click"/>
                             <CheckBox x:Name="gnoteNeed" Content="Обобщ. ноты" IsChecked="True" Click="gnoteNeed_Click"/>
+                            <CheckBox x:Name="precountNeed" Content="Прекаунт" IsChecked="True" Click="precountNeed_Click"/>
                             <Button x:Name="Ok" Content="Ok" Click="OnClick"/>
                         </StackPanel>
                     </Flyout>

@@ -71,6 +71,7 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		if (localSettings->Values->HasKey("need_metronome"))
 		{
 			((App^)App::Current)->_player->needMetronome = (bool)localSettings->Values->Lookup("need_metronome");
+			_keyboard->SetKey(KeyType::metronome, ((App^)App::Current)->_player->needMetronome);
 		}
 		else {
 			((App^)App::Current)->_player->needMetronome = true;
@@ -79,9 +80,19 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		if (localSettings->Values->HasKey("need_play_generic"))
 		{
 			((App^)App::Current)->_player->needPlayGeneric = (bool)localSettings->Values->Lookup("need_play_generic");
+			_keyboard->SetKey(KeyType::playGeneric, ((App^)App::Current)->_player->needPlayGeneric);
 		}
 		else {
 			((App^)App::Current)->_player->needPlayGeneric = true;
+		}
+
+		if (localSettings->Values->HasKey("precount"))
+		{
+			((App^)App::Current)->_player->precount = (int)localSettings->Values->Lookup("precount");
+			_keyboard->SetKey(KeyType::precount, ((App^)App::Current)->_player->precount);
+		}
+		else {
+			((App^)App::Current)->_player->precount = 4;
 		}
 	}
 
@@ -197,6 +208,7 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 
 	localSettings->Values->Insert("need_metronome", ((App^)App::Current)->_player->needMetronome);
 	localSettings->Values->Insert("need_play_generic", ((App^)App::Current)->_player->needPlayGeneric);
+	localSettings->Values->Insert("precount", ((App^)App::Current)->_player->precount);
 
 	// отписка от события
 	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
@@ -245,6 +257,11 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		{
 			((App^)App::Current)->_player->quantize = args->key->value;
 			_textRow->quantize = args->key->value;
+			break;
+		}
+		case SketchMusic::View::KeyType::precount:
+		{
+			((App^)App::Current)->_player->precount = args->key->value;
 			break;
 		}
 		case SketchMusic::View::KeyType::end:
@@ -349,6 +366,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		}
 		case SketchMusic::View::KeyType::record:
 			recording = args->key->value;
+			((App^)App::Current)->_player->recording = recording;
 			break;
 		case SketchMusic::View::KeyType::deleteSym:
 		{

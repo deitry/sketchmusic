@@ -766,6 +766,7 @@ namespace SketchMusic
 			newPart			= 25,	// отметка о начале новой части
 			hide			= 30,	// спрятать клавиатуру
 			layout			= 31,	// сменить раскладку клавиатуры
+			precount		= 32,	// установить предварительные тики перед проигрыванием
 		};
 
 		public enum class KeyboardStateEnum

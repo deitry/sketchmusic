@@ -470,6 +470,23 @@ void SketchMusic::View::BaseKeyboard::OnQuantizeClick(Platform::Object ^ sender,
 	}
 }
 
+// Для задания начальных значений
+void SketchMusic::View::BaseKeyboard::SetKey(KeyType type, int value)
+{
+	switch (type)
+	{
+	case KeyType::metronome:
+		metroNeed->IsChecked = value ? true : false;
+		break;
+	case KeyType::precount:
+		precountNeed->IsChecked = value ? true : false;
+		break;
+	case KeyType::playGeneric:
+		gnoteNeed->IsChecked = value ? true : false;
+		break;
+	}
+}
+
 
 void SketchMusic::View::BaseKeyboard::quantizeNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
@@ -551,4 +568,18 @@ void SketchMusic::View::BaseKeyboard::Button_Click(Platform::Object^ sender, Win
 void SketchMusic::View::BaseKeyboard::Button_Click_1(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	TempoSlider->Value -= 1;
+}
+
+
+void SketchMusic::View::BaseKeyboard::precountNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	auto key = ref new SketchMusic::View::Key(KeyType::precount, 4*(int)(precountNeed->IsChecked->Value));
+	auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
+	KeyPressed(this, args);
+}
+
+
+void SketchMusic::View::BaseKeyboard::TempoSlider_ValueChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^ e)
+{
+	BpmTxt->Text = L"BPM = " + TempoSlider->Value;
 }

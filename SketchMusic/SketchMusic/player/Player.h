@@ -41,6 +41,9 @@ public:
 	
 	property bool needPlayGeneric;
 	property bool cycling;
+	property int precount;
+	property bool recording;	// для выключения прекаунта, когда записи нет
+
 	property float _BPM
 	{
 		float get() { return m_bpm; }
