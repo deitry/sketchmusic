@@ -25,6 +25,12 @@
         </ResourceDictionary>
     </Page.Resources>
 
+    <!--<Page.TopAppBar>
+        <CommandBar Grid.Row="0" ClosedDisplayMode="Hidden">
+            <AppBarButton Icon="Home"/>
+        </CommandBar>
+    </Page.TopAppBar>-->
+    
     <Grid x:Name="grid" 
           Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           RenderTransformOrigin="0,1"
@@ -128,6 +134,13 @@
                         </StackPanel>
                     </ContentControl>
 
+                    <ContentControl Name="ChangeViewItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE97C;" />
+                            <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Сменить представление" Margin="10 0 0 0" />
+                        </StackPanel>
+                    </ContentControl>
+
                     <ContentControl Name="settingsItem">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE713;" />
@@ -143,19 +156,132 @@
                       VerticalAlignment="Stretch">
 
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
 
-                        <smv:TextRow x:Name="_textRow"
-                                     BorderThickness="1"
-                                     BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
-                                     HorizontalAlignment="Left"
+                    <smv:TextRow x:Name="_textRow" Visibility="Visible"
+                                 Grid.Row="1"
+                                 BorderThickness="1"
+                                 BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                                 HorizontalAlignment="Left"
+                                 VerticalAlignment="Stretch"
+                                 Margin="5,5,5,5"
+                                 SizeChanged="_textRow_SizeChanged"
+                                 />
+
+                    <Grid Grid.Row="1" Visibility="Collapsed" x:Name="_ChordViewGrid">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock x:Name="PrevPosTxt" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Center"/>
+
+                        <Border BorderThickness="1"
+                                Grid.Row="1" Grid.Column="0"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
+                            <smv:ChordView x:Name="PrevChord"
+                                     HorizontalAlignment="Stretch"
                                      VerticalAlignment="Stretch"
+                                     Height="150"
+                                     Width="200"
                                      Margin="5,5,5,5"
-                                     SizeChanged="_textRow_SizeChanged"
                                      />
+                        </Border>
+
+                        <Border Grid.Row="2" Grid.Column="0"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
+                            <smv:ChordView x:Name="PrevGChord"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch"
+                                     Height="150"
+                                     Width="200"
+                                     Margin="5,5,5,5"
+                                     />
+                        </Border>
+                        
+                        <Button x:Name="MoveLeftCWBtn" Click="MoveLeftCWBtn_Click"
+                                Grid.Row="1" Grid.RowSpan="2"
+                                Grid.Column="1"
+                                FontFamily="Segoe MDL2 Assets"
+                                Content="&#xE760;"
+                                VerticalAlignment="Stretch"
+                                IsEnabled="False"/>
+
+                        <TextBlock x:Name="CurPosTxt" Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center"/>
+
+                        <Border BorderThickness="1"
+                                Grid.Row="1" Grid.Column="2"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
+                             <smv:ChordView x:Name="CurrentChord"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch"
+                                     Width="400"
+                                     Height="150"
+                                     Margin="5,5,5,5"
+                                     />
+                        </Border>
+                        <Border BorderThickness="1"
+                                Grid.Row="2" Grid.Column="2"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
+                            <smv:ChordView x:Name="CurrentGChord"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Margin="5,5,5,5"
+                                Width="400"
+                                Height="150"
+                                />
+                        </Border>
+
+                        <Button x:Name="MoveRightCWBtn" Click="MoveRightCWBtn_Click"
+                                Grid.Row="1" Grid.RowSpan="2"
+                                Grid.Column="3"
+                                FontFamily="Segoe MDL2 Assets"
+                                Content="&#xE761;"
+                                VerticalAlignment="Stretch"
+                                IsEnabled="False"/>
+
+                        <TextBlock x:Name="NextPosTxt" Grid.Row="0" Grid.Column="4" HorizontalAlignment="Center"/>
+
+                        <Border BorderThickness="1"
+                                Grid.Row="1" Grid.Column="4"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
+                            <smv:ChordView x:Name="NextChord"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Width="200"
+                            Height="150"
+                            Margin="5,5,5,5"
+                            />
+                        </Border>
+                        
+                        <Border BorderThickness="1"
+                                Grid.Row="2" Grid.Column="4"
+                                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
+                            <smv:ChordView x:Name="NextGChord"
+                                        BorderThickness="1"
+                                        BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        Height="150"
+                                        Width="200"
+                                        Margin="5,5,5,5"
+                                        />
+                        </Border>
+
+                    </Grid>
 
 
                     <smv:BaseKeyboard x:Name="_keyboard" BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
@@ -164,7 +290,7 @@
                                  Width="auto"
                                  VerticalAlignment="Bottom"
                                  HorizontalAlignment="Left"
-                                 Grid.Row="1"/>
+                                 Grid.Row="2"/>
 
                     <!--<StackPanel Orientation="Vertical"
                         VerticalAlignment="Bottom"

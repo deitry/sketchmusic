@@ -69,14 +69,16 @@ namespace SketchMusic
 			// для мыши
 			void onKeyboardControlPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 			void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
-			void OnClosed(Platform::Object ^sender, Platform::Object ^args);
-			void OnOpened(Platform::Object ^sender, Platform::Object ^args);
 			void OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 			void OnQuantizeClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 		private:
 			void quantizeNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 			void QuantizeFlyout_Closed(Platform::Object^ sender, Platform::Object^ e);
 			void MenuFlyoutItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+			void gnoteNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+			void metroNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+			void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+			void Button_Click_1(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		};
 	}
 }

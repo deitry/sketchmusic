@@ -51,6 +51,7 @@ namespace StrokeEditor
 		bool recording;
 		bool cycling;
 		bool appending;	// для задержки перед добавлением последующих нот с клавиатуры - чтобы и аккорды записывать, и курсор перемещать
+		SketchMusic::View::ViewType viewType;
 
 		static const int BASE_FREQ = 441;
 		static const int BUFFER_LENGTH = (44100 / BASE_FREQ);
@@ -63,6 +64,8 @@ namespace StrokeEditor
 		void _keyboard_KeyReleased(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ e);
 		void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
 		//void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+
+		void UpdateChordViews(SketchMusic::Cursor^ pos);
 
 		SketchMusic::Idea^ _idea;
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
@@ -78,5 +81,7 @@ namespace StrokeEditor
 		void menu_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
 		void _textRow_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
 		void Page_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
+		void MoveLeftCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void MoveRightCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }

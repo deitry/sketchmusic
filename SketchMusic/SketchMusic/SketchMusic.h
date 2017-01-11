@@ -240,7 +240,7 @@ namespace SketchMusic
 		virtual property int _voice;
 
 		virtual SymbolType GetSymType() { return SymbolType::NOTE; }
-		virtual Platform::String^ ToString() { return valToString(_val); }
+		virtual Platform::String^ ToString() { return _val.ToString(); }
 		//virtual Platform::String^ Serialize() { return "note," + valToString(_val); }	// приставка указывает на тип
 	};
 
@@ -250,7 +250,7 @@ namespace SketchMusic
 		SSpace() {}
 
 		virtual SymbolType GetSymType() { return SymbolType::SPACE; }
-		virtual Platform::String^ ToString() { return "Space"; }
+		virtual Platform::String^ ToString() { return L"\uE75D"; }
 		//virtual Platform::String^ Serialize() { return "space"; }
 	};
 
@@ -263,7 +263,7 @@ namespace SketchMusic
 		property String^ name;
 
 		virtual SymbolType GetSymType() { return SymbolType::NPART; }
-		virtual Platform::String^ ToString() { return name; }
+		virtual Platform::String^ ToString() { return L"\uE8A5" + name; }
 	};
 
 	public ref class STempo sealed : public SketchMusic::ISymbol
@@ -311,7 +311,7 @@ namespace SketchMusic
 
 		virtual property int _val
 		{
-			int get() { return (abs(_valX) + _valY * 100)* (_valX)/abs(_valX); }
+			int get() { return (abs(_valX) + _valY * 100)* ((_valX >= 0 )? 1 : -1 ); }
 			void set(int val) { _valY = abs(val) / 100; _valX = val % 100; }
 		}
 		
@@ -321,20 +321,25 @@ namespace SketchMusic
 		virtual property int _voice;
 
 		virtual SymbolType GetSymType() { return SymbolType::GNOTE; }
-		virtual Platform::String^ ToString() { return valToString(_val); }
+		virtual Platform::String^ ToString() { return L"" + _valX + ";" + _valY; }
 		//virtual Platform::String^ Serialize() { return "gnote," + valToString(_val); }
 	};
 
 	/**
 	Заканчивает все ноты, какие есть в этой дорожке
 	*/
-	public ref class SNoteEnd sealed : public ISymbol
+	public ref class SNoteEnd sealed : public ISymbol, INote
 	{
 	public:
 		SNoteEnd() {}
 
 		virtual SymbolType GetSymType() { return SymbolType::END; }
-		virtual Platform::String^ ToString() { return "SNoteEnd"; }
+		virtual Platform::String^ ToString() { return L"\uE81A"; }
+
+		// Унаследовано через INote
+		virtual property int _val;
+		virtual property int _velocity;
+		virtual property int _voice;
 		//virtual Platform::String^ Serialize() { return "end"; }
 	};
 
@@ -363,7 +368,7 @@ namespace SketchMusic
 		SNewLine() {}
 
 		virtual SymbolType GetSymType() { return SymbolType::NLINE; }
-		virtual Platform::String^ ToString() { return "SNewLine"; }
+		virtual Platform::String^ ToString() { return L"\uE751"; }
 		//virtual Platform::String^ Serialize() { return "nline"; }
 	};
 
@@ -756,6 +761,7 @@ namespace SketchMusic
 			zoom			= 16,
 			metronome		= 17,
 			quantization	= 18,
+			playGeneric		= 19,	// озвучиваем обобщённые ноты
 			end				= 20,	// конец ноты - остановка звучания
 			newPart			= 25,	// отметка о начале новой части
 			hide			= 30,	// спрятать клавиатуру
@@ -824,6 +830,13 @@ namespace SketchMusic
 								// ? будет полезно?
 		};
 		
+		// перечисление доступных типов отображения нот
+		public enum class ViewType
+		{
+			TextRow		= 0,	// "обычное" представление нот
+			ChordView	= 1,	// представление для последовательного ввода
+		};
+
 		public interface class IKeyboard
 		{
 			event EventHandler<SketchMusic::View::KeyboardEventArgs^>^ KeyPressed;	// нажатие на одну клавишу
@@ -841,6 +854,8 @@ namespace SketchMusic
 		ref class KeyStateToColorConverter;
 		ref class OnPositionedSymbolToTextConverter;
 		ref class PSymbolToVerticalPosConverter;
+		ref class PSymbolToHorizontalPosConverter;
+		ref class PSymbolToStyleConverter;
 		ref class MultiplicatedLengthConverter;
 		ref class TestData;
 		

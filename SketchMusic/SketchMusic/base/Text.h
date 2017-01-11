@@ -66,6 +66,12 @@ public:
 	unsigned int getSize() { return _t.size(); }
 	IVector<PositionedSymbol^>^ getText();
 	//Platform::Collections::Vector<PositionedSymbol^>^ getText();
+
+	// получение нот в конкретной точке и сбоку от неё - для последовательного редактирования
+	IVector<PositionedSymbol^>^ getNotesAt(Cursor^ pos, SymbolType type);
+	IVector<PositionedSymbol^>^ getNotesAtExcluding(Cursor^ pos, SymbolType type);
+	Cursor^ getPosAtLeft(Cursor^ pos);
+	Cursor^ getPosAtRight(Cursor^ pos);
 	
 	static SketchMusic::Text^ deserialize(Platform::String^ str);
 	static SketchMusic::Text^ deserialize(Windows::Data::Json::JsonObject^ json);

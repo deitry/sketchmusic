@@ -109,8 +109,8 @@
             <TextBlock x:Name="symbolTextBlock"
                    HorizontalAlignment="Center" VerticalAlignment="Center"
                    Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
-                <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
-                <Run Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
+                <!--<Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>-->
+                <Run FontFamily="Segoe MDL2 Assets" Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
             </TextBlock>
         </Grid>
     </ControlTemplate>
@@ -124,19 +124,14 @@
                      Width="{TemplateBinding Width}" 
                      Height="{TemplateBinding Height}"
                      />
-                
+
             <TextBlock x:Name="symbolTextBlock"
                    HorizontalAlignment="Center" VerticalAlignment="Center"
                    Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
-                <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
-                <Run Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
+                <Run FontFamily="Segoe MDL2 Assets" Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
             </TextBlock>
         </Grid>
     </ControlTemplate>
-
-    <DataTemplate x:Key="SymbolControlData">
-        
-    </DataTemplate>
 
     <Style TargetType="ContentControl" x:Key="SymbolControlStyle" x:Name="SymbolControlStyle">
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -146,8 +141,8 @@
         <Setter Property="Height" Value="{StaticResource SymbolHeight}"/>
         <Setter Property="Padding" Value="10,10,10,10"/>
         <Setter Property="Template" Value="{StaticResource SymbolControlTemplate}"/>
-        <Setter Property="ContentTemplate" Value="{StaticResource SymbolControlData}"/>
-        <!--<Setter Property="Tag" Value="Note"/>-->
+        <!--<Setter Property="ContentTemplate" Value="{StaticResource SymbolControlData}"/>
+        <Setter Property="Tag" Value="Note"/>-->
     </Style>
 
     <Style TargetType="ContentControl" x:Key="GenericNoteCtrlStyle" x:Name="GenericNoteCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">
@@ -155,7 +150,14 @@
         <Setter Property="Height" Value="{StaticResource GSymbolHeight}"/>
         <Setter Property="Template" Value="{StaticResource GNoteControlTemplate}"/>
     </Style>
-    
+
+    <Style TargetType="ContentControl" x:Key="SymbolCtrlStyle" x:Name="SymbolCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">
+        <Setter Property="Background" Value="{StaticResource tempoBackground}"/>
+        <Setter Property="Width" Value="{StaticResource GSymbolWidth}"/>
+        <Setter Property="Height" Value="{StaticResource GSymbolHeight}"/>
+        <Setter Property="Template" Value="{StaticResource SymbolControlTemplate}"/>
+    </Style>
+
     <ControlTemplate x:Key="PlaceholderControlTemplate">
         <Border Background="{TemplateBinding Background}"
                     BorderBrush="{TemplateBinding BorderBrush}"
@@ -166,7 +168,7 @@
                                HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
                                VerticalAlignment="{TemplateBinding VerticalAlignment}"
                                Foreground="{TemplateBinding Foreground}">
-                        <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        <Run Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}}"/>
                 </TextBlock>
             </Grid>
         </Border>

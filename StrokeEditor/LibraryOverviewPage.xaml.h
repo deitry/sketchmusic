@@ -70,14 +70,14 @@ namespace StrokeEditor
 			if (value == nullptr) return nullptr;
 
 			int rating = ((Windows::Foundation::IPropertyValue^)value)->GetInt32();
-			if (rating == 0) return nullptr;
+			if (rating == 0) return Windows::UI::Xaml::Application::Current->Resources->Lookup("LowBrush");//ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Gray);
 
-			if (rating >= 10) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Blue);
-			if (rating >= 8) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Green);
-			if (rating >= 6) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::YellowGreen);
-			if (rating >= 4) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Goldenrod);
-			if (rating >= 2) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::Red);
-			if (rating >= 1) return ref new Windows::UI::Xaml::Media::SolidColorBrush(Windows::UI::Colors::DarkRed);
+			if (rating >= 10) return Windows::UI::Xaml::Application::Current->Resources->Lookup("BlueBrush");
+			if (rating >= 8) return Windows::UI::Xaml::Application::Current->Resources->Lookup("GreenBrush");
+			if (rating >= 6) return Windows::UI::Xaml::Application::Current->Resources->Lookup("YellowGreenBrush");
+			if (rating >= 4) return Windows::UI::Xaml::Application::Current->Resources->Lookup("GoldenrodBrush");
+			if (rating >= 2) return Windows::UI::Xaml::Application::Current->Resources->Lookup("RedBrush");
+			if (rating >= 1) return Windows::UI::Xaml::Application::Current->Resources->Lookup("DarkRedBrush");
 
 			return nullptr;
 		}

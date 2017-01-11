@@ -81,6 +81,14 @@ void SketchMusic::View::BaseKeyboard::OnControlPressed(SketchMusic::View::Key ^ 
 		key->type = KeyType::octave;
 		UpdateParent(key);
 		break;
+	//case KeyType::enter:
+	//	key->type = KeyType::end;
+	//	UpdateParent(key);
+	//	break;
+	//case KeyType::end:
+	//	key->type = KeyType::enter;
+	//	UpdateParent(key);
+	//	break;
 	}
 }
 
@@ -271,7 +279,8 @@ void SketchMusic::View::BaseKeyboard::onKeyboardControlPressed(Platform::Object^
 void SketchMusic::View::BaseKeyboard::onKeyboardControlEntered(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
 	// нажатие тачем или мышкой, если она не отжималась
-	if ((e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse)
+	if ((e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||
+		(e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Pen)
 		//&& (!mousePressed)	// оставим на будущее, когда я придумаю, как сделать отпускание.
 		// а может, эта штука вовсе не нужна
 		)
@@ -336,7 +345,8 @@ void SketchMusic::View::BaseKeyboard::OnPointerReleased(Platform::Object ^sender
 void SketchMusic::View::BaseKeyboard::OnPointerExited(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
 {
 	// отпускаем клавишу, если это тач или если мышь нажата и не отпускалась
-	if ((e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse)
+	if ((e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||
+		(e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Pen)
 		//&& (!mousePressed)
 		)
 		return;
@@ -432,47 +442,12 @@ void SketchMusic::View::BaseKeyboard::ReleaseKey(Object^ sender)
 }
 
 
-void SketchMusic::View::BaseKeyboard::OnClosed(Platform::Object ^sender, Platform::Object ^args)
-{
-	Flyout^ flyout = dynamic_cast<Flyout^>(sender);
-	if (flyout == nullptr)
-		return;
-
-	StackPanel^ panel = dynamic_cast<StackPanel^>(flyout->Content);
-
-	for (auto&& child : panel->Children)
-	{
-		if (tempoPressed)
-		{
-			Slider^ slider = dynamic_cast<Slider^>(static_cast<Object^>(child));
-			if (slider)
-			{
-				auto key = ref new SketchMusic::View::Key(KeyType::tempo, slider->Value);
-				auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
-				KeyPressed(this, args);
-				tempoPressed = false;
-			}
-		}
-		CheckBox^ checkBox = dynamic_cast<CheckBox^>(static_cast<Object^>(child));
-		if (checkBox)
-		{
-			auto key = ref new SketchMusic::View::Key(KeyType::metronome, (int)checkBox->IsChecked->Value);
-			auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
-			KeyPressed(this, args);
-		}
-	}
-}
-
-
-void SketchMusic::View::BaseKeyboard::OnOpened(Platform::Object ^sender, Platform::Object ^args)
-{
-
-}
-
-
 void SketchMusic::View::BaseKeyboard::OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
 {
-	tempoPressed = true;
+	auto key = ref new SketchMusic::View::Key(KeyType::tempo, TempoSlider->Value);
+	auto keyArgs = ref new KeyboardEventArgs(key, this->pressedKeys);
+	KeyPressed(this, keyArgs);
+	
 	TempoFlyout->Hide();
 }
 
@@ -522,22 +497,58 @@ void SketchMusic::View::BaseKeyboard::MenuFlyoutItem_Click(Platform::Object^ sen
 	{
 		int type = std::stoi(((String^)el->Tag)->Data());
 		_layout = static_cast<KeyboardType>(type);
-
-		for (auto&& row : mainPanel->Children)
+		
+		switch (_layout)
 		{
-			auto el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
-			if (el)
+		case KeyboardType::Basic:
+		case KeyboardType::Generic:
+			for (auto&& row : mainPanel->Children)
 			{
-				auto str = (String^)el->Tag;
-				if (str == "CtrlPanel") continue;
+				auto el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
+				if (el)
+				{
+					auto str = (String^)el->Tag;
+					if (str == "CtrlPanel") continue;
 
-				int type = std::stoi(str->Data());
-				KeyboardType tag = static_cast<KeyboardType>(type);
-				if (tag == _layout) el->Visibility = Windows::UI::Xaml::Visibility::Visible;
-				else el->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+					int type = std::stoi(str->Data());
+					KeyboardType tag = static_cast<KeyboardType>(type);
+					if (tag == _layout) el->Visibility = Windows::UI::Xaml::Visibility::Visible;
+					else el->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+				}
 			}
+			break;
+		default: break;
 		}
+		
 	}
 
 	LayoutFlyout->Hide();
+}
+
+
+void SketchMusic::View::BaseKeyboard::gnoteNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	auto key = ref new SketchMusic::View::Key(KeyType::playGeneric, (int)(gnoteNeed->IsChecked->Value));
+	auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
+	KeyPressed(this, args);
+}
+
+
+void SketchMusic::View::BaseKeyboard::metroNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	auto key = ref new SketchMusic::View::Key(KeyType::metronome, (int)(metroNeed->IsChecked->Value));
+	auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
+	KeyPressed(this, args);
+}
+
+
+void SketchMusic::View::BaseKeyboard::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	TempoSlider->Value += 1;
+}
+
+
+void SketchMusic::View::BaseKeyboard::Button_Click_1(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	TempoSlider->Value -= 1;
 }

@@ -10,7 +10,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     d:DesignHeight="300"
-    d:DesignWidth="400">
+    d:DesignWidth="400"
+    Width="100"
+    Height="100">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -52,7 +54,11 @@
             <smv:PSymbolToVerticalPosConverter x:Key="psym2ypos"
                                                LineSpacing="{StaticResource LineSpacing}"
                                                AvailableHeight="{x:Bind Height}"/>
-            <smv:MultiplicatedLengthConverter x:Key="HalvedWidth" Multiplicator="0.45" Default="{x:Bind Width}"/>
+            <smv:PSymbolToHorizontalPosConverter x:Key="psym2xpos"
+                                               LineSpacing="{StaticResource LineSpacing}"
+                                               AvailableWidth="{x:Bind Width}"/>
+            <smv:PSymbolToStyleConverter x:Key="psym2style"/>
+            <!--<smv:MultiplicatedLengthConverter x:Key="HalvedWidth" Multiplicator="0.45" Default="{x:Bind Width}"/>-->
 
         </ResourceDictionary>
     </UserControl.Resources>
@@ -74,14 +80,17 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <ContentControl Style="{StaticResource SymbolControlStyle}" HorizontalAlignment="Center">
+                    <ContentControl Style="{Binding Path=DataContext,
+                                            RelativeSource={RelativeSource TemplatedParent},
+                                            Converter={StaticResource psym2style}}" 
+                                    HorizontalAlignment="Center">
                         <ContentControl.RenderTransform>
                             <TranslateTransform Y="{Binding Path=DataContext,
                                                 RelativeSource={RelativeSource TemplatedParent},
                                                 Converter={StaticResource psym2ypos}}"
-                                                X="{Binding Path=Width,
+                                                X="{Binding Path=DataContext,
                                                 RelativeSource={RelativeSource TemplatedParent},
-                                                Converter={StaticResource HalvedWidth}}"/>
+                                                Converter={StaticResource psym2xpos}}"/>
                         </ContentControl.RenderTransform>
                     </ContentControl>
                 </DataTemplate>

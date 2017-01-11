@@ -97,6 +97,70 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 	return vect;
 }
 
+// ѕолучаем ноты в данной позиции, имеющие тип type (или все, если type == unknown)
+IVector<PositionedSymbol^>^ SketchMusic::Text::getNotesAt(Cursor ^ pos, SymbolType type)
+{
+	if (pos == nullptr) return nullptr;
+	Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
+	
+	for (auto sym = _t.lower_bound(pos); sym != _t.upper_bound(pos); sym++)
+	{
+		if (type == SymbolType::unknown || type == sym->second->GetSymType())
+			vect->Append(ref new PositionedSymbol(sym->first, sym->second));
+	}
+
+	return vect;
+}
+
+// ѕолучаем ноты в данной позиции, исключа€ те, которые имеют тип type (или все, если type == unknown)
+IVector<PositionedSymbol^>^ SketchMusic::Text::getNotesAtExcluding(Cursor ^ pos, SymbolType type)
+{
+	if (pos == nullptr) return nullptr;
+	Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
+
+	for (auto sym = _t.lower_bound(pos); sym != _t.upper_bound(pos); sym++)
+	{
+		if (type == SymbolType::unknown || type != sym->second->GetSymType())
+			vect->Append(ref new PositionedSymbol(sym->first, sym->second));
+	}
+
+	return vect;
+}
+
+Cursor^ SketchMusic::Text::getPosAtLeft(Cursor ^ pos)
+{
+	auto curIter = _t.lower_bound(pos);
+	// проверка на то, что мы не в самом начале
+	if (curIter == _t.begin()) return nullptr;
+
+	auto prevPos = (--curIter)->first;
+	//Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
+	//for (auto sym = _t.lower_bound(prevPos); sym != _t.upper_bound(prevPos); sym++)
+	//{
+	//	vect->Append(ref new PositionedSymbol(sym->first, sym->second));
+	//}
+
+	return prevPos;
+}
+
+Cursor^ SketchMusic::Text::getPosAtRight(Cursor ^ pos)
+{
+	auto nextIter = _t.upper_bound(pos);
+	// проверка на то, что мы не в самом конце
+	if (nextIter == _t.end()) return nullptr;
+	
+	auto nextPos = nextIter->first;
+	//Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
+	//
+	//for (auto sym = _t.lower_bound(nextPos); sym != _t.upper_bound(nextPos); sym++)
+	//{
+	//	if (type == SymbolType::unknown || type == sym->second->GetSymType())
+	//		vect->Append(ref new PositionedSymbol(sym->first, sym->second));
+	//}
+
+	return nextPos;
+}
+
 IJsonValue^ SketchMusic::Text::serialize()
 {
 	JsonObject^ json = ref new JsonObject();
@@ -167,7 +231,7 @@ SketchMusic::Text ^ SketchMusic::Text::deserialize(Windows::Data::Json::JsonObje
 void SketchMusic::Text::moveSymbol(SketchMusic::PositionedSymbol^ psym, SketchMusic::Cursor^ newpos)
 {
 	psymIter target = _t.end();
-	for (auto sym = _t.lower_bound(psym->_pos); sym->first->EQ(psym->_pos); sym++)
+	for (auto sym = _t.lower_bound(psym->_pos); sym != _t.upper_bound(psym->_pos); sym++)
 	{
 		// если такой символ имеетс€
 		if (sym->second == psym->_sym)

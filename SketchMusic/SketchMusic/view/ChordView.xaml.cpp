@@ -26,39 +26,10 @@ SketchMusic::View::ChordView::ChordView()
 	InitializeComponent();
 }
 
-void SketchMusic::View::ChordView::SetNotes(Windows::Foundation::Collections::IObservableVector<PositionedSymbol^>^ notes)
+void SketchMusic::View::ChordView::SetNotes(Windows::Foundation::Collections::IVector<PositionedSymbol^>^ notes)
 {
-	_ItemsControl->ItemsSource = notes;
-	/*for (auto psym : notes)
-	{
-		// создаём объект и размещаем его на канвасе
-		Windows::UI::Xaml::Controls::ContentControl^ ctrl = ref new Windows::UI::Xaml::Controls::ContentControl;
-		ctrl->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(this->Resources->Lookup("SymbolControlStyle"));
-		ctrl->Content = psym;
-		
-		// обработчики нажатия
-		//bt->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerPressed);
-		//bt->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
-		//bt->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerReleased);
-
-		_canvas->Children->Append(ctrl);
-		
-		//Binding^ canvasY = ref new Binding();
-		//canvasY->Source = ctrl->Content;
-		//canvasY->Path = ref new PropertyPath("Canvas.Top");
-		//canvasY->Converter = dynamic_cast<SketchMusic::View::PSymbolToVerticalPosConverter^>(this->Resources->Lookup("symbol2ypos")); //Windows::UI::Xaml::Data::IValueConverter^
-		//canvasY->ConverterParameter = ctrl->Height;
-		//_canvas->SetBinding(Canvas::TopProperty, canvasY);
-
-
-		//auto transform = ctrl->TransformToVisual(_canvas);
-		//Point basePoint = Point(0, 0);
-		//auto point = transform->TransformPoint(basePoint);
-
-		//double offsetY = GetOffsetY(psym->_sym);
-		//_canvas->SetLeft(ctrl, 50);
-		//_canvas->SetTop(ctrl, point.Y + offsetY);
-	}*/
+	Notes = notes;
+	_ItemsControl->ItemsSource = Notes;
 }
 
 double SketchMusic::View::ChordView::GetOffsetY(ISymbol ^ sym)

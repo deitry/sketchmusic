@@ -39,6 +39,7 @@ public:
 		}
 	}
 	
+	property bool needPlayGeneric;
 	property bool cycling;
 	property float _BPM
 	{

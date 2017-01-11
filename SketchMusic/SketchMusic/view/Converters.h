@@ -98,7 +98,7 @@ public:
 			}
 			break;
 		case KeyType::space:
-			result += L"\u2423";
+			result += L"\uE75D";
 			break;
 		case KeyType::move:
 			if (key->value >= 0)
@@ -111,7 +111,7 @@ public:
 			}
 			break;
 		case KeyType::enter:
-			result += L"\u21a9";
+			result += L"\uE751";
 			break;
 		case KeyType::play:
 			if (key->value >= 0)
@@ -142,10 +142,10 @@ public:
 			result += L"\ue15b";
 			break;
 		case KeyType::tempo:
-			result += L"\u23f3";
+			result += L"\uE98F"; //23f3 - часики
 			break;
 		case KeyType::quantization:
-			result += L"\uE8D6";
+			result += L"Q"; // \uE8D6 - значок мелодии
 			break;
 		case KeyType::hide:
 			result = L"\uE92F";
@@ -153,6 +153,12 @@ public:
 		case KeyType::layout:
 			result = L"\uEDA7";
 			break;
+		case KeyType::end:
+			result = L"\uE81A"; //E769 - значок паузы
+			break;
+			// символы про запас
+			// E892 - перемотка назад
+			// E893 - перемотка вперёд
 		default:
 			break;
 		}
@@ -312,26 +318,7 @@ public:
 	{
 		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
 		if (psym == nullptr) return "";
-
-		SketchMusic::STempo^ tempo = dynamic_cast<SketchMusic::STempo^>(psym->_sym);
-		if (tempo)
-		{
-			return L"" + tempo->value;
-		}
-
-		SketchMusic::SGNote^ gnote = dynamic_cast<SketchMusic::SGNote^>(psym->_sym);
-		if (gnote)
-		{
-			return L"" + gnote->_valX + "," + gnote->_valY;
-		} 
-
-		SketchMusic::INote^ note = dynamic_cast<SketchMusic::INote^>(psym->_sym);
-		if (note)
-		{
-			return L"" + note->_val;
-		}
-
-		return L"";
+		return psym->_sym->ToString();
 	}
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
 	{
@@ -356,32 +343,36 @@ public:
 		auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
 		if (psym == nullptr) return nullptr;
 
-		SketchMusic::INote^ note = dynamic_cast<SketchMusic::INote^>(psym->_sym);
-
+		
 		double scaling = AvailableHeight;
 		double Y = 0;
 
-		if (note)
+
+		switch (psym->_sym->GetSymType())
 		{
-			// TODO : сделать расчёт похитрее, чтобы выглядело как на нотном стане
-			// В том числе разрещить вылезать за пределы, увеличивая тем самым высоту строки
-			// (чтобы строки не налезали друг на друга)
+		case SketchMusic::SymbolType::NOTE:
+		{
+			SketchMusic::INote^ note = dynamic_cast<SketchMusic::INote^>(psym->_sym);
+			if (note == nullptr) break;
 			Y = note->_val >= 0 ?
 				-abs(note->_val) % 12 :
 				-12 * ((note->_val % 12) != 0) + abs(note->_val) % 12;
-			Y *= scaling / 12;
-			Y += scaling - 5;
+			Y *= 0.6* scaling / 12;
+			return Y += scaling - 70;
 		}
-		else
+		case SketchMusic::SymbolType::GNOTE:
 		{
-			STempo^ tempo = dynamic_cast<STempo^>(psym->_sym);
-			if (tempo)
-			{
-				Y = -0.6*scaling;
-			}
+			auto gnote = dynamic_cast<SketchMusic::SGNote^>(psym->_sym);
+			if (gnote == nullptr) break;
+			Y = - 0.6*AvailableHeight * gnote->_valY / 5;
+			Y += AvailableHeight - 70;
+			return Y;
 		}
-
-		return Y;
+		case SketchMusic::SymbolType::TEMPO:
+		default:
+			return 0.03*scaling * static_cast<int>(psym->_sym->GetSymType());
+		}
+		return 0;
 	}
 
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
@@ -390,6 +381,97 @@ public:
 	}
 
 	PSymbolToVerticalPosConverter() {}
+};
+
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+public ref class SketchMusic::View::PSymbolToHorizontalPosConverter sealed : Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
+{
+public:
+	property double LineSpacing;	// рассотояние между предполагаемыми линиями нотного стана
+	property double AvailableWidth;
+
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	{
+		//SketchMusic::ISymbol^ symbol = dynamic_cast<SketchMusic::ISymbol^>(value);
+		//if (symbol == nullptr) return nullptr;
+		auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
+		if (psym == nullptr) return nullptr;
+
+		double scaling = AvailableWidth;
+		double X = 0;
+
+		//SketchMusic::SNote^ note = dynamic_cast<SketchMusic::SNote^>(psym->_sym);
+		switch (psym->_sym->GetSymType())
+		{
+		case SketchMusic::SymbolType::GNOTE:
+		{
+			X = AvailableWidth / 2;
+			auto gnote = dynamic_cast<SketchMusic::SGNote^>(psym->_sym);
+			if (gnote == nullptr) break;
+			X += AvailableWidth * gnote->_valX / 6;
+			return X;
+		}			
+		case SketchMusic::SymbolType::NOTE:
+		{
+			X = AvailableWidth / 2;
+			auto sym = dynamic_cast<INote^>(psym->_sym);
+			X += (sym->_val % 2 ? 1 : -1) * AvailableWidth / 6;
+			return X;
+		}
+		case SketchMusic::SymbolType::TEMPO:
+		default:
+			X = AvailableWidth / 10;
+			return X;
+		}
+
+		return AvailableWidth / 2;
+	}
+
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	{
+		return nullptr;
+	}
+
+	PSymbolToHorizontalPosConverter() {}
+};
+
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+public ref class SketchMusic::View::PSymbolToStyleConverter sealed : Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
+{
+public:
+	
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	{
+		auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
+		if (psym == nullptr) return nullptr;
+
+		switch (psym->_sym->GetSymType())
+		{
+		case SketchMusic::SymbolType::GNOTE:
+		{
+			if (Application::Current->Resources->HasKey("GenericNoteCtrlStyle"))
+				return Application::Current->Resources->Lookup("GenericNoteCtrlStyle");
+		}
+		case SketchMusic::SymbolType::NOTE:
+		{
+			if (Application::Current->Resources->HasKey("SymbolControlStyle"))
+				return Application::Current->Resources->Lookup("SymbolControlStyle");
+		}
+		case SketchMusic::SymbolType::TEMPO:
+		default:
+			if (Application::Current->Resources->HasKey("SymbolCtrlStyle"))
+				return Application::Current->Resources->Lookup("SymbolCtrlStyle");
+		}
+
+		return nullptr;
+	}
+
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	{
+		return nullptr;
+	}
+
+	PSymbolToStyleConverter() {}
 };
 
 

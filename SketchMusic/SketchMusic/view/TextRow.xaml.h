@@ -76,6 +76,7 @@ public:
 	property Text^ current;
 	property Text^ format;
 	property int scale;			// текущий уровень масштаба 
+	property int quantize;		// текущий уровень квантизации - делитель Tick
 
 	TextRow();
 	void OnApplyTemplate() override;

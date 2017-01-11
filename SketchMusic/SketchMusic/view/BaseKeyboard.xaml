@@ -56,9 +56,21 @@
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="3001"/>
 
+            
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" 
+                            Width="{StaticResource CtrlWidth}" Tag="13000"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}"
+                            Width="{StaticResource CtrlWidth}" Tag="6000"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}"
+                            Width="{StaticResource CtrlWidth}" Tag="20000"/>
+
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                 Converter={StaticResource ctrlKeyState2color}}"
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Margin="80,0,0,0"
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="12000"/>
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
@@ -66,36 +78,44 @@
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}"
                             Width="{StaticResource CtrlWidth}" Tag="7000"/>
-            <!--<ContentControl Style="{StaticResource KeyboardBtnStyle}" 
-                                                Width="{StaticResource CtrlWidth}" Tag="8000"/>-->
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" Tag="13000"/>
-            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
+                            Style="{StaticResource KeyboardBtnStyle}"
                             Width="{StaticResource CtrlWidth}" Tag="15000">
                 <FlyoutBase.AttachedFlyout>
-                    <Flyout x:Name="TempoFlyout" Closed="OnClosed" Opened="OnOpened">
+                    <Flyout x:Name="TempoFlyout">
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="BPM"/>
-                            <Slider x:Name="TempoSlider"
-                                    Orientation="Vertical"
-                                    Height="100"
-                                    Minimum="30"
-                                    Maximum="300"
-                                    Value="120"
-                                    StepFrequency="5"
-                                    TickFrequency="15"
-                                    Foreground="{StaticResource SystemControlBackgroundBaseHighBrush}"/>
-                            <CheckBox x:Name="metroNeed" Content="Metronome" IsChecked="True"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+
+                                <Slider x:Name="TempoSlider"
+                                        Grid.Row="0" Grid.RowSpan="2"
+                                        Grid.Column="0"
+                                        Orientation="Vertical"
+                                        Height="100"
+                                        Minimum="30"
+                                        Maximum="300"
+                                        Value="120"
+                                        StepFrequency="5"
+                                        TickFrequency="15"
+                                        Foreground="{StaticResource SystemControlBackgroundBaseHighBrush}"/>
+                                <Button Grid.Row="0" FontFamily="Segoe MDL2 Assets" Grid.Column="1" Content="&#xE948;" Click="Button_Click"/>
+                                <Button Grid.Row="1" FontFamily="Segoe MDL2 Assets" Grid.Column="1" Content="&#xE949;" Click="Button_Click_1"/>
+                            </Grid>
+                            <CheckBox x:Name="metroNeed" Content="Метроном" IsChecked="True" Click="metroNeed_Click"/>
+                            <CheckBox x:Name="gnoteNeed" Content="Обобщ. ноты" IsChecked="True" Click="gnoteNeed_Click"/>
                             <Button x:Name="Ok" Content="Ok" Click="OnClick"/>
                         </StackPanel>
                     </Flyout>
                 </FlyoutBase.AttachedFlyout>
             </ContentControl>
-            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}"
-                            Width="{StaticResource CtrlWidth}" Tag="6000"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="18000">
@@ -145,7 +165,7 @@
                             <MenuFlyoutItem Text="Ступени / Функции" IsEnabled="False"/>
                             <MenuFlyoutItem Text="Обобщённые ноты" Tag="2" Click="MenuFlyoutItem_Click"/>
                             <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem Text="Настройки..." IsEnabled="False"/>
+                            <MenuFlyoutItem Text="Настройки клавиатуры..." IsEnabled="False"/>
                         </StackPanel>
                     </Flyout>
                 </FlyoutBase.AttachedFlyout>
@@ -154,7 +174,7 @@
 
         <!-- Row 1 -->
         <StackPanel x:Name="_Row1"
-                    Margin="55,0,0,0"
+                    Margin="45,0,0,0"
                     Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Tag="0">
@@ -212,7 +232,7 @@
         </StackPanel>
         <!-- Row 3 -->
         <StackPanel x:Name="_Row3"
-                    Margin="55,0,0,0"
+                    Margin="45,0,0,0"
                     Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Tag="0">

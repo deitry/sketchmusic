@@ -42,8 +42,8 @@ public:
 	void setPos(int b) { setPos(b, 0); }
 
 	int getBeat() { return _beat; }
-	int getTick() { return _tick; }
-	int toTicks() { return _tick + _beat*SketchMusic::TICK_IN_BEAT; }
+	float getTick() { return _tick; }
+	float toTicks() { return _tick + _beat*SketchMusic::TICK_IN_BEAT; }
 
 	// операции
 

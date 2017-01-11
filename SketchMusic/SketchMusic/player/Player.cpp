@@ -24,6 +24,7 @@ SketchMusic::Player::Player::Player()
 	needMetronome = true;
 	_BPM = 120;
 	cycling = false;
+	needPlayGeneric = true;
 	quantize = 4.;
 
 	// do - чтобы можно было "скипнуть" инициализацию, если то-то не удалось
@@ -81,9 +82,10 @@ void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note, Sketc
 
 void SketchMusic::Player::Player::playMetronome()
 {
+	static SNote^ note = ref new SNote(17);
 	if (_metronome)
 	{
-		_metronome->Play(ref new SNote(17), 20, nullptr); // TODO : незачем каждый раз создавать новую ноту, можно хранить значение
+		_metronome->Play(note, 20, nullptr); // TODO : незачем каждый раз создавать новую ноту, можно хранить значение
 	}
 }
 
@@ -181,18 +183,34 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						Windows::Foundation::Collections::IVector<SketchMusic::INote^>^ notes = ref new Platform::Collections::Vector < SketchMusic::INote^ >;
 						do
 						{
-							auto note = dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym);
-							if (note)
+							switch (pIter->Current->_sym->GetSymType())
 							{
-								notes->Append(note);
+							case SymbolType::NOTE:
+							case SymbolType::END:
+							{
+								auto note = dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym);
+								if (note)
+								{
+									notes->Append(note);
+								}
+								break;
 							}
-							else // чтобы не опрашивать лишний раз. Ноты попадаются намного чаще, чем всякие системные символы
+							case SymbolType::GNOTE:
+							{
+								// проигрываем чуть-чуть с помощью метронома, чтобы не заводить отдельный
+								auto note = dynamic_cast<SketchMusic::SGNote^>(pIter->Current->_sym);
+								if (needPlayGeneric)
+									_metronome->Play(ref new SNote(-24 + note->_valX + note->_valY*5), 40, nullptr);
+								break;
+							}
+							case SymbolType::TEMPO:
 							{
 								auto tempo = dynamic_cast<SketchMusic::STempo^>(pIter->Current->_sym);
 								if (tempo)
 								{
 									_BPM = tempo->value;
 								}
+							}
 							}
 							pIter->MoveNext();
 						} while (pIter->HasCurrent && pIter->Current->_pos->LE(cursor));
@@ -204,7 +222,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						// Хотя в общем-то ничего больше вводить не надо, пошаговый ввод можно сделать уже на основе имеющихся функций.
 						iter->first->Play(notes);
 
-						while (pIter->HasCurrent && !(dynamic_cast<SketchMusic::SNote^>(pIter->Current->_sym)))
+						while (pIter->HasCurrent && !(dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym)))
 						{
 							pIter->MoveNext();
 							if (!(pIter->HasCurrent)) break;
@@ -225,7 +243,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						{
 							pIter->MoveNext();
 							if (!(pIter->HasCurrent)) break;
-						} while (!(dynamic_cast<SketchMusic::SNote^>(pIter->Current->_sym)));
+						} while (!(dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym)));
 					}
 				}
 			};

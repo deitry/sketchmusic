@@ -10,6 +10,7 @@
 
 using namespace StrokeEditor;
 using namespace SketchMusic;
+using namespace SketchMusic::View;
 namespace SMC = SketchMusic::Commands;
 
 using namespace Platform;
@@ -74,6 +75,14 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		else {
 			((App^)App::Current)->_player->needMetronome = true;
 		}
+
+		if (localSettings->Values->HasKey("need_play_generic"))
+		{
+			((App^)App::Current)->_player->needPlayGeneric = (bool)localSettings->Values->Lookup("need_play_generic");
+		}
+		else {
+			((App^)App::Current)->_player->needPlayGeneric = true;
+		}
 	}
 
 	//((App^)App::Current)->ShowNotification("Загрузка инструментов");
@@ -116,6 +125,9 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	}
 	
 	_textRow->SetText(_texts, nullptr);
+
+	viewType = ViewType::TextRow;
+	//UpdateChordViews(_textRow->currentPosition);
 }
 
 void StrokeEditor::MelodyEditorPage::InitializePage()
@@ -141,6 +153,11 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		_textRow->current->addSymbol(symArgs->_newSym);
 		// добавить внешнее представление символа
 		_textRow->AddSymbol(symArgs->_newSym);
+		if (viewType == ViewType::ChordView)
+		{
+			if (symArgs->_newSym->_sym->GetSymType() == SymbolType::NOTE) this->CurrentChord->GetNotes()->Append(symArgs->_newSym);
+			else this->CurrentGChord->GetNotes()->Append(symArgs->_newSym);
+		}
 	});
 
 	deleteSym = ref new SketchMusic::Commands::Handler([=](Object^ args) -> void
@@ -179,6 +196,7 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 		Windows::Storage::ApplicationData::Current->LocalSettings;
 
 	localSettings->Values->Insert("need_metronome", ((App^)App::Current)->_player->needMetronome);
+	localSettings->Values->Insert("need_play_generic", ((App^)App::Current)->_player->needPlayGeneric);
 
 	// отписка от события
 	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
@@ -218,11 +236,18 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			((App^)App::Current)->_player->needMetronome = (bool)args->key->value;
 			break;
 		}
-		case SketchMusic::View::KeyType::quantization:
+		case SketchMusic::View::KeyType::playGeneric:
 		{
-			((App^)App::Current)->_player->quantize= (int)args->key->value;
+			((App^)App::Current)->_player->needPlayGeneric = (bool)args->key->value;
 			break;
 		}
+		case SketchMusic::View::KeyType::quantization:
+		{
+			((App^)App::Current)->_player->quantize = args->key->value;
+			_textRow->quantize = args->key->value;
+			break;
+		}
+		case SketchMusic::View::KeyType::end:
 		case SketchMusic::View::KeyType::note:
 		case SketchMusic::View::KeyType::relativeNote:
 		case SketchMusic::View::KeyType::genericNote:
@@ -250,18 +275,25 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 				//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
 				//	+ " / tick = " + _textRow->currentPosition->getTick();
 
-				if (!appending)
+				if (!appending && ((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::PLAY)
 				{
 					appending = true;
 					Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]
 					{
 						auto delay = concurrency::create_task([this]
 						{
-							unsigned int timeout = 300 * 60 / ((App^)App::Current)->_player->_BPM / _textRow->scale;
+							unsigned int timeout = 600 * 60 / ((App^)App::Current)->_player->_BPM / _textRow->scale;
 							concurrency::wait(timeout);
 							Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=] {
 								this->appending = false;
-								this->_textRow->MoveCursorRight();
+								if (this->viewType == ViewType::TextRow)
+								{
+									this->_textRow->MoveCursorRight();
+								}
+								else
+								{
+									this->MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
+								}
 							}));
 
 						});
@@ -301,13 +333,15 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		{
 			if (args->key->value >= 0)
 			{
-				_textRow->MoveCursorRight();
+				if (viewType == ViewType::TextRow) _textRow->MoveCursorRight();
+				else MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
 				//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
 				//	+ " / tick = " + _textRow->currentPosition->getTick();
 			}
 			else
 			{
-				_textRow->MoveCursorLeft();
+				if (viewType == ViewType::TextRow) _textRow->MoveCursorLeft();
+				else MoveLeftCWBtn_Click(this, ref new RoutedEventArgs);
 				//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
 				//	+ " / tick = " + _textRow->currentPosition->getTick();
 			}
@@ -531,6 +565,26 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 	{
 		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(deleteCtrl);
 	}
+	else if (ChangeViewItem == (ContentControl^)e->ClickedItem)
+	{
+		// TODO : если типов представления нот будет больше, сделать через флайаут или контентдиалог
+		viewType = viewType == ViewType::TextRow ? ViewType::ChordView : ViewType::TextRow;
+		
+		// Соответствующим образом меняем представление
+		switch (viewType)
+		{
+		case ViewType::TextRow:
+			_textRow->Visibility = Windows::UI::Xaml::Visibility::Visible;
+			_ChordViewGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+			break;
+		case ViewType::ChordView:
+			_textRow->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+			_ChordViewGrid->Visibility = Windows::UI::Xaml::Visibility::Visible;
+			UpdateChordViews(_textRow->currentPosition);
+			break;
+		}
+		
+	}
 	else if (settingsItem == (ContentControl^)e->ClickedItem)
 	{
 		//myFrame->Navigate(settingsItem->GetType());
@@ -548,4 +602,84 @@ void StrokeEditor::MelodyEditorPage::Page_SizeChanged(Platform::Object^ sender, 
 {
 	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width - mySplitView->CompactPaneLength;
 	_textRow->Width = width;
+}
+
+
+// переместить курсор к ближайшей левой ноте
+void StrokeEditor::MelodyEditorPage::MoveLeftCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	Cursor^ prevPos = nullptr;
+	auto notes = PrevChord->GetNotes();
+	if (notes == nullptr || notes->Size == 0) notes = PrevGChord->GetNotes();
+	if (notes == nullptr || notes->Size == 0) return;
+
+	//if (notes->Size > 0) // учли выше
+	prevPos = notes->GetAt(0)->_pos;
+	
+	if (prevPos)
+	{
+		UpdateChordViews(prevPos);
+	}
+}
+
+
+// переместить курсор к ближайшей правой ноте
+void StrokeEditor::MelodyEditorPage::MoveRightCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	Cursor^ nextPos = nullptr;
+	auto notes = NextChord->GetNotes();
+	if (notes == nullptr || notes->Size == 0) notes = NextGChord->GetNotes();
+	if (notes == nullptr || notes->Size == 0) return;
+
+	//if (notes->Size > 0)
+	nextPos = notes->GetAt(0)->_pos;
+	
+	if (nextPos)
+	{
+		UpdateChordViews(nextPos);
+	}
+}
+
+void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
+{
+	if (this->viewType != ViewType::ChordView) return;
+
+	auto txt = _textRow->current;
+	if (txt == nullptr) return;
+
+	//auto cur = _textRow->currentPosition; 
+	_textRow->SetCursor(pos);
+
+	CurPosTxt->Text = L"" + pos->getBeat() + ":" + pos->getTick();
+	// сюда - только обычные ноты
+	CurrentChord->SetNotes(txt->getNotesAt(pos, SymbolType::NOTE));
+	// сюда - все, кроме обычных
+	CurrentGChord->SetNotes(txt->getNotesAtExcluding(pos, SymbolType::NOTE));
+
+	auto prevPos = txt->getPosAtLeft(pos);
+	PrevChord->SetNotes(txt->getNotesAt(prevPos, SymbolType::NOTE));
+	PrevGChord->SetNotes(txt->getNotesAtExcluding(prevPos, SymbolType::NOTE));
+
+	bool prevEnabled = (PrevChord->GetNotes() == nullptr) ? false : (PrevChord->GetNotes()->Size > 0);
+	if (prevEnabled == false) prevEnabled = (PrevGChord->GetNotes() == nullptr) ? false : (PrevGChord->GetNotes()->Size > 0);
+	
+	if (prevEnabled)
+	{
+		MoveLeftCWBtn->IsEnabled = true; PrevPosTxt->Text = L"" + prevPos->getBeat() + ":" + prevPos->getTick() ;
+	}
+	else { MoveLeftCWBtn->IsEnabled = false; PrevPosTxt->Text = ""; }
+
+	auto nextPos = txt->getPosAtRight(pos);
+	NextChord->SetNotes(_textRow->current->getNotesAt(nextPos, SymbolType::NOTE));
+	NextGChord->SetNotes(_textRow->current->getNotesAtExcluding(nextPos, SymbolType::NOTE));
+	
+	bool nextEnabled = (NextChord->GetNotes() == nullptr) ? false : (NextChord->GetNotes()->Size > 0);
+	if (nextEnabled == false) nextEnabled = (NextGChord->GetNotes() == nullptr) ? false : (NextGChord->GetNotes()->Size > 0);
+
+	if (nextEnabled)
+	{
+		MoveRightCWBtn->IsEnabled = true; NextPosTxt->Text = L"" + nextPos->getBeat() + ":" + nextPos->getTick();
+	}
+	else { MoveRightCWBtn->IsEnabled = false; NextPosTxt->Text = ""; }
+
 }

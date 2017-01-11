@@ -119,6 +119,9 @@ SketchMusic::Player::SFSoundEngine::~SFSoundEngine()
 */
 void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, NoteOff^ noteOff)
 {
+	auto end = dynamic_cast<SNoteEnd^>(note);
+	if (end) return;
+
 	// - проходимся по всем зонам и т.д., вычисляем конечные параметры звука
 	if (_sfPreset)
 	{

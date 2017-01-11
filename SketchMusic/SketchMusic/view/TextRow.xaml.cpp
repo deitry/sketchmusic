@@ -31,6 +31,7 @@ SketchMusic::View::TextRow::TextRow()
 
 	initialised = 0;
 	scale = 1;
+	quantize = 1;
 
 	currentPosition = ref new Cursor;
 	data = ref new CompositionData;
@@ -107,7 +108,7 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 			ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerPressed);
 			ctrl->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
 			ctrl->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("PlaceholderControlStyle"));
-			ctrl->Content = (prev + i + 1);
+			ctrl->DataContext = (prev + i + 1);
 			row->Children->Append(ctrl);
 		}
 
@@ -118,6 +119,7 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 
 	_mainPanel->UpdateLayout();
 	scale = newScale;
+	//quantize = scale;
 }
 
 void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
@@ -366,7 +368,7 @@ void SketchMusic::View::TextRow::AddSymbol(PositionedSymbol^ sym)
 		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("SymbolControlStyle"));
 		break;
 	}
-	bt->Content = sym;
+	bt->DataContext = sym;
 	bt->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerPressed);
 	bt->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
 	bt->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerReleased);
@@ -438,7 +440,8 @@ void SketchMusic::View::TextRow::InsertNoteObject(PositionedSymbol^ note)
 
 int SketchMusic::View::TextRow::GetControlIndexAtPos(Cursor^ pos, int offset)
 {
-	int lookupIndex = pos->getBeat()*initialised + pos->getTick() * scale / TICK_IN_BEAT * initialised / scale;
+	//int lookupIndex = pos->getBeat()*initialised + pos->getTick() * scale / TICK_IN_BEAT * initialised / scale;
+	int lookupIndex = pos->getBeat()*initialised + pos->getTick() / TICK_IN_BEAT * initialised;
 	lookupIndex += offset;
 	return lookupIndex;
 }
@@ -477,7 +480,7 @@ ContentControl^ SketchMusic::View::TextRow::GetControlAtPos(Cursor^ pos, int off
 
 float SketchMusic::View::TextRow::CalculateTick(float offsetX, ContentControl ^ ctrl)
 {
-	return ((int)((offsetX + ctrl->Width / scale / 4) / ctrl->Width * scale)) * TICK_IN_BEAT / scale;
+	return ((int)((offsetX + ctrl->Width / quantize / 4) / ctrl->Width * quantize)) * TICK_IN_BEAT / quantize;
 	//int tick = (int)(offset.X / ctrl->Width * TICK_IN_BEAT * scale / TICK_IN_BEAT) * TICK_IN_BEAT / scale;
 }
 
@@ -548,7 +551,7 @@ Point SketchMusic::View::TextRow::GetCoordinatsOfControl(Windows::UI::Xaml::Cont
 
 void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 {
-	auto psym = reinterpret_cast<SketchMusic::PositionedSymbol^>(ctrl->Content);
+	auto psym = reinterpret_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
 	switch (psym->_sym->GetSymType())
 	{
 	case SketchMusic::SymbolType::NOTE:
@@ -599,32 +602,48 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
 {
 	double offsetY = 0;
-	// если обрабатываемый символ - нота
-	INote^ inote = dynamic_cast<INote^>(sym);
-	if (inote)
+	
+	switch (sym->GetSymType())
 	{
-		// TODO : сделать расчёт похитрее, чтобы выглядело как на нотном стане
-		// В том числе разрещить вылезать за пределы, увеличивая тем самым высоту строки
-		// (чтобы строки не налезали друг на друга)
-		offsetY = inote->_val >= 0 ?
-			-abs(inote->_val) % 12 :
-			-12 * ((inote->_val % 12) != 0) + abs(inote->_val) % 12;
-		offsetY *= RowHeight / 12;
-		offsetY += RowHeight - 5;
-	}
-	else {
-		STempo^ tempo = dynamic_cast<STempo^>(sym);
-		if (tempo)
+	case SymbolType::NOTE:
+	{
+		INote^ inote = dynamic_cast<INote^>(sym);
+		if (inote)
 		{
-			offsetY = -14;
+			// TODO : сделать расчёт похитрее, чтобы выглядело как на нотном стане
+			// В том числе разрещить вылезать за пределы, увеличивая тем самым высоту строки
+			// (чтобы строки не налезали друг на друга)
+			offsetY = inote->_val >= 0 ?
+				-abs(inote->_val) % 12 :
+				-12 * ((inote->_val % 12) != 0) + abs(inote->_val) % 12;
+			offsetY *= RowHeight / 12;
+			offsetY += RowHeight - 5;
+		}
+		break;
+	}
+	case SymbolType::GNOTE:
+	{
+		SGNote^ gnote = dynamic_cast<SGNote^>(sym);
+		if (gnote)
+		{
+			offsetY = - abs(gnote->_valY) * RowHeight / 5;
+			offsetY += RowHeight - 5;
+			break;
 		}
 	}
+	default:
+	{
+		offsetY = -14;
+		break;
+	}
+	}
+
 	return offsetY;
 }
 
 void SketchMusic::View::TextRow::SetNoteOnCanvas(ContentControl ^ note)
 {
-	PositionedSymbol^ psym = dynamic_cast<PositionedSymbol^>(note->Content);
+	PositionedSymbol^ psym = dynamic_cast<PositionedSymbol^>(note->DataContext);
 	if (psym == nullptr) return;
 
 	auto point = GetCoordinatsOfPosition(psym->_pos);

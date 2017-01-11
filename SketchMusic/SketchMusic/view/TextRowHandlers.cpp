@@ -58,6 +58,7 @@ void SketchMusic::View::TextRow::InitializePage()
 
 	initialised = 1;
 	scale = 1;
+	quantize = 1;
 }
 
 // масштабирование
@@ -104,8 +105,10 @@ void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Wind
 		return;
 	}
 
-	//_scrollViewer->HorizontalScrollMode = ScrollMode::Disabled;
-	ScrollViewer::SetHorizontalScrollMode(_mainPanel, ScrollMode::Disabled);
+	_scrollViewer->HorizontalScrollMode = ScrollMode::Disabled;
+	_scrollViewer->VerticalScrollMode = ScrollMode::Disabled;
+	//ScrollViewer::SetHorizontalScrollMode(_mainPanel, ScrollMode::Disabled);
+	//ScrollViewer::SetVerticalScrollMode(_mainPanel, ScrollMode::Disabled);
 	_lastPoint = e->GetCurrentPoint(_canvas)->Position;
 	_lastPoint.X -= Canvas::GetLeft(ctrl);
 	_lastPoint.Y -= Canvas::GetTop(ctrl);
@@ -169,7 +172,7 @@ void SketchMusic::View::TextRow::OnPointerReleased(Platform::Object ^sender, Win
 
 	if (_currentSnapPoint != nullptr)
 	{
-		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(_dragged->Content);
+		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(_dragged->DataContext);
 		//INote^ inote = dynamic_cast<INote^>(psym->_sym);
 		// привязываем к ближайшей точке привязки
 		auto point = GetCoordinatsOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
@@ -200,8 +203,10 @@ void SketchMusic::View::TextRow::OnPointerReleased(Platform::Object ^sender, Win
 	_dragged->Foreground = nullptr;
 	//SetBackgroundColor(_dragged);
 	_dragged = nullptr;
-	ScrollViewer::SetHorizontalScrollMode(_mainPanel, ScrollMode::Enabled);
-	//_scrollViewer->HorizontalScrollMode = ScrollMode::Enabled;
+	//ScrollViewer::SetHorizontalScrollMode(_mainPanel, ScrollMode::Enabled);
+	//ScrollViewer::SetVerticalScrollMode(_mainPanel, ScrollMode::Enabled);
+	_scrollViewer->HorizontalScrollMode = ScrollMode::Enabled;
+	_scrollViewer->VerticalScrollMode = ScrollMode::Enabled;
 
 	//VisualStateManager::GoToState(bt, "Normal", true);
 }
@@ -214,9 +219,14 @@ void SketchMusic::View::TextRow::MoveCursorLeft()
 		return;
 
 	int beat = currentPosition->getBeat();
-	int tick = currentPosition->getTick();
+	float tick = currentPosition->getTick();
+	
+	// округялем с точностью до квантизации
+	int roundedTicks = round(tick * quantize);
 	//beat -= 1 / this->initialised;
-	tick -= TICK_IN_BEAT / scale;	// не очень хорошо пользоваться, пока функции не отлажены
+	roundedTicks -= TICK_IN_BEAT; //  /quantize;
+	tick = (float)roundedTicks / quantize;
+	
 	if (tick < 0)
 	{
 		tick += TICK_IN_BEAT;
@@ -244,8 +254,14 @@ void SketchMusic::View::TextRow::MoveCursorRight()
 		return;
 
 	int beat = currentPosition->getBeat();
-	int tick = currentPosition->getTick();
-	tick += TICK_IN_BEAT / scale;
+	float tick = currentPosition->getTick();
+	
+	// округялем с точностью до квантизации
+	int roundedTicks = round(tick * quantize);
+	//beat -= 1 / this->initialised;
+	roundedTicks += TICK_IN_BEAT; //  /quantize;
+	tick = (float)roundedTicks / quantize;
+
 	if (tick >= TICK_IN_BEAT)
 	{
 		tick -= TICK_IN_BEAT;
@@ -293,10 +309,12 @@ void SketchMusic::View::TextRow::SetScale(int scaleFactor)
 		_mainPanel->UpdateLayout();
 
 		scale = newScale;
+		//quantize = newScale;
 
 		// если курсор приходится на дробную позицию согласно новому масштабу, округляем
-		if (currentPosition->getTick() * scale % TICK_IN_BEAT)
-			currentPosition->setPos(currentPosition->getBeat(), currentPosition->getTick() * scale / TICK_IN_BEAT);
+		int roundedTicks = (int)round(currentPosition->getTick() * quantize);
+		if (roundedTicks % TICK_IN_BEAT)
+			currentPosition->setPos(currentPosition->getBeat(), currentPosition->getTick() * quantize / TICK_IN_BEAT);
 
 		// обновляем положения нот
 		RedrawText();
@@ -324,8 +342,8 @@ void SketchMusic::View::TextRow::Backspace()
 
 	// вычисляем положение курсора на единицу влево
 	int beat = currentPosition->getBeat();
-	int tick = currentPosition->getTick();
-	tick -= TICK_IN_BEAT / scale;
+	float tick = currentPosition->getTick();
+	tick -= (float)TICK_IN_BEAT / quantize;
 	if (tick < 0)
 	{
 		tick += TICK_IN_BEAT;
@@ -345,7 +363,7 @@ void SketchMusic::View::TextRow::Backspace()
 		if (ctrl)
 		{
 			// по тегу проверяем, что нота принадлежит текущей дорожке
-			auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->Content);
+			auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
 			if (((Text^)ctrl->Tag == current) && (psym != nullptr))
 			{
 				// если она попадает в искомый диапазон, то удаляем

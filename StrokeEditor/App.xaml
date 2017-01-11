@@ -4,5 +4,21 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:StrokeEditor"
     xmlns:sm="using:SketchMusic">
-    
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="ms-appx:///SketchMusic/SketchMusic/view/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="BlueBrush" Color="Blue"/>
+            <SolidColorBrush x:Key="GreenBrush" Color="Green"/>
+            <SolidColorBrush x:Key="YellowGreenBrush" Color="YellowGreen"/>
+            <SolidColorBrush x:Key="GoldenrodBrush" Color="Goldenrod"/>
+            <SolidColorBrush x:Key="RedBrush" Color="Red"/>
+            <SolidColorBrush x:Key="DarkRedBrush" Color="DarkRed"/>
+            <SolidColorBrush x:Key="LowBrush" Color="{ThemeResource SystemBaseLowColor}"/>
+        </ResourceDictionary>
+    </Application.Resources>
+ 
 </Application>

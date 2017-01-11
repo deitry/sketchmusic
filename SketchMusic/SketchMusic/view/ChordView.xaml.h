@@ -35,12 +35,11 @@ public ref class SketchMusic::View::ChordView sealed
 private:
 	void SetNoteOnCanvas(Windows::UI::Xaml::Controls::ContentControl^ ctrl);
 	double GetOffsetY(ISymbol ^ sym);
-
 	Windows::Foundation::Collections::IVector<SketchMusic::PositionedSymbol^>^ Notes;
 
 public:
 	ChordView();
 	
-	void SetNotes(Windows::Foundation::Collections::IObservableVector<SketchMusic::PositionedSymbol^>^ notes);
-	
+	void SetNotes(Windows::Foundation::Collections::IVector<SketchMusic::PositionedSymbol^>^ notes);
+	Windows::Foundation::Collections::IVector<SketchMusic::PositionedSymbol^>^ GetNotes() { return Notes; }
 };
