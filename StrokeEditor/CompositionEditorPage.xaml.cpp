@@ -5,6 +5,7 @@
 
 #include "pch.h"
 #include "CompositionEditorPage.xaml.h"
+#include "MainMenuPage.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -18,6 +19,7 @@ using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace Windows::UI::Xaml::Interop;
 using namespace SketchMusic;
 
 // Шаблон элемента пустой страницы задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234238
@@ -25,25 +27,44 @@ using namespace SketchMusic;
 CompositionEditorPage::CompositionEditorPage()
 {
 	InitializeComponent();
-
-	//Object^ content = ref new SketchMusic::PositionedSymbol(ref new SketchMusic::Cursor, ref new SketchMusic::SNote(5));
-
-	auto Notes = ref new Platform::Collections::Vector<PositionedSymbol^>;
-	Notes->Append(ref new SketchMusic::PositionedSymbol(ref new Cursor, ref new SNote(6)));
-	Notes->Append(ref new SketchMusic::PositionedSymbol(ref new Cursor, ref new SNote(10)));
-	Notes->Append(ref new SketchMusic::PositionedSymbol(ref new Cursor, ref new SNote(13)));
-
-	CurrentChordView->SetNotes(Notes);
 }
 
 
-void StrokeEditor::CompositionEditorPage::GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+
+
+
+void StrokeEditor::CompositionEditorPage::HomeBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	//We should verify if there are pages in the navigation back stack 
-	//before navigating to the previous page.
-	if (this->Frame != nullptr && Frame->CanGoBack)
-	{
-		//Using the GoBack method, the frame navigates to the previous page.
-		Frame->GoBack();
-	}
+	// идём на вкладку с обзором данных с пустыми руками
+	this->Frame->Navigate(TypeName(StrokeEditor::MainMenuPage::typeid), nullptr);
+}
+
+
+void StrokeEditor::CompositionEditorPage::DeleteBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
+}
+
+
+void StrokeEditor::CompositionEditorPage::CancelBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
+}
+
+
+void StrokeEditor::CompositionEditorPage::SaveBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
+}
+
+
+void StrokeEditor::CompositionEditorPage::EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
+}
+
+
+void StrokeEditor::CompositionEditorPage::OkBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
 }

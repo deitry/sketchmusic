@@ -8,15 +8,25 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.TopAppBar>
+        <CommandBar x:Name="commandBar">
+            <AppBarButton Icon="Home" Label="В меню" Name="HomeBtn" Click="HomeBtn_Click"/>
+            <AppBarSeparator/>
+            <AppBarButton  Icon="Delete" Label="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
+            <AppBarSeparator/>
+            <AppBarButton Icon="Back" Label="Назад" Name="CancelBtn" Click="CancelBtn_Click"/>
+            <AppBarButton Icon="Save" Label="Сохранить" Name="SaveBtn" Click="SaveBtn_Click"/>
+            <AppBarButton Icon="Edit" Label="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
+            <AppBarButton Icon="Accept" Label="ОК" Name="OkBtn" Click="OkBtn_Click"/>
+        </CommandBar>
+    </Page.TopAppBar>
+    
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         
-        <Button Grid.Row="0" Name="GoBackBtn" Content="Вернуться в меню" Click="GoBackBtn_Click" Margin="0,20" HorizontalAlignment="Center"/>
-        <Border Grid.Row="1" BorderBrush="Blue" BorderThickness="2" >
-            <smv:ChordView x:Name="CurrentChordView" Width="200" Height="200"/>
-        </Border>
+        
     </Grid>
 </Page>

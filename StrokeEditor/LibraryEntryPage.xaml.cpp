@@ -39,10 +39,8 @@ void StrokeEditor::LibraryEntryPage::InitializePage()
 
 void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
-	//e->
-	//auto a = e->Content;
 	auto args = reinterpret_cast<StrokeEditor::LibraryEntryNavigationArgs^>(e->Parameter);
-	//this->_library = args->library;
+	
 	this->_entry = reinterpret_cast<SketchMusic::Idea^>(args->idea);
 	if (this->_entry == nullptr)
 	{
@@ -51,15 +49,13 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	}
 	// пока других нету, задаём принудительно
 	this->_entry->Category = SketchMusic::IdeaCategoryEnum::melody;
-	//_isRead = args->isRead;
-
+	
 	// TODO : очень плохо, надо каким-то образом сделать через привязку, триггеры, хз
 	entryNameTB->IsReadOnly = _isRead;
 	categoryTB->IsReadOnly = true;	// выбора нет
 	creationTB->IsReadOnly = true;
-	//ratingTB->IsReadOnly = _isRead;
 	descrTB->IsReadOnly = _isRead;
-	serContTB->IsReadOnly = false; // TODO : заглушка, чтобы можно было вручную изменять текст, а в частности инструменты
+	serContTB->IsReadOnly = true;
 	tagsTB->IsReadOnly = _isRead;
 	//_isRead = args->isRead;
 	//this->UpdateLayout();
