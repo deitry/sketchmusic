@@ -6,9 +6,6 @@
 #include <xaudio2.h>
 #include "SFData.h"
 
-
-#define MIDIKEYTOA4 69
-
 /**
 Отвечает за звучание определённого инструмента.
 */

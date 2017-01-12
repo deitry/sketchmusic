@@ -7,6 +7,7 @@
 
 #include "..\SketchMusic.h"
 #include "../base/Cursor.h"
+#include "../base/Text.h"
 #include "SketchMusic\view\ChordView.g.h"
 
 using namespace Windows::Foundation::Collections;
@@ -20,12 +21,24 @@ public:
 	{
 		IVector<PositionedSymbol^>^ get() {
 			auto notes = ref new Vector<PositionedSymbol^>;
-			notes->Append(ref new PositionedSymbol(ref new SketchMusic::Cursor(), ref new SNote(0)));
-			notes->Append(ref new PositionedSymbol(ref new SketchMusic::Cursor(), ref new SNote(3)));
-			notes->Append(ref new PositionedSymbol(ref new SketchMusic::Cursor(), ref new SNote(7)));
-			notes->Append(ref new PositionedSymbol(ref new SketchMusic::Cursor(), ref new SNote(11)));
+			notes->Append(ref new PositionedSymbol(ref new Cursor, ref new SNote(0)));
+			notes->Append(ref new PositionedSymbol(ref new Cursor, ref new SNote(3)));
+			notes->Append(ref new PositionedSymbol(ref new Cursor, ref new SNote(7)));
+			notes->Append(ref new PositionedSymbol(ref new Cursor, ref new SNote(11)));
 			return notes;
 		}
+	}
+
+	static Text^ CreateTestText(int length)
+	{
+		Text^ text = ref new Text;
+		for (int i = 0; i < length; i++)
+		{
+			text->addSymbol(ref new PositionedSymbol(ref new Cursor(i), ref new SNote(i % 12)));
+			if (i%2)
+				text->addSymbol(ref new PositionedSymbol(ref new Cursor(i), ref new SNote(i % 12 + 5)));
+		}
+		return text;
 	}
 };
 

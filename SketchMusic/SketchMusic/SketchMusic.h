@@ -18,8 +18,9 @@ using namespace concurrency;
 namespace SketchMusic
 {
 	const int TICK_IN_BEAT = 32;	// количество тиков в доле
-	const int BPM = 60;
+	const int BPM = 120;
 	const int MAX_COMMAND_COUNT = 20; // максимальное число команд в истории
+	const int MIDIKEYTOA4 = 69;
 
 	ref class Text;
 	ref class Cursor;
@@ -36,10 +37,10 @@ namespace SketchMusic
 			// если что, обрабатывать будем аналогично "комбинированной" идее ...
 		name = 1,		// идея определяет по сути только название
 		instrument = 2,	// идея определяет используемый инструмент (как вариант - способ звукоизвлечения)
-		tempo = 6,		// задаёт темп. Можно использовать как ббазу для создания композиции,
-		// когда вообще не знаешь о чём думать.
+		tempo = 6,		// задаёт темп и размер. Можно использовать как базу для создания композиции,
+						// когда вообще не знаешь о чём думать.
 
-		rhythm = 10,			// задаёт некоторый ритм или размер
+		rhythm = 10,			// задаёт некоторый ритм
 		melody = 11,			// мелодическая последовательность + ритм
 		chord = 13,				// один аккорд
 		melodicSequence = 15,	// мелодическая последовательность - небор нот без привязки к ритму
@@ -59,6 +60,17 @@ namespace SketchMusic
 
 		lyrics = 90,	// задаёт слова - что не влезает в название
 		combo = 100		// идея определяет сразу кучу параметров
+	};
+
+	// Категория динамики. Сделал через битовые поля, чтобы одним числом можно было определить сразу несколько категорий.
+	public value struct DynamicCategory
+	{
+		bool quite;		// |--
+		bool regular;	// ||
+		bool unregular;	// |/|
+		bool fast;		// ||||
+		bool hard;		// !
+		bool harder;	// !||	
 	};
 
 	ref class Sample;
@@ -83,6 +95,8 @@ namespace SketchMusic
 		// TODO : добавить дорожку с "системными" данными? - вносить туда всё, что касается композиции в целом
 		// один текст воспринимается как одна дорожка
 		property Windows::Foundation::Collections::IVector<Text^>^ texts;
+		property Text^ controlText;
+			// В дальнейшем сделаем controlText "хранителем" управляющих символов и прочая, что влияет непосредственно на композицию
 
 		static CompositionData^ deserialize(Platform::String^ str);
 		Windows::Data::Json::IJsonValue^ serialize();
@@ -105,17 +119,23 @@ namespace SketchMusic
 	// список используемых типов символов
 	public enum class SymbolType
 	{
-		unknown,
-		NOTE,		// обычная нота
-		RNOTE,		// относительная нота (относительно последней "обычной")
-		GNOTE,		// обобщённая нота (не имеет непосредственной связи с высотой звука)
-		END,		// прекращение звучания нот(-ы)
-		SCALE,		// текущая гамма
-		NLINE,		// новая строка - для визуального отображения
-		SPACE,		// "пробел" - для визуального отображения
-		NPART,		// новый раздел - для отделения частей одна от другой
-		TEMPO,		// задание темпа
-		STRING		// для вставки строки
+		unknown	= 0,	// тип не определён или тип не важен (если используется в качестве аргумента)
+		
+		NOTE	= 1,	// обычная нота
+		RNOTE	= 2,	// относительная нота (относительно последней "обычной")
+		GNOTE	= 3,	// обобщённая нота (не имеет непосредственной связи с высотой звука)
+		END		= 4,	// прекращение звучания нот(-ы)
+		CHORD	= 5,	// ранее известен как SCALE - определяет аккорд (в обобщённом, неконкретизированном виде) / гармонию / звукоряд
+
+		NLINE	= 6,	// новая строка - для визуального отображения
+		SPACE	= 7,	// "пробел" - для визуального отображения
+		NPART	= 8,	// новый раздел - для отделения частей одна от другой
+
+		TEMPO	= 9,	// задание темпа
+		STRING	= 10,	// для вставки строки		
+		CLEF	= 11,	// для установки нот по вертикали
+		HIGHLIGHT = 12,	// для "подсветки" данного положения - таким образом будем выделять ключевые места.
+						// По сути, ту же самую роль может выполнять GNote, но этот элемент будет проще, безо всяких значений
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
@@ -134,8 +154,8 @@ namespace SketchMusic
 			case IdeaCategoryEnum::combo: return "Комбинированная идея";
 			case IdeaCategoryEnum::dynamic: return "Динамика";
 			case IdeaCategoryEnum::instrument: return "Инструмент";
-			case IdeaCategoryEnum::lyrics: return "Текст/стихи";
-			case IdeaCategoryEnum::melodicSequence: return "Мелодическая последовательность";
+			case IdeaCategoryEnum::lyrics: return L"\uE8E4";
+			case IdeaCategoryEnum::melodicSequence: return L"\ue189";
 			case IdeaCategoryEnum::melody: return L"\ue189";
 			case IdeaCategoryEnum::name: return "Название";
 			case IdeaCategoryEnum::rhythm: return "Ритм";
@@ -254,6 +274,36 @@ namespace SketchMusic
 		//virtual Platform::String^ Serialize() { return "space"; }
 	};
 
+	public ref class SHighlight sealed : public SketchMusic::ISymbol
+	{
+	public:
+		SHighlight() {}
+
+		virtual SymbolType GetSymType() { return SymbolType::HIGHLIGHT; }
+		virtual Platform::String^ ToString() { return L"\uE9A9"; }
+		//virtual Platform::String^ Serialize() { return "space"; }
+	};
+
+
+	const int TrebleClef	= -5;	// скрипичный ключ; нижняя строка = ми4
+	const int BassClef		= -14;	// басовый ключ; нижняя строка = соль3
+	//const int AltoClef		= 0;
+	//const int TenorClef		= 0;
+	//const int BaritoneClef	= 0;
+
+
+	public ref class SClef sealed : public SketchMusic::ISymbol
+	{
+	public:
+		SClef() {}
+		SClef(int val) { bottom = val; }
+
+		property int bottom; // устанавливает высоту звука для нижней линии на нотном стане.
+		
+		virtual SymbolType GetSymType() { return SymbolType::CLEF; }
+		virtual Platform::String^ ToString() { return "Clef"; }
+	};
+
 	public ref class SNewPart sealed : public SketchMusic::ISymbol
 	{
 	public:
@@ -261,9 +311,12 @@ namespace SketchMusic
 		SNewPart(String^ _name) { name = _name; }
 
 		property String^ name;
+		property String^ category;	// "A", "B", "куплет", "бридж" - определяется только категория
+			//, номер будет отображаться автоматически в зависимости от положения в композиции
+		property DynamicCategory dynamic;
 
 		virtual SymbolType GetSymType() { return SymbolType::NPART; }
-		virtual Platform::String^ ToString() { return L"\uE8A5" + name; }
+		virtual Platform::String^ ToString() { return L"\uE70B" + name; }
 	};
 
 	public ref class STempo sealed : public SketchMusic::ISymbol
@@ -343,18 +396,66 @@ namespace SketchMusic
 		//virtual Platform::String^ Serialize() { return "end"; }
 	};
 
+	// Структура, определяющая модификаторы аккорда
+	public value struct SChordMod
+	{
+		bool minor;	// = _3dim; 0 = major
+		bool dim;	// = _5dim; 0 = normal
+		bool aug;	// = _5aug; 0 = normal. dim && aug == normal
+
+		// модификаторы аккорда - включение (или выключение) ступеней в аккорд
+		bool _2;
+		bool _3ex;	// ВЫКЛЮЧАЕТ ступень из аккорда. Нужно для получения нетерцовых аккордов
+		bool _4;			
+		bool _5ex;	// ВЫКЛЮЧАЕТ ступень из аккорда.
+		bool _6;
+		bool _7;
+		bool _8;
+		bool _9;
+
+		// "небазовые" модуляторы звукоряда - можно изменять только ступени 2..7
+		// 1 всегда остаётся 1, вне октавы всё повторяется. 7aug = oct = 1 пренебрегаем
+		bool _2dim;
+		bool _2aug;
+		bool _3aug;
+		bool _4dim;
+		bool _4aug;
+		bool _6dim;
+		bool _6aug;
+		bool dom;		// = _7dim; "доминантность" 7аккорда. Вне зависимости от _7 изменяет положение ступени звукоряда
+			
+	};
+
 	/**
 	Определяет текущую гамму
 	- нужен класс Конкретизатор
 	*/
-	public ref class SScale sealed : public ISymbol
+	public ref class SChord sealed : public ISymbol //, INote
 	{
-	public:
-		SScale() {}
+	private:
+		
 
-		virtual SymbolType GetSymType() { return SymbolType::SCALE; }
-		virtual Platform::String^ ToString() { return "SScale"; }
-		//virtual Platform::String^ Serialize() { return "scale"; }
+	public:
+		SChord() {}
+		SChord(int _key, int _deg, int _var, int _bass, SChordMod _mod)
+		{
+			key = _key; degree = _deg; variation = _var; bass = _bass; mod = _mod;
+		}
+
+		virtual SymbolType GetSymType() { return SymbolType::CHORD; }
+		virtual Platform::String^ ToString() { return "SChord"; }
+
+		property int key;			// В каком ключе будет аккорд: C, D, E ... Тут будет содержаться значение конкретной ноты
+		property int degree;		// ступень гаммы, от которой отстраивается аккорд: I, II, V ... соответсвует также ладу: ионийский, ...
+		property int variation;		// обращение аккорда. Нужно будет для конкретизации. Не знаю пока, как учитывать широкое / узкое расположение
+		property int bass;			// значение ноты в басу
+
+		property SChordMod mod;	// модификаторы
+
+		// Унаследовано через INote
+		//virtual property int _val;
+		//virtual property int _velocity;
+		//virtual property int _voice;
 	};
 
 	// переименовать в LinStart и пусть он хранит всю необходимую информацию
@@ -860,17 +961,13 @@ namespace SketchMusic
 		ref class MultiplicatedLengthConverter;
 		ref class TestData;
 		
-		// контейнеры
-		ref class MultiRowStackPanel;
-
 		// варианты клавиатур
-		ref class RadialKeyboard;
+		//ref class RadialKeyboard;
 		ref class BaseKeyboard;
-		// ref class RandomKeyboard;
-		// ref class ContinuumKeyboard;
 
-		ref class TextRow;		// единичная строка для отображения текста
-		ref class ChordView;	// для отображения нескольких нот
+		ref class TextRow;			// "строковое" представление музыкального текста
+		ref class ChordView;		// для отображения нескольких нот
+		ref class CompositionView;	// для отображения композиции в целом
 	}
 
 	/**

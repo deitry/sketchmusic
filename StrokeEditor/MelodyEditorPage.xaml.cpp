@@ -56,6 +56,7 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 			// принудительно, пока нет выбора других инструментов
 			_idea->Content = ref new CompositionData();
 			_idea->Content->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
+			//_idea->Content->texts->Append(TestData::CreateTestText(2350));
 		}
 	}
 	

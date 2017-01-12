@@ -235,16 +235,15 @@
     <ClInclude Include="SketchMusic\view\ChordView.xaml.h">
       <DependentUpon>SketchMusic\view\ChordView.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="SketchMusic\view\CompositionView.xaml.h">
+      <DependentUpon>SketchMusic\view\CompositionView.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="SketchMusic\view\Converters.h" />
     <ClInclude Include="SketchMusic\view\BaseKeyboard.xaml.h">
       <DependentUpon>SketchMusic\view\BaseKeyboard.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="SketchMusic\view\Key.h" />
     <ClInclude Include="SketchMusic\view\Keyboard.h" />
-    <ClInclude Include="SketchMusic\view\MultiRowStackPanel.h" />
-    <ClInclude Include="SketchMusic\view\RadialKeyboard.h" />
-    <ClInclude Include="SketchMusic\view\StrokeEditor.h" />
-    <ClInclude Include="SketchMusic\view\TextMultiRow.h" />
     <ClInclude Include="SketchMusic\view\TextRow.xaml.h">
       <DependentUpon>SketchMusic\view\TextRow.xaml</DependentUpon>
     </ClInclude>
@@ -277,10 +276,9 @@
     <ClCompile Include="SketchMusic\view\BaseKeyboard.xaml.cpp">
       <DependentUpon>SketchMusic\view\BaseKeyboard.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="SketchMusic\view\MultiRowStackPanel.cpp" />
-    <ClCompile Include="SketchMusic\view\RadialKeyboard.cpp" />
-    <ClCompile Include="SketchMusic\view\StrokeEditor.cpp" />
-    <ClCompile Include="SketchMusic\view\TextMultiRow.cpp" />
+    <ClCompile Include="SketchMusic\view\CompositionView.xaml.cpp">
+      <DependentUpon>SketchMusic\view\CompositionView.xaml</DependentUpon>
+    </ClCompile>
     <ClCompile Include="SketchMusic\view\TextRow.xaml.cpp">
       <DependentUpon>SketchMusic\view\TextRow.xaml</DependentUpon>
     </ClCompile>
@@ -294,6 +292,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SketchMusic\view\BaseKeyboard.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="SketchMusic\view\CompositionView.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SketchMusic\view\Styles.xaml">

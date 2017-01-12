@@ -20,18 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="SketchMusic\view\MultiRowStackPanel.cpp">
-      <Filter>view</Filter>
-    </ClCompile>
-    <ClCompile Include="SketchMusic\view\RadialKeyboard.cpp">
-      <Filter>view</Filter>
-    </ClCompile>
-    <ClCompile Include="SketchMusic\view\StrokeEditor.cpp">
-      <Filter>view</Filter>
-    </ClCompile>
-    <ClCompile Include="SketchMusic\view\TextMultiRow.cpp">
-      <Filter>view</Filter>
-    </ClCompile>
     <ClCompile Include="SketchMusic\view\TextRowHandlers.cpp">
       <Filter>view</Filter>
     </ClCompile>
@@ -82,18 +70,6 @@
       <Filter>view</Filter>
     </ClInclude>
     <ClInclude Include="SketchMusic\view\Keyboard.h">
-      <Filter>view</Filter>
-    </ClInclude>
-    <ClInclude Include="SketchMusic\view\MultiRowStackPanel.h">
-      <Filter>view</Filter>
-    </ClInclude>
-    <ClInclude Include="SketchMusic\view\RadialKeyboard.h">
-      <Filter>view</Filter>
-    </ClInclude>
-    <ClInclude Include="SketchMusic\view\StrokeEditor.h">
-      <Filter>view</Filter>
-    </ClInclude>
-    <ClInclude Include="SketchMusic\view\TextMultiRow.h">
       <Filter>view</Filter>
     </ClInclude>
     <ClInclude Include="SketchMusic\base\Cursor.h">
@@ -190,6 +166,9 @@
       <Filter>view</Filter>
     </Page>
     <Page Include="SketchMusic\view\BaseKeyboard.xaml">
+      <Filter>view</Filter>
+    </Page>
+    <Page Include="SketchMusic\view\CompositionView.xaml">
       <Filter>view</Filter>
     </Page>
   </ItemGroup>

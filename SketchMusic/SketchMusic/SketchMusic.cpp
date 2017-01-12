@@ -84,7 +84,7 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			{
 				return ref new SSpace();
 			}
-			case SymbolType::SCALE:
+			case SymbolType::CHORD:
 		//	{
 		//		jval = obj->GetNamedValue("v");
 		//		if (jval)

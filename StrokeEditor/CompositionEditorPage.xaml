@@ -26,7 +26,10 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        
+
+        <smv:CompositionView x:Name="CompositionView" HorizontalAlignment="Stretch" Margin="10"/>
+
+        <ListView x:Name="CompositionPartList"/>
         
     </Grid>
 </Page>

@@ -8,13 +8,11 @@
 #include <collection.h>
 #include <ppltasks.h>
 #include "SketchMusic\SketchMusic.h"
-#include "SketchMusic\view\RadialKeyboard.h"
 #include "SketchMusic\view\Converters.h"
 #include "SketchMusic\view\BaseKeyboard.xaml.h"
 #include "SketchMusic\view\ChordView.xaml.h"
 #include "SketchMusic\view\TextRow.xaml.h"
-#include "SketchMusic\view\TextMultiRow.h"
-#include "SketchMusic\view\MultiRowStackPanel.h"
+
 #include "SketchMusic\player\Instrument.h"
 #include "SketchMusic\base\Idea.h"
 #include "SketchMusic\base\Text.h"

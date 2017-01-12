@@ -58,7 +58,7 @@
     <smv:MultiplicatedLengthConverter x:Key="DiminishedLength" Multiplicator="0.8"/>
     
     <Style x:Key="KeyboardBtnStyle" TargetType="ContentControl">
-        <Setter Property="Background" Value="Transparent"/>
+        <!--<Setter Property="Background" Value="Transparent"/>-->
         <Setter Property="BorderBrush" Value="{ThemeResource SystemControlForegroundBaseLowBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Template">

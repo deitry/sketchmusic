@@ -112,6 +112,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 	auto iterMap 
 		= new std::vector< std::pair<SketchMusic::Player::ISoundEngine^, std::pair<IIterator < SketchMusic::PositionedSymbol^ > ^, IVector< SketchMusic::PositionedSymbol^ > ^> > >;
 
+		// поиск стартового положения
 	auto getIterators = concurrency::create_task([data, iterMap, this, cursor]
 	{
 		for (auto text : data->texts)
@@ -161,9 +162,10 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			}
 		}
 	})
+
+		// прекаунт
 		.then([this, iterMap, cursor, data]
 	{
-		// прекаунт
 		if (precount && recording)
 		{
 			int pbeat = -1;
@@ -190,6 +192,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			}
 		}
 	})
+		
+		// основное проигрывание
 		.then([this, iterMap, cursor]
 	{
 		auto tempState = _state;
@@ -245,6 +249,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 								{
 									_BPM = tempo->value;
 								}
+								break;
 							}
 							}
 							pIter->MoveNext();
@@ -255,7 +260,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						// Заодно нужно отделить функцию проигрывания текущей позиции / одной доли?,
 						// чтобы успешно реализовать пошаговый ввод.
 						// Хотя в общем-то ничего больше вводить не надо, пошаговый ввод можно сделать уже на основе имеющихся функций.
-						iter->first->Play(notes);
+						if (notes && notes->Size > 0)
+							iter->first->Play(notes);
 
 						// проматываем до следующего элемента
 						// без проверки на INote будем ловить все символы, в т.ч. новые строки и так далее

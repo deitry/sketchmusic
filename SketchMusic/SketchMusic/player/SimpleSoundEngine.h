@@ -5,8 +5,6 @@
 #include "SoundFont.h"
 #include <xaudio2.h>
 
-#define MIDIKEYTOC4 69
-
 /**
 Отвечает за звучание определённого инструмента.
 */
