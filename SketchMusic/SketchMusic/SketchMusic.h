@@ -308,11 +308,17 @@ namespace SketchMusic
 	{
 	public:
 		SNewPart() {}
-		SNewPart(String^ _name) { name = _name; }
+		SNewPart(String^ _cat) { category = _cat; }
+		SNewPart(String^ _cat, int _num) { category = _cat; number = _num; }
+		SNewPart(String^ _cat, int _num, DynamicCategory _dyn) { category = _cat; number = _num; dynamic = _dyn; }
 
 		property String^ name;
 		property String^ category;	// "A", "B", "куплет", "бридж" - определяется только категория
 			//, номер будет отображаться автоматически в зависимости от положения в композиции
+		property int number;	// порядковый номер части с этой категорией. Будет вычисляться автоматически, здесь храним для удобства
+		property int length;	// продолжительность в "битах". Будет вычисляться автоматически, здесь храним для удобства
+		property double timeLegnth;	// продолжительность в секундах, опять же для удобства. Будем вычислять автоматичеки, проходясь по тексту и учитывая STempo
+
 		property DynamicCategory dynamic;
 
 		virtual SymbolType GetSymType() { return SymbolType::NPART; }
@@ -959,6 +965,8 @@ namespace SketchMusic
 		ref class PSymbolToHorizontalPosConverter;
 		ref class PSymbolToStyleConverter;
 		ref class MultiplicatedLengthConverter;
+		ref class PSymbolPosToTextConverter;
+		ref class PartCatToTextConverter;
 		ref class TestData;
 		
 		// варианты клавиатур

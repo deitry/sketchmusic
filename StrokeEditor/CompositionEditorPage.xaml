@@ -6,7 +6,8 @@
     xmlns:smv="using:SketchMusic.View"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    SizeChanged="Page_SizeChanged">
 
     <Page.TopAppBar>
         <CommandBar x:Name="commandBar">
@@ -27,9 +28,53 @@
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <smv:CompositionView x:Name="CompositionView" HorizontalAlignment="Stretch" Margin="10"/>
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
 
-        <ListView x:Name="CompositionPartList"/>
-        
+            <smv:CompositionView Grid.Row="0"
+                                 x:Name="CompositionView"
+                                 HorizontalAlignment="Center"
+                                 Margin="10"
+                                 Width="800"/>
+
+            <Slider Grid.Row="1" 
+                HorizontalAlignment="Stretch"
+                x:Name="CompositionSlider"
+                Margin="10"
+                VerticalAlignment="Center"/>
+            <StackPanel HorizontalAlignment="Center"
+                    Grid.Row="2">
+                <Button FontFamily="Segoe MDL2 Assets" Content="&#xE768;" Margin="5,0,5,0"/>
+            </StackPanel>
+        </Grid>
+
+        <ListView Grid.Row="1" x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
+                  CanReorderItems="True" CanDragItems="True" AllowDrop="True" DropCompleted="CompositionPartList_DropCompleted"
+                  Drop="CompositionPartList_Drop" DragItemsStarting="CompositionPartList_DragItemsStarting"
+                  >
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Drop="Grid_Drop">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding DataContext,
+                                                            RelativeSource={RelativeSource TemplatedParent},
+                                                            Converter={StaticResource partcat2text}}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding DataContext.dynamic,
+                                                            RelativeSource={RelativeSource TemplatedParent},
+                                                            Converter={StaticResource partcat2text}}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
     </Grid>
 </Page>

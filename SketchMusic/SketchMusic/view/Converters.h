@@ -7,6 +7,7 @@
 
 #include "../SketchMusic.h"
 #include "Key.h"
+#include "../base/Cursor.h"
 #include <string>
 
 using namespace Platform;
@@ -327,6 +328,55 @@ public:
 	}
 
 	OnPositionedSymbolToTextConverter() {}
+};
+
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+public ref class SketchMusic::View::PSymbolPosToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+{
+public:
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	{
+		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
+		if (psym == nullptr) return "";
+		
+		
+		int param = 0;;
+
+		String^ str = psym->_pos->getBeat().ToString();
+		if (parameter)	// без разницы какой - если есть хоть что-то
+			str += L":" + psym->_pos->getTick().ToString();
+
+		return str;
+	}
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	{
+		return nullptr;
+	}
+
+	PSymbolPosToTextConverter() {}
+};
+
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+public ref class SketchMusic::View::PartCatToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+{
+public:
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	{
+		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
+		if (psym == nullptr) return nullptr;
+		SketchMusic::SNewPart^ part = dynamic_cast<SketchMusic::SNewPart^>(psym->_sym);
+		if (part == nullptr) return nullptr;
+		auto str = part->category;
+		if (part->number)
+			str += part->number;
+		return str;
+	}
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	{
+		return nullptr;
+	}
+
+	PartCatToTextConverter() {}
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]

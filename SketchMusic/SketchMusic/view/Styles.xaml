@@ -40,6 +40,8 @@
     <smv:OnKeyToStringConverter x:Key="key2string"/>
     <smv:TagToKeyConverter x:Key="tag2key"/>
     <smv:OnPositionedSymbolToTextConverter x:Key="possym2text"/>
+    <smv:PSymbolPosToTextConverter x:Key="psympos2text"/>
+    <smv:PartCatToTextConverter x:Key="partcat2text"/>
     <smv:BlackKeyToColorConverter x:Key="blackKey2color"
                                     BlackKeyBrush="{StaticResource blackKeyBackground}"/>
     <smv:BoolToColorConverter     x:Key="bool2color"
@@ -221,6 +223,37 @@
         <Setter Property="Height" Value="100"/>
         <Setter Property="Background" Value="DarkRed"/>
         <Setter Property="Template" Value="{StaticResource CursorPositionTemplate}"/>
+    </Style>
+
+    <Style TargetType="ContentControl" x:Key="CompositionPartStyle">
+        <Setter Property="Margin" Value="0,10,0,10"/>
+        <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Grid BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" BorderThickness="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0">
+                                    <Run x:Name="PartCatTxt" Text="{Binding DataContext,
+                                                                    RelativeSource={RelativeSource TemplatedParent},
+                                                                    Converter={StaticResource partcat2text}}"/>
+                                    <Run Text=" at "/>
+                                    <Run x:Name="PartPosTxt" Text="{Binding DataContext,
+                                                                    RelativeSource={RelativeSource TemplatedParent},
+                                                                    Converter={StaticResource psympos2text}}"/>
+                        </TextBlock>
+                        <Rectangle Grid.Row="1" Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                                   StrokeThickness="2"
+                                   Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                   Width="{TemplateBinding Width}"
+                                   Height="10"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>
