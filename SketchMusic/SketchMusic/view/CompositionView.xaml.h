@@ -16,19 +16,18 @@ using namespace SketchMusic;
 public ref class SketchMusic::View::CompositionView sealed
 {
 private:
-	IObservableVector<PositionedSymbol^>^ m_parts;
+	IObservableVector<PartDefinition^>^ m_parts;
 
 public:
 	CompositionView();
 
-	property IObservableVector<PositionedSymbol^>^ Parts
+	property IObservableVector<PartDefinition^>^ Parts
 	{
-		IObservableVector<PositionedSymbol^>^ get() { return m_parts; }
+		IObservableVector<PartDefinition^>^ get() { return m_parts; }
 	}
 
-	void SetParts(IObservableVector<PositionedSymbol^>^ parts);
+	void SetParts(IObservableVector<PartDefinition^>^ parts);
 	void UpdateSize();
 	void UpdateView();
-	void UpdatePartPos();
-	void OnVectorChanged(IObservableVector<PositionedSymbol^>^ sender, IVectorChangedEventArgs^ args);
+	void OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs^ args);
 };

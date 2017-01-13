@@ -362,11 +362,9 @@ public ref class SketchMusic::View::PartCatToTextConverter sealed : Windows::UI:
 public:
 	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
 	{
-		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
-		if (psym == nullptr) return nullptr;
-		SketchMusic::SNewPart^ part = dynamic_cast<SketchMusic::SNewPart^>(psym->_sym);
+		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
 		if (part == nullptr) return nullptr;
-		auto str = part->category;
+		auto str = part->original->category;
 		if (part->number)
 			str += part->number;
 		return str;
@@ -377,6 +375,54 @@ public:
 	}
 
 	PartCatToTextConverter() {}
+};
+
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+public ref class SketchMusic::View::PartDynToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+{
+public:
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	{
+		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
+		if (part == nullptr) return nullptr;
+		
+		Platform::String^ str = "";
+
+		bool needComma = false;
+		if (part->original->dynamic.quite) str += "|--";
+		if (part->original->dynamic.regular)
+		{
+			if (needComma) str += ","; else needComma = true;
+			str += "||";
+		}
+		if (part->original->dynamic.unregular)
+		{
+			if (needComma) str += ","; else needComma = true;
+			str += "|/|";
+		}
+		if (part->original->dynamic.fast)
+		{
+			if (needComma) str += ","; else needComma = true;
+			str += "||||";
+		}
+		if (part->original->dynamic.hard)
+		{
+			if (needComma) str += ","; else needComma = true;
+			str += "!";
+		}
+		if (part->original->dynamic.harder)
+		{
+			if (needComma) str += ","; else needComma = true;
+			str += "!||";
+		}
+		return str;
+	}
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	{
+		return nullptr;
+	}
+
+	PartDynToTextConverter() {}
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]

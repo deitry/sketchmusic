@@ -6,6 +6,7 @@
 
 using namespace Platform;
 using namespace Windows::Foundation;
+using namespace Windows::Foundation::Collections;
 using namespace concurrency;
 
 #define SOURCE_VOICES_MAX		16		// максимальное количество голосов
@@ -23,8 +24,9 @@ namespace SketchMusic
 	const int MIDIKEYTOA4 = 69;
 
 	ref class Text;
+	ref class TextIterator;
 	ref class Cursor;
-
+	ref class PartDefinition;
 	ref class Idea;
 	
 	public enum class IdeaCategoryEnum
@@ -91,11 +93,21 @@ namespace SketchMusic
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class CompositionData sealed
 	{
+	private:
+		Windows::Foundation::Collections::IVector<Text^>^ m_texts;
+		void HandleControlSymbols();
+		Text^ controlText;
+
 	public:
 		// TODO : добавить дорожку с "системными" данными? - вносить туда всё, что касается композиции в целом
 		// один текст воспринимается как одна дорожка
-		property Windows::Foundation::Collections::IVector<Text^>^ texts;
-		property Text^ controlText;
+		property Windows::Foundation::Collections::IVector<Text^>^ texts
+		{
+			Windows::Foundation::Collections::IVector<Text^>^ get() { return m_texts; }
+			void set(Windows::Foundation::Collections::IVector<Text^>^ _texts) { m_texts = _texts; HandleControlSymbols(); }
+		}
+
+		IObservableVector<PartDefinition^>^ getParts();
 			// В дальнейшем сделаем controlText "хранителем" управляющих символов и прочая, что влияет непосредственно на композицию
 
 		static CompositionData^ deserialize(Platform::String^ str);
@@ -309,20 +321,39 @@ namespace SketchMusic
 	public:
 		SNewPart() {}
 		SNewPart(String^ _cat) { category = _cat; }
-		SNewPart(String^ _cat, int _num) { category = _cat; number = _num; }
-		SNewPart(String^ _cat, int _num, DynamicCategory _dyn) { category = _cat; number = _num; dynamic = _dyn; }
+		SNewPart(String^ _cat, DynamicCategory _dyn) { category = _cat; dynamic = _dyn; }
 
-		property String^ name;
+		//property String^ name;
 		property String^ category;	// "A", "B", "куплет", "бридж" - определяется только категория
 			//, номер будет отображаться автоматически в зависимости от положения в композиции
-		property int number;	// порядковый номер части с этой категорией. Будет вычисляться автоматически, здесь храним для удобства
-		property int length;	// продолжительность в "битах". Будет вычисляться автоматически, здесь храним для удобства
-		property double timeLegnth;	// продолжительность в секундах, опять же для удобства. Будем вычислять автоматичеки, проходясь по тексту и учитывая STempo
-
+		
 		property DynamicCategory dynamic;
 
 		virtual SymbolType GetSymType() { return SymbolType::NPART; }
-		virtual Platform::String^ ToString() { return L"\uE70B" + name; }
+		virtual Platform::String^ ToString() { return L"\uE70B" + category; }
+	};
+
+	// Вместо использования PositionedSymbol для оперирования на уровне частей в редакторе композиции,
+	// будем создавать специальный объект, для этого предназначенный
+	public ref class PartDefinition sealed
+	{
+	public:
+		PartDefinition() {}
+		PartDefinition(PositionedSymbol^ psym) { originalPos = psym->_pos; original = dynamic_cast<SNewPart^>(psym->_sym); }
+		PartDefinition(Cursor^ pos, SNewPart^ sym) { originalPos = pos; original = sym; }
+
+		PositionedSymbol^ GetPositionedSymbol(Cursor^ cur) 
+		{ 
+			if (cur) return ref new PositionedSymbol(cur, original); 
+			else return ref new PositionedSymbol(originalPos, original);
+		}
+
+		property Cursor^ originalPos;
+		property SNewPart^ original;
+
+		property int number;	// порядковый номер части с этой категорией. Будет вычисляться автоматически, здесь храним для удобства
+		property int length;	// продолжительность в "битах". Будет вычисляться автоматически, здесь храним для удобства
+		property double timeLegnth;	// продолжительность в секундах, опять же для удобства. Будем вычислять автоматичеки, проходясь по тексту и учитывая STempo
 	};
 
 	public ref class STempo sealed : public SketchMusic::ISymbol
@@ -506,6 +537,7 @@ namespace SketchMusic
 		static Platform::String^ NOTE_VELOCITY = "y";	// динамика
 		static Platform::String^ NOTE_VOICE = "o";		// номер голоса
 		static Platform::String^ NOTES_ARRAY = "notes";	// обозначение массива с нотами
+		static Platform::String^ CONTROL_TEXT = "ctrl_txt";	// обозначение текста, содержащего общие для всех "инструментальных" текстов символы
 	}
 
 	// классы для обеспечения модели синтеза SoundFont
@@ -967,6 +999,7 @@ namespace SketchMusic
 		ref class MultiplicatedLengthConverter;
 		ref class PSymbolPosToTextConverter;
 		ref class PartCatToTextConverter;
+		ref class PartDynToTextConverter;
 		ref class TestData;
 		
 		// варианты клавиатур

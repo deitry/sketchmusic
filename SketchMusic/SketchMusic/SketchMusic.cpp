@@ -85,24 +85,7 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 				return ref new SSpace();
 			}
 			case SymbolType::CHORD:
-		//	{
-		//		jval = obj->GetNamedValue("v");
-		//		if (jval)
-		//		{
-		//			val = static_cast<int>(jval->GetNumber());
-		//		}
-		//		return ref new SString(val);
-		//	}
 			case SymbolType::STRING:
-		//	{
-		//		String^ str;
-		//		jval = obj->GetNamedValue("s");
-		//		if (jval)
-		//		{
-		//			str = jval->GetString();
-		//		}
-		//		return ref new SString(str);
-		//	}
 			default: return nullptr;
 			}
 		}
@@ -112,7 +95,6 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 
 ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType type, Object^ val)
 {
-	//SymbolType sym_type = static_cast<SymbolType>(type);
 	switch (type)
 	{
 	case SketchMusic::View::KeyType::note:
@@ -153,80 +135,42 @@ ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType t
 	{
 		return ref new SSpace();
 	}
-	//case KeyType::scale:
-		//	{
-		//		jval = obj->GetNamedValue("v");
-		//		if (jval)
-		//		{
-		//			val = static_cast<int>(jval->GetNumber());
-		//		}
-		//		return ref new SString(val);
-		//	}
-	//case SymbolType::STRING:
-		//	{
-		//		String^ str;
-		//		jval = obj->GetNamedValue("s");
-		//		if (jval)
-		//		{
-		//			str = jval->GetString();
-		//		}
-		//		return ref new SString(str);
-		//	}
 	default: return nullptr;
 	}
 	return nullptr;
 }
 
-/*ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(int type, int val)
+// проходимся по всем текстам, собираем из них управляющие символы, действующие для всей композиции
+// - метроном, обозначения частей
+void SketchMusic::CompositionData::HandleControlSymbols()
 {
-	switch (type)
+	for (auto&& txt : m_texts)
 	{
-	NOTE:
+		auto symbols = txt->getText();
+		for (auto psym : symbols)
 		{
-			return ref new SNote(val);
+			switch (psym->_sym->GetSymType())
+			{
+				// выбираем все "управляющие символы"
+			case SymbolType::NPART:
+			case SymbolType::TEMPO:
+			{
+				// удалить из исходного текста, добавить в контрол
+				txt->deleteSymbol(psym->_pos, psym->_sym);
+				controlText->addSymbol(psym);
+				break;
+			}
+			default:
+				break;
+			}
 		}
-	RNOTE:
-		{
-			return ref new SRNote(val);
-		}
-	GNOTE:
-		{
-			return ref new SGNote(val);
-		}
-	END:
-		{
-			return ref new SNoteEnd();
-		}
-	NLINE:
-		{
-			return ref new SNewLine();
-		}
-	SPACE:
-		{
-			return ref new SSpace();
-		}
-	//SCALE:
-	//	{
-	//		jval = obj->GetNamedValue("v");
-	//		if (jval)
-	//		{
-	//			val = static_cast<int>(jval->GetNumber());
-	//		}
-	//		return ref new SString(val);
-	//	}
-	//STRING:
-	//	{
-	//		String^ str;
-	//		jval = obj->GetNamedValue("strv");
-	//		if (jval)
-	//		{
-	//			str = jval->GetString();
-	//		}
-	//		return ref new SString(str);
-	//	}
 	}
-	return nullptr;
-}*/
+}
+
+IObservableVector<PartDefinition^>^ SketchMusic::CompositionData::getParts()
+{
+	return controlText->getParts();
+}
 
 CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ str)
 {
@@ -241,7 +185,9 @@ CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ st
 			auto text = SketchMusic::Text::deserialize(obj);
 			if (text)
 			{
-				data->texts->Append(text);
+				if (text->instrument->_name == SerializationTokens::CONTROL_TEXT)
+					data->controlText = text;
+				else data->texts->Append(text);
 			}
 		}
 	}

@@ -10,6 +10,8 @@
 using namespace SketchMusic;
 using namespace Windows::Foundation::Collections;
 
+ref class Text;
+
 /**
  * Текст объединяет в себе отедельные символы-ноты и упрощает работу с ними.
  * Не уверен, что для него нужен отдельный класс, возможно можно обойтись просто map,
@@ -22,9 +24,9 @@ using namespace Windows::Foundation::Collections;
  */
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
 [Windows::UI::Xaml::Data::BindableAttribute]
-public ref class SketchMusic::Text sealed
+public ref class SketchMusic::Text sealed : IIterable<PositionedSymbol^>
 {
-private:
+internal:
 	std::multimap<Cursor^, ISymbol^> _t;
 		// чтобы можно было вставлять несколько символов с одним положением.
 		// При этом нужно будет сделать обёртку для адд, чтобы ноты объединять в аккорды,
@@ -65,6 +67,7 @@ public:
 	
 	unsigned int getSize() { return _t.size(); }
 	IVector<PositionedSymbol^>^ getText();
+	IObservableVector<PartDefinition^>^ getParts();	// TODO : Перенести реализацию целиком в CompositionData
 	//Platform::Collections::Vector<PositionedSymbol^>^ getText();
 
 	// получение нот в конкретной точке и сбоку от неё - для последовательного редактирования
@@ -76,8 +79,36 @@ public:
 	static SketchMusic::Text^ deserialize(Platform::String^ str);
 	static SketchMusic::Text^ deserialize(Windows::Data::Json::JsonObject^ json);
 	Windows::Data::Json::IJsonValue^ serialize();
+
+	virtual IIterator<PositionedSymbol^>^ First();
 	
 	// TODO : функции вставки одного текста в другой, объединение, "вырезание" и так далее
 	// Потребуются, когда можно будет идеи объединять друг с другом
 };
 
+public ref class SketchMusic::TextIterator sealed : IIterator<PositionedSymbol^>
+{
+internal:
+	std::multimap<Cursor^, ISymbol^>::iterator m_iter;
+	std::multimap<Cursor^, ISymbol^>::iterator end_iter;
+
+public:
+	TextIterator(Text^ txt) { m_iter = txt->_t.begin(); end_iter = txt->_t.end(); }
+
+	// Унаследовано через IIterator
+	virtual property SketchMusic::PositionedSymbol ^ Current
+	{
+		PositionedSymbol^ get() { return ref new PositionedSymbol(m_iter->first,m_iter->second); }
+	}
+	virtual property bool HasCurrent
+	{
+		bool get() { return m_iter == end_iter; }
+	}
+	virtual bool MoveNext()
+	{
+		m_iter++;
+		if (m_iter == end_iter) return false;
+		else return true;
+	}
+	virtual unsigned int GetMany(Platform::WriteOnlyArray<SketchMusic::PositionedSymbol ^, 1U> ^items) { return 0; }
+};

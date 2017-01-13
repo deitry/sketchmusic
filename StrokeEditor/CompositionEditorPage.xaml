@@ -21,7 +21,7 @@
             <AppBarButton Icon="Accept" Label="ОК" Name="OkBtn" Click="OkBtn_Click"/>
         </CommandBar>
     </Page.TopAppBar>
-    
+
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -53,12 +53,12 @@
         </Grid>
 
         <ListView Grid.Row="1" x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
-                  CanReorderItems="True" CanDragItems="True" AllowDrop="True" DropCompleted="CompositionPartList_DropCompleted"
-                  Drop="CompositionPartList_Drop" DragItemsStarting="CompositionPartList_DragItemsStarting"
+                  CanReorderItems="True" CanDragItems="True" AllowDrop="True" Width="800"
+                  VerticalAlignment="Stretch"
                   >
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid Drop="Grid_Drop">
+                    <Grid HorizontalAlignment="Stretch" Width="auto">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -68,9 +68,10 @@
                         <TextBlock Grid.Column="0" Text="{Binding DataContext,
                                                             RelativeSource={RelativeSource TemplatedParent},
                                                             Converter={StaticResource partcat2text}}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding DataContext.dynamic,
-                                                            RelativeSource={RelativeSource TemplatedParent},
-                                                            Converter={StaticResource partcat2text}}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding DataContext,
+                                                            RelativeSource={RelativeSource TemplatedParent}, 
+                                                            Converter={StaticResource partdyn2text}}"
+                                                            />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

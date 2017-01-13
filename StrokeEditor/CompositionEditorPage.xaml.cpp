@@ -74,71 +74,11 @@ void StrokeEditor::CompositionEditorPage::Page_SizeChanged(Platform::Object^ sen
 	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width - CompositionView->Margin.Left - CompositionView->Margin.Right;
 	CompositionView->Width = width;
 	CompositionView->UpdateSize();
+
+	CompositionPartList->Width = width;
 }
 
 
 
-void StrokeEditor::CompositionEditorPage::CompositionPartList_Drop(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e)
-{
-	//if (!e->Data->Properties->HasKey("sourceList")) return;
-	//auto sourceList = dynamic_cast<ListView^>(e->Data->Properties->Lookup("sourceList"));
-	//if (sourceList == nullptr && sourceList != CompositionPartList) return;
-	//
-	//if (!e->Data->Properties->HasKey("sourceItem")) return;
-	//auto sourceItem = dynamic_cast<SNewPart^>(e->Data->Properties->Lookup("sourceItem"));
-	//if (sourceItem == nullptr) return;
-
-	auto rearrangedParts = ref new Platform::Collections::Vector<PositionedSymbol^>;
-
-	for (auto&& child : CompositionPartList->ItemsPanelRoot->Children)
-	{
-		FrameworkElement^ el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(child));
-		if (el == nullptr) continue;
-
-		auto psym = dynamic_cast<PositionedSymbol^>(el->DataContext);
-		if (psym)
-		{
-			rearrangedParts->Append(psym);
-		}
-	}
-
-	CompositionView->SetParts(rearrangedParts);
-	//CompositionView->UpdateView();
-}
 
 
-void StrokeEditor::CompositionEditorPage::CompositionPartList_DragItemsStarting(Platform::Object^ sender, Windows::UI::Xaml::Controls::DragItemsStartingEventArgs^ e)
-{
-	//if (!e->Items->Size) return;
-	//
-	//auto dataItem = e->Items->First();
-	//e->Data->Properties->Insert("sourceItem", dataItem);
-	//e->Data->Properties->Insert("sourceList", sender);
-}
-
-
-void StrokeEditor::CompositionEditorPage::CompositionPartList_DropCompleted(Windows::UI::Xaml::UIElement^ sender, Windows::UI::Xaml::DropCompletedEventArgs^ args)
-{
-	auto rearrangedParts = ref new Platform::Collections::Vector<PositionedSymbol^>;
-
-	for (auto&& child : CompositionPartList->ItemsPanelRoot->Children)
-	{
-		FrameworkElement^ el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(child));
-		if (el == nullptr) continue;
-
-		auto psym = dynamic_cast<PositionedSymbol^>(el->DataContext);
-		if (psym)
-		{
-			rearrangedParts->Append(psym);
-		}
-	}
-
-	CompositionView->SetParts(rearrangedParts);
-	//CompositionView->UpdateView();
-}
-
-
-void StrokeEditor::CompositionEditorPage::Grid_Drop(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e)
-{
-
-}

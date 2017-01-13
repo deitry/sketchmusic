@@ -23,45 +23,40 @@ using namespace Windows::UI::Xaml::Navigation;
 
 CompositionView::CompositionView()
 {
-	auto parts = ref new Platform::Collections::Vector<PositionedSymbol^>;
+	auto parts = ref new Platform::Collections::Vector<PartDefinition^>;
 	DynamicCategory cat;
 	cat.quite = true;
 	cat.regular = true;
-	parts->Append(ref new PositionedSymbol(ref new Cursor(0),ref new SNewPart("A",0,cat)));
-	parts->Append(ref new PositionedSymbol(ref new Cursor(2), ref new SNewPart("B",0,cat)));
-	parts->Append(ref new PositionedSymbol(ref new Cursor(4), ref new SNewPart("A",1,cat)));
-	parts->Append(ref new PositionedSymbol(ref new Cursor(8), ref new SNewPart("B",1,cat)));
+	PartDefinition^ p1 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(0), ref new SNewPart("A", cat)));
+	p1->length = 2;
+	PartDefinition^ p2 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(2), ref new SNewPart("B", cat)));
+	p2->length = 2;
+	PartDefinition^ p3 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(4), ref new SNewPart("A", cat)));
+	p3->length = 5; p3->number = 1;
+	PartDefinition^ p4 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(9), ref new SNewPart("B", cat)));
+	p4->length = 1; p4->number = 1;
+
+	parts->Append(p1);
+	parts->Append(p2);
+	parts->Append(p3);
+	parts->Append(p4);
 
 	InitializeComponent();
 	SetParts(parts);
 
-	m_parts->VectorChanged += ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PositionedSymbol ^>(this, 
+	m_parts->VectorChanged += ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PartDefinition ^>(this,
 		&SketchMusic::View::CompositionView::OnVectorChanged);
 }
 
-void SketchMusic::View::CompositionView::SetParts(IObservableVector<PositionedSymbol^>^ parts)
+void SketchMusic::View::CompositionView::SetParts(IObservableVector<PartDefinition^>^ parts)
 {
 	m_parts = parts;
-	PositionedSymbol^ prev = nullptr;
-	for (auto&& part : m_parts)
-	{
-		// вычисляем длину частей и номера согласно категориям
-		// TODO : Из категорий составляем список, запоминаем
-		
-		if (prev)
-		{
-			auto prevPart = dynamic_cast<SNewPart^>(prev->_sym);
-			if (prevPart)
-			{
-				prevPart->length = part->_pos->getBeat() - prev->_pos->getBeat();
-			}
-		}
-		prev = part;
-	}
+	PartDefinition^ prev = nullptr;
+	
 	UpdateView();
 }
 
-void SketchMusic::View::CompositionView::OnVectorChanged(IObservableVector<PositionedSymbol^>^ sender, IVectorChangedEventArgs^ args)
+void SketchMusic::View::CompositionView::OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs^ args)
 {
 	switch (args->CollectionChange)
 	{
@@ -75,27 +70,22 @@ void SketchMusic::View::CompositionView::OnVectorChanged(IObservableVector<Posit
 
 void SketchMusic::View::CompositionView::UpdateSize()
 {
-	ContentControl^ prev = nullptr;
-	int prevBeat = 0;
-	int endBeat = m_parts->GetAt(Parts->Size-1)->_pos->getBeat();
+	int endBeat = m_parts->GetAt(Parts->Size-1)->originalPos->getBeat();
 
-	auto child = CompositionPanel->Children->First();
-	auto part = m_parts->First();
-	
-	while (part->HasCurrent)
+	// вычисляем суммарную длину
+	int totalLength = 0;
+	for (auto&& p : m_parts)
 	{
-		auto ctrl = dynamic_cast<ContentControl^>(static_cast<Object^>(child->Current));
-		//auto part = dynamic_cast<PositionedSymbol^>(static_cast<Object^>(child));
+		totalLength += p->length;
+	}
 
-		if (prev)
-		{
-			//double relWid = ;
-			prev->Width = this->Width * (part->Current->_pos->getBeat() - prevBeat) / endBeat;
-		}
-		prev = ctrl;
-		prevBeat = part->Current->_pos->getBeat();
-		child->MoveNext();
-		part->MoveNext();
+	for (auto&& child : CompositionPanel->Children)
+	{
+		auto ctrl = dynamic_cast<FrameworkElement^>(static_cast<Object^>(child));
+		if (ctrl == nullptr) continue;
+		auto part = dynamic_cast<PartDefinition^>(ctrl->DataContext);
+
+		ctrl->Width = this->Width * part->length / totalLength;
 	}
 	CompositionPanel->UpdateLayout();
 }
@@ -104,13 +94,9 @@ void SketchMusic::View::CompositionView::UpdateView()
 {
 	CompositionPanel->Children->Clear();
 	
-	UpdatePartPos();
-
 	auto end = m_parts->GetAt(m_parts->Size - 1);	// быстрая ссылка на последний элемент
 	for (auto&& part : m_parts)
 	{
-		if (part == end) break;
-
 		auto ctrl = ref new ContentControl;
 		ctrl->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(this->Resources->Lookup("CompositionPartStyle"));
 		ctrl->DataContext = part;
@@ -120,15 +106,3 @@ void SketchMusic::View::CompositionView::UpdateView()
 	UpdateSize();
 }
 
-void SketchMusic::View::CompositionView::UpdatePartPos()
-{
-	int curPos = 0;
-	for (auto&& part : m_parts)
-	{
-		// вычисляем новые положения posytionedSymbol исходя из вычисленной ранее длины
-		auto current = dynamic_cast<SNewPart^>(part->_sym);
-		part->_pos->setPos(curPos);
-		if (current)
-			curPos += current->length;
-	}
-}

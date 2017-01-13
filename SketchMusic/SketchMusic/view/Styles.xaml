@@ -42,6 +42,7 @@
     <smv:OnPositionedSymbolToTextConverter x:Key="possym2text"/>
     <smv:PSymbolPosToTextConverter x:Key="psympos2text"/>
     <smv:PartCatToTextConverter x:Key="partcat2text"/>
+    <smv:PartDynToTextConverter x:Key="partdyn2text"/>
     <smv:BlackKeyToColorConverter x:Key="blackKey2color"
                                     BlackKeyBrush="{StaticResource blackKeyBackground}"/>
     <smv:BoolToColorConverter     x:Key="bool2color"

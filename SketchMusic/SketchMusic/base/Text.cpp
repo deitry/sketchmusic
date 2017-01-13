@@ -97,6 +97,29 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 	return vect;
 }
 
+IObservableVector<PartDefinition^>^ SketchMusic::Text::getParts()
+{
+	auto parts = ref new Platform::Collections::Vector<PartDefinition^>;
+	PartDefinition^ prev = nullptr;
+	for (auto&& i : _t)
+	{
+		if (i.second->GetSymType() == SymbolType::NPART)
+		{
+			auto def = ref new PartDefinition(i.first, dynamic_cast<SNewPart^>(i.second));
+			if (prev)
+			{
+				def->length = def->originalPos->getBeat() - prev->originalPos->getBeat();
+			}
+			parts->Append(def);
+			prev = def;
+		}
+	}
+
+	// исключаем последний PartDefinition - он обозначает конец композиции и для манипуляций не нужен
+	parts->RemoveAt(parts->Size - 1);
+	return parts;
+}
+
 // Получаем ноты в данной позиции, имеющие тип type (или все, если type == unknown)
 IVector<PositionedSymbol^>^ SketchMusic::Text::getNotesAt(Cursor ^ pos, SymbolType type)
 {
@@ -191,6 +214,12 @@ IJsonValue^ SketchMusic::Text::serialize()
 	}
 	json->Insert(t::NOTES_ARRAY, jsonNotes);
 	return json;
+}
+
+IIterator<PositionedSymbol^>^ SketchMusic::Text::First()
+{
+	TextIterator^ iter = ref new TextIterator(this);
+	return iter;
 }
 
 SketchMusic::Text^ SketchMusic::Text::deserialize(Platform::String^ str)
