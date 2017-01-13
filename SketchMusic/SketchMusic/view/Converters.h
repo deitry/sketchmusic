@@ -378,6 +378,29 @@ public:
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
+public ref class SketchMusic::View::PartTimeToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+{
+public:
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	{
+		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
+		if (part == nullptr) return nullptr;
+		int seconds = part->length * 120 / 60;
+		int minutes = seconds / 60;
+		seconds = seconds % 60;
+
+		String^ str = minutes.ToString() + ":" + seconds.ToString();
+		return str;
+	}
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	{
+		return nullptr;
+	}
+
+	PartTimeToTextConverter() {}
+};
+
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 public ref class SketchMusic::View::PartDynToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 {
 public:

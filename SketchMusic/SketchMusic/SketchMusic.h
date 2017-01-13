@@ -147,7 +147,7 @@ namespace SketchMusic
 		TEMPO	= 9,	// задание темпа
 		STRING	= 10,	// дл€ вставки строки		
 		CLEF	= 11,	// дл€ установки нот по вертикали
-		HIGHLIGHT = 12,	// дл€ "подсветки" данного положени€ - таким образом будем выдел€ть ключевые места.
+		ACCENT	= 12,	// дл€ "подсветки" данного положени€ - таким образом будем выдел€ть ключевые места.
 						// ѕо сути, ту же самую роль может выполн€ть GNote, но этот элемент будет проще, безо вс€ких значений
 	};
 
@@ -287,12 +287,16 @@ namespace SketchMusic
 		//virtual Platform::String^ Serialize() { return "space"; }
 	};
 
-	public ref class SHighlight sealed : public SketchMusic::ISymbol
+	// акцент - как визуальный, так и звуковой.
+	// ƒл€ него будет реализовано специальное поведение проигрывател€ - если встречаетс€ этот символ,
+	// то вне зависимости от текущего "тика", мы перескакиваем на ближайшую долю - принудительно делаем ноту "под ударением"
+	// —оответственно будет играть метроном. Ёти символы будут надстройкой над размером; при 
+	public ref class SAccent sealed : public SketchMusic::ISymbol
 	{
 	public:
-		SHighlight() {}
+		SAccent() {}
 
-		virtual SymbolType GetSymType() { return SymbolType::HIGHLIGHT; }
+		virtual SymbolType GetSymType() { return SymbolType::ACCENT; }
 		virtual Platform::String^ ToString() { return L"\uE9A9"; }
 		//virtual Platform::String^ Serialize() { return "space"; }
 	};
@@ -907,6 +911,7 @@ namespace SketchMusic
 			hide			= 30,	// спр€тать клавиатуру
 			layout			= 31,	// сменить раскладку клавиатуры
 			precount		= 32,	// установить предварительные тики перед проигрыванием
+			accent			= 33,	// акцентирование
 		};
 
 		public enum class KeyboardStateEnum
@@ -1001,6 +1006,7 @@ namespace SketchMusic
 		ref class PSymbolPosToTextConverter;
 		ref class PartCatToTextConverter;
 		ref class PartDynToTextConverter;
+		ref class PartTimeToTextConverter;
 		ref class TestData;
 		
 		// варианты клавиатур

@@ -84,6 +84,10 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			{
 				return ref new SSpace();
 			}
+			case SymbolType::ACCENT:
+			{
+				return ref new SSpace();
+			}
 			case SymbolType::CHORD:
 			case SymbolType::STRING:
 			default: return nullptr;
@@ -132,6 +136,10 @@ ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType t
 		return ref new SNewLine();
 	}
 	case SketchMusic::View::KeyType::space:
+	{
+		return ref new SSpace();
+	}
+	case SketchMusic::View::KeyType::accent:
 	{
 		return ref new SSpace();
 	}
