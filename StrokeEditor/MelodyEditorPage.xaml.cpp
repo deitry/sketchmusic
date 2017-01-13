@@ -162,9 +162,9 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		SketchMusic::Commands::SymbolHandlerArgs^ symArgs = dynamic_cast<SketchMusic::Commands::SymbolHandlerArgs^>(args);
 		if (symArgs == nullptr) return;
 
-		_textRow->current->addSymbol(symArgs->_newSym);
+		symArgs->_text->addSymbol(symArgs->_newSym);
 		// добавить внешнее представление символа
-		_textRow->AddSymbol(symArgs->_newSym);
+		_textRow->AddSymbol(symArgs->_text, symArgs->_newSym);
 		if (viewType == ViewType::ChordView)
 		{
 			if (symArgs->_newSym->_sym->GetSymType() == SymbolType::NOTE) this->CurrentChord->GetNotes()->Append(symArgs->_newSym);
@@ -329,7 +329,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			// создаём команду на добавление ноты в текст и сохраняем её в истории
 			((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
 				ref new SMC::Command(addSym, nullptr, nullptr),
-				ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
+				ref new SMC::SymbolHandlerArgs(_texts->ControlText, nullptr,
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
 			((App^)App::Current)->_manager->ExecuteLast();
 			//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
@@ -371,12 +371,22 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			break;
 		case SketchMusic::View::KeyType::deleteSym:
 		{
+			// из текущего текста
 			((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
 				ref new SMC::Command(deleteSym, nullptr, nullptr),
 				ref new SMC::SymbolHandlerArgs(_textRow->current,
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), nullptr),
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition->getBeat() - 1), nullptr))));
 			((App^)App::Current)->_manager->ExecuteLast();
+
+			// из управляющего текста - из управляющего текста удалять только через контекстное меню конкретного символа?
+			// ! Это не требуется, т.к. сейчас удаление символа происходит через Backspace, а он сам учитывает всё что надо
+			//((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
+			//	ref new SMC::Command(deleteSym, nullptr, nullptr),
+			//	ref new SMC::SymbolHandlerArgs(_texts->ControlText,
+			//		ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), nullptr),
+			//		ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition->getBeat() - 1), nullptr))));
+			//((App^)App::Current)->_manager->ExecuteLast();
 			//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
 			//	+ " / tick = " + _textRow->currentPosition->getTick();
 			break;

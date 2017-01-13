@@ -95,8 +95,7 @@ namespace SketchMusic
 	{
 	private:
 		Windows::Foundation::Collections::IVector<Text^>^ m_texts;
-		void HandleControlSymbols();
-		Text^ controlText;
+		void HandleControlSymbols();	// если мы будем сразу все управл€ющие символы добавл€ть в controlText, то эта функци€ не понадобитс€
 
 	public:
 		// TODO : добавить дорожку с "системными" данными? - вносить туда всЄ, что касаетс€ композиции в целом
@@ -106,6 +105,8 @@ namespace SketchMusic
 			Windows::Foundation::Collections::IVector<Text^>^ get() { return m_texts; }
 			void set(Windows::Foundation::Collections::IVector<Text^>^ _texts) { m_texts = _texts; HandleControlSymbols(); }
 		}
+
+		property Text^ ControlText;
 
 		IObservableVector<PartDefinition^>^ getParts();
 			// ¬ дальнейшем сделаем controlText "хранителем" управл€ющих символов и проча€, что вли€ет непосредственно на композицию

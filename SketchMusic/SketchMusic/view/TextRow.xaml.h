@@ -92,7 +92,7 @@ public:
 	void SetCursor(SketchMusic::Cursor^ pos);
 
 	// работа с отдельными символами
-	void AddSymbol(PositionedSymbol^ symbol);
+	void AddSymbol(Text^ source, PositionedSymbol^ symbol);
 	//void DeleteSymbol(PositionedSymbol^ symbol);
 	void Backspace();
 	//void DeleteRange(Cursor^ from, Cursor^ to);

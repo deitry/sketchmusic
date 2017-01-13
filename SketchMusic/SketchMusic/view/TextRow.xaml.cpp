@@ -292,7 +292,15 @@ void SketchMusic::View::TextRow::InvalidateText()
 	{
 		// - проверка на то, что если текст отличен от текста форматирования и это не нота - пропускаем
 
-		this->AddSymbol(symbol);
+		this->AddSymbol(current, symbol);
+	}
+	// аналогично - для управляющих символов
+	symbols = data->ControlText->getText();
+	for (auto&& symbol : symbols)
+	{
+		// - проверка на то, что если текст отличен от текста форматирования и это не нота - пропускаем
+
+		this->AddSymbol(data->ControlText, symbol);
 	}
 	//}
 	// перерисовываем
@@ -335,7 +343,7 @@ void SketchMusic::View::TextRow::SetCursor(SketchMusic::Cursor^ pos)
 }
 
 // работа с отдельными символами
-void SketchMusic::View::TextRow::AddSymbol(PositionedSymbol^ sym)
+void SketchMusic::View::TextRow::AddSymbol(Text^ source, PositionedSymbol^ sym)
 {
 
 	// отыскиваем, куда нужно ставить
@@ -372,7 +380,7 @@ void SketchMusic::View::TextRow::AddSymbol(PositionedSymbol^ sym)
 	bt->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerPressed);
 	bt->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
 	bt->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerReleased);
-	bt->Tag = current;
+	bt->Tag = source;
 	// изменяем цвет согласно тегу
 	SetBackgroundColor(bt);
 

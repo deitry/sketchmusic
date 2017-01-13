@@ -57,6 +57,8 @@ ISoundEngine^ SoundEnginePool::GetSoundEngine(Instrument^ instrument)
 
 void SoundEnginePool::ReleaseSoundEngine(ISoundEngine^ engine)
 {
+	if (engine == nullptr) return;
+
 	engine->Stop();
 	// возвращаем в список доступных
 	_available.push_back(engine);

@@ -157,7 +157,7 @@ void SketchMusic::CompositionData::HandleControlSymbols()
 			{
 				// удалить из исходного текста, добавить в контрол
 				txt->deleteSymbol(psym->_pos, psym->_sym);
-				controlText->addSymbol(psym);
+				ControlText->addSymbol(psym);
 				break;
 			}
 			default:
@@ -169,7 +169,7 @@ void SketchMusic::CompositionData::HandleControlSymbols()
 
 IObservableVector<PartDefinition^>^ SketchMusic::CompositionData::getParts()
 {
-	return controlText->getParts();
+	return ControlText->getParts();
 }
 
 CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ str)
@@ -186,7 +186,7 @@ CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ st
 			if (text)
 			{
 				if (text->instrument->_name == SerializationTokens::CONTROL_TEXT)
-					data->controlText = text;
+					data->ControlText = text;
 				else data->texts->Append(text);
 			}
 		}
@@ -201,7 +201,9 @@ CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ st
 			if (text)
 			{
 				data = ref new SketchMusic::CompositionData;
-				data->texts->Append(text);
+				if (text->instrument->_name == SerializationTokens::CONTROL_TEXT)
+					data->ControlText = text;
+				else data->texts->Append(text);
 			}
 		}
 	}
@@ -211,6 +213,9 @@ CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ st
 Windows::Data::Json::IJsonValue ^ SketchMusic::CompositionData::serialize()
 {
 	auto json = ref new JsonArray();
+	if (ControlText)
+		json->Append(ControlText->serialize());
+
 	for (auto&& text : texts)
 	{
 		if (text->getSize())
@@ -223,5 +228,6 @@ Windows::Data::Json::IJsonValue ^ SketchMusic::CompositionData::serialize()
 
 SketchMusic::CompositionData::CompositionData()
 {
+	ControlText = ref new Text(ref new Instrument(SerializationTokens::CONTROL_TEXT));
 	this->texts = ref new Platform::Collections::Vector < Text^ >;
 }

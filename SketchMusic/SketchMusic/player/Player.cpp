@@ -115,6 +115,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 		// поиск стартового положени€
 	auto getIterators = concurrency::create_task([data, iterMap, this, cursor]
 	{
+		// ќбработка основных текстов
 		for (auto text : data->texts)
 		{
 			// получаем список символов в данном тексте
@@ -124,7 +125,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			auto iter = symbols->First();
 			auto startIter = symbols->First();
 
-			_BPM = 120;
+			//_BPM = 120;
 			while (iter->HasCurrent)
 			{
 				auto p = iter->Current->_pos;
@@ -132,17 +133,19 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 				if (p->LE(cursor))
 				{
 					// обработка системных параметров - учитываем все возможные модул€ции
-					auto tempo = dynamic_cast<STempo^>(iter->Current->_sym);
-					if (tempo)
-					{
-						_BPM = tempo->value;
-					}
+					// теперь обработка темпа - только в управл€ющем тексте
+					//auto tempo = dynamic_cast<STempo^>(iter->Current->_sym);
+					//if (tempo)
+					//{
+					//	_BPM = tempo->value;
+					//}
 
 					// проматываем
 					iter->MoveNext();
 					if (p->LT(cursor)) startIter->MoveNext();
 
 					// если мы достигли последней ноты, а наш курсор ещЄ дальше
+					// TODO : сбрасывать на ноль только если ни в каком из текстов нот дальше чем курсор
 					if ((iter->HasCurrent == false) && (p->LE(cursor)))
 					{
 						// играем сначала
@@ -161,6 +164,38 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 				}
 			}
 		}
+
+		// ќбработка управл€ющего текста - положение курсора уже определено
+		// получаем список символов в данном тексте
+		auto symbols = data->ControlText->getText();
+		// находим ближайший к старту символ (ѕќ—Ћ≈ старта)
+		auto iter = symbols->First();
+		auto startIter = symbols->First();
+		_BPM = 120;
+		while (iter->HasCurrent)
+		{
+			auto p = iter->Current->_pos;
+		
+			if (p->LE(cursor))
+			{
+				// обработка системных параметров - учитываем все возможные модул€ции
+				auto tempo = dynamic_cast<STempo^>(iter->Current->_sym);
+				if (tempo)
+				{
+					_BPM = tempo->value;
+				}
+		
+				// проматываем
+				iter->MoveNext();
+				if (p->LT(cursor)) startIter->MoveNext();
+			}
+			else
+			{
+				iterMap->push_back(std::make_pair(nullptr, std::make_pair(startIter, symbols)));
+				break;
+			}
+		}
+		
 	})
 
 		// прекаунт
@@ -174,7 +209,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			int actualCount = precount;
 			Cursor^ tmp = ref new Cursor;
 
-			while (actualCount > 0 && _state != s::STOP)
+			while (actualCount >= 0 && _state != s::STOP)
 			{
 				// метроном
 				if (((tmp->getBeat() - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
@@ -185,9 +220,9 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 				pbeat = tmp->getBeat();
 
 				auto nClock = Clock::now();
-				auto dif = (std::chrono::duration_cast<std::chrono::microseconds>(nClock - pClock).count());
+				auto dif = (std::chrono::duration_cast<std::chrono::nanoseconds>(nClock - pClock).count());
 				pClock = nClock;
-				float offset = (float)dif * _BPM*1.5 * TICK_IN_BEAT / 60 / 1000000;	// не знаю, почему, но дл€ корректного воспроизведени€ надо умножать на полтора
+				float offset = (float)dif * _BPM * TICK_IN_BEAT / 60 / 1000000000;	// не знаю, почему, но дл€ корректного воспроизведени€ надо умножать на полтора
 				tmp->incTick(offset);
 			}
 		}
@@ -260,7 +295,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						// «аодно нужно отделить функцию проигрывани€ текущей позиции / одной доли?,
 						// чтобы успешно реализовать пошаговый ввод.
 						// ’от€ в общем-то ничего больше вводить не надо, пошаговый ввод можно сделать уже на основе имеющихс€ функций.
-						if (notes && notes->Size > 0)
+						if (notes && notes->Size > 0 && iter->first)
 							iter->first->Play(notes);
 
 						// проматываем до следующего элемента

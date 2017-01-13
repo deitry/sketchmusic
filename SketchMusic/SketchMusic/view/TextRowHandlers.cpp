@@ -87,7 +87,7 @@ void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Wind
 	// - - если оно меняется, то при достижении определённой "дельты" вызываем SetScale
 	
 	ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
-	if ((ctrl == nullptr) || (dynamic_cast<Text^>(ctrl->Tag) != current))
+	if ((ctrl == nullptr) || ((dynamic_cast<Text^>(ctrl->Tag) != current) && (dynamic_cast<Text^>(ctrl->Tag) != data->ControlText)) )
 	{
 		// если нажато один раз, но ноты нет, зато есть контрол, то перемещаем указатель в данный контрол
 		if (_currentSnapPoint)
@@ -181,7 +181,7 @@ void SketchMusic::View::TextRow::OnPointerReleased(Platform::Object ^sender, Win
 		_canvas->SetTop(_dragged, point.Y + offsetY);
 
 		// перемещаем символ "фактически"
-		Text^ text = current;
+		Text^ text = dynamic_cast<SketchMusic::Text^>(_dragged->Tag);
 		if (psym && text)
 		{
 			SketchMusic::Cursor^ newpos = this->GetPositionOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
@@ -354,6 +354,7 @@ void SketchMusic::View::TextRow::Backspace()
 
 	// удаляем символы из текста
 	current->deleteSymbols(currentPosition, to);
+	data->ControlText->deleteSymbols(currentPosition, to);
 
 	// удаляем все элементы с текущего положения по положение на шаг назад
 	int i = 0;
@@ -364,7 +365,7 @@ void SketchMusic::View::TextRow::Backspace()
 		{
 			// по тегу проверяем, что нота принадлежит текущей дорожке
 			auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
-			if (((Text^)ctrl->Tag == current) && (psym != nullptr))
+			if (((Text^)ctrl->Tag == current || (Text^)ctrl->Tag == data->ControlText) && (psym != nullptr))
 			{
 				// если она попадает в искомый диапазон, то удаляем
 				if (psym->_pos->LT(currentPosition)
