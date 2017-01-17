@@ -31,6 +31,7 @@ CompositionEditorPage::CompositionEditorPage()
 	InitializeComponent();
 
 	CompositionPartList->ItemsSource = CompositionView->Parts;
+	CompositionView->Parts->VectorChanged += ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PartDefinition ^>(this, &StrokeEditor::CompositionEditorPage::OnVectorChanged);
 }
 
 
@@ -111,9 +112,10 @@ void StrokeEditor::CompositionEditorPage::AddPartButton_Click(Platform::Object^ 
 	AddPartFlyout->Hide();
 	
 	PartDefinition^ part = ref new PartDefinition;
-	part->length = std::stoi(PartLength->Text->Data());
+	part->Length = std::stoi(PartLength->Text->Data());
 	part->original = ref new SNewPart;
 	part->original->category = PartCatTxt->Text;
+	part->original->Name = PartNameTxt->Text;
 	part->original->dynamic = (DynamicCategory)PartCatComboBox->SelectedIndex;
 
 	CompositionView->Parts->Append(part);
@@ -140,5 +142,16 @@ void StrokeEditor::CompositionEditorPage::PartLength_TextChanging(Windows::UI::X
 			sender->Text = ref new Platform::String(wstr.data());
 			sender->SelectionStart = pos;
 		}
+	}
+}
+
+void StrokeEditor::CompositionEditorPage::OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs ^ args)
+{
+	switch (args->CollectionChange)
+	{
+	case CollectionChange::ItemInserted:
+		CompositionPartList->ItemsSource = nullptr;
+		CompositionPartList->ItemsSource = CompositionView->Parts;
+		break;
 	}
 }

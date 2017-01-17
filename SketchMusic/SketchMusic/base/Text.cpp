@@ -132,7 +132,7 @@ IObservableVector<PartDefinition^>^ SketchMusic::Text::getParts()
 			auto def = ref new PartDefinition(i.first, dynamic_cast<SNewPart^>(i.second));
 			if (prev)
 			{
-				def->length = def->originalPos->Beat - prev->originalPos->Beat;
+				def->Length = def->originalPos->Beat - prev->originalPos->Beat;
 			}
 			parts->Append(def);
 			prev = def;

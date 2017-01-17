@@ -333,7 +333,7 @@ namespace SketchMusic
 		SNewPart(String^ _cat) { category = _cat; }
 		SNewPart(String^ _cat, DynamicCategory _dyn) { category = _cat; dynamic = _dyn; }
 
-		//property String^ name;
+		property String^ Name;
 		property String^ category;	// "A", "B", "куплет", "бридж" - определяется только категория
 			//, номер будет отображаться автоматически в зависимости от положения в композиции
 		
@@ -345,8 +345,13 @@ namespace SketchMusic
 
 	// Вместо использования PositionedSymbol для оперирования на уровне частей в редакторе композиции,
 	// будем создавать специальный объект, для этого предназначенный
-	public ref class PartDefinition sealed
+	public ref class PartDefinition sealed : Windows::UI::Xaml::Data::INotifyPropertyChanged
 	{
+	private:
+		void OnPropertyChanged(Platform::String^ propertyName);
+		int m_number;
+		int m_length;
+		double m_time;
 	public:
 		PartDefinition() {}
 		PartDefinition(PositionedSymbol^ psym) { originalPos = psym->_pos; original = dynamic_cast<SNewPart^>(psym->_sym); }
@@ -361,9 +366,25 @@ namespace SketchMusic
 		property Cursor^ originalPos;
 		property SNewPart^ original;
 
-		property int number;	// порядковый номер части с этой категорией. Будет вычисляться автоматически, здесь храним для удобства
-		property int length;	// продолжительность в "битах". Будет вычисляться автоматически, здесь храним для удобства
-		property double timeLegnth;
+		property int Number		// порядковый номер части с этой категорией. Будет вычисляться автоматически, здесь храним для удобства
+		{
+			int get() { return m_number; }
+			void set(int num) { m_number = num; OnPropertyChanged("Number"); }
+		}
+		property int Length	// продолжительность в "битах". Будет вычисляться автоматически, здесь храним для удобства
+		{
+			int get() { return m_length; }
+			void set(int num) { m_length = num; OnPropertyChanged("Length"); }
+		}
+		property double Time
+		{
+			double get() { return m_time; }
+			void set(double num) { m_time = num; OnPropertyChanged("Time"); }
+		}
+
+		// Унаследовано через INotifyPropertyChanged
+		virtual event Windows::UI::Xaml::Data::PropertyChangedEventHandler ^ PropertyChanged;
+		// продолжительность в секундах, опять же для удобства. Будем вычислять автоматичеки, проходясь по тексту и учитывая STempo
 	};
 
 	public ref class STempo sealed : public SketchMusic::ISymbol
@@ -1012,6 +1033,7 @@ namespace SketchMusic
 		ref class PartCatToTextConverter;
 		ref class PartDynToTextConverter;
 		ref class PartTimeToTextConverter;
+		ref class PartNameToTextConverter;
 		ref class TestData;
 		
 		// варианты клавиатур

@@ -262,7 +262,7 @@ void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>
 			ok = false;
 			break;
 		}
-		cur += part->length;
+		cur += part->Length;
 	}
 
 	if (ok) return;
@@ -278,7 +278,7 @@ void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>
 			// определяем граничные итераторы части в данном тексте
 			auto orig = part->originalPos;
 			auto leftBound = oldText->_t.lower_bound(orig);	// откуда начнём "вырезать" текст
-			int rightBeat = leftBound->first->Beat + part->length;
+			int rightBeat = leftBound->first->Beat + part->Length;
 			int dif = part->originalPos->Beat - curPos;
 			Cursor^ rightPos = ref new Cursor(rightBeat + dif);
 			auto rightBound = oldText->_t.lower_bound(rightPos);	// где закончим
@@ -290,7 +290,7 @@ void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>
 				newText->_t.insert(std::make_pair(ref new Cursor (iter->first->Beat + dif,iter->first->Tick),sym));
 			}
 
-			curPos += part->length;
+			curPos += part->Length;
 		}
 
 		reorginised->Append(newText);
@@ -308,4 +308,9 @@ SketchMusic::CompositionData::CompositionData()
 void SketchMusic::Composition::Serialize()
 {
 	throw ref new Platform::NotImplementedException();
+}
+
+void SketchMusic::PartDefinition::OnPropertyChanged(Platform::String ^ propertyName)
+{
+	PropertyChanged(this, ref new PropertyChangedEventArgs(propertyName));
 }

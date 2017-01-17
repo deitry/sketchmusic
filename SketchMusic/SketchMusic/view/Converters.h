@@ -365,8 +365,8 @@ public:
 		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
 		if (part == nullptr) return nullptr;
 		auto str = part->original->category;
-		if (part->number)
-			str += part->number;
+		if (part->Number)
+			str += part->Number;
 		return str;
 	}
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
@@ -385,11 +385,11 @@ public:
 	{
 		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
 		if (part == nullptr) return nullptr;
-		int seconds = part->length * 120 / 60;
+		int seconds = part->Length * 120 / 60;
 		int minutes = seconds / 60;
 		seconds = seconds % 60;
 
-		String^ str = minutes.ToString() + ":" + seconds.ToString();
+		String^ str = minutes.ToString() + ":" + ((seconds < 10) ? "0" : "") + seconds.ToString();
 		return str;
 	}
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
@@ -398,6 +398,25 @@ public:
 	}
 
 	PartTimeToTextConverter() {}
+};
+
+[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+public ref class SketchMusic::View::PartNameToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+{
+public:
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	{
+		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
+		if (part == nullptr) return nullptr;
+		if (part->original == nullptr) return nullptr;
+		return part->original->Name;
+	}
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	{
+		return nullptr;
+	}
+
+	PartNameToTextConverter() {}
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]

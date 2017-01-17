@@ -105,28 +105,36 @@
         </StackPanel>
 
         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Visible" VerticalScrollMode="Enabled">
-        <ListView x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
-                  CanReorderItems="True" CanDragItems="True" AllowDrop="True" Width="800"
-                  ItemClick="CompositionPartList_ItemClick"
-                  SelectionChanged="CompositionPartList_SelectionChanged"
-                  >
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Grid HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=CompositionPartList}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="8*"/>
-                            <ColumnDefinition Width="2*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding DataContext,
+            <ListView x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
+                      CanReorderItems="True" CanDragItems="True" AllowDrop="True" Width="800"
+                      ItemClick="CompositionPartList_ItemClick"
+                      SelectionChanged="CompositionPartList_SelectionChanged"
+                      >
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=CompositionPartList}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="8*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding DataContext,
+                                                                RelativeSource={RelativeSource TemplatedParent},
+                                                                Converter={StaticResource partcat2text}}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding DataContext,
+                                                                RelativeSource={RelativeSource TemplatedParent}, 
+                                                                Converter={StaticResource partdyn2text}}"
+                                                                />
+                            <TextBlock Grid.Column="2" Text="{Binding DataContext,
+                                                                RelativeSource={RelativeSource TemplatedParent}, 
+                                                                Converter={StaticResource partname2text}}"
+                                                                />
+                            <TextBlock Grid.Column="3" Text="{Binding DataContext,
                                                             RelativeSource={RelativeSource TemplatedParent},
-                                                            Converter={StaticResource partcat2text}}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding DataContext,
-                                                            RelativeSource={RelativeSource TemplatedParent}, 
-                                                            Converter={StaticResource partdyn2text}}"
+                                                            Converter={StaticResource parttime2text}}"
                                                             />
-                    </Grid>
+                        </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

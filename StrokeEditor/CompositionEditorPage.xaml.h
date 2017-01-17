@@ -7,6 +7,9 @@
 
 #include "CompositionEditorPage.g.h"
 
+using namespace Windows::Foundation::Collections;
+using namespace SketchMusic;
+
 namespace StrokeEditor
 {
 	/// <summary>
@@ -31,5 +34,6 @@ namespace StrokeEditor
 		void AddPartButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void EditPartBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void PartLength_TextChanging(Windows::UI::Xaml::Controls::TextBox^ sender, Windows::UI::Xaml::Controls::TextBoxTextChangingEventArgs^ args);
+		void OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs^ args);
 	};
 }
