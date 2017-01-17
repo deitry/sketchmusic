@@ -37,12 +37,10 @@ public:
 
 	// доступ к полям
 	
-	void moveTo(SketchMusic::Cursor^ pos) { _beat = pos->getBeat(); _tick = pos->getTick(); }
+	void moveTo(SketchMusic::Cursor^ pos) { _beat = pos->Beat; _tick = pos->Tick; }
 	void setPos(int b, float t) { _beat = b; _tick = t; }
 	void setPos(int b) { setPos(b, 0); }
 
-	int getBeat() { return _beat; }
-	float getTick() { return _tick; }
 	float toTicks() { return _tick + _beat*SketchMusic::TICK_IN_BEAT; }
 
 	// операции

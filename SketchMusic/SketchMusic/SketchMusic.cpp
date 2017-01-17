@@ -234,8 +234,78 @@ Windows::Data::Json::IJsonValue ^ SketchMusic::CompositionData::serialize()
 	return json;
 }
 
+void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>^ parts)
+{
+	// проходимся по списку определений частей
+	// формируем новый текст, "выдёргивая" из старого текста символы и расставляя их согласно новой структуре
+
+	// выполняются следующие сценарии:
+	// - переставление частей местами
+	// - удаление частей
+	// - добавление частей
+	// - "укорачивание" частей
+	// - "удлинение" частей
+
+	// Вместо того, чтобы каждый сценарий реализовывать в отдельности, сейчас при перестроении мы создаём новые тексты
+	// и реорганизуем их в таком виде, в котором они должны быть
+
+	// например, было: ч0 - пос 0 длина 2, ч1 - пос 2 длина 2, ч2 - пос 4 длина 8
+	// стало: ч2 нпос 0, ч0 - нпос 8, ч1 - нпос 10 
+
+	// проверка на то, что реорганизовывать ничего не надо
+	bool ok = true;
+	for (auto&& part : parts)
+	{
+		static int cur = 0;
+		if (part->originalPos->Beat != cur)
+		{
+			ok = false;
+			break;
+		}
+		cur += part->length;
+	}
+
+	if (ok) return;
+
+	auto reorginised = ref new Platform::Collections::Vector<Text^>;
+	for (auto&& oldText : m_texts)
+	{
+		Text^ newText = ref new Text(oldText->instrument);
+
+		for (auto&& part : parts)
+		{
+			static int curPos = 0;
+			// определяем граничные итераторы части в данном тексте
+			auto orig = part->originalPos;
+			auto leftBound = oldText->_t.lower_bound(orig);	// откуда начнём "вырезать" текст
+			int rightBeat = leftBound->first->Beat + part->length;
+			int dif = part->originalPos->Beat - curPos;
+			Cursor^ rightPos = ref new Cursor(rightBeat + dif);
+			auto rightBound = oldText->_t.lower_bound(rightPos);	// где закончим
+
+			// переставляем символы из старого текста в новый
+			for (auto iter = leftBound; iter != rightBound; iter++)
+			{
+				auto sym = iter->second;
+				newText->_t.insert(std::make_pair(ref new Cursor (iter->first->Beat + dif,iter->first->Tick),sym));
+			}
+
+			curPos += part->length;
+		}
+
+		reorginised->Append(newText);
+	}
+
+	m_texts = reorginised;
+}
+
 SketchMusic::CompositionData::CompositionData()
 {
 	ControlText = ref new Text(ref new Instrument(SerializationTokens::CONTROL_TEXT));
 	this->texts = ref new Platform::Collections::Vector < Text^ >;
+}
+
+void SketchMusic::Composition::Serialize()
+{
+	throw ref new Platform::NotImplementedException();
 }

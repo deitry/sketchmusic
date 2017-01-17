@@ -212,12 +212,12 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			while (actualCount >= 0 && _state != s::STOP)
 			{
 				// метроном
-				if (((tmp->getBeat() - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
+				if (((tmp->Beat - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
 				{
 					playMetronome();
 					actualCount--;
 				}
-				pbeat = tmp->getBeat();
+				pbeat = tmp->Beat;
 
 				auto nClock = Clock::now();
 				auto dif = (std::chrono::duration_cast<std::chrono::nanoseconds>(nClock - pClock).count());
@@ -309,11 +309,11 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 					}
 
 					// метроном
-					if (needMetronome && ((cursor->getBeat() - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
+					if (needMetronome && ((cursor->Beat - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
 					{
 						playMetronome();
 					}
-					pbeat = cursor->getBeat();
+					pbeat = cursor->Beat;
 
 					// если уже пропустили символ, то переходим ко следующему, чтобы не возникало "зависаний"
 					if ((pIter->HasCurrent) && (pIter->Current->_pos->LT(cursor)))
@@ -338,8 +338,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			{
 				static int prevQuant = -1;
 				static int prevBeat = -1;
-				int quant = cursor->getTick() * quantize / TICK_IN_BEAT;
-				int beat = cursor->getBeat();
+				int quant = cursor->Tick * quantize / TICK_IN_BEAT;
+				int beat = cursor->Beat;
 				if ((quant != prevQuant) || (beat != prevBeat))
 				{
 					CursorPosChanged(this, cursor);

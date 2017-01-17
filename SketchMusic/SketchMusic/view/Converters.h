@@ -342,9 +342,9 @@ public:
 		
 		int param = 0;;
 
-		String^ str = psym->_pos->getBeat().ToString();
+		String^ str = psym->_pos->Beat.ToString();
 		if (parameter)	// без разницы какой - если есть хоть что-то
-			str += L":" + psym->_pos->getTick().ToString();
+			str += L":" + psym->_pos->Tick.ToString();
 
 		return str;
 	}

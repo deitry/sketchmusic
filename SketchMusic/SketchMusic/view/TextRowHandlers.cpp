@@ -215,11 +215,11 @@ void SketchMusic::View::TextRow::OnPointerReleased(Platform::Object ^sender, Win
 void SketchMusic::View::TextRow::MoveCursorLeft()
 {
 	// сдвигать должны на одну позицию согласно масштабированию
-	if ((currentPosition->getBeat() == 0) && (currentPosition->getTick() == 0))
+	if ((currentPosition->Beat == 0) && (currentPosition->Tick == 0))
 		return;
 
-	int beat = currentPosition->getBeat();
-	float tick = currentPosition->getTick();
+	int beat = currentPosition->Beat;
+	float tick = currentPosition->Tick;
 	
 	// округялем с точностью до квантизации
 	int roundedTicks = round(tick * quantize);
@@ -253,8 +253,8 @@ void SketchMusic::View::TextRow::MoveCursorRight()
 	if (currentPosition->EQ(_maxPos))	// TODO : получать максимально возможное значение от this 
 		return;
 
-	int beat = currentPosition->getBeat();
-	float tick = currentPosition->getTick();
+	int beat = currentPosition->Beat;
+	float tick = currentPosition->Tick;
 	
 	// округялем с точностью до квантизации
 	int roundedTicks = round(tick * quantize);
@@ -312,9 +312,9 @@ void SketchMusic::View::TextRow::SetScale(int scaleFactor)
 		//quantize = newScale;
 
 		// если курсор приходится на дробную позицию согласно новому масштабу, округляем
-		int roundedTicks = (int)round(currentPosition->getTick() * quantize);
+		int roundedTicks = (int)round(currentPosition->Tick * quantize);
 		if (roundedTicks % TICK_IN_BEAT)
-			currentPosition->setPos(currentPosition->getBeat(), currentPosition->getTick() * quantize / TICK_IN_BEAT);
+			currentPosition->setPos(currentPosition->Beat, currentPosition->Tick * quantize / TICK_IN_BEAT);
 
 		// обновляем положения нот
 		RedrawText();
@@ -337,12 +337,12 @@ void SketchMusic::View::TextRow::Backspace()
 
 	// берём положение курсора
 	// убеждаемся, что оно ненулевое
-	if ((currentPosition->getBeat() == 0) && (currentPosition->getTick() == 0))
+	if ((currentPosition->Beat == 0) && (currentPosition->Tick == 0))
 		return;
 
 	// вычисляем положение курсора на единицу влево
-	int beat = currentPosition->getBeat();
-	float tick = currentPosition->getTick();
+	int beat = currentPosition->Beat;
+	float tick = currentPosition->Tick;
 	tick -= (float)TICK_IN_BEAT / quantize;
 	if (tick < 0)
 	{

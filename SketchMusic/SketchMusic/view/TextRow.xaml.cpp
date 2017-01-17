@@ -95,7 +95,7 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 
 	for (int rowCnt = 0; rowCnt < breakLine.size(); rowCnt++)
 	{
-		int current = breakLine[rowCnt]->_pos->getBeat();
+		int current = breakLine[rowCnt]->_pos->Beat;
 		// добавляем новую строку
 		StackPanel^ row = ref new StackPanel;
 		row->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("RowPanel"));
@@ -126,7 +126,7 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 {
 	// вставка разрыва строки
 	// - находим строку, в которую будем вставлять разрыв
-	int beat = pos->getBeat();
+	int beat = pos->Beat;
 	int ctrlCnt = 0;
 
 	for (int i = 0; i < _mainPanel->Children->Size; i++)
@@ -174,7 +174,7 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 {
 	// удаление разрыва строки
 	// - находим строку, из которой будем удалять разрыв
-	int beat = pos->getBeat();
+	int beat = pos->Beat;
 	int rowCnt = 0; // конец нулевой строки - начало первой
 
 	for (auto&& line : breakLine)
@@ -449,7 +449,7 @@ void SketchMusic::View::TextRow::InsertNoteObject(PositionedSymbol^ note)
 int SketchMusic::View::TextRow::GetControlIndexAtPos(Cursor^ pos, int offset)
 {
 	//int lookupIndex = pos->getBeat()*initialised + pos->getTick() * scale / TICK_IN_BEAT * initialised / scale;
-	int lookupIndex = pos->getBeat()*initialised + pos->getTick() / TICK_IN_BEAT * initialised;
+	int lookupIndex = pos->Beat*initialised + pos->Tick / TICK_IN_BEAT * initialised;
 	lookupIndex += offset;
 	return lookupIndex;
 }
@@ -534,7 +534,7 @@ Point SketchMusic::View::TextRow::GetCoordinatsOfPosition(Cursor^ pos)
 		auto point = transform->TransformPoint(basePoint);
 
 		// смещение учитывая тики
-		point.X += ctrl->Width * pos->getTick() / TICK_IN_BEAT;
+		point.X += ctrl->Width * pos->Tick / TICK_IN_BEAT;
 		return point;
 	}
 	return Point(0,0);

@@ -70,7 +70,7 @@ void SketchMusic::View::CompositionView::OnVectorChanged(IObservableVector<PartD
 
 void SketchMusic::View::CompositionView::UpdateSize()
 {
-	int endBeat = m_parts->GetAt(Parts->Size-1)->originalPos->getBeat();
+	int endBeat = m_parts->GetAt(Parts->Size-1)->originalPos->Beat;
 
 	// вычисляем суммарную длину
 	int totalLength = 0;

@@ -114,6 +114,8 @@ namespace SketchMusic
 		static CompositionData^ deserialize(Platform::String^ str);
 		Windows::Data::Json::IJsonValue^ serialize();
 
+		void ApplyParts(IObservableVector<PartDefinition^>^ parts);
+
 		CompositionData();
 	};
 
@@ -122,9 +124,11 @@ namespace SketchMusic
 	*/
 	public ref class Composition sealed
 	{
-	internal:
-		CompositionHeader^ _header;
-		CompositionData^ _tracks;
+	public:
+		property CompositionHeader^ _header;
+		property CompositionData^ _tracks;
+
+		void Serialize();
 	};
 
 	// внутренняя структура
@@ -148,7 +152,8 @@ namespace SketchMusic
 		STRING	= 10,	// для вставки строки		
 		CLEF	= 11,	// для установки нот по вертикали
 		ACCENT	= 12,	// для "подсветки" данного положения - таким образом будем выделять ключевые места.
-						// По сути, ту же самую роль может выполнять GNote, но этот элемент будет проще, безо всяких значений
+						// По сути, ту же самую роль может выполнять GNote, но этот элемент будет проще, безо всяких значений,
+						// а также будет служить для разового "смещения" метронома
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]

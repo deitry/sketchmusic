@@ -38,22 +38,21 @@ internal:
 
 		// для каждого элемента хранить не абсолютное положение, а относительное - относительно текущего элемента?
 		// абсолютное - можно как буферизованное значение, вычисляемое для последнего обращения к одному из элементов...
+
+	IObservableVector<PartDefinition^>^ getParts();	// TODO : Перенести реализацию целиком в CompositionData?
+
 public:
 	Text();
 	Text(Windows::Data::Json::JsonObject^ json) {}
 	Text(Instrument^ instrument);
-	//Text(String^ instrumentName);
-		// TODO : так ли важен используемый инструмент для определения текста?
-		// Если использовать этот класс для определения содержимого произвольной идеи,
-		// то инструмент может сам по себе быть идеей, а может не играть никакой роли вообще
-		// ! Однако инструмент требуется в любом случае, если мы захотим прослушать то, что в тексте написано.
-		// Соответственно без указания инструмента для озвучивания остаётся только использовать некий "дефолтный" инструмент
-
+	
 	property SketchMusic::Instrument^ instrument;	// инструмент, который связывается с данной дорожкой
 	property SketchMusic::Cursor^ curPosition;
 
 	void addSymbol(PositionedSymbol^ sym) { _t.insert(std::make_pair(sym->_pos, sym->_sym)); }
 	void addSymbol(Cursor^ cur, ISymbol^ sym) { _t.insert(std::make_pair(cur, sym)); }
+	void addOrReplaceSymbol(PositionedSymbol^ sym);
+
 	ISymbol^ getSymbol(Cursor^ cur) { return _t.find(cur)->second; }
 	void deleteSymbol(Cursor^ cur, ISymbol^ sym);
 	void deleteSymbols(Cursor^ begin, Cursor^ end);
@@ -64,26 +63,27 @@ public:
 	// Работа с долями - вставка, удаление
 	void addBeat(Cursor^ position, Cursor^ offset);
 	void deleteBeat(Cursor^ position, Cursor^ offset);
-	
+	//void MoveSymbols(Cursor^ leftBound, Cursor^ rightBound, Cursor^ to);
+
 	unsigned int getSize() { return _t.size(); }
 	IVector<PositionedSymbol^>^ getText();
-	IObservableVector<PartDefinition^>^ getParts();	// TODO : Перенести реализацию целиком в CompositionData
-	//Platform::Collections::Vector<PositionedSymbol^>^ getText();
-
+	
 	// получение нот в конкретной точке и сбоку от неё - для последовательного редактирования
 	IVector<PositionedSymbol^>^ getNotesAt(Cursor^ pos, SymbolType type);
 	IVector<PositionedSymbol^>^ getNotesAtExcluding(Cursor^ pos, SymbolType type);
 	Cursor^ getPosAtLeft(Cursor^ pos);
 	Cursor^ getPosAtRight(Cursor^ pos);
 	
-	static SketchMusic::Text^ deserialize(Platform::String^ str);
-	static SketchMusic::Text^ deserialize(Windows::Data::Json::JsonObject^ json);
+	static Text^ deserialize(Platform::String^ str);
+	static Text^ deserialize(Windows::Data::Json::JsonObject^ json);
 	Windows::Data::Json::IJsonValue^ serialize();
 
 	virtual IIterator<PositionedSymbol^>^ First();
 	
 	// TODO : функции вставки одного текста в другой, объединение, "вырезание" и так далее
 	// Потребуются, когда можно будет идеи объединять друг с другом
+
+	
 };
 
 public ref class SketchMusic::TextIterator sealed : IIterator<PositionedSymbol^>

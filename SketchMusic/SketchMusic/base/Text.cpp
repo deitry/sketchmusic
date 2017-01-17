@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Text.h"
+#include "Cursor.h"
 
 using namespace SketchMusic;
 using Windows::Foundation::Collections::IVector;
@@ -26,6 +27,29 @@ SketchMusic::Text::Text(Instrument^ instrument)
 //	this->curPosition = ref new Cursor;
 //	this->instrument = ref new Instrument(instrumentName);
 //}
+
+void SketchMusic::Text::addOrReplaceSymbol(PositionedSymbol ^ sym)
+{
+	// поискать аналогичный символ в этом месте
+	auto lookup = _t.lower_bound(sym->_pos);
+	auto max = _t.upper_bound(sym->_pos);
+	if (lookup == max)
+	{
+		// если нету - вставляем новый символ
+		
+	}
+	else
+	{
+		// если нашли - изменяем содержимое
+		for (;lookup != max; lookup++)
+		{
+			if (lookup->second->GetSymType() == sym->_sym->GetSymType())
+			{
+				lookup->second = sym->_sym;
+			}
+		}
+	}
+}
 
 void SketchMusic::Text::deleteSymbol(Cursor^ cur, ISymbol^ sym)
 {
@@ -108,7 +132,7 @@ IObservableVector<PartDefinition^>^ SketchMusic::Text::getParts()
 			auto def = ref new PartDefinition(i.first, dynamic_cast<SNewPart^>(i.second));
 			if (prev)
 			{
-				def->length = def->originalPos->getBeat() - prev->originalPos->getBeat();
+				def->length = def->originalPos->Beat - prev->originalPos->Beat;
 			}
 			parts->Append(def);
 			prev = def;
@@ -195,8 +219,8 @@ IJsonValue^ SketchMusic::Text::serialize()
 	{
 		// не вызываем сериализацию для каждого элемента в отдельности, чтобы немного сэкономить на объектах.
 		JsonObject^ jsym = ref new JsonObject;
-		jsym->Insert(t::BEAT, JsonValue::CreateNumberValue(sym.first->getBeat()));
-		jsym->Insert(t::TICK, JsonValue::CreateNumberValue(sym.first->getTick()));
+		jsym->Insert(t::BEAT, JsonValue::CreateNumberValue(sym.first->Beat));
+		jsym->Insert(t::TICK, JsonValue::CreateNumberValue(sym.first->Tick));
 		jsym->Insert(t::SYMBOL_TYPE, JsonValue::CreateNumberValue(static_cast<int>(sym.second->GetSymType())));
 		auto tempo = dynamic_cast<STempo^>(sym.second);
 		if (tempo)

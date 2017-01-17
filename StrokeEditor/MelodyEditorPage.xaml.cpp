@@ -376,7 +376,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 				ref new SMC::Command(deleteSym, nullptr, nullptr),
 				ref new SMC::SymbolHandlerArgs(_textRow->current,
 					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), nullptr),
-					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition->getBeat() - 1), nullptr))));
+					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition->Beat - 1), nullptr))));
 			((App^)App::Current)->_manager->ExecuteLast();
 
 			// из управляющего текста - из управляющего текста удалять только через контекстное меню конкретного символа?
@@ -679,7 +679,7 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 	//auto cur = _textRow->currentPosition; 
 	_textRow->SetCursor(pos);
 
-	CurPosTxt->Text = L"" + pos->getBeat() + ":" + pos->getTick();
+	CurPosTxt->Text = L"" + pos->Beat + ":" + pos->Tick;
 	// сюда - только обычные ноты
 	CurrentChord->SetNotes(txt->getNotesAt(pos, SymbolType::NOTE));
 	// сюда - все, кроме обычных
@@ -694,7 +694,7 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 	
 	if (prevEnabled)
 	{
-		MoveLeftCWBtn->IsEnabled = true; PrevPosTxt->Text = L"" + prevPos->getBeat() + ":" + prevPos->getTick() ;
+		MoveLeftCWBtn->IsEnabled = true; PrevPosTxt->Text = L"" + prevPos->Beat + ":" + prevPos->Tick ;
 	}
 	else { MoveLeftCWBtn->IsEnabled = false; PrevPosTxt->Text = ""; }
 
@@ -707,7 +707,7 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 
 	if (nextEnabled)
 	{
-		MoveRightCWBtn->IsEnabled = true; NextPosTxt->Text = L"" + nextPos->getBeat() + ":" + nextPos->getTick();
+		MoveRightCWBtn->IsEnabled = true; NextPosTxt->Text = L"" + nextPos->Beat + ":" + nextPos->Tick;
 	}
 	else { MoveRightCWBtn->IsEnabled = false; NextPosTxt->Text = ""; }
 
