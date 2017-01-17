@@ -3,6 +3,7 @@
 // Реализация класса CompositionEditorPage
 //
 
+#include <string>
 #include "pch.h"
 #include "CompositionEditorPage.xaml.h"
 #include "MainMenuPage.xaml.h"
@@ -21,6 +22,7 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace Windows::UI::Xaml::Interop;
 using namespace SketchMusic;
+
 
 // Шаблон элемента пустой страницы задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -78,7 +80,65 @@ void StrokeEditor::CompositionEditorPage::Page_SizeChanged(Platform::Object^ sen
 	CompositionPartList->Width = width;
 }
 
+void StrokeEditor::CompositionEditorPage::CompositionPartList_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
+{
+
+}
 
 
+void StrokeEditor::CompositionEditorPage::CompositionPartList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+{
+	DeletePartBtn->IsEnabled = CompositionPartList->SelectedItem ? true : false;
+	EditPartBtn->IsEnabled = CompositionPartList->SelectedItem ? true : false;
+	CompositionView->SelectedItem = (PartDefinition^)CompositionPartList->SelectedItem;
+}
 
 
+void StrokeEditor::CompositionEditorPage::DeletePartBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	unsigned int ind;
+	auto selected = CompositionPartList->SelectedItem;
+	if (CompositionView->Parts->IndexOf((PartDefinition^)selected, &ind))
+	{
+		CompositionView->SelectedItem = nullptr;
+		CompositionView->Parts->RemoveAt(ind);
+	}
+}
+
+
+void StrokeEditor::CompositionEditorPage::AddPartButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	AddPartFlyout->Hide();
+	
+	PartDefinition^ part = ref new PartDefinition;
+	part->length = std::stoi(PartLength->Text->Data());
+	part->original = ref new SNewPart;
+	part->original->category = PartCatTxt->Text;
+	part->original->dynamic = (DynamicCategory)PartCatComboBox->SelectedIndex;
+
+	CompositionView->Parts->Append(part);
+}
+
+
+void StrokeEditor::CompositionEditorPage::EditPartBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
+}
+
+
+void StrokeEditor::CompositionEditorPage::PartLength_TextChanging(Windows::UI::Xaml::Controls::TextBox^ sender, Windows::UI::Xaml::Controls::TextBoxTextChangingEventArgs^ args)
+{
+	if (sender->SelectionStart != 0)
+	{
+		std::wstring lastChar = sender->Text->Data();
+		int pos = sender->SelectionStart - 1;
+		lastChar = lastChar.substr(pos,1);
+		if (!iswdigit(lastChar.at(0)))
+		{
+			std::wstring wstr = sender->Text->Data();
+			wstr = wstr.substr(0,pos);
+			sender->Text = ref new Platform::String(wstr.data());
+			sender->SelectionStart = pos;
+		}
+	}
+}

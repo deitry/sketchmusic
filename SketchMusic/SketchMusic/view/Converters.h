@@ -411,32 +411,14 @@ public:
 		
 		Platform::String^ str = "";
 
-		bool needComma = false;
-		if (part->original->dynamic.quite) str += "|--";
-		if (part->original->dynamic.regular)
+		switch (part->original->dynamic)
 		{
-			if (needComma) str += ","; else needComma = true;
-			str += "||";
-		}
-		if (part->original->dynamic.unregular)
-		{
-			if (needComma) str += ","; else needComma = true;
-			str += "|/|";
-		}
-		if (part->original->dynamic.fast)
-		{
-			if (needComma) str += ","; else needComma = true;
-			str += "||||";
-		}
-		if (part->original->dynamic.hard)
-		{
-			if (needComma) str += ","; else needComma = true;
-			str += "!";
-		}
-		if (part->original->dynamic.harder)
-		{
-			if (needComma) str += ","; else needComma = true;
-			str += "!||";
+		case DynamicCategory::quite: str += "|--"; break;
+		case DynamicCategory::regular: str += "||"; break;
+		case DynamicCategory::unregular: str += "|/|"; break;
+		case DynamicCategory::fast: str += "||||"; break;
+		case DynamicCategory::hard: str += "!"; break;
+		case DynamicCategory::harder: str += "!||"; break;
 		}
 		return str;
 	}

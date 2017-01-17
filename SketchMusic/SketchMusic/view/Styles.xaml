@@ -36,6 +36,8 @@
     <SolidColorBrush x:Key="noteBackground4" x:Name="noteBackground4" Color="Yellow"/>
     <SolidColorBrush x:Key="tempoBackground" x:Name="tempoBackground" Color="DarkCyan"/>
 
+    <SolidColorBrush x:Key="SelectedPartBackground" x:Name="SelectedPartBackground" Color="Yellow"/>
+    
     <smv:OnSymbolToStringConverter x:Key="sym2string"/>
     <smv:OnKeyToStringConverter x:Key="key2string"/>
     <smv:TagToKeyConverter x:Key="tag2key"/>
@@ -228,7 +230,7 @@
 
     <Style TargetType="ContentControl" x:Key="CompositionPartStyle">
         <Setter Property="Margin" Value="0,10,0,10"/>
-        <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
+        <!--<Setter Property="Background" Value="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>-->
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
@@ -241,14 +243,19 @@
                                     <Run x:Name="PartCatTxt" Text="{Binding DataContext,
                                                                     RelativeSource={RelativeSource TemplatedParent},
                                                                     Converter={StaticResource partcat2text}}"/>
-                                    <Run Text=" at "/>
+                                    <!--<Run Text=" at "/>
                                     <Run x:Name="PartPosTxt" Text="{Binding DataContext,
                                                                     RelativeSource={RelativeSource TemplatedParent},
-                                                                    Converter={StaticResource psympos2text}}"/>
+                                                                    Converter={StaticResource psympos2text}}"/>-->
                         </TextBlock>
                         <Rectangle Grid.Row="1" Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}"
                                    StrokeThickness="2"
                                    Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                                   Width="{TemplateBinding Width}"
+                                   Height="10"/>
+                        <Rectangle Grid.Row="1" Stroke="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                                   StrokeThickness="2"
+                                   Fill="{TemplateBinding Background}"
                                    Width="{TemplateBinding Width}"
                                    Height="10"/>
                     </Grid>

@@ -17,9 +17,12 @@ public ref class SketchMusic::View::CompositionView sealed
 {
 private:
 	IObservableVector<PartDefinition^>^ m_parts;
+	PartDefinition^ m_selected;
 
 public:
 	CompositionView();
+
+	property IMap<Platform::String^, int>^ Categories;	// ключ - имя категории, значение - количество вхождений. Обновляется автоматически
 
 	property IObservableVector<PartDefinition^>^ Parts
 	{
@@ -30,4 +33,9 @@ public:
 	void UpdateSize();
 	void UpdateView();
 	void OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs^ args);
+	property PartDefinition^ SelectedItem
+	{
+		PartDefinition^ get() { return m_selected; }
+		void set(PartDefinition^ selected);
+	}
 };

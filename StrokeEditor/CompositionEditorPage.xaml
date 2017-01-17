@@ -26,6 +26,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -46,19 +47,72 @@
                 x:Name="CompositionSlider"
                 Margin="10"
                 VerticalAlignment="Center"/>
-            <StackPanel HorizontalAlignment="Center"
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal"
                     Grid.Row="2">
                 <Button FontFamily="Segoe MDL2 Assets" Content="&#xE768;" Margin="5,0,5,0"/>
             </StackPanel>
         </Grid>
 
-        <ListView Grid.Row="1" x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
+        <StackPanel Grid.Row="1" HorizontalAlignment="Left" Orientation="Horizontal" Margin="10,5,10,5">
+            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;">
+                <Button.Flyout>
+                    <Flyout x:Name="AddPartFlyout">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                             </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" HorizontalAlignment="Right" Text="Имя"/>
+                            <TextBlock Grid.Row="1" HorizontalAlignment="Right" Text="Категория"/>
+                            <TextBlock Grid.Row="2" HorizontalAlignment="Right" Text="Динамика"/>
+                            <TextBlock Grid.Row="3" HorizontalAlignment="Right" Text="Длина"/>
+
+                            <TextBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" x:Name="PartNameTxt"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" x:Name="PartCatTxt"/>
+
+                            <ComboBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"
+                                      x:Name="PartCatComboBox">
+                                <ComboBoxItem Content="|--"/>
+                                <ComboBoxItem Content="||"/>
+                                <ComboBoxItem Content="|/|"/>
+                                <ComboBoxItem Content="||||"/>
+                                <ComboBoxItem Content="!--"/>
+                                <ComboBoxItem Content="!||"/>
+                                <ComboBoxItem Content="~"/>
+                            </ComboBox>
+                            <TextBox Grid.Row="3" Grid.Column="1"  HorizontalAlignment="Left" Text="4" x:Name="PartLength"
+                                     TextChanging="PartLength_TextChanging"/>
+
+                            <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" 
+                                    x:Name="AddPartBtn" Click="AddPartButton_Click" 
+                                    HorizontalAlignment="Center"
+                                    Content="Добавить"/>
+                            
+                        </Grid>
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" x:Name="DeletePartBtn" Click="DeletePartBtn_Click" IsEnabled="False"/>
+            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE70F;" x:Name="EditPartBtn" Click="EditPartBtn_Click"  IsEnabled="False"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Visible" VerticalScrollMode="Enabled">
+        <ListView x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
                   CanReorderItems="True" CanDragItems="True" AllowDrop="True" Width="800"
-                  VerticalAlignment="Stretch"
+                  ItemClick="CompositionPartList_ItemClick"
+                  SelectionChanged="CompositionPartList_SelectionChanged"
                   >
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid HorizontalAlignment="Stretch" Width="auto">
+                    <Grid HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=CompositionPartList}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
@@ -76,6 +130,7 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+        </ScrollViewer>
 
     </Grid>
 </Page>

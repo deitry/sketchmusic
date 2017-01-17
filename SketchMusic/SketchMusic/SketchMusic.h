@@ -65,14 +65,14 @@ namespace SketchMusic
 	};
 
 	// Категория динамики. Сделал через битовые поля, чтобы одним числом можно было определить сразу несколько категорий.
-	public value struct DynamicCategory
+	public enum class DynamicCategory
 	{
-		bool quite;		// |--
-		bool regular;	// ||
-		bool unregular;	// |/|
-		bool fast;		// ||||
-		bool hard;		// !
-		bool harder;	// !||	
+		quite		= 0,	// |--
+		regular		= 1,	// ||
+		unregular	= 2, 	// |/|
+		fast		= 3,	// ||||
+		hard		= 4,	// !
+		harder		= 5,	// !||
 	};
 
 	ref class Sample;
@@ -363,7 +363,7 @@ namespace SketchMusic
 
 		property int number;	// порядковый номер части с этой категорией. Будет вычисляться автоматически, здесь храним для удобства
 		property int length;	// продолжительность в "битах". Будет вычисляться автоматически, здесь храним для удобства
-		property double timeLegnth;	// продолжительность в секундах, опять же для удобства. Будем вычислять автоматичеки, проходясь по тексту и учитывая STempo
+		property double timeLegnth;
 	};
 
 	public ref class STempo sealed : public SketchMusic::ISymbol

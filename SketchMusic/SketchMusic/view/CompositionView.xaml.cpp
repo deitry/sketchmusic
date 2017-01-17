@@ -23,17 +23,15 @@ using namespace Windows::UI::Xaml::Navigation;
 
 CompositionView::CompositionView()
 {
+	Categories = ref new Platform::Collections::Map<String^, int>;
 	auto parts = ref new Platform::Collections::Vector<PartDefinition^>;
-	DynamicCategory cat;
-	cat.quite = true;
-	cat.regular = true;
-	PartDefinition^ p1 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(0), ref new SNewPart("A", cat)));
+	PartDefinition^ p1 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(0), ref new SNewPart("A", DynamicCategory::quite)));
 	p1->length = 2;
-	PartDefinition^ p2 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(2), ref new SNewPart("B", cat)));
+	PartDefinition^ p2 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(2), ref new SNewPart("B", DynamicCategory::harder)));
 	p2->length = 2;
-	PartDefinition^ p3 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(4), ref new SNewPart("A", cat)));
+	PartDefinition^ p3 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(4), ref new SNewPart("A", DynamicCategory::regular)));
 	p3->length = 5; p3->number = 1;
-	PartDefinition^ p4 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(9), ref new SNewPart("B", cat)));
+	PartDefinition^ p4 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(9), ref new SNewPart("B", DynamicCategory::fast)));
 	p4->length = 1; p4->number = 1;
 
 	parts->Append(p1);
@@ -58,20 +56,70 @@ void SketchMusic::View::CompositionView::SetParts(IObservableVector<PartDefiniti
 
 void SketchMusic::View::CompositionView::OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs^ args)
 {
+	// обновляем список категорий и количество вхождений
+	Categories->Clear();
+	for (auto&& part : sender)
+	{
+		auto cat = part->original->category;
+		if (cat == nullptr || cat == "")
+		{
+			part->number = 0;
+			continue;
+		}
+
+		if (Categories->HasKey(cat))
+		{
+			auto val = Categories->Lookup(cat);
+			Categories->Insert(cat, val+1);
+			part->number = val + 1;
+		}
+		else
+		{
+			Categories->Insert(cat, 0);
+			part->number = 0;
+		}
+	}
+
 	switch (args->CollectionChange)
 	{
 	case CollectionChange::ItemRemoved:
-		break;
 	case CollectionChange::ItemInserted:
 		UpdateView();
 		break;
 	}
 }
 
+void SketchMusic::View::CompositionView::SelectedItem::set(PartDefinition ^ part)
+{
+	unsigned int ind;
+	if (m_parts->IndexOf(part, &ind))
+	{
+		if (part != nullptr)
+		{
+			for (auto&& child : CompositionPanel->Children)
+			{
+				auto ctrl = dynamic_cast<ContentControl^>(static_cast<Object^>(child));
+				if (ctrl == nullptr) continue;
+				auto childData = dynamic_cast<PartDefinition^>(ctrl->DataContext);
+
+				if (childData == part)
+				{
+					ctrl->Background = reinterpret_cast<Windows::UI::Xaml::Media::SolidColorBrush^>(
+						this->Resources->Lookup("SelectedPartBackground"));
+				}
+				else
+				{
+					ctrl->Background = nullptr;
+				}
+			}
+		}
+
+		m_selected = part;
+	}
+}
+
 void SketchMusic::View::CompositionView::UpdateSize()
 {
-	int endBeat = m_parts->GetAt(Parts->Size-1)->originalPos->Beat;
-
 	// вычисляем суммарную длину
 	int totalLength = 0;
 	for (auto&& p : m_parts)
@@ -101,6 +149,16 @@ void SketchMusic::View::CompositionView::UpdateView()
 		ctrl->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(this->Resources->Lookup("CompositionPartStyle"));
 		ctrl->DataContext = part;
 		CompositionPanel->Children->Append(ctrl);
+
+		if (part == m_selected)
+		{
+			ctrl->Background = reinterpret_cast<Windows::UI::Xaml::Media::SolidColorBrush^>(
+				this->Resources->Lookup("SelectedPartBackground"));
+		}
+		else
+		{
+			ctrl->Background = nullptr;
+		}
 	}
 
 	UpdateSize();
