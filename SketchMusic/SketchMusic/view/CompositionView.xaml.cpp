@@ -42,14 +42,14 @@ CompositionView::CompositionView()
 	InitializeComponent();
 	SetParts(parts);
 
-	m_parts->VectorChanged += ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PartDefinition ^>(this,
-		&SketchMusic::View::CompositionView::OnVectorChanged);
+	
 }
 
 void SketchMusic::View::CompositionView::SetParts(IObservableVector<PartDefinition^>^ parts)
 {
 	m_parts = parts;
-	PartDefinition^ prev = nullptr;
+	m_parts->VectorChanged += ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PartDefinition ^>(this,
+		&SketchMusic::View::CompositionView::OnVectorChanged);
 	
 	UpdateView();
 }

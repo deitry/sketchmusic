@@ -86,8 +86,8 @@ namespace SketchMusic
 	public ref class CompositionHeader sealed
 	{
 	public:
-		property String^ name;
-		property String^ description;
+		property String^ Name;
+		property String^ Description;
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
@@ -111,6 +111,7 @@ namespace SketchMusic
 		IObservableVector<PartDefinition^>^ getParts();
 			// В дальнейшем сделаем controlText "хранителем" управляющих символов и прочая, что влияет непосредственно на композицию
 
+		static CompositionData^ deserialize(Windows::Data::Json::JsonArray^ json);
 		static CompositionData^ deserialize(Platform::String^ str);
 		Windows::Data::Json::IJsonValue^ serialize();
 
@@ -125,10 +126,13 @@ namespace SketchMusic
 	public ref class Composition sealed
 	{
 	public:
-		property CompositionHeader^ _header;
-		property CompositionData^ _tracks;
+		property CompositionHeader^ Header;
+		property CompositionData^ Data;
 
-		void Serialize();
+		Windows::Data::Json::IJsonValue^ Serialize();
+		static Composition^ Deserialize(Windows::Data::Json::JsonObject^ json);
+
+		Composition() { Header = ref new CompositionHeader; Data = ref new CompositionData; }
 	};
 
 	// внутренняя структура
@@ -331,7 +335,7 @@ namespace SketchMusic
 	public:
 		SNewPart() {}
 		SNewPart(String^ _cat) { category = _cat; }
-		SNewPart(String^ _cat, DynamicCategory _dyn) { category = _cat; dynamic = _dyn; }
+		SNewPart(String^ _name, String^ _cat, DynamicCategory _dyn) { Name = _name; category = _cat; dynamic = _dyn; }
 
 		property String^ Name;
 		property String^ category;	// "A", "B", "куплет", "бридж" - определяется только категория
@@ -569,6 +573,14 @@ namespace SketchMusic
 		static Platform::String^ NOTE_VOICE = "o";		// номер голоса
 		static Platform::String^ NOTES_ARRAY = "notes";	// обозначение массива с нотами
 		static Platform::String^ CONTROL_TEXT = "ctrl_txt";	// обозначение текста, содержащего общие для всех "инструментальных" текстов символы
+		static Platform::String^ TEXTS_ARRAY = "texts";	// обозначение массива с текстами
+		static Platform::String^ PROJ_NAME = "name";	// имя проекта
+		static Platform::String^ PROJ_DESC = "descr";	// описание проекта
+
+		static Platform::String^ PART_NAME = "n";	// описание проекта
+		static Platform::String^ PART_CAT = "s";	// описание проекта
+		static Platform::String^ PART_DYN = "d";	// описание проекта
+
 	}
 
 	// классы для обеспечения модели синтеза SoundFont

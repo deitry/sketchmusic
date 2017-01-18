@@ -7,6 +7,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <local:FileToTextConverter x:Key="file2text"/>
+    </Page.Resources>
+    
     <Page.TopAppBar>
         <CommandBar x:Name="commandBar">
             <AppBarButton Name="GoMenuBtn" Label="В меню" Click="GoMenuBtn_Click" Icon="Home"/>
@@ -52,7 +56,7 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Grid BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}" BorderThickness="1">
-                        <TextBlock Text="{Binding}"/>
+                        <TextBlock Text="{Binding Converter={StaticResource file2text}}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

@@ -17,6 +17,7 @@ namespace StrokeEditor
 	{
 	public:
 		CompositionOverviewPage();
+
 	private:
 		void GoMenuBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void FilterList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
@@ -25,10 +26,32 @@ namespace StrokeEditor
 		void EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 
 		void InitializePage();
+		
+		Windows::Foundation::Collections::IVector < Windows::Storage::StorageFile^ > ^ compositionList;
+		Windows::Storage::StorageFolder^ Workspace;
 
-		Windows::Foundation::Collections::IVector<Platform::String^>^ compositionList;
 		void SetWorkingFolderBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void PlayBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void CompositionListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
+	};
+
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+	public ref class FileToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+	{
+	public:
+		virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+		{
+			auto file = dynamic_cast<Windows::Storage::StorageFile^>(value);
+			
+			return file->Name;
+		}
+
+		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+		{
+			return nullptr;
+			//return ref new SketchMusic::PositionedSymbol(ref new SketchMusic::Cursor, ref new SketchMusic::SNote);
+		}
+
+		FileToTextConverter() {}
 	};
 }

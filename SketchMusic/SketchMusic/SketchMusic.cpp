@@ -64,8 +64,11 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			}
 			case SymbolType::NPART:
 			{
-				auto str = obj->GetNamedString(t::NOTE_VALUE, "");
-				return ref new SNewPart(str);
+				auto name = obj->GetNamedString(t::PART_NAME, "");
+				auto cat = obj->GetNamedString(t::PART_CAT, "");
+				auto dyn = (DynamicCategory)((int)obj->GetNamedNumber(t::PART_DYN, 0));
+
+				return ref new SNewPart(name, cat, dyn);
 			}
 			case SymbolType::TEMPO:
 			{
@@ -186,18 +189,7 @@ CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ st
 	auto json = ref new JsonArray();
 	if (JsonArray::TryParse(str, &json))
 	{
-		data = ref new SketchMusic::CompositionData;
-		for (auto i : json)
-		{
-			auto obj = i->GetObject();
-			auto text = SketchMusic::Text::deserialize(obj);
-			if (text)
-			{
-				if (text->instrument->_name == SerializationTokens::CONTROL_TEXT)
-					data->ControlText = text;
-				else data->texts->Append(text);
-			}
-		}
+		data = deserialize(json);
 	}
 	else
 	{
@@ -213,6 +205,24 @@ CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ st
 					data->ControlText = text;
 				else data->texts->Append(text);
 			}
+		}
+	}
+	return data;
+}
+
+CompositionData ^ SketchMusic::CompositionData::deserialize(Windows::Data::Json::JsonArray^ json)
+{
+	SketchMusic::CompositionData^ data = nullptr;
+	data = ref new SketchMusic::CompositionData;
+	for (auto i : json)
+	{
+		auto obj = i->GetObject();
+		auto text = SketchMusic::Text::deserialize(obj);
+		if (text)
+		{
+			if (text->instrument->_name == SerializationTokens::CONTROL_TEXT)
+				data->ControlText = text;
+			else data->texts->Append(text);
 		}
 	}
 	return data;
@@ -254,10 +264,10 @@ void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>
 
 	// проверка на то, что реорганизовывать ничего не надо
 	bool ok = true;
+	int cur = 0;
 	for (auto&& part : parts)
 	{
-		static int cur = 0;
-		if (part->originalPos->Beat != cur)
+		if ((part->originalPos == nullptr) || (part->originalPos && part->originalPos->Beat != cur))
 		{
 			ok = false;
 			break;
@@ -267,36 +277,63 @@ void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>
 
 	if (ok) return;
 
+	// инициализируем "реорганизованные" тексты
 	auto reorginised = ref new Platform::Collections::Vector<Text^>;
 	for (auto&& oldText : m_texts)
 	{
 		Text^ newText = ref new Text(oldText->instrument);
-
-		for (auto&& part : parts)
-		{
-			static int curPos = 0;
-			// определяем граничные итераторы части в данном тексте
-			auto orig = part->originalPos;
-			auto leftBound = oldText->_t.lower_bound(orig);	// откуда начнём "вырезать" текст
-			int rightBeat = leftBound->first->Beat + part->Length;
-			int dif = part->originalPos->Beat - curPos;
-			Cursor^ rightPos = ref new Cursor(rightBeat + dif);
-			auto rightBound = oldText->_t.lower_bound(rightPos);	// где закончим
-
-			// переставляем символы из старого текста в новый
-			for (auto iter = leftBound; iter != rightBound; iter++)
-			{
-				auto sym = iter->second;
-				newText->_t.insert(std::make_pair(ref new Cursor (iter->first->Beat + dif,iter->first->Tick),sym));
-			}
-
-			curPos += part->Length;
-		}
-
 		reorginised->Append(newText);
 	}
+	Text^ newCtrlTxt = ref new Text(ref new Instrument(t::CONTROL_TEXT));
 
+	// применяем перестановки частей
+	int curPos = 0;
+	for (auto&& part : parts)
+	{
+		// определяем граничные итераторы части в данном тексте
+		if (part->originalPos != nullptr)
+		{
+			for (int i = 0; i < m_texts->Size + 1; i++)
+			{
+				Text^ oldText;
+				Text^ newText;
+				if (i < m_texts->Size)
+				{
+					oldText = m_texts->GetAt(i);
+					newText = reorginised->GetAt(i);
+				}
+				else
+				{
+					oldText = ControlText;
+					newText = newCtrlTxt;
+				}
+
+				auto orig = part->originalPos;
+				auto leftBound = oldText->_t.lower_bound(orig);	// откуда начнём "вырезать" текст
+				int rightBeat = leftBound->first->Beat + part->Length;
+				int dif = orig->Beat - curPos;
+				Cursor^ rightPos = ref new Cursor(rightBeat + dif);
+				auto rightBound = oldText->_t.lower_bound(rightPos);	// где закончим
+
+				// переставляем символы из старого текста в новый
+				for (auto iter = leftBound; iter != rightBound; iter++)
+				{
+					auto sym = iter->second;
+					if (sym->GetSymType() != SymbolType::NPART)	// переставляем всё, кроме символов частей
+						newText->_t.insert(std::make_pair(ref new Cursor(iter->first->Beat + dif, iter->first->Tick), sym));
+				}
+			}
+		}
+
+		// вставляем собственно сам символ части
+		newCtrlTxt->_t.insert(std::make_pair(ref new Cursor(curPos), part->original));
+		curPos += part->Length;
+	}
+
+	// вставляем символ части в самый конец
+	newCtrlTxt->_t.insert(std::make_pair(ref new Cursor(curPos), ref new SNewPart));
 	m_texts = reorginised;
+	ControlText = newCtrlTxt;
 }
 
 SketchMusic::CompositionData::CompositionData()
@@ -305,9 +342,25 @@ SketchMusic::CompositionData::CompositionData()
 	this->texts = ref new Platform::Collections::Vector < Text^ >;
 }
 
-void SketchMusic::Composition::Serialize()
+IJsonValue^ SketchMusic::Composition::Serialize()
 {
-	throw ref new Platform::NotImplementedException();
+	auto json = ref new JsonObject;
+	json->Insert(SerializationTokens::PROJ_NAME, JsonValue::CreateStringValue(Header->Name));
+	//json->Insert(SerializationTokens::PROJ_NAME, JsonValue::CreateStringValue(_header->description));
+	json->Insert(SerializationTokens::TEXTS_ARRAY, Data->serialize());
+	return json;
+}
+
+Composition ^ SketchMusic::Composition::Deserialize(JsonObject ^ json)
+{
+	Composition^ comp = ref new Composition;
+	comp->Header->Name = json->GetNamedString(SerializationTokens::PROJ_NAME, "");
+	auto texts = json->GetNamedArray(SerializationTokens::TEXTS_ARRAY, nullptr);
+	if (texts)
+	{
+		comp->Data = CompositionData::deserialize(texts);
+	}
+	return comp;
 }
 
 void SketchMusic::PartDefinition::OnPropertyChanged(Platform::String ^ propertyName)

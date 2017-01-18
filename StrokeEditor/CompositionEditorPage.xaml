@@ -49,12 +49,12 @@
                 VerticalAlignment="Center"/>
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal"
                     Grid.Row="2">
-                <Button FontFamily="Segoe MDL2 Assets" Content="&#xE768;" Margin="5,0,5,0"/>
+                <Button x:Name="PlayCompositionBtn" FontFamily="Segoe MDL2 Assets" Content="&#xE768;" Margin="5,0,5,0"/>
             </StackPanel>
         </Grid>
 
         <StackPanel Grid.Row="1" HorizontalAlignment="Left" Orientation="Horizontal" Margin="10,5,10,5">
-            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;">
+            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" x:Name="AddPartBtn" Click="AddPartBtn_Click">
                 <Button.Flyout>
                     <Flyout x:Name="AddPartFlyout">
                         <Grid>
@@ -92,10 +92,14 @@
                                      TextChanging="PartLength_TextChanging"/>
 
                             <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" 
-                                    x:Name="AddPartBtn" Click="AddPartButton_Click" 
+                                    x:Name="AcceptAddPartBtn" Click="AcceptAddPartButton_Click" 
                                     HorizontalAlignment="Center"
                                     Content="Добавить"/>
                             
+                            <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" 
+                                    x:Name="AcceptEditPartBtn" Click="AcceptEditPartButton_Click" 
+                                    HorizontalAlignment="Center"
+                                    Content="Изменить" Visibility="Collapsed"/>
                         </Grid>
                     </Flyout>
                 </Button.Flyout>

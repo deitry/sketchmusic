@@ -35,7 +35,7 @@ CompositionOverviewPage::CompositionOverviewPage()
 {
 	InitializeComponent();
 
-	compositionList = ref new Platform::Collections::Vector<String^>;
+	compositionList = ref new Platform::Collections::Vector<StorageFile^>;
 
 	InitializePage();
 }
@@ -111,28 +111,22 @@ void StrokeEditor::CompositionOverviewPage::InitializePage()
 			localSettings->Values->Insert("workspace_path", fullPath);
 			Windows::Storage::AccessCache::StorageApplicationPermissions::FutureAccessList->AddOrReplace("PickedFolderToken", folder);
 
+			Workspace = folder;
+
 			create_task(folder->GetFilesAsync()).then([=](Windows::Foundation::Collections::IVectorView<StorageFile^>^ fileList)
 			{
 				compositionList->Clear();
-				for (auto file : fileList)
+				for (auto&& file : fileList)
 				{
-					compositionList->Append(file->Name);
+					compositionList->Append(file);
 				}
 				this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Low, ref new Windows::UI::Core::DispatchedHandler([=]()
 				{
-					auto listView = dynamic_cast<ListView^>(CompositionListView);
-					if (listView)
-					{
-						listView->ItemsSource = compositionList;
-					}
+					CompositionListView->ItemsSource = compositionList;
 				}));
 			});
 		}
 	});
-
-	
-		//myTask.get();
-	//}));
 }
 
 
@@ -156,13 +150,13 @@ void StrokeEditor::CompositionOverviewPage::RefreshBtn_Click(Platform::Object^ s
 
 void StrokeEditor::CompositionOverviewPage::CreateEntryBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-
+	this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), ref new CompositionNavigationArgs(Workspace, nullptr));
 }
 
 
 void StrokeEditor::CompositionOverviewPage::EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), CompositionListView->SelectedItem);
+	this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), ref new CompositionNavigationArgs(Workspace, (StorageFile^) CompositionListView->SelectedItem));
 }
 
 
@@ -184,11 +178,13 @@ void StrokeEditor::CompositionOverviewPage::SetWorkingFolderBtn_Click(Platform::
 				
 				Windows::Storage::AccessCache::StorageApplicationPermissions::FutureAccessList->AddOrReplace("PickedFolderToken", folder);
 
+				Workspace = folder;
+
 				create_task(folder->GetFilesAsync()).then([=](Windows::Foundation::Collections::IVectorView<StorageFile^>^ fileList)
 				{
 					for (auto file : fileList)
 					{
-						compositionList->Append(file->Name);
+						compositionList->Append(file);
 					}
 					this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Low, ref new Windows::UI::Core::DispatchedHandler([=]()
 					{

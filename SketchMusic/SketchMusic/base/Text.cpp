@@ -125,22 +125,50 @@ IObservableVector<PartDefinition^>^ SketchMusic::Text::getParts()
 {
 	auto parts = ref new Platform::Collections::Vector<PartDefinition^>;
 	PartDefinition^ prev = nullptr;
+	int curBpm = 120;
+	std::pair<Cursor^, ISymbol^> prevTempo;
 	for (auto&& i : _t)
 	{
-		if (i.second->GetSymType() == SymbolType::NPART)
+		if (i.second->GetSymType() == SymbolType::TEMPO)
+		{
+			auto tempo = dynamic_cast<STempo^>(i.second);
+			if (tempo)
+			{
+				int maxBeat = 0;
+				if (prevTempo.first)
+				{
+					if (prevTempo.first->Beat > maxBeat) maxBeat = prevTempo.first->Beat;
+				}
+				if (prev)
+				{
+					if (prev->originalPos && prev->originalPos->Beat > maxBeat) maxBeat = prev->originalPos->Beat;
+					prev->Time += (i.first->Beat - maxBeat) * curBpm / 60;
+				}
+				
+				curBpm = tempo->value;
+				prevTempo = i;
+			}
+		}
+		else if (i.second->GetSymType() == SymbolType::NPART)
 		{
 			auto def = ref new PartDefinition(i.first, dynamic_cast<SNewPart^>(i.second));
 			if (prev)
 			{
-				def->Length = def->originalPos->Beat - prev->originalPos->Beat;
+				int maxBeat = prev->originalPos->Beat;
+				if (prevTempo.first && prevTempo.first->Beat > maxBeat) maxBeat = prevTempo.first->Beat;
+
+				prev->Length = def->originalPos->Beat - prev->originalPos->Beat;
+				prev->Time += (i.first->Beat - maxBeat) * curBpm / 60;
 			}
+			
 			parts->Append(def);
 			prev = def;
 		}
 	}
 
 	// исключаем последний PartDefinition - он обозначает конец композиции и дл€ манипул€ций не нужен
-	parts->RemoveAt(parts->Size - 1);
+	if (parts->Size)
+		parts->RemoveAt(parts->Size - 1);
 	return parts;
 }
 
@@ -211,9 +239,15 @@ Cursor^ SketchMusic::Text::getPosAtRight(Cursor ^ pos)
 IJsonValue^ SketchMusic::Text::serialize()
 {
 	JsonObject^ json = ref new JsonObject();
-	json->Insert(t::INSTR, JsonValue::CreateStringValue(instrument->_name));
-	if (instrument->preset && instrument->preset != "") { json->Insert(t::INSTR_PRESET, JsonValue::CreateStringValue(instrument->preset)); }
+	if (instrument)
+	{
+		json->Insert(t::INSTR, JsonValue::CreateStringValue(instrument->_name));
 
+		if (instrument->preset && instrument->preset != "")
+		{
+			json->Insert(t::INSTR_PRESET, JsonValue::CreateStringValue(instrument->preset)); 
+		}
+	}
 	JsonArray^ jsonNotes = ref new JsonArray;
 	for (auto sym : this->_t)
 	{
@@ -226,6 +260,13 @@ IJsonValue^ SketchMusic::Text::serialize()
 		if (tempo)
 		{
 			jsym->Insert(t::NOTE_VALUE, JsonValue::CreateNumberValue(tempo->value));
+		}
+		auto part = dynamic_cast<SNewPart^>(sym.second);
+		if (part)
+		{
+			jsym->Insert(t::PART_NAME, JsonValue::CreateStringValue(part->Name));
+			jsym->Insert(t::PART_CAT, JsonValue::CreateStringValue(part->category));
+			jsym->Insert(t::PART_DYN, JsonValue::CreateNumberValue((int)part->dynamic));
 		}
 		auto note = dynamic_cast<INote^>(sym.second);
 		if (note)
