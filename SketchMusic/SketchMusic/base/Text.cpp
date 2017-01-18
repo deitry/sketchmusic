@@ -142,7 +142,7 @@ IObservableVector<PartDefinition^>^ SketchMusic::Text::getParts()
 				if (prev)
 				{
 					if (prev->originalPos && prev->originalPos->Beat > maxBeat) maxBeat = prev->originalPos->Beat;
-					prev->Time += (i.first->Beat - maxBeat) * curBpm / 60;
+					prev->Time += (i.first->Beat - maxBeat) * 60 / curBpm;
 				}
 				
 				curBpm = tempo->value;
@@ -158,7 +158,7 @@ IObservableVector<PartDefinition^>^ SketchMusic::Text::getParts()
 				if (prevTempo.first && prevTempo.first->Beat > maxBeat) maxBeat = prevTempo.first->Beat;
 
 				prev->Length = def->originalPos->Beat - prev->originalPos->Beat;
-				prev->Time += (i.first->Beat - maxBeat) * curBpm / 60;
+				prev->Time += (i.first->Beat - maxBeat) * 60 / curBpm;
 			}
 			
 			parts->Append(def);

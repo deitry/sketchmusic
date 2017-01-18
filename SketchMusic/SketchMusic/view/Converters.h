@@ -385,11 +385,11 @@ public:
 	{
 		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
 		if (part == nullptr) return nullptr;
-		int seconds = part->Length * 120 / 60;
+		int seconds = part->Time ? part->Time : part->Length*60/120;
 		int minutes = seconds / 60;
 		seconds = seconds % 60;
 
-		String^ str = minutes.ToString() + ":" + ((seconds < 10) ? "0" : "") + seconds.ToString();
+		String^ str = (part->Time ? "" : "~") + minutes.ToString() + ":" + ((seconds < 10) ? "0" : "") + seconds.ToString();
 		return str;
 	}
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
