@@ -81,11 +81,11 @@ void SketchMusic::View::TextRow::OnPointerWheelChanged(Platform::Object ^sender,
 // выбор ноты или чего-нибудь ещё
 void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
 {
-	// если второй палец 
+	// TODO : если второй палец 
 	// - если нота уже "поднята", ничего не происходит
 	// - если нота не "поднята", то замеряем расстояние между пальцами
 	// - - если оно меняется, то при достижении определённой "дельты" вызываем SetScale
-	
+
 	ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
 	if ((ctrl == nullptr) || ((dynamic_cast<Text^>(ctrl->Tag) != current) && (dynamic_cast<Text^>(ctrl->Tag) != data->ControlText)) )
 	{
@@ -101,6 +101,23 @@ void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Wind
 				_canvas->SetLeft(_cursor, point.X);
 				_canvas->SetTop(_cursor, point.Y);
 			}
+		}
+		return;
+	}
+
+	// Если включён ластик - удаляем символ
+	if (EraserTool)
+	{
+		auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
+		if (((Text^)ctrl->Tag == current || (Text^)ctrl->Tag == data->ControlText) && (psym != nullptr))
+		{
+			// удаляем представление элемента с панели
+			unsigned int ind;
+			if (_canvas->Children->IndexOf(ctrl, &ind))
+				_canvas->Children->RemoveAt(ind);
+
+			// удаляем сам элемент из массива
+			((Text^)ctrl->Tag)->deleteSymbol(psym->_pos, psym->_sym);
 		}
 		return;
 	}

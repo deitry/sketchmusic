@@ -25,7 +25,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="1" HorizontalAlignment="Center" Orientation="Vertical">
-            <Button Name="CreateCompositionBtn" Content="Создать композицию" Click="CreateCompositionBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+            <!--<Button Name="CreateCompositionBtn" Content="Создать композицию" Click="CreateCompositionBtn_Click" Style="{StaticResource MenuBtnStyle}"/>-->
             <Button Name="CreateIdeaBtn" Content="Записать идею" Click="CreateIdeaBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
             <Line Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="150" Y1="0" Y2="0" HorizontalAlignment="Stretch" Margin="10"/>
             <Button Name="OpenCompositionLibraryBtn" Content="Обзор проектов" Click="OpenCompositionLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}"/>

@@ -166,6 +166,11 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 void StrokeEditor::LibraryOverviewPage::OnNavigatedFrom(NavigationEventArgs ^ e)
 {
+	if (((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::STOP)
+	{
+		((App^)App::Current)->_player->stop();
+	}
+
 	// сохранение настроек навроде параметров фильтрации
 	Windows::Storage::ApplicationDataContainer^ localSettings =
 		Windows::Storage::ApplicationData::Current->LocalSettings;
@@ -346,6 +351,9 @@ void StrokeEditor::LibraryOverviewPage::FilterList_SelectionChanged(Platform::Ob
 			break;
 		}
 	}
+	if (last3DaysFilter || rating5Higher || todoTagsFilter || baseTagsFilter || notBaseTagsFilter)
+		FilterBtn->Foreground = (SolidColorBrush^)this->Resources->Lookup("ActiveFilterForeground");
+	else FilterBtn->Foreground = (SolidColorBrush^)this->Resources->Lookup("InactiveFilterForeground");
 }
 
 
@@ -377,6 +385,8 @@ void StrokeEditor::LibraryOverviewPage::PlayBtn_Click(Platform::Object^ sender, 
 			auto play = concurrency::create_task([=]
 			{
 				((App^)App::Current)->_player->needMetronome = false;
+				((App^)App::Current)->_player->needPlayGeneric = false;
+				((App^)App::Current)->_player->StopAtLast = true;
 				((App^)App::Current)->Play(texts, ref new SketchMusic::Cursor);
 			});
 		}));

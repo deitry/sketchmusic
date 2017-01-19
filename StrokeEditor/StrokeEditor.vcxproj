@@ -153,6 +153,9 @@
     <ClInclude Include="CompositionOverviewPage.xaml.h">
       <DependentUpon>CompositionOverviewPage.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="EditCompositionDialog.xaml.h">
+      <DependentUpon>EditCompositionDialog.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="LibraryEntryPage.xaml.h">
       <DependentUpon>LibraryEntryPage.xaml</DependentUpon>
     </ClInclude>
@@ -182,6 +185,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="CompositionOverviewPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="EditCompositionDialog.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="LibraryEntryPage.xaml">
@@ -243,6 +249,9 @@
     </ClCompile>
     <ClCompile Include="CompositionOverviewPage.xaml.cpp">
       <DependentUpon>CompositionOverviewPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="EditCompositionDialog.xaml.cpp">
+      <DependentUpon>EditCompositionDialog.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="LibraryEntryPage.xaml.cpp">
       <DependentUpon>LibraryEntryPage.xaml</DependentUpon>

@@ -73,6 +73,7 @@ namespace SketchMusic
 		fast		= 3,	// ||||
 		hard		= 4,	// !
 		harder		= 5,	// !||
+		solo		= 6,	// ~
 	};
 
 	ref class Sample;
@@ -88,6 +89,7 @@ namespace SketchMusic
 	public:
 		property String^ Name;
 		property String^ Description;
+		property String^ FileName;
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
@@ -98,6 +100,8 @@ namespace SketchMusic
 		void HandleControlSymbols();	// если мы будем сразу все управляющие символы добавлять в controlText, то эта функция не понадобится
 
 	public:
+		property int BPM;	// базовый темп
+
 		// TODO : добавить дорожку с "системными" данными? - вносить туда всё, что касается композиции в целом
 		// один текст воспринимается как одна дорожка
 		property Windows::Foundation::Collections::IVector<Text^>^ texts
@@ -576,10 +580,10 @@ namespace SketchMusic
 		static Platform::String^ TEXTS_ARRAY = "texts";	// обозначение массива с текстами
 		static Platform::String^ PROJ_NAME = "name";	// имя проекта
 		static Platform::String^ PROJ_DESC = "descr";	// описание проекта
-
-		static Platform::String^ PART_NAME = "n";	// описание проекта
-		static Platform::String^ PART_CAT = "s";	// описание проекта
-		static Platform::String^ PART_DYN = "d";	// описание проекта
+		static Platform::String^ PROJ_BPM = "bpm";		// базовый темп проекта
+		static Platform::String^ PART_NAME = "n";		// название части
+		static Platform::String^ PART_CAT = "s";		// категория части
+		static Platform::String^ PART_DYN = "d";		// динамика части
 
 	}
 
@@ -950,6 +954,7 @@ namespace SketchMusic
 			layout			= 31,	// сменить раскладку клавиатуры
 			precount		= 32,	// установить предварительные тики перед проигрыванием
 			accent			= 33,	// акцентирование
+			eraser			= 35,	// "ластик"
 		};
 
 		public enum class KeyboardStateEnum

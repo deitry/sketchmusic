@@ -41,6 +41,7 @@ public:
 	
 	property bool needPlayGeneric;
 	property bool cycling;
+	property bool StopAtLast;
 	property int precount;
 	property bool recording;	// для выключения прекаунта, когда записи нет
 

@@ -15,6 +15,9 @@
         <local:ObjectToBoolConverter x:Key="ObjectToBoolConverter"/>
         <local:ObjectToBoolStrConverter x:Key="ObjectToBoolStrConverter"/>
 
+        <SolidColorBrush x:Key="ActiveFilterForeground" Color="Goldenrod"/>
+        <SolidColorBrush x:Key="InactiveFilterForeground" Color="{ThemeResource SystemBaseHighColor}"/>
+
         <Style x:Key="ItemStyle" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Segoe UI Light"/>
             <Setter Property="FontSize" Value="14.667"/>
@@ -38,7 +41,7 @@
                     </Flyout>
                 </Button.Flyout>
             </AppBarButton>
-            <AppBarButton Label="Фильтрация" Icon="Filter">
+            <AppBarButton x:Name="FilterBtn" Label="Фильтрация" Icon="Filter">
                 <Button.Flyout>
                     <Flyout x:Name="FilterFlyout">
                         <ListView Name="FilterList" SelectionMode="Multiple" SelectionChanged="FilterList_SelectionChanged">

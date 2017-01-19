@@ -81,12 +81,13 @@ void SketchMusic::View::BaseKeyboard::OnControlPressed(SketchMusic::View::Key ^ 
 		key->type = KeyType::octave;
 		UpdateParent(key);
 		break;
-	//case KeyType::enter:
-	//	key->type = KeyType::end;
+	//case KeyType::deleteSym:
+	//	key->type = KeyType::eraser;
 	//	UpdateParent(key);
 	//	break;
-	//case KeyType::end:
-	//	key->type = KeyType::enter;
+	//case KeyType::eraser:
+	//	key->type = KeyType::deleteSym;
+	//	key->value = 0;
 	//	UpdateParent(key);
 	//	break;
 	}
@@ -226,6 +227,10 @@ void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 			case SketchMusic::View::KeyType::zoom:
 				KeyPressed(this, args);
 				break;
+
+				// переключатели
+			case SketchMusic::View::KeyType::eraser:
+			case SketchMusic::View::KeyType::cycling:
 			case SketchMusic::View::KeyType::record:
 				key->value = !key->value;
 				UpdateParent(key);
@@ -237,12 +242,6 @@ void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 																		// Надо будет понять, что вообще имеется в виду под state
 				KeyboardStateChanged(this, currentState);
 				break;
-			case SketchMusic::View::KeyType::cycling:
-				key->value = !key->value;
-				UpdateParent(key);
-
-				KeyPressed(this, args);
-				break;
 
 			case SketchMusic::View::KeyType::layout:
 			case SketchMusic::View::KeyType::tempo:
@@ -252,6 +251,7 @@ void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 				break;
 			
 			case SketchMusic::View::KeyType::enter:
+				break;
 			case SketchMusic::View::KeyType::play:
 			case SketchMusic::View::KeyType::move:
 			case SketchMusic::View::KeyType::space:

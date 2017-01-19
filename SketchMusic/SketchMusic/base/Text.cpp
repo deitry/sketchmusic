@@ -36,7 +36,7 @@ void SketchMusic::Text::addOrReplaceSymbol(PositionedSymbol ^ sym)
 	if (lookup == max)
 	{
 		// если нету - вставляем новый символ
-		
+		_t.insert(std::make_pair(sym->_pos,sym->_sym));
 	}
 	else
 	{
@@ -53,12 +53,36 @@ void SketchMusic::Text::addOrReplaceSymbol(PositionedSymbol ^ sym)
 
 void SketchMusic::Text::deleteSymbol(Cursor^ cur, ISymbol^ sym)
 {
-	// TODO 
-	/*for (std::pair<SketchMusic::Cursor^, SketchMusic::ISymbol^> sym : this->_t)
+	auto lookup = _t.lower_bound(cur);
+	auto max = _t.upper_bound(cur);
+	for (;lookup != max; lookup++)
 	{
-
-	}*/
-	//this->_t[cur] = sym;
+		auto type = lookup->second->GetSymType();
+		if (type == sym->GetSymType())
+		{
+			// проверка на то, что это действительно тот символ - помимо типа проверяем на значение
+			switch (type)
+			{
+			case SymbolType::NOTE:
+			case SymbolType::RNOTE:
+			case SymbolType::GNOTE:
+			{
+				INote^ note = dynamic_cast<INote^>(lookup->second);
+				INote^ note2 = dynamic_cast<INote^>(sym);
+				if (note->_val == note2->_val)
+				{
+					_t.erase(lookup);
+					return;
+				}
+				break;
+			}
+			default:
+				// по умолчанию на тип не смотрим, полагая, что там только один такой символ
+				_t.erase(lookup);
+				return;
+			}
+		}
+	}
 }
 
 void SketchMusic::Text::deleteNLine(Cursor^ cur)
@@ -119,57 +143,6 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 	}
 
 	return vect;
-}
-
-IObservableVector<PartDefinition^>^ SketchMusic::Text::getParts()
-{
-	auto parts = ref new Platform::Collections::Vector<PartDefinition^>;
-	PartDefinition^ prev = nullptr;
-	int curBpm = 120;
-	std::pair<Cursor^, ISymbol^> prevTempo;
-	for (auto&& i : _t)
-	{
-		if (i.second->GetSymType() == SymbolType::TEMPO)
-		{
-			auto tempo = dynamic_cast<STempo^>(i.second);
-			if (tempo)
-			{
-				int maxBeat = 0;
-				if (prevTempo.first)
-				{
-					if (prevTempo.first->Beat > maxBeat) maxBeat = prevTempo.first->Beat;
-				}
-				if (prev)
-				{
-					if (prev->originalPos && prev->originalPos->Beat > maxBeat) maxBeat = prev->originalPos->Beat;
-					prev->Time += (i.first->Beat - maxBeat) * 60 / curBpm;
-				}
-				
-				curBpm = tempo->value;
-				prevTempo = i;
-			}
-		}
-		else if (i.second->GetSymType() == SymbolType::NPART)
-		{
-			auto def = ref new PartDefinition(i.first, dynamic_cast<SNewPart^>(i.second));
-			if (prev)
-			{
-				int maxBeat = prev->originalPos->Beat;
-				if (prevTempo.first && prevTempo.first->Beat > maxBeat) maxBeat = prevTempo.first->Beat;
-
-				prev->Length = def->originalPos->Beat - prev->originalPos->Beat;
-				prev->Time += (i.first->Beat - maxBeat) * 60 / curBpm;
-			}
-			
-			parts->Append(def);
-			prev = def;
-		}
-	}
-
-	// исключаем последний PartDefinition - он обозначает конец композиции и для манипуляций не нужен
-	if (parts->Size)
-		parts->RemoveAt(parts->Size - 1);
-	return parts;
 }
 
 // Получаем ноты в данной позиции, имеющие тип type (или все, если type == unknown)

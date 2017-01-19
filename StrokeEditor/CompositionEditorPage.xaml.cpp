@@ -7,7 +7,9 @@
 #include "pch.h"
 #include "CompositionEditorPage.xaml.h"
 #include "CompositionOverviewPage.xaml.h"
+#include "MelodyEditorPage.xaml.h"
 #include "MainMenuPage.xaml.h"
+#include "EditCompositionDialog.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -59,6 +61,10 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 			else
 				CompositionProject = ref new Composition;
 
+			if (CompositionProject->Header->Name == nullptr || CompositionProject->Header->Name == "")
+				CompositionProject->Header->Name = CompositionFile->Name;
+
+			CompositionProject->Header->FileName = CompositionFile->Name;
 			SetParts(CompositionProject->Data->getParts());
 			AreButtonsEnabled(true);
 		});
@@ -76,8 +82,6 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		TextBox^ fileNameTxt = ref new TextBox;
 		grid->Children->Append(fileNameTxt);
 		dialog->Content = grid;
-		dialog->PrimaryButtonText = "Ok";
-		dialog->SecondaryButtonText = "Cancel";
 		
 		this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Low, ref new Windows::UI::Core::DispatchedHandler([=]()
 		{
@@ -114,6 +118,8 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 				else
 					CompositionProject = ref new Composition;
 
+				CompositionProject->Header->Name = fileNameTxt->Text;
+				CompositionProject->Header->FileName = fileNameTxt->Text + ".jsm";
 				SetParts(CompositionProject->Data->getParts());
 				AreButtonsEnabled(true);
 			}, cancelTokenSource.get_token());
@@ -156,6 +162,22 @@ void StrokeEditor::CompositionEditorPage::SetParts(IObservableVector<PartDefinit
 	CompositionPartList->ItemsSource = parts;
 	parts->VectorChanged += 
 		ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PartDefinition ^>(this, &StrokeEditor::CompositionEditorPage::OnVectorChanged);
+	TitleTxt->Text = CompositionProject->Header->Name;
+	UpdateTotalLength();
+}
+
+void StrokeEditor::CompositionEditorPage::UpdateTotalLength()
+{
+	int totalLength = 0;
+	for (auto&& part : CompositionView->Parts)
+	{
+		totalLength += part->Length;
+	}
+
+	totalLength = totalLength * 60 / CompositionProject->Data->BPM;	// /BPM
+	int minutes = totalLength / 60;
+	int seconds = totalLength % 60;
+	FullLengthTxt->Text = minutes.ToString() + ":" + ((seconds < 10) ? "0" : "") + seconds.ToString();
 }
 
 
@@ -175,6 +197,7 @@ void StrokeEditor::CompositionEditorPage::DeleteBtn_Click(Platform::Object^ send
 void StrokeEditor::CompositionEditorPage::CancelBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	// возвращаемся к обзору без сохранения изменений
+	this->Frame->Navigate(TypeName(StrokeEditor::CompositionOverviewPage::typeid), nullptr);
 }
 
 
@@ -188,6 +211,7 @@ void StrokeEditor::CompositionEditorPage::SaveBtn_Click(Platform::Object^ sender
 void StrokeEditor::CompositionEditorPage::EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	// редактируем композицию, переставляя курсор на начало выбранной части
+	//this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), nullptr);
 }
 
 
@@ -217,8 +241,9 @@ void StrokeEditor::CompositionEditorPage::CompositionPartList_ItemClick(Platform
 
 void StrokeEditor::CompositionEditorPage::CompositionPartList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
 {
-	DeletePartBtn->IsEnabled = CompositionPartList->SelectedItem ? true : false;
-	EditPartBtn->IsEnabled = CompositionPartList->SelectedItem ? true : false;
+	bool hasSelection = CompositionPartList->SelectedItem ? true : false;
+	DeletePartBtn->IsEnabled = hasSelection;
+	EditPartBtn->IsEnabled = hasSelection;
 	CompositionView->SelectedItem = (PartDefinition^)CompositionPartList->SelectedItem;
 }
 
@@ -289,7 +314,8 @@ void StrokeEditor::CompositionEditorPage::OnVectorChanged(IObservableVector<Part
 	case CollectionChange::ItemInserted:
 		CompositionPartList->ItemsSource = nullptr;
 		CompositionPartList->ItemsSource = CompositionView->Parts;
-		break;
+		
+		UpdateTotalLength();
 	}
 }
 
@@ -313,4 +339,25 @@ void StrokeEditor::CompositionEditorPage::AcceptEditPartButton_Click(Platform::O
 
 	CompositionPartList->ItemsSource = nullptr;
 	CompositionPartList->ItemsSource = CompositionView->Parts;
+}
+
+
+void StrokeEditor::CompositionEditorPage::TitleTxt_PointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
+{
+	auto dialog = ref new EditCompositionDialog;
+	dialog->DataContext = CompositionProject;
+	dialog->PrimaryButtonText = "Ок";
+	dialog->SecondaryButtonText = "Отмена";
+	create_task(dialog->ShowAsync())
+		.then([=](ContentDialogResult result)
+	{
+		if (result == ContentDialogResult::Primary)
+		{
+			this->Dispatcher->RunAsync(
+				Windows::UI::Core::CoreDispatcherPriority::Normal,
+				ref new Windows::UI::Core::DispatchedHandler([=]() {
+				SetParts(CompositionProject->Data->getParts());
+			}));
+		}
+	});
 }

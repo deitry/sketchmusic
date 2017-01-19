@@ -25,6 +25,7 @@ SketchMusic::Player::Player::Player()
 	_BPM = 120;
 	cycling = false;
 	needPlayGeneric = true;
+	StopAtLast = true;
 	quantize = 4.;
 
 	// do - чтобы можно было "скипнуть" инициализацию, если то-то не удалось
@@ -171,7 +172,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 		// находим ближайший к старту символ (ПОСЛЕ старта)
 		auto iter = symbols->First();
 		auto startIter = symbols->First();
-		_BPM = 120;
+		_BPM = data->BPM;
 		while (iter->HasCurrent)
 		{
 			auto p = iter->Current->_pos;
@@ -222,7 +223,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 				auto nClock = Clock::now();
 				auto dif = (std::chrono::duration_cast<std::chrono::nanoseconds>(nClock - pClock).count());
 				pClock = nClock;
-				float offset = (float)dif * _BPM * TICK_IN_BEAT / 60 / 1000000000;	// не знаю, почему, но для корректного воспроизведения надо умножать на полтора
+				float offset = (float)dif * _BPM * TICK_IN_BEAT / 60 / 1000000000;
 				tmp->incTick(offset);
 			}
 		}
@@ -242,7 +243,9 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			// запустить асинхронно
 			//concurrency::parallel_for_each(iterList->begin(), iterList->end(), [this](Windows::Foundation::Collections::IIterator<SketchMusic::PositionedSymbol^>^ iter)
 			// - один итератор = один текст = один инструмент = один саунденжин = несколько нот
-			tempState = s::WAIT;
+			if (StopAtLast) tempState = s::WAIT;
+			else tempState = this->_state;
+
 			for (auto iter = iterMap->begin(); iter < iterMap->end(); iter++)
 			{
 				auto pIter = iter->second.first;
@@ -308,13 +311,6 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						//}
 					}
 
-					// метроном
-					if (needMetronome && ((cursor->Beat - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
-					{
-						playMetronome();
-					}
-					pbeat = cursor->Beat;
-
 					// если уже пропустили символ, то переходим ко следующему, чтобы не возникало "зависаний"
 					if ((pIter->HasCurrent) && (pIter->Current->_pos->LT(cursor)))
 					{
@@ -326,6 +322,13 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 					}
 				}
 			};
+			
+			// метроном
+			if (needMetronome && ((cursor->Beat - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
+			{
+				playMetronome();
+			}
+			pbeat = cursor->Beat;
 
 			auto nClock = Clock::now();
 			auto dif = (std::chrono::duration_cast<std::chrono::microseconds>(nClock - pClock).count());
@@ -342,7 +345,9 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 				int beat = cursor->Beat;
 				if ((quant != prevQuant) || (beat != prevBeat))
 				{
-					CursorPosChanged(this, cursor);
+					Cursor^ pos = ref new Cursor(cursor);
+					pos->Tick = (float) quant * TICK_IN_BEAT / quantize;	// округляем до ближайшего кванта
+					CursorPosChanged(this, pos);
 					prevQuant = quant;
 					prevBeat = beat;
 				}

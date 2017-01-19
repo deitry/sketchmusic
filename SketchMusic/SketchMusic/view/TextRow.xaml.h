@@ -77,6 +77,7 @@ public:
 	property Text^ format;
 	property int scale;			// текущий уровень масштаба 
 	property int quantize;		// текущий уровень квантизации - делитель Tick
+	property bool EraserTool;	// если true - по нажатию на кнопку удаляем
 
 	TextRow();
 	void OnApplyTemplate() override;

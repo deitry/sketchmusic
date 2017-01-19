@@ -11,19 +11,28 @@
 
     <Page.TopAppBar>
         <CommandBar x:Name="commandBar">
-            <AppBarButton Icon="Home" Label="В меню" Name="HomeBtn" Click="HomeBtn_Click"/>
-            <AppBarSeparator/>
-            <AppBarButton  Icon="Delete" Label="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
-            <AppBarSeparator/>
-            <AppBarButton Icon="Back" Label="Назад" Name="CancelBtn" Click="CancelBtn_Click"/>
-            <AppBarButton Icon="Save" Label="Сохранить" Name="SaveBtn" Click="SaveBtn_Click"/>
-            <AppBarButton Icon="Edit" Label="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
-            <AppBarButton Icon="Accept" Label="ОК" Name="OkBtn" Click="OkBtn_Click"/>
+            <CommandBar.Content>
+                <TextBlock x:Name="TitleTxt" Margin="15,4,4,15" VerticalAlignment="Center"
+                           FontSize="24"
+                           PointerPressed="TitleTxt_PointerPressed">
+                </TextBlock>
+            </CommandBar.Content>
+            <CommandBar.PrimaryCommands>
+                <AppBarButton Icon="Home" Label="В меню" Name="HomeBtn" Click="HomeBtn_Click"/>
+                <AppBarSeparator/>
+                <AppBarButton  Icon="Delete" Label="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click"/>
+                <AppBarSeparator/>
+                <AppBarButton Icon="Back" Label="Назад" Name="CancelBtn" Click="CancelBtn_Click"/>
+                <AppBarButton Icon="Save" Label="Сохранить" Name="SaveBtn" Click="SaveBtn_Click"/>
+                <AppBarButton Icon="Edit" Label="Редактировать" Name="EditBtn" Click="EditBtn_Click"/>
+                <AppBarButton Icon="Accept" Label="ОК" Name="OkBtn" Click="OkBtn_Click"/>
+            </CommandBar.PrimaryCommands>
         </CommandBar>
     </Page.TopAppBar>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -54,7 +63,8 @@
         </Grid>
 
         <StackPanel Grid.Row="1" HorizontalAlignment="Left" Orientation="Horizontal" Margin="10,5,10,5">
-            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" x:Name="AddPartBtn" Click="AddPartBtn_Click">
+            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE710;" FontSize="18" 
+                    x:Name="AddPartBtn" Click="AddPartBtn_Click">
                 <Button.Flyout>
                     <Flyout x:Name="AddPartFlyout">
                         <Grid>
@@ -76,7 +86,7 @@
                             <TextBlock Grid.Row="3" HorizontalAlignment="Right" Text="Длина"/>
 
                             <TextBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" x:Name="PartNameTxt"/>
-                            <TextBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" x:Name="PartCatTxt"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" x:Name="PartCatTxt" Text="A"/>
 
                             <ComboBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"
                                       x:Name="PartCatComboBox">
@@ -88,7 +98,7 @@
                                 <ComboBoxItem Content="!||"/>
                                 <ComboBoxItem Content="~"/>
                             </ComboBox>
-                            <TextBox Grid.Row="3" Grid.Column="1"  HorizontalAlignment="Left" Text="4" x:Name="PartLength"
+                            <TextBox Grid.Row="3" Grid.Column="1"  HorizontalAlignment="Left" Text="64" x:Name="PartLength"
                                      TextChanging="PartLength_TextChanging"/>
 
                             <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" 
@@ -104,11 +114,26 @@
                     </Flyout>
                 </Button.Flyout>
             </Button>
-            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" x:Name="DeletePartBtn" Click="DeletePartBtn_Click" IsEnabled="False"/>
-            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE70F;" x:Name="EditPartBtn" Click="EditPartBtn_Click"  IsEnabled="False"/>
+            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE738;" FontSize="18" 
+                    x:Name="DeletePartBtn" Click="DeletePartBtn_Click" IsEnabled="False"/>
+            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE70F;" FontSize="18" 
+                    x:Name="EditPartBtn" Click="EditPartBtn_Click"  IsEnabled="False"/>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Visible" VerticalScrollMode="Enabled">
+        <Grid Grid.Row="2" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=CompositionPartList}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Категория" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="1" Text="Динамика" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="2" Text="Название"/>
+            <TextBlock Grid.Column="3" Text="Длина" x:Name="FullLengthTxt" Margin="13,0,0,0" HorizontalAlignment="Center"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Visible" VerticalScrollMode="Enabled">
             <ListView x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
                       CanReorderItems="True" CanDragItems="True" AllowDrop="True" Width="800"
                       ItemClick="CompositionPartList_ItemClick"
@@ -137,7 +162,7 @@
                             <TextBlock Grid.Column="3" Text="{Binding DataContext,
                                                             RelativeSource={RelativeSource TemplatedParent},
                                                             Converter={StaticResource parttime2text}}"
-                                                            />
+                                        HorizontalAlignment="Center"/>
                         </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

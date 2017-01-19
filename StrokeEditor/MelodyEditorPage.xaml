@@ -168,7 +168,7 @@
                                  BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
                                  HorizontalAlignment="Left"
                                  VerticalAlignment="Stretch"
-                                 Margin="5,5,5,5"
+                                 Margin="5,12,5,5"
                                  SizeChanged="_textRow_SizeChanged"
                                  />
 

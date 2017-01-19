@@ -56,11 +56,16 @@
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="3001"/>
 
-            
+
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
-                            Margin="40,0,0,0"
+                            Margin="10,0,0,0"
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="13000"/>
+            <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
+                                Converter={StaticResource ctrlKeyState2color}}"
+                            Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" 
+                            Width="{StaticResource CtrlWidth}" Tag="35000"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}"
                             Width="{StaticResource CtrlWidth}" Tag="6000"/>
@@ -71,7 +76,7 @@
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                 Converter={StaticResource ctrlKeyState2color}}"
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
-                            Margin="40,0,0,0"
+                            Margin="10,0,0,0"
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="12000"/>
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,

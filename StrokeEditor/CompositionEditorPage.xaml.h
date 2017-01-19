@@ -31,6 +31,7 @@ namespace StrokeEditor
 		void SaveComposition();
 		void AreButtonsEnabled(bool isEnabled);
 		void SetParts(IObservableVector<PartDefinition^>^ parts);
+		void UpdateTotalLength();
 
 	private:
 		void HomeBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
@@ -49,6 +50,7 @@ namespace StrokeEditor
 		void OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs^ args);
 		void AddPartBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void AcceptEditPartButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void TitleTxt_PointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 	};
 
 	public ref class CompositionNavigationArgs sealed

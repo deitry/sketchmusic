@@ -76,7 +76,7 @@ public:
 			result += "" + key->value + "r";
 			break;
 		case KeyType::genericNote:
-			result += "(" + (abs(key->value)/100) + "," + (key->value % 100) + ")";
+			result += "(" + (key->value % 100) + "," + (abs(key->value) / 100) + ")";
 			break;
 		case KeyType::octave:
 			if (key->value >= 0)
@@ -135,6 +135,9 @@ public:
 			break;
 		case KeyType::deleteSym:
 			result += L"\ue750";
+			break;
+		case KeyType::eraser:
+			result += L"\ue75c";
 			break;
 		case KeyType::control:
 			result += "Ctrl";
@@ -436,8 +439,9 @@ public:
 		case DynamicCategory::regular: str += "||"; break;
 		case DynamicCategory::unregular: str += "|/|"; break;
 		case DynamicCategory::fast: str += "||||"; break;
-		case DynamicCategory::hard: str += "!"; break;
+		case DynamicCategory::hard: str += "!--"; break;
 		case DynamicCategory::harder: str += "!||"; break;
+		case DynamicCategory::solo: str += "~"; break;
 		}
 		return str;
 	}

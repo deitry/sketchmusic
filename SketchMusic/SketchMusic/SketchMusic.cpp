@@ -180,7 +180,53 @@ void SketchMusic::CompositionData::HandleControlSymbols()
 
 IObservableVector<PartDefinition^>^ SketchMusic::CompositionData::getParts()
 {
-	return ControlText->getParts();
+	auto parts = ref new Platform::Collections::Vector<PartDefinition^>;
+	PartDefinition^ prev = nullptr;
+	int curBpm = BPM;
+	std::pair<Cursor^, ISymbol^> prevTempo;
+	for (auto&& i : ControlText->_t)
+	{
+		if (i.second->GetSymType() == SymbolType::TEMPO)
+		{
+			auto tempo = dynamic_cast<STempo^>(i.second);
+			if (tempo)
+			{
+				int maxBeat = 0;
+				if (prevTempo.first)
+				{
+					if (prevTempo.first->Beat > maxBeat) maxBeat = prevTempo.first->Beat;
+				}
+				if (prev)
+				{
+					if (prev->originalPos && prev->originalPos->Beat > maxBeat) maxBeat = prev->originalPos->Beat;
+					prev->Time += (i.first->Beat - maxBeat) * 60 / curBpm;
+				}
+
+				curBpm = tempo->value;
+				prevTempo = i;
+			}
+		}
+		else if (i.second->GetSymType() == SymbolType::NPART)
+		{
+			auto def = ref new PartDefinition(i.first, dynamic_cast<SNewPart^>(i.second));
+			if (prev)
+			{
+				int maxBeat = prev->originalPos->Beat;
+				if (prevTempo.first && prevTempo.first->Beat > maxBeat) maxBeat = prevTempo.first->Beat;
+
+				prev->Length = def->originalPos->Beat - prev->originalPos->Beat;
+				prev->Time += (i.first->Beat - maxBeat) * 60 / curBpm;
+			}
+
+			parts->Append(def);
+			prev = def;
+		}
+	}
+
+	// исключаем последний PartDefinition - он обозначает конец композиции и для манипуляций не нужен
+	if (parts->Size)
+		parts->RemoveAt(parts->Size - 1);
+	return parts;
 }
 
 CompositionData ^ SketchMusic::CompositionData::deserialize(Platform::String^ str)
@@ -340,13 +386,15 @@ SketchMusic::CompositionData::CompositionData()
 {
 	ControlText = ref new Text(ref new Instrument(SerializationTokens::CONTROL_TEXT));
 	this->texts = ref new Platform::Collections::Vector < Text^ >;
+	BPM = 120;
 }
 
 IJsonValue^ SketchMusic::Composition::Serialize()
 {
 	auto json = ref new JsonObject;
 	json->Insert(SerializationTokens::PROJ_NAME, JsonValue::CreateStringValue(Header->Name));
-	//json->Insert(SerializationTokens::PROJ_NAME, JsonValue::CreateStringValue(_header->description));
+	json->Insert(SerializationTokens::PROJ_BPM, JsonValue::CreateNumberValue(Data->BPM));
+	json->Insert(SerializationTokens::PROJ_DESC, JsonValue::CreateStringValue(Header->Description));
 	json->Insert(SerializationTokens::TEXTS_ARRAY, Data->serialize());
 	return json;
 }
@@ -355,11 +403,13 @@ Composition ^ SketchMusic::Composition::Deserialize(JsonObject ^ json)
 {
 	Composition^ comp = ref new Composition;
 	comp->Header->Name = json->GetNamedString(SerializationTokens::PROJ_NAME, "");
+	comp->Header->Description = json->GetNamedString(SerializationTokens::PROJ_DESC, "");
 	auto texts = json->GetNamedArray(SerializationTokens::TEXTS_ARRAY, nullptr);
 	if (texts)
 	{
 		comp->Data = CompositionData::deserialize(texts);
 	}
+	comp->Data->BPM = json->GetNamedNumber(SerializationTokens::PROJ_BPM, 120);
 	return comp;
 }
 

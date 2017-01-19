@@ -97,6 +97,8 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		}
 	}
 
+	((App^)App::Current)->_player->StopAtLast = false;
+
 	//((App^)App::Current)->ShowNotification("Загрузка инструментов");
 
 	auto async = create_task([=]
@@ -162,7 +164,15 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		SketchMusic::Commands::SymbolHandlerArgs^ symArgs = dynamic_cast<SketchMusic::Commands::SymbolHandlerArgs^>(args);
 		if (symArgs == nullptr) return;
 
-		symArgs->_text->addSymbol(symArgs->_newSym);
+		auto type = symArgs->_newSym->_sym->GetSymType();
+		if (type == SymbolType::TEMPO || type == SymbolType::NPART || type == SymbolType::CLEF)
+		{
+			// темп и может какие-нибудь другие символы будем заменять вместо добавления новых в ту же точку
+			symArgs->_text->addOrReplaceSymbol(symArgs->_newSym);
+		}
+		else symArgs->_text->addSymbol(symArgs->_newSym);
+		
+		
 		// добавить внешнее представление символа
 		_textRow->AddSymbol(symArgs->_text, symArgs->_newSym);
 		if (viewType == ViewType::ChordView)
@@ -284,12 +294,24 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			// надо добавлять сразу аккордами
 			if (recording)
 			{
-				// создаём команду на добавление ноты в текст и сохраняем её в истории
-				((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
-					ref new SMC::Command(addSym, nullptr, nullptr),
-					ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
-						ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
-				((App^)App::Current)->_manager->ExecuteLast();
+				
+				Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]
+				{
+					auto delay = concurrency::create_task([=]
+					{
+						// небольшая задержка, чтобы можно было нажимать чуть-чуть заранее
+						concurrency::wait(20);
+
+						Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=] {
+							// создаём команду на добавление ноты в текст и сохраняем её в истории
+							((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
+								ref new SMC::Command(addSym, nullptr, nullptr),
+								ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
+									ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
+							((App^)App::Current)->_manager->ExecuteLast();
+						}));
+					});
+				}));
 				//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
 				//	+ " / tick = " + _textRow->currentPosition->getTick();
 
@@ -338,14 +360,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			break;
 		}
 		case SketchMusic::View::KeyType::enter:
-			// создаём команду на добавление ноты в текст и сохраняем её в истории
-			((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
-				ref new SMC::Command(addSym, nullptr, nullptr),
-				ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
-					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), ref new SNewLine))));
-			((App^)App::Current)->_manager->ExecuteLast();
-			//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-			//	+ " / tick = " + _textRow->currentPosition->getTick();
+			// перенос строки обрабатываем на отпускании
 			break;
 		case SketchMusic::View::KeyType::move:
 		{
@@ -407,6 +422,9 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		case SketchMusic::View::KeyType::hide:
 			//_textRow->Height = 
 			break;
+		case SketchMusic::View::KeyType::eraser:
+			_textRow->EraserTool = args->key->value;
+			break;
 		case SketchMusic::View::KeyType::octave:
 		case SketchMusic::View::KeyType::space:
 		default:
@@ -427,6 +445,19 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyReleased(Platform::Object^ sen
 			notesPlayingMap.erase(noteIter);
 			break;
 		}
+	}
+
+	// обрабатывание событий отпускания некоторых клавиш
+	switch (args->key->type)
+	{
+	case KeyType::enter:
+		// создаём команду на добавление ноты в текст и сохраняем её в истории
+		((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
+			ref new SMC::Command(addSym, nullptr, nullptr),
+			ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
+				ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), ref new SNewLine))));
+		((App^)App::Current)->_manager->ExecuteLast();
+		break;
 	}
 }
 
@@ -629,7 +660,8 @@ void StrokeEditor::MelodyEditorPage::_textRow_SizeChanged(Platform::Object^ send
 
 void StrokeEditor::MelodyEditorPage::Page_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
 {
-	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width - mySplitView->CompactPaneLength;
+	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width
+		- mySplitView->CompactPaneLength - _textRow->Margin.Left - _textRow->Margin.Right;
 	_textRow->Width = width;
 }
 
