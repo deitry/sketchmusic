@@ -88,6 +88,39 @@
                         </StackPanel>
                     </ContentControl>
 
+                    <ContentControl Name="partsItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xEB05;" />
+                            <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Части" Margin="10 0 0 0"
+                                       Name="partsCtrl">
+                                <FlyoutBase.AttachedFlyout>
+                                    <Flyout x:Name="PartsFlyout">
+                                        <ListView ItemsSource="{Binding}" x:Name="PartsList" SelectionChanged="PartsList_SelectionChanged" Width="auto">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border BorderThickness="1" BorderBrush="AliceBlue">
+                                                        <TextBlock FontSize="14" Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
+                                                            <Run Text="{Binding original.category}"/>
+                                                        </TextBlock>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </Flyout>
+                                </FlyoutBase.AttachedFlyout>
+                            </TextBlock>
+                        </StackPanel>
+                    </ContentControl>
+
+                    <ContentControl Name="ChangeViewItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE97C;" />
+                            <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Сменить представление" Margin="10 0 0 0" />
+                        </StackPanel>
+                    </ContentControl>
+                    
+                    <Line x:Name="MenuSeparator" Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="22" Y1="0" Y2="0"/>
+
                     <ContentControl Name="addItem">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE710;"/>
@@ -134,12 +167,8 @@
                         </StackPanel>
                     </ContentControl>
 
-                    <ContentControl Name="ChangeViewItem">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE97C;" />
-                            <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Сменить представление" Margin="10 0 0 0" />
-                        </StackPanel>
-                    </ContentControl>
+                    <Line x:Name="MenuSeparator2" Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="22" Y1="0" Y2="0" />
+
 
                     <ContentControl Name="settingsItem">
                         <StackPanel Orientation="Horizontal">

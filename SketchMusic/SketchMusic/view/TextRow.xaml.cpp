@@ -52,7 +52,7 @@ SketchMusic::View::TextRow::TextRow()
 - исходя из scale решаем сколько должно быть точек привязки и рисуем один-единственный кружок,
 соответствующий ближайшей к указателю точке
 */
-void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int newScale)
+void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int newScale, int selectedPart)
 {
 	if (text == nullptr)
 		return;
@@ -89,9 +89,34 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 	//}
 
 	// + ещё одна строка - последняя
-	breakLine.push_back(ref new PositionedSymbol(ref new Cursor(64), ref new SNewLine));
-
-	int prev = 0;
+	// находим нужную часть и определяем
+	if (selectedPart >= 0)	// по умолчанию если нам это не надо, selectedPart = -1
+	{
+		int cnt = 0;
+		for (auto&& iter : data->ControlText->_t)
+		{
+			if (iter.second->GetSymType() == SymbolType::NPART)
+			{
+				if (cnt == selectedPart)
+				{
+					// искомая часть
+					_startPos = ref new Cursor(iter.first);
+				}
+				else if (cnt == selectedPart + 1)
+				{
+					// конец искомой части
+					_maxPos = ref new Cursor(iter.first);
+					break;
+				}
+				cnt++;
+			}
+		}
+	}
+	if (_startPos == nullptr) _startPos = ref new Cursor;
+	if (_maxPos == nullptr) _maxPos = ref new Cursor(64);
+	breakLine.push_back(ref new PositionedSymbol(ref new Cursor(_maxPos), ref new SNewLine));
+	
+	int prev = _startPos->Beat;
 
 	for (int rowCnt = 0; rowCnt < breakLine.size(); rowCnt++)
 	{
@@ -114,8 +139,6 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 
 		prev = current;
 	}
-
-	this->_maxPos = ref new Cursor(prev - 1);
 
 	_mainPanel->UpdateLayout();
 	scale = newScale;
@@ -217,48 +240,54 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 	RedrawText();
 }
 
-void SketchMusic::View::TextRow::SetText(SketchMusic::Text^ text)
-{
-	// добавляем текст в список
-	// делаем его "главным"
-	unsigned int ndx = 0;
-	if (!data->texts->IndexOf(text, &ndx))
-		this->data->texts->Append(text);
-
-	current = text;
-
-	if (_mainPanel == nullptr)
-		return;
-
-	AllocateSnapPoints(text, 1);
-	InvalidateText();
-	RedrawText();
-}
+//void SketchMusic::View::TextRow::SetText(SketchMusic::Text^ text)
+//{
+//	// добавляем текст в список
+//	// делаем его "главным"
+//	unsigned int ndx = 0;
+//	if (!data->texts->IndexOf(text, &ndx))
+//		this->data->texts->Append(text);
+//
+//	current = text;
+//
+//	if (_mainPanel == nullptr)
+//		return;
+//
+//	AllocateSnapPoints(text, 1, -1);
+//	InvalidateText();
+//	RedrawText();
+//}
 
 void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textCollection, SketchMusic::Text^ format)
+{
+	SetText(textCollection, format, -1);
+}
+
+void SketchMusic::View::TextRow::SetText(CompositionData ^ textCollection, SketchMusic::Text ^ selected, int selectedPart)
 {
 	if (data == textCollection)
 		return;
 
 	data = textCollection;
 
-	if (format)
+	if (textCollection->texts && textCollection->texts->Size > 0)
 	{
-		this->format = format;
-		this->current = format;
-	}
-	else
-	{
-		if (textCollection->texts && textCollection->texts->Size > 0)
+		if (selected)
 		{
-			AllocateSnapPoints(textCollection->texts->GetAt(0), 1);
+			this->format = selected;
+			this->current = selected;
+		}
+		else
+		{
 			this->format = textCollection->texts->First()->Current;
 			this->current = this->format;
 		}
+
+		AllocateSnapPoints(this->format, 1, selectedPart);
+		InvalidateText();
 	}
 
-	InvalidateText();
-	SetCursor(currentPosition);
+	SetCursor(_startPos);
 }
 
 /*
@@ -280,14 +309,7 @@ void SketchMusic::View::TextRow::InvalidateText()
 	_canvas->Children->Append(_snapPoint);
 	_canvas->Children->Append(_cursor);
 	
-	//breakLine.clear();
-	//breakLine.push_back(ref new PositionedSymbol(ref new Cursor(64), ref new SNewLine)); // конец доступного места
-	//	// TODO : сделать более гибко
-
-	// TODO : add для символов форматирования - только для текста, чьё форматирование сейчас берётся за основу
-	//for (auto text : _texts)
-	//{
-	auto symbols = current->getText();
+	auto symbols = current->GetSymbols(_startPos, _maxPos);
 	for (auto&& symbol : symbols)
 	{
 		// - проверка на то, что если текст отличен от текста форматирования и это не нота - пропускаем
@@ -302,9 +324,6 @@ void SketchMusic::View::TextRow::InvalidateText()
 
 		this->AddSymbol(data->ControlText, symbol);
 	}
-	//}
-	// перерисовываем
-	//RedrawText();
 }
 
 /*
@@ -333,6 +352,9 @@ void SketchMusic::View::TextRow::SetCursor(SketchMusic::Cursor^ pos)
 {
 	if (pos)
 	{
+		if (pos->LT(_startPos)) pos = _startPos;
+		if (!pos->LE(_maxPos)) pos = _maxPos;
+
 		currentPosition->moveTo(pos);
 	}
 
@@ -345,6 +367,7 @@ void SketchMusic::View::TextRow::SetCursor(SketchMusic::Cursor^ pos)
 // работа с отдельными символами
 void SketchMusic::View::TextRow::AddSymbol(Text^ source, PositionedSymbol^ sym)
 {
+	if (sym->_sym->GetSymType() == SymbolType::NPART) return;
 
 	// отыскиваем, куда нужно ставить
 	// вставляем
@@ -449,7 +472,8 @@ void SketchMusic::View::TextRow::InsertNoteObject(PositionedSymbol^ note)
 int SketchMusic::View::TextRow::GetControlIndexAtPos(Cursor^ pos, int offset)
 {
 	//int lookupIndex = pos->getBeat()*initialised + pos->getTick() * scale / TICK_IN_BEAT * initialised / scale;
-	int lookupIndex = pos->Beat*initialised + pos->Tick / TICK_IN_BEAT * initialised;
+	int dif = pos->Beat - _startPos->Beat;
+	int lookupIndex = dif*initialised + pos->Tick / TICK_IN_BEAT * initialised;
 	lookupIndex += offset;
 	return lookupIndex;
 }
@@ -514,7 +538,7 @@ Cursor^ SketchMusic::View::TextRow::GetPositionOfControl(Windows::UI::Xaml::Cont
 		if (rowPanel->Children->IndexOf(ctrl, &index))
 		{
 			float tick = CalculateTick(offset.X, ctrl);
-			Cursor^ position = ref new Cursor(index + currentRowIndex, tick);
+			Cursor^ position = ref new Cursor(_startPos->Beat + index + currentRowIndex, tick);
 			return position;
 		}
 
@@ -526,7 +550,16 @@ Cursor^ SketchMusic::View::TextRow::GetPositionOfControl(Windows::UI::Xaml::Cont
 
 Point SketchMusic::View::TextRow::GetCoordinatsOfPosition(Cursor^ pos)
 {
-	ContentControl^ ctrl = this->GetControlAtPos(pos);
+	ContentControl^ ctrl;
+	if (pos->EQ(_maxPos))
+	{
+		ctrl = this->GetControlAtPos(ref new Cursor(pos->Beat-1));
+	}
+	else
+	{
+		ctrl = this->GetControlAtPos(pos);
+	}
+	
 	if (ctrl)
 	{
 		auto transform = ctrl->TransformToVisual(_canvas);
@@ -535,6 +568,7 @@ Point SketchMusic::View::TextRow::GetCoordinatsOfPosition(Cursor^ pos)
 
 		// смещение учитывая тики
 		point.X += ctrl->Width * pos->Tick / TICK_IN_BEAT;
+		if (pos->EQ(_maxPos)) point.X += ctrl->Width;
 		return point;
 	}
 	return Point(0,0);
@@ -595,6 +629,7 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 			}
 		}
 		break;
+	case SketchMusic::SymbolType::NPART:
 	case SketchMusic::SymbolType::TEMPO:
 		if (_dict->HasKey("tempoBackground"))
 		{

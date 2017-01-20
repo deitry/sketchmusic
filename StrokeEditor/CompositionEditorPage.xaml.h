@@ -23,17 +23,22 @@ namespace StrokeEditor
 	public:
 		CompositionEditorPage();
 		property StorageFile^ CompositionFile;
+		//property StorageFolder^ CompositionWorkspace;
 		property Composition^ CompositionProject;
 
 	protected:
 		void InitializePage();
 		virtual void OnNavigatedTo(NavigationEventArgs^ e) override;
+		virtual void OnNavigatedFrom(NavigationEventArgs^ e) override;
 		void SaveComposition();
 		void AreButtonsEnabled(bool isEnabled);
 		void SetParts(IObservableVector<PartDefinition^>^ parts);
 		void UpdateTotalLength();
 
 	private:
+		Windows::Foundation::EventRegistrationToken playerStateChangeToken;
+		Windows::Foundation::EventRegistrationToken curPosChangeToken;
+
 		void HomeBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void DeleteBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void CancelBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
@@ -51,19 +56,29 @@ namespace StrokeEditor
 		void AddPartBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void AcceptEditPartButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void TitleTxt_PointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
+		void PlayCompositionBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void NeedMetronomeChbx_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void NeedGenericChbx_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
+		void OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor ^args);
 	};
 
 	public ref class CompositionNavigationArgs sealed
 	{
 	public:
 		CompositionNavigationArgs() {}
-		CompositionNavigationArgs(StorageFolder^ _folder, StorageFile^ _file)
+		CompositionNavigationArgs(StorageFolder^ _folder, StorageFile^ _file, Composition^ _project)
 		{
-			Workspace = _folder; File = _file;
+			Workspace = _folder; File = _file; Project = _project; Selected = -1;
+		}
+		CompositionNavigationArgs(StorageFolder^ _folder, StorageFile^ _file, Composition^ _project, int selected)
+		{
+			Workspace = _folder; File = _file; Project = _project; Selected = selected;
 		}
 
 		property StorageFile^ File;
 		property StorageFolder^ Workspace;
-		//property StrokeEditor::LibraryOverviewPage^ library;
+		property Composition^ Project;
+		property int Selected;
 	};
 }

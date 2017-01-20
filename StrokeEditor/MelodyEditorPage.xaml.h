@@ -6,6 +6,7 @@
 #pragma once
 
 #include "MelodyEditorPage.g.h"
+#include "CompositionEditorPage.xaml.h"
 
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Navigation;
@@ -68,6 +69,9 @@ namespace StrokeEditor
 		void UpdateChordViews(SketchMusic::Cursor^ pos);
 
 		SketchMusic::Idea^ _idea;
+		void LoadIdea();
+		CompositionNavigationArgs^ _compositionArgs;
+		void LoadComposition();
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
 		void OnBpmChanged(Platform::Object ^sender, float args);
 		void OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor^ pos);
@@ -83,5 +87,15 @@ namespace StrokeEditor
 		void Page_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
 		void MoveLeftCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void MoveRightCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void PartsList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
 	};
+
+	//public ref class MelodyEditorArgs sealed
+	//{
+	//	property Platform::Object^ Data;	// может быть как CompositionArgs, так и Idea
+	//	property int Selected;	// передаём информацию о том, какую часть необходимо отображать, если данные содержат несколько частей
+	//
+	//	MelodyEditorArgs(Platform::Object^ data, int select) { Data = data; Selected = select; }
+	//	MelodyEditorArgs(Platform::Object^ data) { Data = data; Selected = 0; }
+	//};
 }

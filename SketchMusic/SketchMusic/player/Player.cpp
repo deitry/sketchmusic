@@ -94,7 +94,7 @@ void SketchMusic::Player::Player::playMetronome()
 Принимает текст и проигрывает его начиная со start либо до конца, либо пока не придёт
 команда остановиться.
 */
-void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::Cursor^ pos)
+void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::Cursor^ pos) //, SketchMusic::Cursor^ end
 {
 	// - для каждой из дорожек инициализировать инструмент
 	// - - создать по соурс войсу на каждый семпл
@@ -230,7 +230,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 	})
 		
 		// основное проигрывание
-		.then([this, iterMap, cursor]
+		.then([this, iterMap, cursor] //, end
 	{
 		auto tempState = _state;
 		int pbeat = -1;
@@ -337,10 +337,10 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			cursor->incTick(offset);
 
 			// квантизация
+			int prevQuant = -1;
+			int prevBeat = -1;
 			if (quantize)
 			{
-				static int prevQuant = -1;
-				static int prevBeat = -1;
 				int quant = cursor->Tick * quantize / TICK_IN_BEAT;
 				int beat = cursor->Beat;
 				if ((quant != prevQuant) || (beat != prevBeat))
@@ -354,6 +354,15 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			} 
 			//else { // без квантизации сообщаем каждый раз
 			//	CursorPosChanged(this, cursor);
+			//}
+
+			// остановка у конца - простой вариант
+			//if (end)
+			//{
+			//	if (end->LE(cursor) && !cycling)
+			//	{
+			//		tempState == s::STOP;
+			//	}
 			//}
 
 			if (this->cycling && (tempState == s::WAIT))

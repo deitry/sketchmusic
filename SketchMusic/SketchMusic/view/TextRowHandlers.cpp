@@ -53,7 +53,7 @@ void SketchMusic::View::TextRow::InitializePage()
 
 	if (this->data->texts->Size > 0)
 	{
-		AllocateSnapPoints(this->GetText(), 1);
+		AllocateSnapPoints(this->GetText(), 1, -1);
 	}
 
 	initialised = 1;
@@ -232,7 +232,7 @@ void SketchMusic::View::TextRow::OnPointerReleased(Platform::Object ^sender, Win
 void SketchMusic::View::TextRow::MoveCursorLeft()
 {
 	// сдвигать должны на одну позицию согласно масштабированию
-	if ((currentPosition->Beat == 0) && (currentPosition->Tick == 0))
+	if (currentPosition->LE(_startPos))
 		return;
 
 	int beat = currentPosition->Beat;
@@ -252,22 +252,18 @@ void SketchMusic::View::TextRow::MoveCursorLeft()
 
 	if (tick < 0)
 		tick = 0;
-	if (beat < 0)
+	if (beat < _startPos->Beat)
 	{
-		beat = 0;
+		beat = _startPos->Beat;
 		tick = 0;
 	}
-	currentPosition->moveTo(ref new Cursor(beat, tick));
-
-	auto point = this->GetCoordinatsOfPosition(currentPosition);
-	_canvas->SetLeft(_cursor, point.X);
-	_canvas->SetTop(_cursor, point.Y);
+	SetCursor(ref new Cursor(beat, tick));
 }
 
 void SketchMusic::View::TextRow::MoveCursorRight()
 {
 	// сдвигать должны на одну позицию согласно масштабированию
-	if (currentPosition->EQ(_maxPos))	// TODO : получать максимально возможное значение от this 
+	if (!(currentPosition->LT(_maxPos)))	// за неимением GE=GreaterOrEqual
 		return;
 
 	int beat = currentPosition->Beat;
@@ -284,12 +280,13 @@ void SketchMusic::View::TextRow::MoveCursorRight()
 		tick -= TICK_IN_BEAT;
 		beat += 1;
 	}
+	if (beat >= _maxPos->Beat)
+	{
+		tick = 0;
+		beat = _maxPos->Beat;
+	}
 
-	currentPosition->moveTo(ref new Cursor(beat, tick));
-
-	auto point = this->GetCoordinatsOfPosition(currentPosition);
-	_canvas->SetLeft(_cursor, point.X);
-	_canvas->SetTop(_cursor, point.Y);
+	SetCursor(ref new Cursor(beat, tick));
 }
 
 // изменяем масштаб согласно переданному "фактору"
@@ -354,7 +351,7 @@ void SketchMusic::View::TextRow::Backspace()
 
 	// берём положение курсора
 	// убеждаемся, что оно ненулевое
-	if ((currentPosition->Beat == 0) && (currentPosition->Tick == 0))
+	if ((currentPosition->Beat == _startPos->Beat) && (currentPosition->Tick == 0))
 		return;
 
 	// вычисляем положение курсора на единицу влево
@@ -371,7 +368,7 @@ void SketchMusic::View::TextRow::Backspace()
 
 	// удаляем символы из текста
 	current->deleteSymbols(currentPosition, to);
-	data->ControlText->deleteSymbols(currentPosition, to);
+	//data->ControlText->deleteSymbols(currentPosition, to); // controlText решено пока не трогать, символы темпа можно удалять с помощью ластика
 
 	// удаляем все элементы с текущего положения по положение на шаг назад
 	int i = 0;

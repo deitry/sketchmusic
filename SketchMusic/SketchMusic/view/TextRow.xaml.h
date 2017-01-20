@@ -42,6 +42,7 @@ private:
 						// могут быть ещё символы
 
 	Cursor^ _maxPos;
+	Cursor^ _startPos;	// что принимаем за ноль
 
 	std::vector<PositionedSymbol^> breakLine;
 	// в отдельном массиве содержим символы, которые отмечают разрыв строки.
@@ -62,7 +63,7 @@ internal:
 	Point GetCoordinatsOfControl(ContentControl^ ctrl, Point offset);
 	void InvalidateText();
 	void RedrawText();
-	void AllocateSnapPoints(Text^ text, int newScale);
+	void AllocateSnapPoints(Text^ text, int newScale, int selectedPart);
 	void SetSnapPointsVisibility(int newScale);
 	void InsertLineBreak(Cursor^ pos);
 	void DeleteLineBreak(Cursor^ pos);
@@ -83,12 +84,13 @@ public:
 	void OnApplyTemplate() override;
 	void InitializePage();
 
-	void SetText(SketchMusic::Text^ text);
+	//void SetText(SketchMusic::Text^ text);
 	//void SetFormat(SketchMusic::Text^ format);	// оставляем возможность ноты брать из одного текста, 
 	// а формат из другого - чтобы легче было работать с несколькими дорожками	SketchMusic::Text^ GetText();
 
 	// универсальная функция
-	void SetText(CompositionData^ textCollection, SketchMusic::Text^ format);
+	void SetText(CompositionData^ textCollection, SketchMusic::Text^ current);
+	void SetText(CompositionData^ textCollection, SketchMusic::Text^ current, int selectedPart);
 	SketchMusic::Text^ GetText();
 	void SetCursor(SketchMusic::Cursor^ pos);
 

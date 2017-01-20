@@ -150,13 +150,13 @@ void StrokeEditor::CompositionOverviewPage::RefreshBtn_Click(Platform::Object^ s
 
 void StrokeEditor::CompositionOverviewPage::CreateEntryBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), ref new CompositionNavigationArgs(Workspace, nullptr));
+	this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), ref new CompositionNavigationArgs(Workspace, nullptr, nullptr));
 }
 
 
 void StrokeEditor::CompositionOverviewPage::EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), ref new CompositionNavigationArgs(Workspace, (StorageFile^) CompositionListView->SelectedItem));
+	this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), ref new CompositionNavigationArgs(Workspace, (StorageFile^) CompositionListView->SelectedItem, nullptr));
 }
 
 

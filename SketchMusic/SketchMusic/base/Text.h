@@ -65,6 +65,7 @@ public:
 
 	unsigned int getSize() { return _t.size(); }
 	IVector<PositionedSymbol^>^ getText();
+	IVector<PositionedSymbol^>^ GetSymbols(Cursor^ from, Cursor^ to);
 	
 	// получение нот в конкретной точке и сбоку от неё - для последовательного редактирования
 	IVector<PositionedSymbol^>^ getNotesAt(Cursor^ pos, SymbolType type);

@@ -356,9 +356,11 @@ void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>
 
 				auto orig = part->originalPos;
 				auto leftBound = oldText->_t.lower_bound(orig);	// откуда начнём "вырезать" текст
+				if (leftBound == oldText->_t.end()) continue;
+
 				int rightBeat = leftBound->first->Beat + part->Length;
-				int dif = orig->Beat - curPos;
-				Cursor^ rightPos = ref new Cursor(rightBeat + dif);
+				int dif = curPos - orig->Beat;
+				Cursor^ rightPos = ref new Cursor(rightBeat);
 				auto rightBound = oldText->_t.lower_bound(rightPos);	// где закончим
 
 				// переставляем символы из старого текста в новый
@@ -372,7 +374,8 @@ void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>
 		}
 
 		// вставляем собственно сам символ части
-		newCtrlTxt->_t.insert(std::make_pair(ref new Cursor(curPos), part->original));
+		part->originalPos = ref new Cursor(curPos);	// обновляем положение части
+		newCtrlTxt->_t.insert(std::make_pair(part->originalPos, part->original));
 		curPos += part->Length;
 	}
 

@@ -25,7 +25,7 @@ public:
 	Cursor() {_beat = 0; _tick = 0; }
 	Cursor(int b) { _beat = b; _tick = 0; }
 	Cursor(int b, float t);
-	Cursor(Cursor^ cur) { _beat = cur->_beat; _tick = cur->_tick; }
+	Cursor(Cursor^ cur) { if (cur) { _beat = cur->_beat; _tick = cur->_tick; } else { _beat = 0; _tick = 0; } }
 
 	property int Beat
 	{ int get() { return _beat; }

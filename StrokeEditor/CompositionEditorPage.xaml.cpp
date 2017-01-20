@@ -42,14 +42,58 @@ CompositionEditorPage::CompositionEditorPage()
 void StrokeEditor::CompositionEditorPage::InitializePage()
 {
 	AreButtonsEnabled(false);
+	Windows::Storage::ApplicationDataContainer^ localSettings =
+		Windows::Storage::ApplicationData::Current->LocalSettings;
+
+	if (localSettings)
+	{
+		if (localSettings->Values->HasKey("need_metronome"))
+		{
+			((App^)App::Current)->_player->needMetronome = (bool)localSettings->Values->Lookup("need_metronome");
+			NeedMetronomeChbx->IsChecked = ((App^)App::Current)->_player->needMetronome;
+		}
+		else {
+			((App^)App::Current)->_player->needMetronome = true;
+			NeedMetronomeChbx->IsChecked = true;
+		}
+
+		if (localSettings->Values->HasKey("need_play_generic"))
+		{
+			((App^)App::Current)->_player->needPlayGeneric = (bool)localSettings->Values->Lookup("need_play_generic");
+			NeedGenericChbx->IsChecked = ((App^)App::Current)->_player->needPlayGeneric;
+		}
+		else {
+			((App^)App::Current)->_player->needPlayGeneric = true;
+			NeedGenericChbx->IsChecked = true;
+		}
+	}
+
+	curPosChangeToken = 
+		((App^)App::Current)->_player->CursorPosChanged 
+		+= ref new Windows::Foundation::EventHandler<SketchMusic::Cursor ^>(this, &StrokeEditor::CompositionEditorPage::OnCursorPosChanged);
+	playerStateChangeToken =
+		((App^)App::Current)->_player->StateChanged 
+		+= ref new Windows::Foundation::EventHandler<SketchMusic::Player::PlayerState>(this, &StrokeEditor::CompositionEditorPage::OnStateChanged);
 }
 
 void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
 	auto args = reinterpret_cast<CompositionNavigationArgs^>(e->Parameter);
-	if (args && args->File != nullptr)
+	if (args == nullptr) return;
+	
+	// если передаём целиком композицию, возвращаясь, например, из MelodyEditor
+	if (args->Project != nullptr)
 	{
 		CompositionFile = args->File;
+		CompositionProject = args->Project;
+
+		SetParts(CompositionProject->Data->getParts());
+		AreButtonsEnabled(true);
+	}
+	else if (args->File != nullptr)
+	{
+		CompositionFile = args->File;
+		//CompositionWorkspace = args->Workspace;
 		create_task(FileIO::ReadTextAsync(CompositionFile))
 			.then([=](String^ text)
 		{
@@ -69,7 +113,7 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 			AreButtonsEnabled(true);
 		});
 	}
-	else
+	else if (args->Workspace != nullptr)
 	{
 		// создать новый в указанной папке
 		auto dialog = ref new ContentDialog;
@@ -127,6 +171,13 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	}
 }
 
+void StrokeEditor::CompositionEditorPage::OnNavigatedFrom(NavigationEventArgs ^ e)
+{
+	// отписка от события
+	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
+	(((App^)App::Current)->_player)->CursorPosChanged -= curPosChangeToken;
+}
+
 
 
 void StrokeEditor::CompositionEditorPage::SaveComposition()
@@ -149,7 +200,6 @@ void StrokeEditor::CompositionEditorPage::SaveComposition()
 void StrokeEditor::CompositionEditorPage::AreButtonsEnabled(bool isEnabled)
 {
 	SaveBtn->IsEnabled = isEnabled;
-	EditBtn->IsEnabled = isEnabled;
 	AddPartBtn->IsEnabled = isEnabled;
 	DeleteBtn->IsEnabled = isEnabled;
 	OkBtn->IsEnabled = isEnabled;
@@ -173,6 +223,8 @@ void StrokeEditor::CompositionEditorPage::UpdateTotalLength()
 	{
 		totalLength += part->Length;
 	}
+
+	CompositionSlider->Maximum = totalLength;
 
 	totalLength = totalLength * 60 / CompositionProject->Data->BPM;	// /BPM
 	int minutes = totalLength / 60;
@@ -210,8 +262,10 @@ void StrokeEditor::CompositionEditorPage::SaveBtn_Click(Platform::Object^ sender
 
 void StrokeEditor::CompositionEditorPage::EditBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
+	// применяем все изменения
+	CompositionProject->Data->ApplyParts(CompositionView->Parts);
 	// редактируем композицию, переставляя курсор на начало выбранной части
-	//this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), nullptr);
+	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), ref new CompositionNavigationArgs(nullptr, CompositionFile, CompositionProject, CompositionPartList->SelectedIndex));
 }
 
 
@@ -244,6 +298,7 @@ void StrokeEditor::CompositionEditorPage::CompositionPartList_SelectionChanged(P
 	bool hasSelection = CompositionPartList->SelectedItem ? true : false;
 	DeletePartBtn->IsEnabled = hasSelection;
 	EditPartBtn->IsEnabled = hasSelection;
+	EditBtn->IsEnabled = hasSelection;
 	CompositionView->SelectedItem = (PartDefinition^)CompositionPartList->SelectedItem;
 }
 
@@ -360,4 +415,76 @@ void StrokeEditor::CompositionEditorPage::TitleTxt_PointerPressed(Platform::Obje
 			}));
 		}
 	});
+}
+
+
+void StrokeEditor::CompositionEditorPage::PlayCompositionBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	if (((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::STOP)
+	{
+		((App^)App::Current)->_player->stop();
+		return;
+	}
+
+	// приводим текст в соответствие со списком частей
+	CompositionProject->Data->ApplyParts(CompositionView->Parts);
+
+	// начинаем проигрывать с заданного места и пока не остановимся
+	((App^)App::Current)->_player->StopAtLast = true;	// последний символ - последняя часть
+	((App^)App::Current)->_player->needMetronome = NeedMetronomeChbx->IsChecked->Value;	// последний символ - последняя часть
+	((App^)App::Current)->_player->needPlayGeneric= NeedGenericChbx->IsChecked->Value;		// последний символ - последняя часть
+	((App^)App::Current)->_player->quantize = 1;		// для обновления положения слайдера нам больше не надо
+	((App^)App::Current)->_player->precount = 0;
+	int start = CompositionSlider->Value;
+	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
+	{
+		auto async = concurrency::create_task([=]
+		{
+			//((App^)App::Current)->_player->stop();
+			((App^)App::Current)->_player->playText(CompositionProject->Data, ref new SketchMusic::Cursor(start));
+		});
+	}));
+}
+
+
+void StrokeEditor::CompositionEditorPage::NeedMetronomeChbx_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	((App^)App::Current)->_player->needPlayGeneric = NeedGenericChbx->IsChecked->Value;
+	Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert("need_metronome", ((App^)App::Current)->_player->needMetronome);
+}
+
+
+void StrokeEditor::CompositionEditorPage::NeedGenericChbx_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	((App^)App::Current)->_player->needPlayGeneric = NeedGenericChbx->IsChecked->Value;
+	Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert("need_play_generic", ((App^)App::Current)->_player->needMetronome);
+}
+
+
+void StrokeEditor::CompositionEditorPage::OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args)
+{
+	this->Dispatcher->RunAsync(
+		Windows::UI::Core::CoreDispatcherPriority::Normal,
+		ref new Windows::UI::Core::DispatchedHandler([=]() {
+		switch (args)
+		{
+		case SketchMusic::Player::PlayerState::PLAY:
+			PlayCompositionBtn->Content = L"\uE769";
+			break;
+		case SketchMusic::Player::PlayerState::STOP:
+		case SketchMusic::Player::PlayerState::WAIT:
+			PlayCompositionBtn->Content = L"\uE768";
+			break;
+		}
+	}));
+}
+
+
+void StrokeEditor::CompositionEditorPage::OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor ^args)
+{
+	this->Dispatcher->RunAsync(
+		Windows::UI::Core::CoreDispatcherPriority::Normal,
+		ref new Windows::UI::Core::DispatchedHandler([=]() {
+		CompositionSlider->Value = args->Beat;
+	}));
 }

@@ -145,6 +145,25 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 	return vect;
 }
 
+IVector<PositionedSymbol^>^ SketchMusic::Text::GetSymbols(Cursor ^ from, Cursor ^ to)
+{
+	Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
+
+	if (from->EQ(to)) return vect;
+	
+	auto left = from ? _t.lower_bound(from) : _t.begin();
+	auto right = to ? _t.lower_bound(to) : _t.end();
+	if (left == right) return vect;
+
+	//for (std::pair<Cursor^, ISymbol^> sym : this->_t)
+	for (; left != right; left++)
+	{
+		vect->Append(ref new PositionedSymbol(left->first, left->second));
+	}
+
+	return vect;
+}
+
 // Получаем ноты в данной позиции, имеющие тип type (или все, если type == unknown)
 IVector<PositionedSymbol^>^ SketchMusic::Text::getNotesAt(Cursor ^ pos, SymbolType type)
 {

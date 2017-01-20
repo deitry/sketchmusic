@@ -7,6 +7,7 @@
 #include "MelodyEditorPage.xaml.h"
 #include "concrt.h"
 #include "LibraryEntryPage.xaml.h"
+#include "CompositionEditorPage.xaml.h"
 
 using namespace StrokeEditor;
 using namespace SketchMusic;
@@ -40,30 +41,14 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
 	InitializePage();
 
-	//((App^)App::Current)->ShowNotification("Загрузка страницы");
-	
-	_idea = (Idea^)e->Parameter;
-	
-	if (_idea->Content == nullptr)
+	_idea = dynamic_cast<Idea^>(e->Parameter);
+	if (_idea) LoadIdea();
+	else
 	{
-		// восстанавливаем из сериализованного состояния
-		if (_idea->SerializedContent != nullptr)
-		{
-			_idea->Content = SketchMusic::CompositionData::deserialize(_idea->SerializedContent);
-		}
-		else
-		{
-			// принудительно, пока нет выбора других инструментов
-			_idea->Content = ref new CompositionData();
-			_idea->Content->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
-			//_idea->Content->texts->Append(TestData::CreateTestText(2350));
-		}
+		_compositionArgs = dynamic_cast<CompositionNavigationArgs^>(e->Parameter);
+		if (_compositionArgs) LoadComposition();
 	}
-	
-	_texts = _idea->Content;
-	
-	//((App^)App::Current)->ShowNotification("Загрузка параметров");
-	
+
 	Windows::Storage::ApplicationDataContainer^ localSettings =
 		Windows::Storage::ApplicationData::Current->LocalSettings;
 
@@ -98,8 +83,6 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	}
 
 	((App^)App::Current)->_player->StopAtLast = false;
-
-	//((App^)App::Current)->ShowNotification("Загрузка инструментов");
 
 	auto async = create_task([=]
 	{
@@ -136,12 +119,52 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	if (list)
 	{
 		list->DataContext = _texts->texts;
+		list->SelectedIndex = 0;
+	}
+
+	ListView^ list2 = dynamic_cast<ListView^>(PartsFlyout->Content);
+	if (list2)
+	{
+		list2->DataContext = _texts->getParts();
 	}
 	
-	_textRow->SetText(_texts, nullptr);
-
 	viewType = ViewType::TextRow;
 	//UpdateChordViews(_textRow->currentPosition);
+}
+
+void StrokeEditor::MelodyEditorPage::LoadIdea()
+{
+	if (_idea->Content == nullptr)
+	{
+		// восстанавливаем из сериализованного состояния
+		if (_idea->SerializedContent != nullptr)
+		{
+			_idea->Content = SketchMusic::CompositionData::deserialize(_idea->SerializedContent);
+		}
+		else
+		{
+			// принудительно, пока нет выбора других инструментов
+			_idea->Content = ref new CompositionData();
+			_idea->Content->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
+			//_idea->Content->texts->Append(TestData::CreateTestText(2350));
+		}
+	}
+
+	_texts = _idea->Content;
+	_textRow->SetText(_texts, nullptr);
+}
+
+void StrokeEditor::MelodyEditorPage::LoadComposition()
+{
+	// полагаем, что у композиции данные уже существуют
+	if (_compositionArgs->Project->Data->texts->Size == 0)
+	{
+		// принудительно, пока нет выбора других инструментов
+		_compositionArgs->Project->Data->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
+	}
+
+	_texts = _compositionArgs->Project->Data;
+	_textRow->SetText(_texts, nullptr, _compositionArgs->Selected);
 }
 
 void StrokeEditor::MelodyEditorPage::InitializePage()
@@ -209,24 +232,28 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	((App^)App::Current)->_player->cycling = false;
 	((App^)App::Current)->_player->stop();
 	((App^)App::Current)->_player->stopKeyboard();
-
-	// сохраняем данные в виде текста
-	_idea->SerializedContent = _idea->Content->serialize()->Stringify();
 	
 	// сохраняем настройки
 	Windows::Storage::ApplicationDataContainer^ localSettings =
 		Windows::Storage::ApplicationData::Current->LocalSettings;
 
-	localSettings->Values->Insert("need_metronome", ((App^)App::Current)->_player->needMetronome);
-	localSettings->Values->Insert("need_play_generic", ((App^)App::Current)->_player->needPlayGeneric);
-	localSettings->Values->Insert("precount", ((App^)App::Current)->_player->precount);
-
 	// отписка от события
 	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
 	(((App^)App::Current)->_player)->CursorPosChanged -= curPosChangeToken;
 
-	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(_idea, true));
+	// сохраняем данные в виде текста
+	if (_idea)
+	{
+		_idea->SerializedContent = _idea->Content->serialize()->Stringify();
+		this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(_idea, true));
+	}
+
+	if (_compositionArgs)
+	{
+		this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), _compositionArgs);
+	}
 }
+
 
 void StrokeEditor::MelodyEditorPage::playAll_Click()
 {
@@ -257,11 +284,13 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		case SketchMusic::View::KeyType::metronome:
 		{
 			((App^)App::Current)->_player->needMetronome = (bool)args->key->value;
+			Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert("need_metronome", ((App^)App::Current)->_player->needMetronome);
 			break;
 		}
 		case SketchMusic::View::KeyType::playGeneric:
 		{
 			((App^)App::Current)->_player->needPlayGeneric = (bool)args->key->value;
+			Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert("need_play_generic", ((App^)App::Current)->_player->needMetronome);
 			break;
 		}
 		case SketchMusic::View::KeyType::quantization:
@@ -273,6 +302,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 		case SketchMusic::View::KeyType::precount:
 		{
 			((App^)App::Current)->_player->precount = args->key->value;
+			Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert("precount", ((App^)App::Current)->_player->needMetronome);
 			break;
 		}
 		case SketchMusic::View::KeyType::end:
@@ -415,6 +445,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 			break;
 		case SketchMusic::View::KeyType::cycling:
 			((App^)App::Current)->_player->cycling = args->key->value;
+			((App^)App::Current)->_player->StopAtLast = ((App^)App::Current)->_player->cycling;
 			break;
 		case SketchMusic::View::KeyType::zoom:
 			_textRow->SetScale(args->key->value * 2);
@@ -505,7 +536,7 @@ void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^
 	Text^ text = dynamic_cast<Text^>(TextsList->SelectedItem); // e->AddedItems->First()->Current
 	if (text)
 	{
-		_textRow->SetText(text);
+		_textRow->SetText(_texts, text, _compositionArgs->Selected);
 	}
 	TextsFlyout->Hide();
 }
@@ -596,7 +627,7 @@ void StrokeEditor::MelodyEditorPage::DeleteTextBtn_Click(Platform::Object^ sende
 			if (new_index> (size - 2)) { new_index = size - 2; }	// size-1 = крайний элемент; size-1-1 = крайний элемент после удаления
 			TextsList->SelectedIndex = new_index;
 			_texts->texts->RemoveAt(index);
-			_textRow->SetText(_texts->texts->GetAt(new_index));
+			_textRow->SetText(_texts, _texts->texts->GetAt(new_index), _compositionArgs->Selected);
 		}
 		DeleteTextFlyout->Hide();
 	}
@@ -607,7 +638,10 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 {
 	if (HamburgerButton == (ContentControl^)e->ClickedItem)
 	{
-		mySplitView->IsPaneOpen = !mySplitView->IsPaneOpen;
+		bool isOpen = !mySplitView->IsPaneOpen;
+		mySplitView->IsPaneOpen = isOpen;
+		MenuSeparator->X2 = isOpen ? 22 : menu->Width;
+		MenuSeparator2->X2 = isOpen ? 22 : menu->Width;
 	}
 	else if (homeItem == (ContentControl^)e->ClickedItem)
 	{
@@ -616,6 +650,10 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 	else if (textsItem == (ContentControl^)e->ClickedItem)
 	{
 		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(textsCtrl);
+	}
+	else if (partsItem == (ContentControl^)e->ClickedItem)
+	{
+		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(partsCtrl);
 	}
 	else if (addItem == (ContentControl^)e->ClickedItem)
 	{
@@ -742,5 +780,10 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 		MoveRightCWBtn->IsEnabled = true; NextPosTxt->Text = L"" + nextPos->Beat + ":" + nextPos->Tick;
 	}
 	else { MoveRightCWBtn->IsEnabled = false; NextPosTxt->Text = ""; }
+
+}
+
+void StrokeEditor::MelodyEditorPage::PartsList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+{
 
 }
