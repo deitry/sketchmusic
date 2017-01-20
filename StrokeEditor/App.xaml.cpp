@@ -26,6 +26,7 @@ using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace Windows::UI::Notifications;
 using namespace Windows::Data::Xml::Dom;
+using namespace Windows::Storage;
 
 using Windows::Foundation::Collections::IVector;
 using Platform::Collections::Vector;
@@ -41,15 +42,22 @@ App::App()
 {
 	InitializeComponent();
 	InitializeApp();
+	((App^)App::Current)->WriteToDebugFile("Инициализация приложения завершена");
 }
 
 void StrokeEditor::App::InitializeApp()
 {
+	concurrency::create_task(Windows::Storage::ApplicationData::Current->LocalFolder->CreateFileAsync("Debug.txt", CreationCollisionOption::ReplaceExisting))
+		.then([=] (StorageFile^ file) {
+		DebugFile = file;
+	});
+
 	Suspending += ref new SuspendingEventHandler(this, &App::OnSuspending);
 	Resuming += ref new EventHandler<Platform::Object^>(this, &App::OnResuming);
 
 	// TODO : в качестве аргумента - или ещё лучше (?) в качестве возвращаемого значения - передавать хендлер
 	OpenLibrary("\\ideaLibrary.db");
+	
 
 	((App^)App::Current)->ideaLibrary = ref new Vector<SketchMusic::Idea^>();
 
@@ -155,6 +163,26 @@ void StrokeEditor::App::OnResuming(Platform::Object ^ sender, Platform::Object ^
 void App::OnNavigationFailed(Platform::Object ^sender, Windows::UI::Xaml::Navigation::NavigationFailedEventArgs ^e)
 {
 	throw ref new FailureException("Failed to load Page " + e->SourcePageType.Name);
+}
+
+void StrokeEditor::App::WriteToDebugFile(Platform::String ^ str)
+{
+	if (DebugFile)
+	{
+		__time64_t long_time;
+		_time64(&long_time);
+		struct tm t;
+		_localtime64_s(&t, &long_time);
+		t.tm_year += 1900;
+		t.tm_mon += 1;
+		Platform::String^ timeStr = t.tm_year + "." +
+			((t.tm_mon < 10) ? "0" : "") + t.tm_mon + "." +
+			((t.tm_mday < 10) ? "0" : "") + t.tm_mday + " " +
+			t.tm_hour + ":" + ((t.tm_min < 10) ? "0" : "") + t.tm_min + ":" +
+			((t.tm_sec<10) ? "0" : "") + t.tm_sec;
+
+		FileIO::AppendLinesAsync(DebugFile, ref new Platform::Collections::Vector<String^>(1,timeStr + " " + str));
+	}
 }
 
 void StrokeEditor::App::OpenLibrary(Platform::String ^ dbName)

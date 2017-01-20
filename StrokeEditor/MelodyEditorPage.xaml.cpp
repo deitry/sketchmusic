@@ -34,12 +34,16 @@ using namespace Windows::Storage::Streams;
 
 MelodyEditorPage::MelodyEditorPage()
 {
+	((App^)App::Current)->WriteToDebugFile("Инициализация окна редактирования текста");
 	InitializeComponent();
+	((App^)App::Current)->WriteToDebugFile("Инициализация компонентов завершена");
 }
 
 void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
+	((App^)App::Current)->WriteToDebugFile("Переход на страницу");
 	InitializePage();
+	((App^)App::Current)->WriteToDebugFile("Инициализация окна завершена");
 
 	_idea = dynamic_cast<Idea^>(e->Parameter);
 	if (_idea) LoadIdea();
@@ -48,6 +52,8 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		_compositionArgs = dynamic_cast<CompositionNavigationArgs^>(e->Parameter);
 		if (_compositionArgs) LoadComposition();
 	}
+
+	((App^)App::Current)->WriteToDebugFile("Загрузка данных завершена");
 
 	Windows::Storage::ApplicationDataContainer^ localSettings =
 		Windows::Storage::ApplicationData::Current->LocalSettings;
@@ -74,7 +80,8 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 		if (localSettings->Values->HasKey("precount"))
 		{
-			((App^)App::Current)->_player->precount = (int)localSettings->Values->Lookup("precount");
+			Object^ obj = localSettings->Values->Lookup("precount");
+			((App^)App::Current)->_player->precount = ((bool)obj) ? 4 : 0;
 			_keyboard->SetKey(KeyType::precount, ((App^)App::Current)->_player->precount);
 		}
 		else {
@@ -83,6 +90,8 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	}
 
 	((App^)App::Current)->_player->StopAtLast = false;
+
+	((App^)App::Current)->WriteToDebugFile("Загрузка настроек завершена");
 
 	auto async = create_task([=]
 	{
@@ -130,10 +139,13 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	
 	viewType = ViewType::TextRow;
 	//UpdateChordViews(_textRow->currentPosition);
+	((App^)App::Current)->WriteToDebugFile("Инициализация страницы завершена");
 }
 
 void StrokeEditor::MelodyEditorPage::LoadIdea()
 {
+	((App^)App::Current)->WriteToDebugFile("Загрузка данных идеи");
+
 	if (_idea->Content == nullptr)
 	{
 		// восстанавливаем из сериализованного состояния
@@ -156,6 +168,8 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 
 void StrokeEditor::MelodyEditorPage::LoadComposition()
 {
+	((App^)App::Current)->WriteToDebugFile("Загрузка данных композиции");
+
 	// полагаем, что у композиции данные уже существуют
 	if (_compositionArgs->Project->Data->texts->Size == 0)
 	{
@@ -169,6 +183,8 @@ void StrokeEditor::MelodyEditorPage::LoadComposition()
 
 void StrokeEditor::MelodyEditorPage::InitializePage()
 {
+	((App^)App::Current)->WriteToDebugFile("Инициализация страницы");
+
 	// подгоняем ширину TextRow
 	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width - mySplitView->CompactPaneLength;
 	_textRow->Width = width;
@@ -260,6 +276,7 @@ void StrokeEditor::MelodyEditorPage::playAll_Click()
 	if (((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::STOP)
 	{
 		((App^)App::Current)->_player->stop();
+		((App^)App::Current)->WriteToDebugFile("Остановка плеера");
 		return;
 	}
 
@@ -268,6 +285,7 @@ void StrokeEditor::MelodyEditorPage::playAll_Click()
 		auto async = concurrency::create_task([this]
 		{
 			//((App^)App::Current)->_player->stop();
+			((App^)App::Current)->WriteToDebugFile("Запуск плеера");
 			((App^)App::Current)->_player->playText(this->_texts, ref new SketchMusic::Cursor(_textRow->currentPosition));
 		});
 	}));
@@ -497,6 +515,7 @@ void StrokeEditor::MelodyEditorPage::OnStateChanged(Platform::Object ^sender, Sk
 	this->Dispatcher->RunAsync(
 		Windows::UI::Core::CoreDispatcherPriority::Normal,
 		ref new Windows::UI::Core::DispatchedHandler([=]() {
+		((App^)App::Current)->WriteToDebugFile("Обработка изменения состояния плеера");
 		switch (args)
 		{
 		case SketchMusic::Player::PlayerState::PLAY:
@@ -522,13 +541,11 @@ void StrokeEditor::MelodyEditorPage::OnBpmChanged(Platform::Object ^sender, floa
 
 void StrokeEditor::MelodyEditorPage::OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor^ pos)
 {
-	this->Dispatcher->RunAsync(
-		Windows::UI::Core::CoreDispatcherPriority::Normal,
+	create_task(this->Dispatcher->RunAsync(
+		Windows::UI::Core::CoreDispatcherPriority::Low,
 		ref new Windows::UI::Core::DispatchedHandler([=]() {
-			_textRow->SetCursor(pos);
-			//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-			//	+ " / tick = " + _textRow->currentPosition->getTick();
-	}));
+		_textRow->SetCursor(pos);
+	})));
 }
 
 void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
@@ -536,7 +553,7 @@ void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^
 	Text^ text = dynamic_cast<Text^>(TextsList->SelectedItem); // e->AddedItems->First()->Current
 	if (text)
 	{
-		_textRow->SetText(_texts, text, _compositionArgs->Selected);
+		_textRow->SetText(_texts, text, _compositionArgs ? _compositionArgs->Selected : -1);
 	}
 	TextsFlyout->Hide();
 }
@@ -640,8 +657,8 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 	{
 		bool isOpen = !mySplitView->IsPaneOpen;
 		mySplitView->IsPaneOpen = isOpen;
-		MenuSeparator->X2 = isOpen ? 22 : menu->Width;
-		MenuSeparator2->X2 = isOpen ? 22 : menu->Width;
+		MenuSeparator->X2 = (isOpen ? 22. : menu->Width);
+		MenuSeparator2->X2 = (isOpen ? 22. : menu->Width);
 	}
 	else if (homeItem == (ContentControl^)e->ClickedItem)
 	{

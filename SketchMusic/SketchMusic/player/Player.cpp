@@ -337,8 +337,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			cursor->incTick(offset);
 
 			// квантизация
-			int prevQuant = -1;
-			int prevBeat = -1;
+			static int prevQuant = -1;
+			static int prevBeat = -1;
 			if (quantize)
 			{
 				int quant = cursor->Tick * quantize / TICK_IN_BEAT;

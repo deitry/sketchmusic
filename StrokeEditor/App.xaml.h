@@ -29,6 +29,8 @@ namespace StrokeEditor
 		SketchMusic::Player::Player^ _player;
 		SketchMusic::Commands::CommandManager^ _manager;
 		Windows::Foundation::Collections::IVector<SketchMusic::Idea^>^ ideaLibrary;
+		Windows::Storage::StorageFile^ DebugFile;
+		void WriteToDebugFile(Platform::String^ str);
 
 		void OpenLibrary(Platform::String^ dbName);
 		int InsertIdea(SketchMusic::Idea^ idea);

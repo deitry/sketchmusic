@@ -449,7 +449,7 @@ void StrokeEditor::CompositionEditorPage::PlayCompositionBtn_Click(Platform::Obj
 
 void StrokeEditor::CompositionEditorPage::NeedMetronomeChbx_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	((App^)App::Current)->_player->needPlayGeneric = NeedGenericChbx->IsChecked->Value;
+	((App^)App::Current)->_player->needMetronome = NeedMetronomeChbx->IsChecked->Value;
 	Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert("need_metronome", ((App^)App::Current)->_player->needMetronome);
 }
 
