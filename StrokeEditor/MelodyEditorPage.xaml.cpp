@@ -657,8 +657,8 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 	{
 		bool isOpen = !mySplitView->IsPaneOpen;
 		mySplitView->IsPaneOpen = isOpen;
-		MenuSeparator->X2 = (isOpen ? 22. : menu->Width);
-		MenuSeparator2->X2 = (isOpen ? 22. : menu->Width);
+		MenuSeparator->X2 = (isOpen ? menu->ActualWidth : 22.);
+		MenuSeparator2->X2 = (isOpen ? menu->ActualWidth : 22.);
 	}
 	else if (homeItem == (ContentControl^)e->ClickedItem)
 	{
