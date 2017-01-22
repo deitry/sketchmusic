@@ -20,8 +20,8 @@
                 <TextBlock Text="{x:Bind name}"/>
             </DataTemplate>
 
-            <x:Double x:Key="MenuSymbolFontSize">24</x:Double>
-            <x:Double x:Key="MenuFontSize">18</x:Double>
+            <x:Double x:Key="MenuSymbolFontSize">20</x:Double>
+            <x:Double x:Key="MenuFontSize">15</x:Double>
         </ResourceDictionary>
     </Page.Resources>
 
@@ -46,8 +46,8 @@
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
 
-        <SplitView Name="mySplitView" Grid.Row="0" OpenPaneLength="240"
-                   DisplayMode="CompactOverlay" CompactPaneLength="46"
+        <SplitView Name="mySplitView" Grid.Row="0" OpenPaneLength="250"
+                   DisplayMode="CompactOverlay" CompactPaneLength="40"
                    BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}" BorderThickness="2"
                    VerticalAlignment="Stretch">
             <SplitView.Pane>
@@ -59,7 +59,7 @@
 
                     <ContentControl Name="homeItem">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE8FB;"/>
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE72B;"/>
                             <TextBlock FontSize="{StaticResource MenuFontSize}" Name="GoBackTxt" Text="Вернуться назад" Margin="10 0 0 0"/>
                         </StackPanel>
                     </ContentControl>
@@ -71,7 +71,8 @@
                                        Name="textsCtrl">
                                 <FlyoutBase.AttachedFlyout>
                                     <Flyout x:Name="TextsFlyout">
-                                        <ListView ItemsSource="{Binding}" x:Name="TextsList" SelectionChanged="ListView_SelectionChanged" Width="auto">
+                                        <ListView ItemsSource="{Binding}" x:Name="TextsList" SelectionChanged="ListView_SelectionChanged" Width="auto"
+                                                  CanReorderItems="True" CanDragItems="True" AllowDrop="True">
                                             <ListView.ItemTemplate>
                                                 <DataTemplate>
                                                     <Border BorderThickness="1" BorderBrush="AliceBlue">
@@ -100,7 +101,7 @@
                                                 <DataTemplate>
                                                     <Border BorderThickness="1" BorderBrush="AliceBlue">
                                                         <TextBlock FontSize="14" Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
-                                                            <Run Text="{Binding original.category}"/>
+                                                            <Run Text="{Binding Converter={StaticResource partcat2text}}"/>
                                                         </TextBlock>
                                                     </Border>
                                                 </DataTemplate>
@@ -118,8 +119,17 @@
                             <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Сменить представление" Margin="10 0 0 0" />
                         </StackPanel>
                     </ContentControl>
-                    
+
                     <Line x:Name="MenuSeparator" Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="22" Y1="0" Y2="0"/>
+                    
+                    <ContentControl Name="PlayItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="PlayItemTxt1" FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE768;" />
+                            <TextBlock x:Name="PlayItemTxt2" FontSize="{StaticResource MenuFontSize}" Text="Воспроизвести" Margin="10 0 0 0" />
+                        </StackPanel>
+                    </ContentControl>
+                    
+                    <Line x:Name="MenuSeparator3" Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="22" Y1="0" Y2="0"/>
 
                     <ContentControl Name="addItem">
                         <StackPanel Orientation="Horizontal">
@@ -169,7 +179,13 @@
 
                     <Line x:Name="MenuSeparator2" Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="22" Y1="0" Y2="0" />
 
-
+                    <ContentControl Name="SaveItem">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE74E;" />
+                            <TextBlock FontSize="{StaticResource MenuFontSize}" Text="Сохранить" Margin="10 0 0 0" />
+                        </StackPanel>
+                    </ContentControl>
+                    
                     <ContentControl Name="settingsItem">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE713;" />

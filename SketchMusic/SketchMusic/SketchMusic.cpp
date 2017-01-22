@@ -295,19 +295,6 @@ void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>
 	// проходимся по списку определений частей
 	// формируем новый текст, "выдёргивая" из старого текста символы и расставляя их согласно новой структуре
 
-	// выполняются следующие сценарии:
-	// - переставление частей местами
-	// - удаление частей
-	// - добавление частей
-	// - "укорачивание" частей
-	// - "удлинение" частей
-
-	// Вместо того, чтобы каждый сценарий реализовывать в отдельности, сейчас при перестроении мы создаём новые тексты
-	// и реорганизуем их в таком виде, в котором они должны быть
-
-	// например, было: ч0 - пос 0 длина 2, ч1 - пос 2 длина 2, ч2 - пос 4 длина 8
-	// стало: ч2 нпос 0, ч0 - нпос 8, ч1 - нпос 10 
-
 	// проверка на то, что реорганизовывать ничего не надо
 	bool ok = true;
 	int cur = 0;
@@ -367,8 +354,13 @@ void SketchMusic::CompositionData::ApplyParts(IObservableVector<PartDefinition^>
 				for (auto iter = leftBound; iter != rightBound; iter++)
 				{
 					auto sym = iter->second;
-					if (sym->GetSymType() != SymbolType::NPART)	// переставляем всё, кроме символов частей
-						newText->_t.insert(std::make_pair(ref new Cursor(iter->first->Beat + dif, iter->first->Tick), sym));
+					if (sym->GetSymType() == SymbolType::NPART)
+						continue;	// переставляем всё, кроме символов частей, их вставим вручную согласно новому списку
+					
+					if (sym->GetSymType() == SymbolType::NLINE)	// для обратной совместимости с уже существующими проектами
+						// символы переноса на строку вставляем в управляющий текст, чтобы сделать их общими для всех текстов
+						newCtrlTxt->_t.insert(std::make_pair(ref new Cursor(iter->first->Beat + dif, iter->first->Tick), sym));
+					else newText->_t.insert(std::make_pair(ref new Cursor(iter->first->Beat + dif, iter->first->Tick), sym));
 				}
 			}
 		}

@@ -96,7 +96,7 @@ namespace SketchMusic
 	public ref class CompositionData sealed
 	{
 	private:
-		Windows::Foundation::Collections::IVector<Text^>^ m_texts;
+		IObservableVector<Text^>^ m_texts;
 		void HandleControlSymbols();	// если мы будем сразу все управл€ющие символы добавл€ть в controlText, то эта функци€ не понадобитс€
 
 	public:
@@ -104,10 +104,10 @@ namespace SketchMusic
 
 		// TODO : добавить дорожку с "системными" данными? - вносить туда всЄ, что касаетс€ композиции в целом
 		// один текст воспринимаетс€ как одна дорожка
-		property Windows::Foundation::Collections::IVector<Text^>^ texts
+		property IObservableVector<Text^>^ texts
 		{
-			Windows::Foundation::Collections::IVector<Text^>^ get() { return m_texts; }
-			void set(Windows::Foundation::Collections::IVector<Text^>^ _texts) { m_texts = _texts; HandleControlSymbols(); }
+			IObservableVector<Text^>^ get() { return m_texts; }
+			void set(IObservableVector<Text^>^ _texts) { m_texts = _texts; HandleControlSymbols(); }
 		}
 
 		property Text^ ControlText;

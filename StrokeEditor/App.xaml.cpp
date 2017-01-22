@@ -143,11 +143,14 @@ void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEvent
 /// <param name="e">Сведения о запросе приостановки.</param>
 void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 {
-	(void) sender;	// Неиспользуемый параметр
-	(void) e;	// Неиспользуемый параметр
-
+	auto deferral = e->SuspendingOperation->GetDeferral();
+	
 	// Сохранить состояние приложения и остановить все фоновые операции
+	SaveData();
+
 	sqlite3_close(libraryDB);
+
+	deferral->Complete();
 }
 
 void StrokeEditor::App::OnResuming(Platform::Object ^ sender, Platform::Object ^ args)
@@ -288,6 +291,39 @@ void StrokeEditor::App::ShowNotification(Platform::String ^ message)
 
 	auto toast = ref new ToastNotification(toastXml);
 	ToastNotificationManager::CreateToastNotifier()->Show(toast);
+}
+
+void StrokeEditor::App::SaveData()
+{
+	// TODO : сохранять копии? или во временные файлы?
+	if (_CurrentIdea)
+	{
+		// сохранить данные - сериализовать
+		_CurrentIdea->SerializedContent = _CurrentIdea->Content->serialize()->Stringify();
+
+		// обновить modified time
+		long long time;
+		_time64(&time);
+		_CurrentIdea->ModifiedTime = time;
+
+		// отправить в библиотеку
+		if (!((App^)App::Current)->UpdateIdea(_CurrentIdea))
+		{
+			((App^)App::Current)->InsertIdea(_CurrentIdea);
+		}
+	}
+	else if (_CurrentCompositionArgs && _CurrentCompositionArgs->Project && _CurrentCompositionArgs->File)
+	{
+		// сохранить в файл
+		// применяем изменения
+		if (_CurrentParts)
+			_CurrentCompositionArgs->Project->Data->ApplyParts(_CurrentParts);
+
+		// сериализуем композицию
+		auto json = _CurrentCompositionArgs->Project->Serialize();
+		// пишем в файл
+		FileIO::WriteTextAsync(_CurrentCompositionArgs->File, json->Stringify());
+	}
 }
 
 void StrokeEditor::App::Play(SketchMusic::CompositionData^ texts, SketchMusic::Cursor ^ cursor)

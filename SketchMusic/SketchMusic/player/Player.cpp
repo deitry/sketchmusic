@@ -104,6 +104,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 	
 
 	SketchMusic::Cursor^ cursor = ref new SketchMusic::Cursor(pos);
+	_cursor = cursor;
 	//_cursor->moveTo(pos);
 
 	// ----
@@ -123,31 +124,39 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			auto symbols = text->getText();
 			// находим ближайший к старту символ (ѕќ—Ћ≈ старта)
 			
+			// с помощью iter мы учитываем все ноты, которые наход€тс€ в той точке, откуда мы начинаем
+			// startIter обозначает ту самую точку.
 			auto iter = symbols->First();
 			auto startIter = symbols->First();
 
-			//_BPM = 120;
+			bool initialized = false;
 			while (iter->HasCurrent)
 			{
 				auto p = iter->Current->_pos;
 				
+				if (p->LT(cursor)) startIter->MoveNext();
+				else if (!initialized)
+				{
+					initialized = true;
+					// отыскиваем среди енжинов подход€щий
+					ISoundEngine^ engine = this->_engines->GetSoundEngine(text->instrument);
+					auto cur = startIter->HasCurrent ? startIter->Current : nullptr;
+					iterMap->push_back(std::make_pair(engine, std::make_pair(startIter, symbols)));
+					break;
+				}
+
 				if (p->LE(cursor))
 				{
 					// обработка системных параметров - учитываем все возможные модул€ции
-					// теперь обработка темпа - только в управл€ющем тексте
-					//auto tempo = dynamic_cast<STempo^>(iter->Current->_sym);
-					//if (tempo)
-					//{
-					//	_BPM = tempo->value;
-					//}
+					// темп перенесЄн в ControlText, так что тут пока ничего нет	
 
 					// проматываем
 					iter->MoveNext();
-					if (p->LT(cursor)) startIter->MoveNext();
 
 					// если мы достигли последней ноты, а наш курсор ещЄ дальше
 					// TODO : сбрасывать на ноль только если ни в каком из текстов нот дальше чем курсор
-					if ((iter->HasCurrent == false) && (p->LE(cursor)))
+					// оставили эту возможность только если включЄн cycling
+					if (cycling && (iter->HasCurrent == false) && (p->LT(cursor)))
 					{
 						// играем сначала
 						cursor->setPos(0);
@@ -155,14 +164,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						startIter = symbols->First();
 					}
 				}
-				else
-				{
-					// отыскиваем среди енжинов подход€щий
-					ISoundEngine^ engine = this->_engines->GetSoundEngine(text->instrument);
-					
-					iterMap->push_back(std::make_pair(engine, std::make_pair(startIter, symbols)));
-					break;
-				}
+				
 			}
 		}
 

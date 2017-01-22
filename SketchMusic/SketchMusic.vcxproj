@@ -285,9 +285,6 @@
     <ClCompile Include="SketchMusic\view\TextRowHandlers.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="SketchMusic\commands\DelegateCommand.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="SketchMusic\view\ChordView.xaml">
       <SubType>Designer</SubType>
     </Page>

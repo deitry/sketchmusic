@@ -160,6 +160,8 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		LibView->ItemsSource = ((App^)App::Current)->ideaLibrary;
 	}
 
+	((App^)App::Current)->_CurrentIdea = nullptr;
+
 	// отказываемся от регулярного обновления в пользу быстродействия
 	//RefreshList();
 }

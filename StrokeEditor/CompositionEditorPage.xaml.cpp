@@ -111,6 +111,12 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 			CompositionProject->Header->FileName = CompositionFile->Name;
 			SetParts(CompositionProject->Data->getParts());
 			AreButtonsEnabled(true);
+
+			// "сохраняем" нашу композицию в параметрах приложения для сохранения на случай внезапного выключения
+			args->File = CompositionFile;
+			// Workspace, полагаю, никуда не делся из аргументов, если он там был
+			args->Project = CompositionProject;
+			((App^)App::Current)->_CurrentCompositionArgs = args;
 		});
 	}
 	else if (args->Workspace != nullptr)
@@ -166,6 +172,12 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 				CompositionProject->Header->FileName = fileNameTxt->Text + ".jsm";
 				SetParts(CompositionProject->Data->getParts());
 				AreButtonsEnabled(true);
+
+				// "сохраняем" нашу композицию в параметрах приложения для сохранения на случай внезапного выключения
+				args->File = CompositionFile;
+				// Workspace, полагаю, никуда не делся из аргументов, если он там был
+				args->Project = CompositionProject;
+				((App^)App::Current)->_CurrentCompositionArgs = args;
 			}, cancelTokenSource.get_token());
 		}));
 	}
@@ -173,6 +185,10 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 void StrokeEditor::CompositionEditorPage::OnNavigatedFrom(NavigationEventArgs ^ e)
 {
+	// обнуляем "текущую композицию"
+	((App^)App::Current)->_CurrentCompositionArgs = nullptr;
+	((App^)App::Current)->_CurrentParts = nullptr;
+
 	// отписка от события
 	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
 	(((App^)App::Current)->_player)->CursorPosChanged -= curPosChangeToken;
@@ -209,6 +225,7 @@ void StrokeEditor::CompositionEditorPage::AreButtonsEnabled(bool isEnabled)
 void StrokeEditor::CompositionEditorPage::SetParts(IObservableVector<PartDefinition^>^ parts)
 {
 	CompositionView->SetParts(parts);
+	((App^)App::Current)->_CurrentParts = parts;
 	CompositionPartList->ItemsSource = parts;
 	parts->VectorChanged += 
 		ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PartDefinition ^>(this, &StrokeEditor::CompositionEditorPage::OnVectorChanged);
@@ -300,6 +317,16 @@ void StrokeEditor::CompositionEditorPage::CompositionPartList_SelectionChanged(P
 	EditPartBtn->IsEnabled = hasSelection;
 	EditBtn->IsEnabled = hasSelection;
 	CompositionView->SelectedItem = (PartDefinition^)CompositionPartList->SelectedItem;
+	if (hasSelection)
+	{
+		int cur = 0;
+		for (auto&& p : CompositionView->Parts)
+		{
+			if (static_cast<Object^>(p) == CompositionView->SelectedItem) break;
+			cur += p->Length;
+		}
+		CompositionSlider->Value = cur;
+	}
 }
 
 

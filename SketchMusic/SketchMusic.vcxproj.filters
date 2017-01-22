@@ -63,6 +63,7 @@
     <ClCompile Include="SketchMusic\view\TextRow.xaml.cpp" />
     <ClCompile Include="SketchMusic\view\ChordView.xaml.cpp" />
     <ClCompile Include="SketchMusic\view\BaseKeyboard.xaml.cpp" />
+    <ClCompile Include="SketchMusic\view\CompositionView.xaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -148,11 +149,7 @@
     <ClInclude Include="SketchMusic\view\TextRow.xaml.h" />
     <ClInclude Include="SketchMusic\view\ChordView.xaml.h" />
     <ClInclude Include="SketchMusic\view\BaseKeyboard.xaml.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="SketchMusic\commands\DelegateCommand.txt">
-      <Filter>commands</Filter>
-    </Text>
+    <ClInclude Include="SketchMusic\view\CompositionView.xaml.h" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="SketchMusic\view\TextRow.xaml">

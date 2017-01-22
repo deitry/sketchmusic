@@ -213,7 +213,7 @@
 
     <Style TargetType="StackPanel" x:Key="RowPanel" x:Name="RowPanel">
         <Setter Property="Orientation" Value="Horizontal"/>
-        <Setter Property="Margin" Value="5,10,5,10"/>
+        <Setter Property="Margin" Value="12,10,5,10"/>
         <Setter Property="Height" Value="{StaticResource RowHeight}"/>
     </Style>
 

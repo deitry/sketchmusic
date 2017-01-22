@@ -57,8 +57,8 @@ void SketchMusic::View::TextRow::InitializePage()
 	}
 
 	initialised = 1;
-	scale = 1;
-	quantize = 1;
+	scale = 2;
+	quantize = 4;
 }
 
 // масштабирование
@@ -93,14 +93,7 @@ void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Wind
 		if (_currentSnapPoint)
 		{
 			Cursor^ newPos = GetPositionOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
-			if (newPos)
-			{
-				currentPosition->moveTo(newPos);
-
-				auto point = GetCoordinatsOfPosition(newPos);
-				_canvas->SetLeft(_cursor, point.X);
-				_canvas->SetTop(_cursor, point.Y);
-			}
+			SetCursor(newPos);
 		}
 		return;
 	}

@@ -568,19 +568,23 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 				// TODO : что вообще тут происходит?
 				//auto cancelToken = new concurrency::cancellation_token_source;
 				//auto tok = cancelToken->get_token();
-				auto release = concurrency::create_task([=]
+				if (duration)
 				{
-					//unsigned int timeout = (double)_buffer.PlayLength / smpl->sampleRate * 1000. * origFreq / freq;
-					unsigned int timeout = duration ? duration
-						: 10000;	// на всякий случай
-					concurrency::wait(timeout);
-					// 161216 - не помню зачем это тут. Попробуем так
-					//if (!concurrency::is_task_cancellation_requested())
-					if (!stop.is_canceled())
+					auto release = concurrency::create_task([=]
 					{
-						this->ReleaseVoice(voice);
-					}
-				}, stop);
+						//unsigned int timeout = (double)_buffer.PlayLength / smpl->sampleRate * 1000. * origFreq / freq;
+						unsigned int timeout = duration;
+						//	? duration
+						//	: 10000;	// на всякий случай
+						concurrency::wait(timeout);
+						// 161216 - не помню зачем это тут. Попробуем так
+						//if (!concurrency::is_task_cancellation_requested())
+						if (!stop.is_canceled())
+						{
+							this->ReleaseVoice(voice);
+						}
+					}, stop);
+				}
 			}
 		}
 	}

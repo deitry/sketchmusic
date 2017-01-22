@@ -98,7 +98,7 @@ inline void OnOctaveInc(SketchMusic::View::Key^ key)
 	switch (key->type)
 	{
 	case SketchMusic::View::KeyType::note:
-	case SketchMusic::View::KeyType::genericNote:
+	//case SketchMusic::View::KeyType::genericNote:
 	case SketchMusic::View::KeyType::relativeNote:
 		key->value += 12;
 		UpdateParent(key);
@@ -113,7 +113,7 @@ inline void OnOctaveDec(SketchMusic::View::Key^ key)
 	switch (key->type)
 	{
 	case SketchMusic::View::KeyType::note:
-	case SketchMusic::View::KeyType::genericNote:
+	//case SketchMusic::View::KeyType::genericNote:
 	case SketchMusic::View::KeyType::relativeNote:
 		key->value -= 12;
 		UpdateParent(key);

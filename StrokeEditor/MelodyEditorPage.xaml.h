@@ -60,6 +60,7 @@ namespace StrokeEditor
 
 		std::multimap<SketchMusic::View::Key^, SketchMusic::Player::NoteOff^> notesPlayingMap;
 
+		void SaveData();
 		void playAll_Click();
 		void _keyboard_KeyboardPressed(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ e);
 		void _keyboard_KeyReleased(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ e);

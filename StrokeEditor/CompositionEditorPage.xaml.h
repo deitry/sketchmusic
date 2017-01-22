@@ -62,23 +62,4 @@ namespace StrokeEditor
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
 		void OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor ^args);
 	};
-
-	public ref class CompositionNavigationArgs sealed
-	{
-	public:
-		CompositionNavigationArgs() {}
-		CompositionNavigationArgs(StorageFolder^ _folder, StorageFile^ _file, Composition^ _project)
-		{
-			Workspace = _folder; File = _file; Project = _project; Selected = -1;
-		}
-		CompositionNavigationArgs(StorageFolder^ _folder, StorageFile^ _file, Composition^ _project, int selected)
-		{
-			Workspace = _folder; File = _file; Project = _project; Selected = selected;
-		}
-
-		property StorageFile^ File;
-		property StorageFolder^ Workspace;
-		property Composition^ Project;
-		property int Selected;
-	};
 }

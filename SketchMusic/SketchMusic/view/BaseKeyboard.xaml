@@ -169,8 +169,8 @@
                 <FlyoutBase.AttachedFlyout>
                     <Flyout x:Name="LayoutFlyout">
                         <StackPanel>
-                            <MenuFlyoutItem Text="Обычная раскладка" Tag="0" Click="MenuFlyoutItem_Click"/>
-                            <MenuFlyoutItem Text="Ступени / Функции" IsEnabled="False"/>
+                            <MenuFlyoutItem Text="Клавиатура" Tag="0" Click="MenuFlyoutItem_Click"/>
+                            <MenuFlyoutItem Text="Гармония" IsEnabled="False"/>
                             <MenuFlyoutItem Text="Обобщённые ноты" Tag="2" Click="MenuFlyoutItem_Click"/>
                             <MenuFlyoutSeparator/>
                             <MenuFlyoutItem Text="Настройки клавиатуры..." IsEnabled="False"/>
@@ -302,7 +302,7 @@
     потому что -->
 
         <!-- Row G1 -->
-        <StackPanel x:Name="_RowG1"
+        <!--<StackPanel x:Name="_RowG1"
                     Orientation="Horizontal"
                     HorizontalAlignment="Center"
                     Visibility="Collapsed"
@@ -313,7 +313,7 @@
                             Style="{StaticResource KeyboardBtnStyle}" Tag="2400"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" Tag="2401"/>
-        </StackPanel>
+        </StackPanel>-->
         <!-- Row G2 -->
         <StackPanel x:Name="_RowG2"
                     Orientation="Horizontal"
@@ -373,11 +373,15 @@
                     Visibility="Collapsed"
                     Tag="2">
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="-2002"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" Tag="-2001"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" Tag="2000"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" Tag="2001"/>
+            <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=Tag, Converter={StaticResource tag2key}}"
+                            Style="{StaticResource KeyboardBtnStyle}" Tag="2002"/>
         </StackPanel>
     </StackPanel>
 

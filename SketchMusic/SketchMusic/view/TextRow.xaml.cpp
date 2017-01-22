@@ -30,8 +30,8 @@ SketchMusic::View::TextRow::TextRow()
 	//DefaultStyleKey = "SketchMusic.View.TextRow";
 
 	initialised = 0;
-	scale = 1;
-	quantize = 1;
+	scale = 2;
+	quantize = 4;
 
 	currentPosition = ref new Cursor;
 	data = ref new CompositionData;
@@ -134,6 +134,9 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 			ctrl->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
 			ctrl->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("PlaceholderControlStyle"));
 			ctrl->DataContext = (prev + i + 1);
+			// TODO : настраивать Width согласно newScale
+			if (newScale = 2)
+				ctrl->Width += PlaceholderWidth;	// пока только для масштаба 2 сделаем
 			row->Children->Append(ctrl);
 		}
 
@@ -265,10 +268,8 @@ void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textColle
 
 void SketchMusic::View::TextRow::SetText(CompositionData ^ textCollection, SketchMusic::Text ^ selected, int selectedPart)
 {
-	if (data == textCollection)
-		return;
-
-	data = textCollection;
+	if (data != textCollection)
+		data = textCollection;
 
 	if (textCollection->texts && textCollection->texts->Size > 0)
 	{
@@ -283,7 +284,7 @@ void SketchMusic::View::TextRow::SetText(CompositionData ^ textCollection, Sketc
 			this->current = this->format;
 		}
 
-		AllocateSnapPoints(this->format, 1, selectedPart);
+		AllocateSnapPoints(this->format, 2, selectedPart);
 		InvalidateText();
 	}
 
@@ -599,14 +600,15 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 	case SketchMusic::SymbolType::NOTE:
 	case SketchMusic::SymbolType::RNOTE:
 	case SketchMusic::SymbolType::GNOTE:
+	case SketchMusic::SymbolType::END:
 		// не хочется делать проверки на каждый noteBackground. Считаем, что если один нашёлся, то и остальные будут
 		if (_dict->HasKey("noteBackground"))
 		{
-			unsigned int ndx;
-			if (data->texts->IndexOf(current, &ndx))
+			Windows::UI::Xaml::Media::Brush^ brush;
+			auto note = dynamic_cast<INote^>(psym->_sym);
+			if (note)
 			{
-				Windows::UI::Xaml::Media::Brush^ brush;
-				switch (ndx)
+				switch (note->_voice)
 				{
 				case 1:
 					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground2"));
@@ -620,7 +622,6 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground4"));
 					ctrl->Background = brush;
 					break;
-				case 0:
 				default:
 					brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("noteBackground"));
 					ctrl->Background = brush;
@@ -631,6 +632,7 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 		break;
 	case SketchMusic::SymbolType::NPART:
 	case SketchMusic::SymbolType::TEMPO:
+	default:
 		if (_dict->HasKey("tempoBackground"))
 		{
 			auto brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("tempoBackground"));

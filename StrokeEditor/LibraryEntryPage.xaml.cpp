@@ -47,9 +47,12 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		this->_entry = ref new SketchMusic::Idea;
 		this->DeleteBtn->IsEnabled = false;	// что не рождено, удалено быть не может
 	}
+
+	((App^)App::Current)->_CurrentIdea = this->_entry;
+
 	// пока других нету, задаём принудительно
 	this->_entry->Category = SketchMusic::IdeaCategoryEnum::melody;
-	
+
 	// TODO : очень плохо, надо каким-то образом сделать через привязку, триггеры, хз
 	entryNameTB->IsReadOnly = _isRead;
 	categoryTB->IsReadOnly = true;	// выбора нет
@@ -201,6 +204,12 @@ void StrokeEditor::LibraryEntryPage::SaveBtn_Click(Platform::Object^ sender, Win
 	{
 		((App^)App::Current)->InsertIdea(this->_entry);
 	}
+
+	auto dialog = ref new ContentDialog;
+	dialog->Title = "Сохранение в библиотеку";
+	dialog->Content = "Успешно сохранено";
+	dialog->PrimaryButtonText = "Ок";
+	dialog->ShowAsync();
 }
 
 void StrokeEditor::LibraryEntryPage::HomeBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)

@@ -164,6 +164,8 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 
 	_texts = _idea->Content;
 	_textRow->SetText(_texts, nullptr);
+
+	((App^)App::Current)->_CurrentIdea = _idea;
 }
 
 void StrokeEditor::MelodyEditorPage::LoadComposition()
@@ -179,6 +181,8 @@ void StrokeEditor::MelodyEditorPage::LoadComposition()
 
 	_texts = _compositionArgs->Project->Data;
 	_textRow->SetText(_texts, nullptr, _compositionArgs->Selected);
+
+	((App^)App::Current)->_CurrentCompositionArgs = _compositionArgs;
 }
 
 void StrokeEditor::MelodyEditorPage::InitializePage()
@@ -271,6 +275,47 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 }
 
 
+void StrokeEditor::MelodyEditorPage::SaveData()
+{
+	if (_idea)
+	{
+		// сохранить данные - сериализовать
+		_idea->SerializedContent = _idea->Content->serialize()->Stringify();
+		
+		// обновить modified time
+		long long time;
+		_time64(&time);
+		_idea->ModifiedTime = time;
+
+		// отправить в библиотеку
+		if (!((App^)App::Current)->UpdateIdea(_idea))
+		{
+			((App^)App::Current)->InsertIdea(_idea);
+		}
+
+		auto dialog = ref new ContentDialog;
+		dialog->Title = "Сохранение в библиотеку";
+		dialog->Content = "Успешно сохранено";
+		dialog->PrimaryButtonText = "Ок";
+		create_task(dialog->ShowAsync());
+	}
+	else if (_compositionArgs)
+	{
+		// сохранить в файл
+		// сериализуем композицию
+		auto json = _compositionArgs->Project->Serialize();
+		// пишем в файл
+		create_task(FileIO::WriteTextAsync(_compositionArgs->File, json->Stringify()))
+			.then([=] {
+			auto dialog = ref new ContentDialog;
+			dialog->Title = "Сохранение в файл";
+			dialog->Content = "Успешно сохранено";
+			dialog->PrimaryButtonText = "Ок";
+			return dialog->ShowAsync();
+		});
+	}
+}
+
 void StrokeEditor::MelodyEditorPage::playAll_Click()
 {
 	if (((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::STOP)
@@ -355,7 +400,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 							((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
 								ref new SMC::Command(addSym, nullptr, nullptr),
 								ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
-									ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym))));
+									ref new PositionedSymbol(ref new SketchMusic::Cursor(((App^)App::Current)->_player->quantize ? _textRow->currentPosition : ((App^)App::Current)->_player->_cursor), sym))));
 							((App^)App::Current)->_manager->ExecuteLast();
 						}));
 					});
@@ -503,7 +548,7 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyReleased(Platform::Object^ sen
 		// создаём команду на добавление ноты в текст и сохраняем её в истории
 		((App^)App::Current)->_manager->AddCommand(ref new SMC::CommandState(
 			ref new SMC::Command(addSym, nullptr, nullptr),
-			ref new SMC::SymbolHandlerArgs(_textRow->current, nullptr,
+			ref new SMC::SymbolHandlerArgs(_texts->ControlText, nullptr,
 				ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), ref new SNewLine))));
 		((App^)App::Current)->_manager->ExecuteLast();
 		break;
@@ -520,10 +565,14 @@ void StrokeEditor::MelodyEditorPage::OnStateChanged(Platform::Object ^sender, Sk
 		{
 		case SketchMusic::Player::PlayerState::PLAY:
 			this->_keyboard->OnKeyboardStateChanged(this, ref new SketchMusic::View::KeyboardState(SketchMusic::View::KeyboardStateEnum::play));
+			PlayItemTxt1->Text = L"\uE769";
+			PlayItemTxt2->Text = L"Остановить";
 			break;
 		case SketchMusic::Player::PlayerState::STOP:
 		case SketchMusic::Player::PlayerState::WAIT:
 			this->_keyboard->OnKeyboardStateChanged(this, ref new SketchMusic::View::KeyboardState(SketchMusic::View::KeyboardStateEnum::stop));
+			PlayItemTxt1->Text = L"\uE768";
+			PlayItemTxt2->Text = L"Воспроизвести";
 			break;
 		}
 	}));
@@ -553,7 +602,14 @@ void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^
 	Text^ text = dynamic_cast<Text^>(TextsList->SelectedItem); // e->AddedItems->First()->Current
 	if (text)
 	{
-		_textRow->SetText(_texts, text, _compositionArgs ? _compositionArgs->Selected : -1);
+		if (text != _textRow->current)
+		{
+			_textRow->SetText(_texts, text, _compositionArgs ? _compositionArgs->Selected : -1);
+		}
+		else
+		{
+			// даём возможность поменять инструмент текста
+		}
 	}
 	TextsFlyout->Hide();
 }
@@ -644,7 +700,7 @@ void StrokeEditor::MelodyEditorPage::DeleteTextBtn_Click(Platform::Object^ sende
 			if (new_index> (size - 2)) { new_index = size - 2; }	// size-1 = крайний элемент; size-1-1 = крайний элемент после удаления
 			TextsList->SelectedIndex = new_index;
 			_texts->texts->RemoveAt(index);
-			_textRow->SetText(_texts, _texts->texts->GetAt(new_index), _compositionArgs->Selected);
+			_textRow->SetText(_texts, _texts->texts->GetAt(new_index), (_compositionArgs ?_compositionArgs->Selected : -1));
 		}
 		DeleteTextFlyout->Hide();
 	}
@@ -659,10 +715,15 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 		mySplitView->IsPaneOpen = isOpen;
 		MenuSeparator->X2 = (isOpen ? menu->ActualWidth : 22.);
 		MenuSeparator2->X2 = (isOpen ? menu->ActualWidth : 22.);
+		MenuSeparator3->X2 = (isOpen ? menu->ActualWidth : 22.);
 	}
 	else if (homeItem == (ContentControl^)e->ClickedItem)
 	{
 		GoBackBtn_Click(this, nullptr);
+	}
+	else if (SaveItem == (ContentControl^)e->ClickedItem)
+	{
+		SaveData();
 	}
 	else if (textsItem == (ContentControl^)e->ClickedItem)
 	{
@@ -679,6 +740,10 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 	else if (deleteItem == (ContentControl^)e->ClickedItem)
 	{
 		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(deleteCtrl);
+	}
+	else if (PlayItem == (ContentControl^)e->ClickedItem)
+	{
+		playAll_Click();
 	}
 	else if (ChangeViewItem == (ContentControl^)e->ClickedItem)
 	{
@@ -802,5 +867,9 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 
 void StrokeEditor::MelodyEditorPage::PartsList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
 {
-
+	if (PartsList->SelectedItem)
+	{
+		_textRow->SetText(_texts, _textRow->current, PartsList->SelectedIndex);
+		_compositionArgs->Selected = PartsList->SelectedIndex;
+	}
 }
