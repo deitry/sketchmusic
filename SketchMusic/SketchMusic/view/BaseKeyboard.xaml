@@ -8,7 +8,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     d:DesignHeight="300"
-    d:DesignWidth="1045">
+    d:DesignWidth="1045"
+    >
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -128,7 +129,7 @@
                             Style="{StaticResource KeyboardBtnStyle}" 
                             Width="{StaticResource CtrlWidth}" Tag="18000">
                 <FlyoutBase.AttachedFlyout>
-                    <Flyout x:Name="QuantizeFlyout" Closed="QuantizeFlyout_Closed">
+                    <Flyout x:Name="QuantizeFlyout">
                         <StackPanel Orientation="Vertical">
                             <Grid>
                                 <Grid.RowDefinitions>

@@ -325,6 +325,36 @@ void StrokeEditor::App::SaveData()
 		FileIO::WriteTextAsync(_CurrentCompositionArgs->File, json->Stringify());
 	}
 }
+// Установить на плитке строку с последним открытым элементом
+// - передавать сюда название файла для композиции
+// - или название идеи
+void StrokeEditor::App::SetTile(Platform::String ^ str)
+{
+	//// Get an XmlDocument containing the badge template
+	//auto badgeXml = BadgeUpdateManager::GetTemplateContent(BadgeTemplateType::BadgeNumber);
+	//// Get the "badge" element
+	//auto badgeElement = (XmlElement^)badgeXml->GetElementsByTagName("badge")->First();
+	//// Set the count in its "value" attribute (as string)
+	//badgeElement->SetAttribute("value", str);
+	//// Create a badge notification from the XML content.
+	//auto badgeNotification = ref new BadgeNotification(badgeXml);
+	//// Send the badge notification to the app's tile.
+	//BadgeUpdateManager::CreateBadgeUpdaterForApplication()->Update(badgeNotification);
+
+	// Get an XML DOM version of a specific template by using getTemplateContent.
+	auto tileXml = TileUpdateManager::GetTemplateContent(TileTemplateType::TileWide310x150Text03);
+
+	// You will need to look at the template documentation to know how many text fields a particular template has.
+	// Get the text attribute for this template and fill it in.
+	auto  tileAttributes = tileXml->GetElementsByTagName("text");
+	tileAttributes->GetAt(0)->AppendChild(tileXml->CreateTextNode(str));
+
+	// Create the notification from the XML.
+	auto tileNotification = ref new TileNotification(tileXml);
+
+	// Send the notification to the calling app's tile.
+	TileUpdateManager::CreateTileUpdaterForApplication()->Update(tileNotification);
+}
 
 void StrokeEditor::App::Play(SketchMusic::CompositionData^ texts, SketchMusic::Cursor ^ cursor)
 {

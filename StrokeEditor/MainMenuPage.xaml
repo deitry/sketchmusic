@@ -30,6 +30,8 @@
             <Line Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="150" Y1="0" Y2="0" HorizontalAlignment="Stretch" Margin="10"/>
             <Button Name="OpenCompositionLibraryBtn" Content="Обзор проектов" Click="OpenCompositionLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
             <Button Name="OpenLibraryBtn" Content="Открыть библиотеку" Click="OpenLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+            <Line Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="150" Y1="0" Y2="0" HorizontalAlignment="Stretch" Margin="10"/>
+            <Button Name="HelpBtn" Content="Справка"  Click="AboutBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
             <Button Name="AboutBtn" Content="О программе"  Click="AboutBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
         </StackPanel>
     </Grid>

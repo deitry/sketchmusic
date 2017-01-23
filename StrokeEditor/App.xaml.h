@@ -68,6 +68,7 @@ namespace StrokeEditor
 		int DeleteIdea(SketchMusic::Idea^ idea);
 		void ShowNotification(Platform::String^ message);
 		void SaveData();
+		void SetTile(Platform::String^ str);
 
 		void Play(SketchMusic::CompositionData^ texts, SketchMusic::Cursor^ cursor);
 

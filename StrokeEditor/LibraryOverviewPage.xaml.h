@@ -57,6 +57,7 @@ namespace StrokeEditor
 		void PlayBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
 		void LibView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
+		void HelpBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]

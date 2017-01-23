@@ -81,7 +81,9 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		if (localSettings->Values->HasKey("precount"))
 		{
 			Object^ obj = localSettings->Values->Lookup("precount");
-			((App^)App::Current)->_player->precount = ((bool)obj) ? 4 : 0;
+			bool has; if (obj) has = true; else has = false;	// не знаю, почему с ним так сложно.
+				// но почему-то тут периодически всё падает
+			((App^)App::Current)->_player->precount = has ? 4 : 0;
 			_keyboard->SetKey(KeyType::precount, ((App^)App::Current)->_player->precount);
 		}
 		else {
@@ -140,6 +142,8 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	viewType = ViewType::TextRow;
 	//UpdateChordViews(_textRow->currentPosition);
 	((App^)App::Current)->WriteToDebugFile("Инициализация страницы завершена");
+
+	_keyboard->Focus(Windows::UI::Xaml::FocusState::Programmatic);
 }
 
 void StrokeEditor::MelodyEditorPage::LoadIdea()

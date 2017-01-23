@@ -10,7 +10,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     SizeChanged="Page_SizeChanged"
-    
     >
 
     <Page.Resources>
@@ -25,12 +24,12 @@
         </ResourceDictionary>
     </Page.Resources>
 
-    <!--<Page.TopAppBar>
+    <Page.TopAppBar>
         <CommandBar Grid.Row="0" ClosedDisplayMode="Hidden">
             <AppBarButton Icon="Home"/>
         </CommandBar>
-    </Page.TopAppBar>-->
-    
+    </Page.TopAppBar>
+
     <Grid x:Name="grid" 
           Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           RenderTransformOrigin="0,1"

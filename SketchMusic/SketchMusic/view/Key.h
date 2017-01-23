@@ -8,6 +8,8 @@ using namespace SketchMusic::View;
 public ref class SketchMusic::View::Key sealed
 {
 public:
+	property KeyType originalType;	// в дальнейшем тип и значение могут измениться
+	property int originalValue;		// здесь сохраняем те, что были даны при создании - поможет в поисках
 	property KeyType type;
 	property int value;
 	property int shift;	// аналог повышения регистра при нажатии шифта
@@ -21,7 +23,9 @@ public:
 		// int = TTNNN
 		// тип сходится с числовым представлением KeyType
 		type = (KeyType)abs(keyNum / 1000);
+		originalType = type;
 		value = keyNum % 1000;
+		originalValue = value;
 		shift = 0;
 	}
 

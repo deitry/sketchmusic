@@ -31,7 +31,9 @@ namespace SketchMusic
 			//int octaveModificator;
 
 			void PushKey(Object^ object);
+			void OnPushKey(Key^ key);
 			void ReleaseKey(Object^ object);
+			void OnReleaseKey(Key^ key);
 			void OnKeyboardPressed(SketchMusic::View::Key^ key);
 			void OnControlPressed(SketchMusic::View::Key^ key);
 			void OnNormalState(SketchMusic::View::Key^ key);
@@ -69,13 +71,14 @@ namespace SketchMusic
 			// для мыши
 			void onKeyboardControlPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 			void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
+			void OnKeyDown(Platform::Object ^sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs ^e);
+			void OnKeyUp(Platform::Object ^sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs ^e);
 			void OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 			void OnQuantizeClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 
 			void SetKey(KeyType type, int value);
 		private:
 			void quantizeNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
-			void QuantizeFlyout_Closed(Platform::Object^ sender, Platform::Object^ e);
 			void MenuFlyoutItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 			void gnoteNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 			void metroNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);

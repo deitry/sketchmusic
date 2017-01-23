@@ -36,10 +36,10 @@ SketchMusic::View::BaseKeyboard::BaseKeyboard()
 	// TODO ? переделать на КвадКейборд?
 	// и в зависимости от параметра - какой тип клавиатуры нужен, в случае больших / бесконечных
 	// (как в случае "гитарной", "баянной" и т.д.) создавать динамически
-	this->KeyboardStateChanged += ref new Windows::Foundation::EventHandler<SketchMusic::View::KeyboardState ^>(this, &SketchMusic::View::BaseKeyboard::OnKeyboardStateChanged);
+	this->KeyboardStateChanged += ref new Windows::Foundation::EventHandler<KeyboardState ^>(this, &BaseKeyboard::OnKeyboardStateChanged);
 }
 
-inline void UpdateParent(SketchMusic::View::Key^ key)
+inline void UpdateParent(Key^ key)
 {
 	Windows::UI::Xaml::Controls::ContentControl^ ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
 	if (ctrl == nullptr)
@@ -47,13 +47,13 @@ inline void UpdateParent(SketchMusic::View::Key^ key)
 	ctrl->Content = key;
 }
 
-void SketchMusic::View::BaseKeyboard::OnKeyboardPressed(SketchMusic::View::Key^ key)
+void SketchMusic::View::BaseKeyboard::OnKeyboardPressed(Key^ key)
 {
 	switch (key->type)
 	{
-	case SketchMusic::View::KeyType::note:
-	case SketchMusic::View::KeyType::genericNote:
-	case SketchMusic::View::KeyType::relativeNote:
+	case KeyType::note:
+	case KeyType::genericNote:
+	case KeyType::relativeNote:
 		break;
 	default:
 	{
@@ -65,7 +65,7 @@ void SketchMusic::View::BaseKeyboard::OnKeyboardPressed(SketchMusic::View::Key^ 
 	}
 }
 
-void SketchMusic::View::BaseKeyboard::OnControlPressed(SketchMusic::View::Key ^ key)
+void SketchMusic::View::BaseKeyboard::OnControlPressed(Key ^ key)
 {
 	switch (key->type)
 	{
@@ -93,13 +93,13 @@ void SketchMusic::View::BaseKeyboard::OnControlPressed(SketchMusic::View::Key ^ 
 	}
 }
 
-inline void OnOctaveInc(SketchMusic::View::Key^ key)
+inline void OnOctaveInc(Key^ key)
 {
 	switch (key->type)
 	{
-	case SketchMusic::View::KeyType::note:
-	//case SketchMusic::View::KeyType::genericNote:
-	case SketchMusic::View::KeyType::relativeNote:
+	case KeyType::note:
+	//case KeyType::genericNote:
+	case KeyType::relativeNote:
 		key->value += 12;
 		UpdateParent(key);
 		break;
@@ -108,13 +108,13 @@ inline void OnOctaveInc(SketchMusic::View::Key^ key)
 	}
 }
 
-inline void OnOctaveDec(SketchMusic::View::Key^ key)
+inline void OnOctaveDec(Key^ key)
 {
 	switch (key->type)
 	{
-	case SketchMusic::View::KeyType::note:
-	//case SketchMusic::View::KeyType::genericNote:
-	case SketchMusic::View::KeyType::relativeNote:
+	case KeyType::note:
+	//case KeyType::genericNote:
+	case KeyType::relativeNote:
 		key->value -= 12;
 		UpdateParent(key);
 		break;
@@ -123,13 +123,13 @@ inline void OnOctaveDec(SketchMusic::View::Key^ key)
 	}
 }
 
-void SketchMusic::View::BaseKeyboard::OnNormalState(SketchMusic::View::Key^ key)
+void SketchMusic::View::BaseKeyboard::OnNormalState(Key^ key)
 {
 	switch (key->type)
 	{
-	case SketchMusic::View::KeyType::note:
-	case SketchMusic::View::KeyType::relativeNote:
-	case SketchMusic::View::KeyType::genericNote:
+	case KeyType::note:
+	case KeyType::relativeNote:
+	case KeyType::genericNote:
 		break;
 	default:
 	{
@@ -141,24 +141,24 @@ void SketchMusic::View::BaseKeyboard::OnNormalState(SketchMusic::View::Key^ key)
 	}
 }
 
-void SketchMusic::View::BaseKeyboard::OnPlayStopState(SketchMusic::View::Key ^ key)
+void SketchMusic::View::BaseKeyboard::OnPlayStopState(Key ^ key)
 {
 	switch (key->type)
 	{
-	case SketchMusic::View::KeyType::play:
-		key->type = SketchMusic::View::KeyType::stop;
+	case KeyType::play:
+		key->type = KeyType::stop;
 		key->value = 1;
 		UpdateParent(key);
 		break;
-	case SketchMusic::View::KeyType::stop:
-		key->type = SketchMusic::View::KeyType::play;
+	case KeyType::stop:
+		key->type = KeyType::play;
 		key->value = 0;
 		UpdateParent(key);
 		break;
 	}
 }
 
-void SketchMusic::View::BaseKeyboard::OnKeyboardStateChanged(Object^ object, SketchMusic::View::KeyboardState ^ state)
+void SketchMusic::View::BaseKeyboard::OnKeyboardStateChanged(Object^ object, KeyboardState ^ state)
 {
 	// проходимся по всем кнопкам и меняем их состояние согласно их типу
 	for (auto&& pkey : _keys)
@@ -166,23 +166,23 @@ void SketchMusic::View::BaseKeyboard::OnKeyboardStateChanged(Object^ object, Ske
 		auto key = pkey.first;
 		switch (state->state)
 		{
-		case SketchMusic::View::KeyboardStateEnum::control:
+		case KeyboardStateEnum::control:
 			OnControlPressed(key);
 			break;
-		case SketchMusic::View::KeyboardStateEnum::pressed:
+		case KeyboardStateEnum::pressed:
 			OnKeyboardPressed(key);
 			break;
-		case SketchMusic::View::KeyboardStateEnum::octaveInc:
+		case KeyboardStateEnum::octaveInc:
 			OnOctaveInc(key);
 			break;
-		case SketchMusic::View::KeyboardStateEnum::octaveDec:
+		case KeyboardStateEnum::octaveDec:
 			OnOctaveDec(key);
 			break;
-		case SketchMusic::View::KeyboardStateEnum::normal:
+		case KeyboardStateEnum::normal:
 			OnNormalState(key);
 			break;
-		case SketchMusic::View::KeyboardStateEnum::play:
-		case SketchMusic::View::KeyboardStateEnum::stop:
+		case KeyboardStateEnum::play:
+		case KeyboardStateEnum::stop:
 			OnPlayStopState(key);
 			break;
 		}
@@ -199,67 +199,72 @@ void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 	ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
 	if (ctrl)
 	{
-		SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(ctrl->Content);
+		Key^ key = dynamic_cast<Key^>(ctrl->Content);
+		OnPushKey(key);
+	}
+}
 
-		KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
-		ctrl->Background = (SolidColorBrush^)_dict->Lookup("draggedForegroundBrush");
+void SketchMusic::View::BaseKeyboard::OnPushKey(Key ^ key)
+{
+	if (key == nullptr) return;
+	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
+	((ContentControl^)key->parent)->Background = (SolidColorBrush^)_dict->Lookup("draggedForegroundBrush");
 
-		if (key)
+	if (key)
+	{
+		switch (key->type)
 		{
-			switch (key->type)
+		case KeyType::note:
+		case KeyType::genericNote:
+		case KeyType::relativeNote:
+			KeyPressed(this, args);
+			if (pressedKeys == 1)
 			{
-			case SketchMusic::View::KeyType::note:
-			case SketchMusic::View::KeyType::genericNote:
-			case SketchMusic::View::KeyType::relativeNote:
-				KeyPressed(this, args);
-				if (pressedKeys == 1)
-				{
-					currentState->state = SketchMusic::View::KeyboardStateEnum::pressed;
-					KeyboardStateChanged(this, currentState);
-				}
-				break;
-			case SketchMusic::View::KeyType::octave:
-				this->currentState->state = (key->value > 0)
-					? KeyboardStateEnum::octaveInc
-					: KeyboardStateEnum::octaveDec;
+				currentState->state = KeyboardStateEnum::pressed;
 				KeyboardStateChanged(this, currentState);
-				break;
-			case SketchMusic::View::KeyType::zoom:
-				KeyPressed(this, args);
-				break;
-
-				// переключатели
-			case SketchMusic::View::KeyType::eraser:
-			case SketchMusic::View::KeyType::cycling:
-			case SketchMusic::View::KeyType::record:
-				key->value = !key->value;
-				UpdateParent(key);
-
-				KeyPressed(this, args);
-				break;
-			case SketchMusic::View::KeyType::control:
-				this->currentState->state = KeyboardStateEnum::control;	// TODO : выглядит очень плохо.
-																		// Надо будет понять, что вообще имеется в виду под state
-				KeyboardStateChanged(this, currentState);
-				break;
-
-			case SketchMusic::View::KeyType::layout:
-			case SketchMusic::View::KeyType::tempo:
-			case SketchMusic::View::KeyType::quantization:
-			case SketchMusic::View::KeyType::hide:
-				// обработка этих клавиш идёт, когда мы отпускаем клавишу, а не нажимаем. Вызывать событие нажатия не требуется
-				break;
-			
-			case SketchMusic::View::KeyType::enter:
-				break;
-			case SketchMusic::View::KeyType::play:
-			case SketchMusic::View::KeyType::move:
-			case SketchMusic::View::KeyType::space:
-			case SketchMusic::View::KeyType::deleteSym:
-			default:
-				KeyPressed(this, args);
-				break;
 			}
+			break;
+		case KeyType::octave:
+			this->currentState->state = (key->value > 0)
+				? KeyboardStateEnum::octaveInc
+				: KeyboardStateEnum::octaveDec;
+			KeyboardStateChanged(this, currentState);
+			break;
+		case KeyType::zoom:
+			KeyPressed(this, args);
+			break;
+
+			// переключатели
+		case KeyType::eraser:
+		case KeyType::cycling:
+		case KeyType::record:
+			key->value = !key->value;
+			UpdateParent(key);
+
+			KeyPressed(this, args);
+			break;
+		case KeyType::control:
+			this->currentState->state = KeyboardStateEnum::control;	// TODO : выглядит очень плохо.
+																	// Надо будет понять, что вообще имеется в виду под state
+			KeyboardStateChanged(this, currentState);
+			break;
+
+		case KeyType::layout:
+		case KeyType::tempo:
+		case KeyType::quantization:
+		case KeyType::hide:
+			// обработка этих клавиш идёт, когда мы отпускаем клавишу, а не нажимаем. Вызывать событие нажатия не требуется
+			break;
+
+		case KeyType::enter:
+			break;
+		case KeyType::play:
+		case KeyType::move:
+		case KeyType::space:
+		case KeyType::deleteSym:
+		default:
+			KeyPressed(this, args);
+			break;
 		}
 	}
 }
@@ -291,6 +296,8 @@ void SketchMusic::View::BaseKeyboard::onKeyboardControlEntered(Platform::Object^
 
 void SketchMusic::View::BaseKeyboard::InitializePage()
 {
+	//this->TabNavigation = Windows::UI::Xaml::Input::KeyboardNavigationMode::Cycle;
+
 	if (mainPanel == nullptr) return;
 
 	for (auto&& row : mainPanel->Children)
@@ -304,7 +311,7 @@ void SketchMusic::View::BaseKeyboard::InitializePage()
 			ContentControl^ ctrl = dynamic_cast<ContentControl^>(static_cast<Object^>(element));
 			if (ctrl)
 			{
-				SketchMusic::View::Key^ key = dynamic_cast<Key^>(ctrl->Content);
+				Key^ key = dynamic_cast<Key^>(ctrl->Content);
 				if (key)
 				{
 					key->parent = ctrl;
@@ -315,18 +322,21 @@ void SketchMusic::View::BaseKeyboard::InitializePage()
 				// сейчас ещё не до конца понятно, какие клавиши во что будем превращать
 
 				// для тача
-				ctrl->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::onKeyboardControlEntered);
-				ctrl->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::OnPointerExited);
+				ctrl->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::onKeyboardControlEntered);
+				ctrl->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::OnPointerExited);
 
 				// для мыши	
-				ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::onKeyboardControlPressed);
-				ctrl->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::OnPointerReleased);
+				ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::onKeyboardControlPressed);
+				ctrl->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::OnPointerReleased);
+
+				ctrl->KeyDown += ref new Windows::UI::Xaml::Input::KeyEventHandler(this, &BaseKeyboard::OnKeyDown);
+				ctrl->KeyUp += ref new Windows::UI::Xaml::Input::KeyEventHandler(this, &BaseKeyboard::OnKeyUp);
 			}
 		}
 	}
 
 	// специально проверяем на тот случай если курсор убегает за пределы клавиш и мы не знаем, отпустили его или нет
-	//grid->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::BaseKeyboard::OnPointerReleased);
+	//grid->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::OnPointerReleased);
 }
 
 
@@ -340,6 +350,141 @@ void SketchMusic::View::BaseKeyboard::OnPointerReleased(Platform::Object ^sender
 		return;
 
 	ReleaseKey(sender);
+}
+
+inline SketchMusic::View::Key^ GetKey(std::multimap<Key^, bool> keys, KeyType type, int val = 0)
+{
+	for (auto&& iter : keys)
+	{
+		if (iter.first->originalType == type && iter.first->originalValue == val && !iter.second) return iter.first;
+	}
+	return nullptr;
+}
+
+void SketchMusic::View::BaseKeyboard::OnKeyDown(Platform::Object ^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs ^ e)
+{
+	if (e->KeyStatus.WasKeyDown) return;
+
+	using Windows::System::VirtualKey;
+	SketchMusic::View::Key^ smkey = nullptr;
+
+	switch (e->Key)
+	{
+	case VirtualKey::Left: smkey = GetKey(_keys, KeyType::move, -1); break;
+	case VirtualKey::Right: smkey = GetKey(_keys, KeyType::move, 1);break;
+	case VirtualKey::Back: smkey = GetKey(_keys, KeyType::deleteSym);break;
+	case VirtualKey::Space: smkey = GetKey(_keys, KeyType::play);break;
+		// альтернатива для обобщённых нот?
+	case VirtualKey::Number1: smkey = GetKey(_keys, KeyType::note, 11); break;
+	case VirtualKey::Number2: smkey = GetKey(_keys, KeyType::note, 12); break;
+	case VirtualKey::Number3: smkey = GetKey(_keys, KeyType::note, 13); break;
+	case VirtualKey::Number4: smkey = GetKey(_keys, KeyType::note, 14); break;
+	case VirtualKey::Number5: smkey = GetKey(_keys, KeyType::note, 15); break;
+	case VirtualKey::Number6: smkey = GetKey(_keys, KeyType::note, 16); break;
+	case VirtualKey::Number7: smkey = GetKey(_keys, KeyType::note, 17); break;
+	case VirtualKey::Number8: smkey = GetKey(_keys, KeyType::note, 18); break;
+	case VirtualKey::Number9: smkey = GetKey(_keys, KeyType::note, 19); break;
+	case VirtualKey::Number0: smkey = GetKey(_keys, KeyType::note, 20); break;
+	case VirtualKey::Q: 
+		smkey = GetKey(_keys, KeyType::note, 8); 
+		break;
+	case VirtualKey::W: smkey = GetKey(_keys, KeyType::note, 9); break;
+	case VirtualKey::E: 
+		smkey = GetKey(_keys, KeyType::note, 10);
+		break;
+	case VirtualKey::R: smkey = GetKey(_keys, KeyType::note, 11); break;
+	case VirtualKey::T: smkey = GetKey(_keys, KeyType::note, 12); break;
+	case VirtualKey::Y: smkey = GetKey(_keys, KeyType::note, 13); break;
+	case VirtualKey::U: smkey = GetKey(_keys, KeyType::note, 14); break;
+	case VirtualKey::I: smkey = GetKey(_keys, KeyType::note, 15); break;
+	case VirtualKey::O: smkey = GetKey(_keys, KeyType::note, 16); break;
+	case VirtualKey::P: smkey = GetKey(_keys, KeyType::note, 17); break;
+	case VirtualKey::A: smkey = GetKey(_keys, KeyType::note, 3); break;
+	case VirtualKey::S: smkey = GetKey(_keys, KeyType::note, 4); break;
+	case VirtualKey::D: smkey = GetKey(_keys, KeyType::note, 5); break;
+	case VirtualKey::F: smkey = GetKey(_keys, KeyType::note, 6); break;
+	case VirtualKey::G: smkey = GetKey(_keys, KeyType::note, 7); break;
+	case VirtualKey::H: smkey = GetKey(_keys, KeyType::note, 8); break;
+	case VirtualKey::J: smkey = GetKey(_keys, KeyType::note, 9); break;
+	case VirtualKey::K: smkey = GetKey(_keys, KeyType::note, 10); break;
+	case VirtualKey::L: smkey = GetKey(_keys, KeyType::note, 11); break;
+	case VirtualKey::Z: smkey = GetKey(_keys, KeyType::note, 0); break;
+	case VirtualKey::X: smkey = GetKey(_keys, KeyType::note, 1); break;
+	case VirtualKey::C: smkey = GetKey(_keys, KeyType::note, 2); break;
+	case VirtualKey::V: smkey = GetKey(_keys, KeyType::note, 3); break;
+	case VirtualKey::B: smkey = GetKey(_keys, KeyType::note, 4); break;
+	case VirtualKey::N: smkey = GetKey(_keys, KeyType::note, 5); break;
+	case VirtualKey::M: smkey = GetKey(_keys, KeyType::note, 6); break;
+	case VirtualKey::Subtract: smkey = GetKey(_keys, KeyType::octave, 1); break;
+	case VirtualKey::Add: smkey = GetKey(_keys, KeyType::octave, -1); break;
+	case VirtualKey::Control: smkey = GetKey(_keys, KeyType::control, 0); break;
+	case VirtualKey::Enter: smkey = GetKey(_keys, KeyType::enter, 0); break;
+	case VirtualKey::Shift: smkey = GetKey(_keys, KeyType::record, 0); break;
+	case VirtualKey::CapitalLock: smkey = GetKey(_keys, KeyType::record, 0); break; // капс лок не будем обрабатывать в релизе ? оО
+	}
+	OnPushKey(smkey);
+}
+
+void SketchMusic::View::BaseKeyboard::OnKeyUp(Platform::Object ^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs ^ e)
+{
+	using Windows::System::VirtualKey;
+	SketchMusic::View::Key^ smkey = nullptr;
+
+	switch (e->Key)
+	{
+	case VirtualKey::Left: smkey = GetKey(_keys, KeyType::move, -1); break;
+	case VirtualKey::Right: smkey = GetKey(_keys, KeyType::move, 1);break;
+	case VirtualKey::Back: smkey = GetKey(_keys, KeyType::deleteSym);break;
+	case VirtualKey::Space: smkey = GetKey(_keys, KeyType::play);break;
+		// альтернатива для обобщённых нот?
+	case VirtualKey::Number1: smkey = GetKey(_keys, KeyType::note, 11); break;
+	case VirtualKey::Number2: smkey = GetKey(_keys, KeyType::note, 12); break;
+	case VirtualKey::Number3: smkey = GetKey(_keys, KeyType::note, 13); break;
+	case VirtualKey::Number4: smkey = GetKey(_keys, KeyType::note, 14); break;
+	case VirtualKey::Number5: smkey = GetKey(_keys, KeyType::note, 15); break;
+	case VirtualKey::Number6: smkey = GetKey(_keys, KeyType::note, 16); break;
+	case VirtualKey::Number7: smkey = GetKey(_keys, KeyType::note, 17); break;
+	case VirtualKey::Number8: smkey = GetKey(_keys, KeyType::note, 18); break;
+	case VirtualKey::Number9: smkey = GetKey(_keys, KeyType::note, 19); break;
+	case VirtualKey::Number0: smkey = GetKey(_keys, KeyType::note, 20); break;
+	case VirtualKey::Q:
+		smkey = GetKey(_keys, KeyType::note, 8);
+		break;
+	case VirtualKey::W: smkey = GetKey(_keys, KeyType::note, 9); break;
+	case VirtualKey::E:
+		smkey = GetKey(_keys, KeyType::note, 10);
+		break;
+	case VirtualKey::R: smkey = GetKey(_keys, KeyType::note, 11); break;
+	case VirtualKey::T: smkey = GetKey(_keys, KeyType::note, 12); break;
+	case VirtualKey::Y: smkey = GetKey(_keys, KeyType::note, 13); break;
+	case VirtualKey::U: smkey = GetKey(_keys, KeyType::note, 14); break;
+	case VirtualKey::I: smkey = GetKey(_keys, KeyType::note, 15); break;
+	case VirtualKey::O: smkey = GetKey(_keys, KeyType::note, 16); break;
+	case VirtualKey::P: smkey = GetKey(_keys, KeyType::note, 17); break;
+	case VirtualKey::A: smkey = GetKey(_keys, KeyType::note, 3); break;
+	case VirtualKey::S: smkey = GetKey(_keys, KeyType::note, 4); break;
+	case VirtualKey::D: smkey = GetKey(_keys, KeyType::note, 5); break;
+	case VirtualKey::F: smkey = GetKey(_keys, KeyType::note, 6); break;
+	case VirtualKey::G: smkey = GetKey(_keys, KeyType::note, 7); break;
+	case VirtualKey::H: smkey = GetKey(_keys, KeyType::note, 8); break;
+	case VirtualKey::J: smkey = GetKey(_keys, KeyType::note, 9); break;
+	case VirtualKey::K: smkey = GetKey(_keys, KeyType::note, 10); break;
+	case VirtualKey::L: smkey = GetKey(_keys, KeyType::note, 11); break;
+	case VirtualKey::Z: smkey = GetKey(_keys, KeyType::note, 0); break;
+	case VirtualKey::X: smkey = GetKey(_keys, KeyType::note, 1); break;
+	case VirtualKey::C: smkey = GetKey(_keys, KeyType::note, 2); break;
+	case VirtualKey::V: smkey = GetKey(_keys, KeyType::note, 3); break;
+	case VirtualKey::B: smkey = GetKey(_keys, KeyType::note, 4); break;
+	case VirtualKey::N: smkey = GetKey(_keys, KeyType::note, 5); break;
+	case VirtualKey::M: smkey = GetKey(_keys, KeyType::note, 6); break;
+	case VirtualKey::Subtract: smkey = GetKey(_keys, KeyType::octave, 1); break;
+	case VirtualKey::Add: smkey = GetKey(_keys, KeyType::octave, -1); break;
+	case VirtualKey::Control: smkey = GetKey(_keys, KeyType::control, 0); break;
+	case VirtualKey::Enter: smkey = GetKey(_keys, KeyType::enter, 0); break;
+	case VirtualKey::Shift: smkey = GetKey(_keys, KeyType::record, 0); break;
+	case VirtualKey::CapitalLock: smkey = GetKey(_keys, KeyType::record, 0); break; // капс лок не будем обрабатывать в релизе ? оО
+	}
+	OnReleaseKey(smkey);
 }
 
 void SketchMusic::View::BaseKeyboard::OnPointerExited(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
@@ -360,74 +505,78 @@ void SketchMusic::View::BaseKeyboard::ReleaseKey(Object^ sender)
 	Windows::UI::Xaml::Controls::ContentControl^ ctrl =
 		dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(static_cast<Object^>(sender));
 
+	if (ctrl == nullptr) return;
 
-	SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(ctrl->Content);
-	if (key == nullptr)
-		return;
+	Key^ key = dynamic_cast<Key^>(ctrl->Content);
+	if (key == nullptr) return;
+
+	OnReleaseKey(key);
+}
+
+void SketchMusic::View::BaseKeyboard::OnReleaseKey(Key ^ key)
+{
+	auto ctrl = ((ContentControl^)key->parent);
+	ctrl->Background = nullptr;
 
 	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
 
-	if (ctrl)
+	if (key)
 	{
-		ctrl->Background = nullptr;
-
-		if (key)
+		switch (key->type)
 		{
-			switch (key->type)
-			{
-			case SketchMusic::View::KeyType::tempo:
-			{
-				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
-				if (flyout)
-					flyout->ShowAt(ctrl);
-				break;
-			}
-			case SketchMusic::View::KeyType::quantization:
-			{
-				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
-				if (flyout)
-					flyout->ShowAt(ctrl);
-				break;
-			}
-			case SketchMusic::View::KeyType::hide:
-			{
-				key->value = !key->value;
-				UpdateParent(key);
+		case KeyType::tempo:
+		{
+			auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
+			if (flyout)
+				flyout->ShowAt(ctrl);
+			break;
+		}
+		case KeyType::quantization:
+		{
+			auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
+			if (flyout)
+				flyout->ShowAt(ctrl);
+			break;
+		}
+		case KeyType::hide:
+		{
+			key->value = !key->value;
+			UpdateParent(key);
 
-				for (auto&& row : mainPanel->Children)
+			for (auto&& row : mainPanel->Children)
+			{
+				FrameworkElement^ el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
+				if (el)
 				{
-					FrameworkElement^ el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
-					if (el)
-					{
-						auto tag = ((String^)el->Tag);
-						if (tag == L"CtrlPanel") continue;
-						auto tagType = static_cast<KeyboardType>(std::stoi(tag->Data()));
+					auto tag = ((String^)el->Tag);
+					if (tag == L"CtrlPanel") continue;
+					auto tagType = static_cast<KeyboardType>(std::stoi(tag->Data()));
 
-						if (key->value == 0 && tagType == _layout) row->Visibility = Windows::UI::Xaml::Visibility::Visible;
-						else row->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-					}
+					if (key->value == 0 && tagType == _layout) row->Visibility = Windows::UI::Xaml::Visibility::Visible;
+					else row->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
 				}
-				KeyReleased(this, args);
-				break;
 			}
-			case SketchMusic::View::KeyType::layout:
-			{
-				// смена раскладки
-				auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
-				if (flyout)
-					flyout->ShowAt(ctrl);
-				break;
-			}
-			case KeyType::note:
-			case KeyType::relativeNote:
-			case KeyType::genericNote:
-				KeyReleased(this, args);
-				break;
-			default:
-				KeyReleased(this, args);
-			}
+			KeyReleased(this, args);
+			break;
+		}
+		case KeyType::layout:
+		{
+			// смена раскладки
+			auto flyout = Windows::UI::Xaml::Controls::Flyout::GetAttachedFlyout(ctrl);
+			if (flyout)
+				flyout->ShowAt(ctrl);
+			break;
+		}
+		case KeyType::note:
+		case KeyType::relativeNote:
+		case KeyType::genericNote:
+			KeyReleased(this, args);
+			break;
+		default:
+			KeyReleased(this, args);
 		}
 	}
+
 
 	pressedKeys--;
 
@@ -436,7 +585,7 @@ void SketchMusic::View::BaseKeyboard::ReleaseKey(Object^ sender)
 		pressedKeys = 0;	// на всякий случай принудительно
 
 							// уведомляем всех о том, что всё норм
-		this->currentState->state = SketchMusic::View::KeyboardStateEnum::normal;
+		this->currentState->state = KeyboardStateEnum::normal;
 		KeyboardStateChanged(this, currentState);
 	}
 }
@@ -444,7 +593,7 @@ void SketchMusic::View::BaseKeyboard::ReleaseKey(Object^ sender)
 
 void SketchMusic::View::BaseKeyboard::OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
 {
-	auto key = ref new SketchMusic::View::Key(KeyType::tempo, TempoSlider->Value);
+	auto key = ref new Key(KeyType::tempo, TempoSlider->Value);
 	auto keyArgs = ref new KeyboardEventArgs(key, this->pressedKeys);
 	KeyPressed(this, keyArgs);
 	
@@ -462,7 +611,7 @@ void SketchMusic::View::BaseKeyboard::OnQuantizeClick(Platform::Object ^ sender,
 		// на сколько надо поделить
 		int div = std::stoi(((String^)bt->Tag)->Data());
 
-		auto key = ref new SketchMusic::View::Key(KeyType::quantization, div);
+		auto key = ref new Key(KeyType::quantization, div);
 		auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
 		KeyPressed(this, args);
 
@@ -491,21 +640,10 @@ void SketchMusic::View::BaseKeyboard::SetKey(KeyType type, int value)
 void SketchMusic::View::BaseKeyboard::quantizeNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	quantizeNeed->IsChecked = !quantizeNeed->IsChecked;
-	auto key = ref new SketchMusic::View::Key(KeyType::quantization, 0);	// 0 - опасно, но хочу попробовать
+	auto key = ref new Key(KeyType::quantization, 0);	// 0 - опасно, но хочу попробовать
 	auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
 	KeyPressed(this, args);
 }
-
-
-void SketchMusic::View::BaseKeyboard::QuantizeFlyout_Closed(Platform::Object^ sender, Platform::Object^ e)
-{
-
-}
-
-/*
-*/
-
-
 
 void SketchMusic::View::BaseKeyboard::MenuFlyoutItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
@@ -545,7 +683,7 @@ void SketchMusic::View::BaseKeyboard::MenuFlyoutItem_Click(Platform::Object^ sen
 
 void SketchMusic::View::BaseKeyboard::gnoteNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	auto key = ref new SketchMusic::View::Key(KeyType::playGeneric, (int)(gnoteNeed->IsChecked->Value));
+	auto key = ref new Key(KeyType::playGeneric, (int)(gnoteNeed->IsChecked->Value));
 	auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
 	KeyPressed(this, args);
 }
@@ -553,7 +691,7 @@ void SketchMusic::View::BaseKeyboard::gnoteNeed_Click(Platform::Object^ sender, 
 
 void SketchMusic::View::BaseKeyboard::metroNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	auto key = ref new SketchMusic::View::Key(KeyType::metronome, (int)(metroNeed->IsChecked->Value));
+	auto key = ref new Key(KeyType::metronome, (int)(metroNeed->IsChecked->Value));
 	auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
 	KeyPressed(this, args);
 }
@@ -573,7 +711,7 @@ void SketchMusic::View::BaseKeyboard::Button_Click_1(Platform::Object^ sender, W
 
 void SketchMusic::View::BaseKeyboard::precountNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	auto key = ref new SketchMusic::View::Key(KeyType::precount, 4*(int)(precountNeed->IsChecked->Value));
+	auto key = ref new Key(KeyType::precount, 4*(int)(precountNeed->IsChecked->Value));
 	auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
 	KeyPressed(this, args);
 }

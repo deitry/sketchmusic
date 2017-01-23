@@ -421,3 +421,9 @@ void StrokeEditor::LibraryOverviewPage::LibView_SelectionChanged(Platform::Objec
 	PlayBtn->IsEnabled = LibView->SelectedItem != nullptr;
 	EditBtn->IsEnabled = LibView->SelectedItem != nullptr;
 }
+
+
+void StrokeEditor::LibraryOverviewPage::HelpBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
+}
