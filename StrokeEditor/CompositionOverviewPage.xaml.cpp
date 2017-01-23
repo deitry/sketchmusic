@@ -182,6 +182,7 @@ void StrokeEditor::CompositionOverviewPage::SetWorkingFolderBtn_Click(Platform::
 
 				create_task(folder->GetFilesAsync()).then([=](Windows::Foundation::Collections::IVectorView<StorageFile^>^ fileList)
 				{
+					compositionList->Clear();
 					for (auto file : fileList)
 					{
 						compositionList->Append(file);

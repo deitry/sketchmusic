@@ -152,7 +152,7 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 {
 	// вставка разрыва строки
 	// - находим строку, в которую будем вставлять разрыв
-	int beat = pos->Beat;
+	int difBeat = pos->Beat - _startPos->Beat;
 	int ctrlCnt = 0;
 
 	for (int i = 0; i < _mainPanel->Children->Size; i++)
@@ -162,10 +162,10 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 			continue;
 
 		ctrlCnt += rowPanel->Children->Size;
-		if (beat < ctrlCnt)
+		if (difBeat < ctrlCnt)
 		{
 			// - вычисляем индекс нового крайнего элемента
-			int rowEnd = ctrlCnt - beat;
+			int rowEnd = ctrlCnt - difBeat;
 
 			// - создаём новую строку, вставляем в _mainPanel
 			StackPanel^ newRow = ref new StackPanel;
@@ -173,7 +173,7 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 			_mainPanel->Children->InsertAt(i, newRow); // новая строка встаёт ПЕРЕД старой
 
 			// - аналогично добавляем значение в массив "крайних точек"
-			auto psym = ref new PositionedSymbol(ref new Cursor(beat), ref new SNewLine);
+			auto psym = ref new PositionedSymbol(ref new Cursor(pos->Beat), ref new SNewLine);
 			breakLine.insert(breakLine.begin() + i, psym);
 			//current->addSymbol(psym);
 
@@ -200,7 +200,7 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 {
 	// удаление разрыва строки
 	// - находим строку, из которой будем удалять разрыв
-	int beat = pos->Beat;
+	int beat = pos->Beat - _startPos->Beat;
 	int rowCnt = 0; // конец нулевой строки - начало первой
 
 	for (auto&& line : breakLine)

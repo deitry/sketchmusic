@@ -337,7 +337,8 @@ void SketchMusic::View::TextRow::Backspace()
 		if (currentPosition->EQ(iter->_pos))
 		{
 			this->DeleteLineBreak(currentPosition);
-			this->current->deleteNLine(currentPosition);
+			this->current->deleteNLine(currentPosition);	// для совместимости с первоначальной структорой, когда переводы на новую строку были в каждом тексте
+			this->data->ControlText->deleteNLine(currentPosition);
 			return;
 		}
 	}
