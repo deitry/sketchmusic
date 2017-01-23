@@ -8,7 +8,7 @@
 #include "../SketchMusic.h"
 #include "Converters.h"
 #include "Key.h"
-#include "SketchMusic\view\GenericKeyboard.g.h"
+#include "SketchMusic\view\BaseKeyboard.g.h"
 #include <string>
 
 
