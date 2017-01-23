@@ -22,7 +22,8 @@
                   ZoomMode="Disabled"
                   VerticalScrollMode="Auto"
                   HorizontalScrollMode="Enabled"
-                  HorizontalScrollBarVisibility="Visible"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto"
                   Width="{Binding RelativeSource={RelativeSource Self}, Path=Width}"
                   MaxWidth="{Binding RelativeSource={RelativeSource Self}, Path=MaxWidth}">
 

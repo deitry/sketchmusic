@@ -13,12 +13,14 @@
     <x:Double x:Key="NoteHeight">56.0</x:Double>
     <x:Double x:Key="RowHeight">70.0</x:Double>
     <x:Double x:Key="BeatWidth">45.0</x:Double>
-    <x:Double x:Key="PlaceholderWidth">25.0</x:Double>
+    <x:Double x:Key="EnderWidth">2.0</x:Double>
+    <x:Double x:Key="PlaceholderWidth">13.0</x:Double>
     <x:Double x:Key="SymbolWidth">25.0</x:Double>
     <x:Double x:Key="SymbolHeight">20.0</x:Double>
     <x:Double x:Key="GSymbolWidth">30.0</x:Double>
     <x:Double x:Key="GSymbolHeight">25.0</x:Double>
     <x:Double x:Key="LineSpacing">15</x:Double>
+    <x:String x:Key="PHold">phold</x:String>
 
     <SolidColorBrush x:Key="keyBackground" x:Name="keyBackground" Color="DarkOrange"/>
     <SolidColorBrush x:Key="blackKeyBackground" x:Name="blackKeyBackground" Color="DarkRed"/>
@@ -166,38 +168,48 @@
     </Style>
 
     <ControlTemplate x:Key="PlaceholderControlTemplate">
-        <Border Background="{TemplateBinding Background}"
-                    BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="{TemplateBinding BorderThickness}">
-            <Grid VerticalAlignment="Center">
-                <Rectangle Fill="{TemplateBinding Background}"/>
-                <TextBlock x:Name="placeholderTextBlock"
+
+        <Grid VerticalAlignment="Stretch" BorderBrush="{TemplateBinding BorderBrush}"
+              BorderThickness="{TemplateBinding BorderThickness}"
+              Background="{TemplateBinding Background}">
+            <TextBlock x:Name="placeholderTextBlock"
                                HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
                                VerticalAlignment="{TemplateBinding VerticalAlignment}"
                                Foreground="{TemplateBinding Foreground}">
                         <Run Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}}"/>
-                </TextBlock>
-            </Grid>
-        </Border>
+            </TextBlock>
+        </Grid>
     </ControlTemplate>
 
     <Style TargetType="ContentControl" x:Key="PlaceholderControlStyle">
         <Setter Property="Template" Value="{StaticResource PlaceholderControlTemplate}"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="BorderBrush" Value="{ThemeResource SystemControlBackgroundBaseLowBrush}"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="{ThemeResource SystemControlBackgroundBaseHighBrush}"/>
-        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource SystemControlForegroundBaseLowBrush}"/>
+        <Setter Property="BorderThickness" Value="1,0,0,0"/>
+        <Setter Property="Padding" Value="1,1,1,1"/>
+        <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
         <Setter Property="Width" Value="{StaticResource BeatWidth}"/>
         <Setter Property="Height" Value="{StaticResource RowHeight}"/>
-        <Setter Property="Content" Value="|"/>
-        <Setter Property="Tag" Value="phold"/>
+        <Setter Property="Tag" Value="{StaticResource PHold}"/>
+    </Style>
+
+    <ControlTemplate x:Key="EnderTemplate">
+        <Rectangle HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="2" Height="2" Fill="{TemplateBinding Foreground}"/>
+    </ControlTemplate>
+    
+    <Style TargetType="ContentControl" x:Key="EnderStyle">
+        <Setter Property="Template" Value="{StaticResource EnderTemplate}"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+        <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}"/>
+        <Setter Property="Width" Value="{StaticResource BeatWidth}"/>
+        <Setter Property="Height" Value="{StaticResource RowHeight}"/>
     </Style>
 
     <Style TargetType="ContentControl" x:Key="SnapPointStyle">
         <Setter Property="Height" Value="20"/>
-        <Setter Property="Width" Value="4"/>
+        <Setter Property="Width" Value="3"/>
         <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundChromeMediumBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -213,8 +225,10 @@
 
     <Style TargetType="StackPanel" x:Key="RowPanel" x:Name="RowPanel">
         <Setter Property="Orientation" Value="Horizontal"/>
-        <Setter Property="Margin" Value="12,10,5,10"/>
+        <Setter Property="Margin" Value="12,10,20,12"/>
+        <Setter Property="Width" Value="auto"/>
         <Setter Property="Height" Value="{StaticResource RowHeight}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource SystemControlForegroundBaseLowBrush}"/>
     </Style>
 
     <ControlTemplate TargetType="ContentControl" x:Key="CursorPositionTemplate">

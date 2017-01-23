@@ -10,6 +10,7 @@
 #include "LibraryEntryPage.xaml.h"
 #include "CompositionEditorPage.xaml.h"
 #include "CompositionOverviewPage.xaml.h"
+#include "MelodyEditorPage.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -58,6 +59,6 @@ void StrokeEditor::MainMenuPage::CreateCompositionBtn_Click(Platform::Object^ se
 
 void StrokeEditor::MainMenuPage::CreateIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	// открыть страницу со сведениями о новой идее
-	this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(nullptr, false));
+	// открыть редактор мелодии
+	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), ref new Idea);
 }

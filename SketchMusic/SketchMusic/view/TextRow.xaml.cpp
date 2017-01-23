@@ -139,6 +139,13 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 				ctrl->Width += PlaceholderWidth;	// пока только для масштаба 2 сделаем
 			row->Children->Append(ctrl);
 		}
+		
+		// меняем стиль последнего пхолдера, чтобы обозначить конец строки
+		ContentControl^ ctrlEnd = dynamic_cast<ContentControl^>(row->Children->GetAt(row->Children->Size - 1));
+		if (ctrlEnd)
+		{
+			ctrlEnd->BorderThickness = Thickness(1,0,1,0);
+		}
 
 		prev = current;
 	}
@@ -184,8 +191,13 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 				rowPanel->Children->RemoveAt(0);
 				newRow->Children->Append(element);
 			}
-
-			// - если это была последняя строка, то заполняем её до маскимума
+			
+			// меняем стиль последнего пхолдера, чтобы обозначить конец строки
+			ContentControl^ ctrlEnd = dynamic_cast<ContentControl^>(newRow->Children->GetAt(newRow->Children->Size - 1));
+			if (ctrlEnd)
+			{
+				ctrlEnd->BorderThickness = Thickness(1, 0, 1, 0);
+			}
 
 			break;
 		}
@@ -216,7 +228,14 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 				return;
 			}
 
-			// - переносим в предыдущую строку все элементы, если это не превысит лимит (?)
+			// меняем стиль последнего пхолдера, чтобы обозначить конец строки
+			ContentControl^ ctrlEnd = dynamic_cast<ContentControl^>(first->Children->GetAt(first->Children->Size - 1));
+			if (ctrlEnd)
+			{
+				ctrlEnd->BorderThickness = Thickness(1, 0, 0, 0);
+			}
+
+			// - переносим в предыдущую строку все элементы
 			while (second->Children->Size > 0)
 			{
 				// TODO : можно сделать поэффективнее
@@ -225,7 +244,6 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 				first->Children->Append(child);
 			}
 
-			// - если это была последняя строка, то обрезаем её до маскимума
 			// - вычисляем индекс нового крайнего элемента, удаляем элемент из вектора, 
 			// в котором хранятся разрывы строк, обновляем значение предыдущего
 
