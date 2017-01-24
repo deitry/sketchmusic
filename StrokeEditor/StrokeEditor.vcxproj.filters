@@ -8,6 +8,15 @@
       <UniqueIdentifier>0c79c8db-801e-4db0-9bdb-20e1d3621b76</UniqueIdentifier>
       <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
     </Filter>
+    <Filter Include="Strings">
+      <UniqueIdentifier>{0f3258e3-86e7-48e6-9dea-c5a8a0fc28ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Strings\en-US">
+      <UniqueIdentifier>{e3d19209-f2a4-413f-84a8-19acb89c4482}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Strings\ru-RU">
+      <UniqueIdentifier>{3d37077f-a2ad-4aae-a6b2-07e56ea10970}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
@@ -23,6 +32,7 @@
     <ClCompile Include="sqlite3.c" />
     <ClCompile Include="CompositionEditorPage.xaml.cpp" />
     <ClCompile Include="CompositionOverviewPage.xaml.cpp" />
+    <ClCompile Include="EditCompositionDialog.xaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -35,6 +45,8 @@
     <ClInclude Include="sqlite3.h" />
     <ClInclude Include="CompositionEditorPage.xaml.h" />
     <ClInclude Include="CompositionOverviewPage.xaml.h" />
+    <ClInclude Include="EditCompositionDialog.xaml.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -82,10 +94,21 @@
     <Page Include="MainMenuPage.xaml" />
     <Page Include="LibraryOverviewPage.xaml" />
     <Page Include="LibraryEntryPage.xaml" />
-    <Page Include="AboutPage.xaml" />
     <Page Include="MelodyEditorPage.xaml" />
     <Page Include="CompositionEditorPage.xaml" />
     <Page Include="CompositionOverviewPage.xaml" />
     <Page Include="EditCompositionDialog.xaml" />
+    <Page Include="AboutPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="StrokeEditor.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Include="Strings\en-US\Resources.resw">
+      <Filter>Strings\en-US</Filter>
+    </PRIResource>
+    <PRIResource Include="Strings\ru-RU\Resources.resw">
+      <Filter>Strings\ru-RU</Filter>
+    </PRIResource>
   </ItemGroup>
 </Project>

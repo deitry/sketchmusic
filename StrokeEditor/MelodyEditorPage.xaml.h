@@ -49,6 +49,7 @@ namespace StrokeEditor
 		SketchMusic::Commands::Handler^ addSym;
 		SketchMusic::Commands::Handler^ deleteSym;
 
+		bool preventMenuClose;
 		bool recording;
 		bool cycling;
 		bool appending;	// для задержки перед добавлением последующих нот с клавиатуры - чтобы и аккорды записывать, и курсор перемещать
@@ -89,6 +90,11 @@ namespace StrokeEditor
 		void MoveLeftCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void MoveRightCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void PartsList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
+		void MenuButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void MenuSplitView_PaneClosing(Windows::UI::Xaml::Controls::SplitView^ sender, Windows::UI::Xaml::Controls::SplitViewPaneClosingEventArgs^ args);
+		void SettingsView_PaneClosing(Windows::UI::Xaml::Controls::SplitView^ sender, Windows::UI::Xaml::Controls::SplitViewPaneClosingEventArgs^ args);
+		void UndoItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void RedoItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
 	//public ref class MelodyEditorArgs sealed

@@ -95,35 +95,36 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 	((App^)App::Current)->WriteToDebugFile("Загрузка настроек завершена");
 
-	auto async = create_task([=]
+	((App^)App::Current)->WriteToDebugFile("Почти всё");
+	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
 	{
-		auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
-		return create_task(folder->GetFolderAsync("SketchMusic\\resources\\"));
-	}).then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
-	{
-		auto resourceFolder = resourceFolderTask.get();
-		return create_task(resourceFolder->GetFilesAsync());
-	}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
-	{
-		availableInstruments = ref new Platform::Collections::Vector<Instrument^>;
-		auto list = resourceListTask.get();
-		for (auto&& file : list)
+		create_task([=]
 		{
-			availableInstruments->Append(ref new Instrument(file->Name));
-		}
-	});
-
-	//((App^)App::Current)->ShowNotification("Почти");
-	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Low, ref new Windows::UI::Core::DispatchedHandler([=]()
-	{
-		async.get();
-		auto listView = dynamic_cast<ListView^>(InstrumentsFlyout->Content);
-		if (listView)
+			auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
+			return create_task(folder->GetFolderAsync("SketchMusic\\resources\\"));
+		}).then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
 		{
-			listView->DataContext = availableInstruments;
-		}
-
-		//((App^)App::Current)->ShowNotification("Составлен список инструментов");
+			auto resourceFolder = resourceFolderTask.get();
+			return create_task(resourceFolder->GetFilesAsync());
+		}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
+		{
+			availableInstruments = ref new Platform::Collections::Vector<Instrument^>;
+			auto list = resourceListTask.get();
+			for (auto&& file : list)
+			{
+				availableInstruments->Append(ref new Instrument(file->Name));
+			}
+		}).then([=]
+		{		
+			if (InstrumentList)
+			{
+			this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
+			{
+				InstrumentList->DataContext = availableInstruments;
+			}));
+			}
+		});
+		((App^)App::Current)->WriteToDebugFile("Составляем список инструментов");
 	}));
 
 	ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
@@ -140,7 +141,7 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	}
 	
 	viewType = ViewType::TextRow;
-	//UpdateChordViews(_textRow->currentPosition);
+
 	((App^)App::Current)->WriteToDebugFile("Инициализация страницы завершена");
 
 	_keyboard->Focus(Windows::UI::Xaml::FocusState::Programmatic);
@@ -162,7 +163,6 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 			// принудительно, пока нет выбора других инструментов
 			_idea->Content = ref new CompositionData();
 			_idea->Content->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
-			//_idea->Content->texts->Append(TestData::CreateTestText(2350));
 		}
 	}
 
@@ -170,6 +170,7 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 	_textRow->SetText(_texts, nullptr);
 
 	((App^)App::Current)->_CurrentIdea = _idea;
+	partsItem->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
 }
 
 void StrokeEditor::MelodyEditorPage::LoadComposition()
@@ -194,7 +195,7 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 	((App^)App::Current)->WriteToDebugFile("Инициализация страницы");
 
 	// подгоняем ширину TextRow
-	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width - mySplitView->CompactPaneLength;
+	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width - MenuSplitView->CompactPaneLength;
 	_textRow->Width = width;
 
 	moveSym = ref new SketchMusic::Commands::Handler([=](Object^ args) -> void
@@ -202,7 +203,6 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		SketchMusic::Commands::SymbolHandlerArgs^ symArgs = dynamic_cast<SketchMusic::Commands::SymbolHandlerArgs^>(args);
 		if (symArgs == nullptr) return;
 
-		//_text->moveSymbol(symArgs->_oldSym, symArgs->_newSym->_pos);
 		symArgs->_oldSym->_pos = symArgs->_newSym->_pos;
 	});
 
@@ -715,8 +715,8 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 {
 	if (HamburgerButton == (ContentControl^)e->ClickedItem)
 	{
-		bool isOpen = !mySplitView->IsPaneOpen;
-		mySplitView->IsPaneOpen = isOpen;
+		bool isOpen = !MenuSplitView->IsPaneOpen;
+		MenuSplitView->IsPaneOpen = isOpen;
 		MenuSeparator->X2 = (isOpen ? menu->ActualWidth : 22.);
 		MenuSeparator2->X2 = (isOpen ? menu->ActualWidth : 22.);
 		MenuSeparator3->X2 = (isOpen ? menu->ActualWidth : 22.);
@@ -772,6 +772,7 @@ void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Wi
 	else if (settingsItem == (ContentControl^)e->ClickedItem)
 	{
 		//myFrame->Navigate(settingsItem->GetType());
+		SettingsView->IsPaneOpen = !SettingsView->IsPaneOpen;
 	}
 }
 
@@ -785,7 +786,7 @@ void StrokeEditor::MelodyEditorPage::_textRow_SizeChanged(Platform::Object^ send
 void StrokeEditor::MelodyEditorPage::Page_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
 {
 	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width
-		- mySplitView->CompactPaneLength - _textRow->Margin.Left - _textRow->Margin.Right;
+		- MenuSplitView->CompactPaneLength - _textRow->Margin.Left - _textRow->Margin.Right;
 	_textRow->Width = width;
 }
 
@@ -876,4 +877,98 @@ void StrokeEditor::MelodyEditorPage::PartsList_SelectionChanged(Platform::Object
 		_textRow->SetText(_texts, _textRow->current, PartsList->SelectedIndex);
 		_compositionArgs->Selected = PartsList->SelectedIndex;
 	}
+}
+
+
+void StrokeEditor::MelodyEditorPage::MenuButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	if ((HamburgerButton == (ContentControl^)e->OriginalSource) )//|| (HamburgerButton2 == (ContentControl^)e->OriginalSource))
+	{
+		bool isOpen = !MenuSplitView->IsPaneOpen;
+		MenuSplitView->IsPaneOpen = isOpen;
+		MenuSeparator->X2 = (isOpen ? menu->ActualWidth : 22.);
+		MenuSeparator2->X2 = (isOpen ? menu->ActualWidth : 22.);
+		MenuSeparator3->X2 = (isOpen ? menu->ActualWidth : 22.);
+	}
+	else if (homeItem == (ContentControl^)e->OriginalSource)
+	{
+		GoBackBtn_Click(this, nullptr);
+	}
+	else if (SaveItem == (ContentControl^)e->OriginalSource)
+	{
+		SaveData();
+	}
+	else if (textsItem == (ContentControl^)e->OriginalSource)
+	{
+		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(textsCtrl);
+	}
+	else if (partsItem == (ContentControl^)e->OriginalSource)
+	{
+		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(partsCtrl);
+	}
+	else if (addItem == (ContentControl^)e->OriginalSource)
+	{
+		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(addCtrl);
+	}
+	else if (deleteItem == (ContentControl^)e->OriginalSource)
+	{
+		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(deleteCtrl);
+	}
+	else if (PlayItem == (ContentControl^)e->OriginalSource)
+	{
+		playAll_Click();
+	}
+	else if (ChangeViewItem == (ContentControl^)e->OriginalSource)
+	{
+		// TODO : если типов представления нот будет больше, сделать через флайаут или контентдиалог
+		viewType = viewType == ViewType::TextRow ? ViewType::ChordView : ViewType::TextRow;
+
+		// Соответствующим образом меняем представление
+		switch (viewType)
+		{
+		case ViewType::TextRow:
+			_textRow->Visibility = Windows::UI::Xaml::Visibility::Visible;
+			_ChordViewGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+			break;
+		case ViewType::ChordView:
+			_textRow->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+			_ChordViewGrid->Visibility = Windows::UI::Xaml::Visibility::Visible;
+			UpdateChordViews(_textRow->currentPosition);
+			break;
+		}
+
+	}
+	else if (settingsItem == (ContentControl^)e->OriginalSource)
+	{
+		//myFrame->Navigate(settingsItem->GetType());
+		bool need = !SettingsView->IsPaneOpen;
+		if (need && MenuSplitView->IsPaneOpen)
+		{
+			MenuSplitView->IsPaneOpen = false;
+		}
+		SettingsView->IsPaneOpen = need;
+	}
+}
+
+void StrokeEditor::MelodyEditorPage::MenuSplitView_PaneClosing(Windows::UI::Xaml::Controls::SplitView^ sender, Windows::UI::Xaml::Controls::SplitViewPaneClosingEventArgs^ args)
+{
+
+}
+
+
+void StrokeEditor::MelodyEditorPage::SettingsView_PaneClosing(Windows::UI::Xaml::Controls::SplitView^ sender, Windows::UI::Xaml::Controls::SplitViewPaneClosingEventArgs^ args)
+{
+
+}
+
+
+void StrokeEditor::MelodyEditorPage::UndoItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
+}
+
+
+void StrokeEditor::MelodyEditorPage::RedoItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
 }

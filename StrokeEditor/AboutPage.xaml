@@ -13,9 +13,12 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" HorizontalAlignment="Center" >
-            <TextBlock Text="SketchMusic для Windows 10."/>
+            <TextBlock x:Uid="WideTitle"/>
             <TextBlock Text="Автор: deitry"/>
-            <TextBlock Text="e-mail: dm.s.vornychev@gmail.com"/>
+            <TextBlock>
+                <Run FontFamily="Segoe MDL2 Assets" FontSize="16" Text="&#xE715; "/>
+                <Hyperlink NavigateUri="mailto:dm.s.vornychev@gmail.com">dm.s.vornychev@gmail.com</Hyperlink>
+            </TextBlock>
             <TextBlock Text="Текущая версия:"/>
             <TextBlock Name="VersionTxt"/>
         </StackPanel>

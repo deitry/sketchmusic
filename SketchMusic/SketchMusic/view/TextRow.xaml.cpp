@@ -135,7 +135,7 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 			ctrl->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("PlaceholderControlStyle"));
 			ctrl->DataContext = (prev + i + 1);
 			// TODO : настраивать Width согласно newScale
-			if (newScale = 2)
+			if (newScale >= 2)
 				ctrl->Width += PlaceholderWidth;	// пока только для масштаба 2 сделаем
 			row->Children->Append(ctrl);
 		}

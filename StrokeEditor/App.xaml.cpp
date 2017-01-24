@@ -118,6 +118,7 @@ void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEvent
 		// Размещение фрейма в текущем окне
 		Window::Current->Content = rootFrame;
 		// Обеспечение активности текущего окна
+		Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->SetPreferredMinSize(Size(300, 300));
 		Window::Current->Activate();
 	}
 	else
@@ -130,6 +131,7 @@ void App::OnLaunched(Windows::ApplicationModel::Activation::LaunchActivatedEvent
 			rootFrame->Navigate(TypeName(MainMenuPage::typeid), e->Arguments);
 		}
 		// Обеспечение активности текущего окна
+		Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->SetPreferredMinSize(Size(300, 300));
 		Window::Current->Activate();
 	}
 }
@@ -299,7 +301,8 @@ void StrokeEditor::App::SaveData()
 	if (_CurrentIdea)
 	{
 		// сохранить данные - сериализовать
-		_CurrentIdea->SerializedContent = _CurrentIdea->Content->serialize()->Stringify();
+		if (_CurrentIdea->Content)
+			_CurrentIdea->SerializedContent = _CurrentIdea->Content->serialize()->Stringify();
 
 		// обновить modified time
 		long long time;
