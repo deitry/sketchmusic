@@ -207,13 +207,6 @@
                     </Button>
                 </StackPanel>
                     <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
-                        <Button Name="UndoItem" Style="{StaticResource MenuBtnStyle}" Click="UndoItem_Click">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" />
-                                <TextBlock Style="{StaticResource ItemTextStyle}" Text="Отменить"/>
-                            </StackPanel>
-                        </Button>
-                        
                         <Button Name="RedoItem" Style="{StaticResource MenuBtnStyle}" Click="RedoItem_Click">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" />
@@ -221,6 +214,13 @@
                             </StackPanel>
                         </Button>
                         
+                        <Button Name="UndoItem" Style="{StaticResource MenuBtnStyle}" Click="UndoItem_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE7A7;" />
+                                <TextBlock Style="{StaticResource ItemTextStyle}" Text="Отменить"/>
+                            </StackPanel>
+                        </Button>
+
                         <Line x:Name="MenuSeparator2" Stroke="{ThemeResource SystemControlForegroundBaseMediumBrush}" X1="0" X2="{StaticResource SeparatorCompactLength}" Y1="0" Y2="0" 
                           Margin="10,2,10,2" IsHitTestVisible="False"
                           />

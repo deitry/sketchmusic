@@ -35,7 +35,7 @@ public:
 	void Redo() {}
 	bool CanRedo() { return true; }
 
-	void ExecuteLast()
+	void ExecuteCurrent()
 	{
 		auto command = _commands->GetAt(_commands->Size - 1);
 		command->_command->Execute(command->_args);

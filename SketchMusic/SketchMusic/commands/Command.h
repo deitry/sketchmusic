@@ -38,7 +38,7 @@ public:
 			_handler(parameter);
 	}
 
-	void UnExecute(Object^ parameter)
+	void Unexecute(Object^ parameter)
 	{
 		if (_unexecute)
 			_unexecute(parameter);

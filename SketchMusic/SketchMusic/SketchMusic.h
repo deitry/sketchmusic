@@ -739,14 +739,13 @@ namespace SketchMusic
 		};
 
 		// Необходимые команды по работе с текстом
-
-		public delegate void Handler(Object^ args);
+		public delegate bool Handler(Object^ args); // bool = выполнено или нет
 
 		// сохранение-загрузка
 		// void Save(Text, FileName, Options?)
 		// Text Load(FileName, Options?) -> void Load( ..Text^.. ) - интересно, можно ли так
 		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-		public delegate void CompositionHandler(CompositionHandlerArgs^ args);
+		public delegate bool CompositionHandler(CompositionHandlerArgs^ args);
 
 		// управление символами
 		// void Insert(Text, PositionedSymbol)
@@ -754,7 +753,7 @@ namespace SketchMusic
 		// void Delete(Text, PositionedSymbol)
 		// void Edit(Text, PositionedSymbol, Symbol newSym) // вместо комбинации delete-insert
 		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-		public delegate void SymbolHandler(SymbolHandlerArgs^ args);
+		public delegate bool SymbolHandler(SymbolHandlerArgs^ args);
 
 
 		// основные классы
@@ -785,16 +784,18 @@ namespace SketchMusic
 				return true;
 			}
 
-			virtual void Execute(Object^ parameter)
+			virtual bool Execute(Object^ parameter)
 			{
-				if (_handler)
-					_handler(parameter);
+				if (_handler) // && CanExecute
+					return _handler(parameter);
+				return false;
 			}
 
-			void UnExecute(Object^ parameter)
+			virtual bool Unexecute(Object^ parameter)
 			{
 				if (_unexecute)
-					_unexecute(parameter);
+					return _unexecute(parameter);
+				return false;
 			}
 
 			virtual event EventHandler<Platform::Object^>^ CanExecuteChanged;
@@ -808,43 +809,105 @@ namespace SketchMusic
 				_args = args;
 			}
 
+			// обёртка, чтобы не морочиться с аргументами
+			// TODO : возвращать bool - выполнена команда или нет
+			bool Execute() { return _command->Execute(_args); }
+			bool Unexecute() { return _command->Unexecute(_args); }
+
 			property Command^ _command;
 			property Object^ _args;
 		};
-		//ref class CommandManager;	// принимает команды и хранит историю
+
+		const int DEFAULT_MAX_COM = 20;
+		
+		// принимает команды и хранит историю
 		public ref class CommandManager sealed
 		{
 		private:
 			// История команд
 			Windows::Foundation::Collections::IVector<SketchMusic::Commands::CommandState^>^ _commands;
-			int position;	// текущее положение в истории команд
+			int _CurrentIndex;	// указывает индекс последней выполненной команды (-1, если ничего нет)
 
 		public:
 			CommandManager()
 			{
+				MaxCommandCount = DEFAULT_MAX_COM;
 				_commands = ref new Platform::Collections::Vector<CommandState^>;
+				_CurrentIndex = -1;
+			}
+
+			CommandManager(int max)
+			{
+				MaxCommandCount = max;
+				_commands = ref new Platform::Collections::Vector<CommandState^>;
+				_CurrentIndex = -1;
+			}
+
+			property int MaxCommandCount; // максимальное количество команд
+			bool CanUndo() { return (_CurrentIndex >= 0) ? true : false; }
+			bool CanRedo()
+			{
+				int max = (_commands->Size - 1); // по непонятной причине, если просто вставить выражение в возвращаемое значение,
+					// то возвращается false
+				return (_CurrentIndex < max);
 			}
 
 			// список доступных манипуляций
-			void Undo() {}
-			bool CanUndo() { return true; }
-
-			void Redo() {}
-			bool CanRedo() { return true; }
-
-			void ExecuteLast()
+			bool Undo()
 			{
-				auto command = _commands->GetAt(_commands->Size - 1);
-				command->_command->Execute(command->_args);
+				if (CanUndo())
+				{
+					// "разделываем" последнюю выполненую команду, уменьшаем счётчик
+					return _commands->GetAt(_CurrentIndex--)->Unexecute();
+				};
+				return false;
 			}
 
-			void AddCommand(SketchMusic::Commands::CommandState^ command)
+			bool Redo()
 			{
+				if (CanRedo())
+				{
+					return ExecuteCurrent();
+				}
+				return false;
+			}
+
+			void Clear()
+			{
+				_commands->Clear();
+				_CurrentIndex = -1;
+			}
+			
+			// Выполняет текущую команду (последнюю или ту, на которую мы отмотали в результате undo-redo)
+			bool ExecuteCurrent()
+			{
+				// переводим счётчик на следующую команду, делаем её
+				return _commands->GetAt(++_CurrentIndex)->Execute();
+			}
+
+			bool AddAndExecute(SketchMusic::Commands::CommandState^ command)
+			{
+				// если мы посередине списка команд - убираем все последующие, чтобы не создавать параллельных веток
+				if (_CurrentIndex != _commands->Size - 1)
+				{
+					for (int cur = _commands->Size - 1; cur > _CurrentIndex; cur--)
+					{
+						_commands->RemoveAtEnd();
+					}
+				}
+
+				// если количество команд достигло заданного предела или по каким-то причинам превышает его
+				// - удаляем команду из начала
+				while (_CurrentIndex >= MaxCommandCount-1)
+				{
+					_commands->RemoveAt(0);
+					_CurrentIndex--;
+				}
+
 				_commands->Append(command);
+				return ExecuteCurrent();
 			}
-			//bool 
 		};
-		// структуры, инкапсулирующие параметры для команд ... нужны?
 	}
 
 	namespace Player
