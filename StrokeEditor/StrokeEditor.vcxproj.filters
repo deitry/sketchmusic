@@ -17,9 +17,18 @@
     <Filter Include="Strings\ru-RU">
       <UniqueIdentifier>{3d37077f-a2ad-4aae-a6b2-07e56ea10970}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml" />
+    <Filter Include="Composition">
+      <UniqueIdentifier>{f3404698-9bb3-4972-9852-8e9174d56c29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Idea">
+      <UniqueIdentifier>{2e89ab52-cea9-4a1c-b577-a2486f8734ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editors">
+      <UniqueIdentifier>{2dad0d9b-55f7-4aca-882e-98886174e99b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Other Pages">
+      <UniqueIdentifier>{38ac8137-4a02-47c1-a1a2-fda4f4ad8b99}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp" />
@@ -91,14 +100,30 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="MainMenuPage.xaml" />
-    <Page Include="LibraryOverviewPage.xaml" />
-    <Page Include="LibraryEntryPage.xaml" />
-    <Page Include="MelodyEditorPage.xaml" />
-    <Page Include="CompositionEditorPage.xaml" />
-    <Page Include="CompositionOverviewPage.xaml" />
-    <Page Include="EditCompositionDialog.xaml" />
-    <Page Include="AboutPage.xaml" />
+    <Page Include="CompositionEditorPage.xaml">
+      <Filter>Composition</Filter>
+    </Page>
+    <Page Include="CompositionOverviewPage.xaml">
+      <Filter>Composition</Filter>
+    </Page>
+    <Page Include="EditCompositionDialog.xaml">
+      <Filter>Composition</Filter>
+    </Page>
+    <Page Include="AboutPage.xaml">
+      <Filter>Other Pages</Filter>
+    </Page>
+    <Page Include="LibraryEntryPage.xaml">
+      <Filter>Idea</Filter>
+    </Page>
+    <Page Include="LibraryOverviewPage.xaml">
+      <Filter>Idea</Filter>
+    </Page>
+    <Page Include="MainMenuPage.xaml">
+      <Filter>Other Pages</Filter>
+    </Page>
+    <Page Include="MelodyEditorPage.xaml">
+      <Filter>Editors</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StrokeEditor.rc" />
@@ -110,5 +135,10 @@
     <PRIResource Include="Strings\ru-RU\Resources.resw">
       <Filter>Strings\ru-RU</Filter>
     </PRIResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Filter>Other Pages</Filter>
+    </ApplicationDefinition>
   </ItemGroup>
 </Project>

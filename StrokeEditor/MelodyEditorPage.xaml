@@ -402,7 +402,7 @@
                                  Background="Orange"
                                  Width="auto"
                                  VerticalAlignment="Bottom"
-                                 HorizontalAlignment="Left"
+                                 HorizontalAlignment="Center"
                                  Grid.Row="2"/>
 
                     <SplitView Grid.RowSpan="4" x:Name="SettingsView" OpenPaneLength="250" CompactPaneLength="0"

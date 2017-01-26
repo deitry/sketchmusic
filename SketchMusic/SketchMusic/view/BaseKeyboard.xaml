@@ -35,59 +35,57 @@
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                                     Converter={StaticResource ctrlKeyState2color}}"
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}"
-                            Width="{StaticResource CtrlWidth}" DataContext="14000" Tag="ctrl"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}"
+                            DataContext="14000" Tag="ctrl"/>
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                 Converter={StaticResource actionKeyState2color}}"
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" DataContext="11000" Tag="rec"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}" 
+                            DataContext="11000" Tag="rec"/>
 
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" 
+                            Style="{StaticResource KeyboardCtrlBtnStyle}" 
                             DataContext="-5001" Tag="left"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}"
-                            Width="{StaticResource CtrlWidth}" DataContext="5001" Tag="right"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}"
+                            DataContext="5001" Tag="right"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}"
-                            Width="{StaticResource CtrlWidth}" DataContext="-3001" Tag="-"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}"
+                            DataContext="-3001" Tag="-"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" DataContext="3001" Tag="+"/>
-
+                            Style="{StaticResource KeyboardCtrlBtnStyle}" 
+                            DataContext="3001" Tag="+"/>
 
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
                             Margin="10,0,0,0"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" DataContext="13000" Tag="backsp"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}" 
+                            DataContext="13000" Tag="backsp"/>
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                 Converter={StaticResource ctrlKeyState2color}}"
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" DataContext="35000" Tag="eraser"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}" 
+                            DataContext="35000" Tag="eraser"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}"
-                            Width="{StaticResource CtrlWidth}" DataContext="6000" Tag="enter"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}"
+                            DataContext="6000" Tag="enter"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}"
-                            Width="{StaticResource CtrlWidth}" DataContext="20000" Tag="end"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}"
+                            DataContext="20000" Tag="end"/>
 
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                 Converter={StaticResource ctrlKeyState2color}}"
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
                             Margin="10,0,0,0"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" DataContext="12000" Tag="cycle"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}" 
+                            DataContext="12000" Tag="cycle"/>
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                 Converter={StaticResource ctrlKeyState2color}}"
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}"
-                            Width="{StaticResource CtrlWidth}" DataContext="7000" Tag="play"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}"
+                            DataContext="7000" Tag="play"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}"
-                            Width="{StaticResource CtrlWidth}" DataContext="15000" Tag="tempo">
+                            Style="{StaticResource KeyboardCtrlBtnStyle}"
+                            DataContext="15000" Tag="tempo">
                 <FlyoutBase.AttachedFlyout>
                     <Flyout x:Name="TempoFlyout" Opened="TempoFlyout_Opened" Closed="TempoFlyout_Closed">
                         <StackPanel Orientation="Vertical">
@@ -126,8 +124,8 @@
                 </FlyoutBase.AttachedFlyout>
             </ContentControl>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" DataContext="18000" Tag="quant">
+                            Style="{StaticResource KeyboardCtrlBtnStyle}" 
+                            DataContext="18000" Tag="quant">
                 <FlyoutBase.AttachedFlyout>
                     <Flyout x:Name="QuantizeFlyout" Opened="QuantizeFlyout_Opened" Closed="QuantizeFlyout_Closed">
                         <StackPanel Orientation="Vertical">
@@ -162,11 +160,11 @@
             <ContentControl Foreground="{Binding RelativeSource={RelativeSource Self}, Path=Content,
                                 Converter={StaticResource ctrlKeyState2color}}"
                             Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" DataContext="30000" Tag="hide"/>
+                            Style="{StaticResource KeyboardCtrlBtnStyle}" 
+                            DataContext="30000" Tag="hide"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" 
-                            Width="{StaticResource CtrlWidth}" DataContext="31000" Tag="layout">
+                            Style="{StaticResource KeyboardCtrlBtnStyle}" 
+                            DataContext="31000" Tag="layout">
                 <FlyoutBase.AttachedFlyout>
                     <Flyout x:Name="LayoutFlyout" Opened="LayoutFlyout_Opened" Closed="LayoutFlyout_Closed">
                         <StackPanel>

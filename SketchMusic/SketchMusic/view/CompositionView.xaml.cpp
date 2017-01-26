@@ -25,24 +25,9 @@ CompositionView::CompositionView()
 {
 	Categories = ref new Platform::Collections::Map<String^, int>;
 	auto parts = ref new Platform::Collections::Vector<PartDefinition^>;
-	//PartDefinition^ p1 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(0), ref new SNewPart("A", DynamicCategory::quite)));
-	//p1->Length = 2; p1->Time = 120 * 2 / 60;
-	//PartDefinition^ p2 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(2), ref new SNewPart("B", DynamicCategory::harder)));
-	//p2->Length = 2; p2->Time = 120 * 2 / 60;
-	//PartDefinition^ p3 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(4), ref new SNewPart("A", DynamicCategory::regular)));
-	//p3->Length = 5; p3->Time = 120 * 5 / 60;
-	//PartDefinition^ p4 = ref new PartDefinition(ref new PositionedSymbol(ref new Cursor(9), ref new SNewPart("B", DynamicCategory::fast)));
-	//p4->Length = 1;
-
-	//parts->Append(p1);
-	//parts->Append(p2);
-	//parts->Append(p3);
-	//parts->Append(p4);
 
 	InitializeComponent();
 	SetParts(parts);
-
-	
 }
 
 void SketchMusic::View::CompositionView::SetParts(IObservableVector<PartDefinition^>^ parts)
@@ -62,6 +47,20 @@ void SketchMusic::View::CompositionView::OnVectorChanged(IObservableVector<PartD
 	case CollectionChange::ItemInserted:
 		UpdateView();
 		break;
+	}
+}
+
+void SketchMusic::View::CompositionView::OnPointerPressed(Platform::Object ^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^ e)
+{
+	auto ctrl = dynamic_cast<ContentControl^>(sender);
+	if (ctrl)
+	{
+		auto part = dynamic_cast<PartDefinition^>(ctrl->DataContext);
+		if (part != m_selected)
+		{
+			SelectedItem = part;
+			SelectionChange(this, part);
+		}
 	}
 }
 
@@ -143,6 +142,7 @@ void SketchMusic::View::CompositionView::UpdateView()
 		auto ctrl = ref new ContentControl;
 		ctrl->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(this->Resources->Lookup("CompositionPartStyle"));
 		ctrl->DataContext = part;
+		ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::CompositionView::OnPointerPressed);
 		CompositionPanel->Children->Append(ctrl);
 
 		if (part == m_selected)

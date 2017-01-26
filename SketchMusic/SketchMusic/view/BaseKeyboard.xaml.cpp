@@ -223,7 +223,7 @@ void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 	ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
 	if (ctrl)
 	{
-		ctrl->Background = (SolidColorBrush^)_dict->Lookup("draggedForegroundBrush");
+		ctrl->Background = (SolidColorBrush^)_dict->Lookup("pressedKeyBackground");
 		Key^ key = dynamic_cast<Key^>(ctrl->Content);
 		for (auto&& iter : _keys)
 		{
@@ -781,8 +781,8 @@ void SketchMusic::View::BaseKeyboard::OnPointerExited(Platform::Object ^sender, 
 
 void SketchMusic::View::BaseKeyboard::ReleaseKey(Object^ sender)
 {
-	Windows::UI::Xaml::Controls::ContentControl^ ctrl =
-		dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(static_cast<Object^>(sender));
+	ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
+	ctrl->Background = nullptr;
 
 	if (ctrl == nullptr) return;
 	for (auto&& iter : _keys)
@@ -806,7 +806,6 @@ void SketchMusic::View::BaseKeyboard::OnReleaseKey(Key ^ key)
 	if (key == nullptr) return;
 
 	auto ctrl = ((ContentControl^)key->parent);
-	ctrl->Background = nullptr;
 
 	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
 

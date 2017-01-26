@@ -33,8 +33,8 @@ namespace StrokeEditor
 		property int Selected;
 	};
 
-	ref class Command;
-	ref class CommandManager;
+	//ref class Command;
+	//ref class CommandManager;
 
 	/// <summary>
 	/// Обеспечивает зависящее от конкретного приложения поведение, дополняющее класс Application по умолчанию.

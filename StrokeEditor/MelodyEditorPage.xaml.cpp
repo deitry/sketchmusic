@@ -250,6 +250,7 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		{
 			AddSymbolToText(symArgs->_text, sym);
 		}
+		return true;
 	});
 
 	DeleteMultipleSymHandler = ref new SMC::Handler([=](Object^ args) -> bool {
@@ -261,6 +262,7 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		{
 			DeleteSymbolFromText(symArgs->_text, sym);
 		}
+		return true;
 	});
 	
 	// Команды для манипуляции с текстом

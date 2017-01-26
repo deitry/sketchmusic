@@ -38,4 +38,8 @@ public:
 		PartDefinition^ get() { return m_selected; }
 		void set(PartDefinition^ selected);
 	}
+
+	event EventHandler<PartDefinition^>^ SelectionChange;
+
+	void OnPointerPressed(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 };

@@ -74,6 +74,8 @@ void StrokeEditor::CompositionEditorPage::InitializePage()
 	playerStateChangeToken =
 		((App^)App::Current)->_player->StateChanged 
 		+= ref new Windows::Foundation::EventHandler<SketchMusic::Player::PlayerState>(this, &StrokeEditor::CompositionEditorPage::OnStateChanged);
+
+	CompositionView->SelectionChange += ref new Windows::Foundation::EventHandler<SketchMusic::PartDefinition ^>(this, &StrokeEditor::CompositionEditorPage::OnSelectionChange);
 }
 
 void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
@@ -514,4 +516,12 @@ void StrokeEditor::CompositionEditorPage::OnCursorPosChanged(Platform::Object ^s
 		ref new Windows::UI::Core::DispatchedHandler([=]() {
 		CompositionSlider->Value = args->Beat;
 	}));
+}
+
+
+void StrokeEditor::CompositionEditorPage::OnSelectionChange(Platform::Object ^sender, SketchMusic::PartDefinition ^args)
+{
+	unsigned int ind;
+	if (CompositionPartList->Items->IndexOf(args, &ind))
+		CompositionPartList->SelectedIndex = ind;
 }

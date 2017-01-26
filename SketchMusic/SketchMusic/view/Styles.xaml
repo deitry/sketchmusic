@@ -22,23 +22,26 @@
     <x:Double x:Key="LineSpacing">15</x:Double>
     <x:String x:Key="PHold">phold</x:String>
 
-    <SolidColorBrush x:Key="keyBackground" x:Name="keyBackground" Color="DarkOrange"/>
-    <SolidColorBrush x:Key="blackKeyBackground" x:Name="blackKeyBackground" Color="DarkRed"/>
+    <SolidColorBrush x:Key="keyColorBackground" x:Name="keyColorBackground" Color="DarkOrange"/> <!-- Фон клавиши -->
+    <SolidColorBrush x:Key="blackKeyColorBackground" x:Name="blackColorBackground" Color="DarkRed"/> <!-- Фон "чёрной" клавиши -->
+    <SolidColorBrush x:Key="keyBackground" x:Name="keyBackground" Color="{ThemeResource SystemAltHighColor}"/>
+    <SolidColorBrush x:Key="blackKeyBackground" x:Name="blackKeyBackground" Color="{ThemeResource SystemBaseHighColor}"/>
     <SolidColorBrush x:Key="keyForeground" x:Name="keyForeground" Color="{ThemeResource SystemBaseHighColor}"/>
-    <SolidColorBrush x:Key="pressedKeyBackground" x:Name="pressedKeyBackground" Color="Gray"/>
-    <SolidColorBrush x:Key="disabledKeyBackground" x:Name="disabledKeyBackground" Color="AntiqueWhite"/>
-    <SolidColorBrush x:Key="ctrlKeyForeground" x:Name="ctrlKeyForeground" Color="Blue"/>
+    <SolidColorBrush x:Key="pressedKeyBackground" x:Name="pressedKeyBackground" Color="{ThemeResource SystemAccentColor}" Opacity="0.6"/>
+    <SolidColorBrush x:Key="disabledKeyBackground" x:Name="disabledKeyBackground" Color="{ThemeResource SystemBaseMediumLowColor}"/>
+    <SolidColorBrush x:Key="ctrlKeyForeground" x:Name="ctrlKeyForeground" Color="{ThemeResource SystemAccentColor}"/>
     <SolidColorBrush x:Key="actionKeyForeground" x:Name="actionKeyForeground" Color="Red"/>
 
     <SolidColorBrush x:Key="textBrush" x:Name="textBrush" Color="{ThemeResource SystemBaseHighColor}"/>
-    <SolidColorBrush x:Key="draggedForegroundBrush" x:Name="draggedForegroundBrush" Color="White" Opacity="0.4"/>
-    <SolidColorBrush x:Key="noteBackground" x:Name="noteBackground" Color="DarkOrange"/>
+    <SolidColorBrush x:Key="altTextBrush" x:Name="altTextBrush" Color="{ThemeResource SystemAltHighColor}"/>
+    <SolidColorBrush x:Key="draggedForegroundBrush" x:Name="draggedForegroundBrush" Color="{ThemeResource SystemAccentColor}" Opacity="0.6"/>
+    <SolidColorBrush x:Key="noteBackground" x:Name="noteBackground" Color="{ThemeResource SystemBaseHighColor}"/> <!-- Фон ноты -->
     <SolidColorBrush x:Key="noteBackground2" x:Name="noteBackground2" Color="Blue"/>
     <SolidColorBrush x:Key="noteBackground3" x:Name="noteBackground3" Color="Green"/>
     <SolidColorBrush x:Key="noteBackground4" x:Name="noteBackground4" Color="Yellow"/>
     <SolidColorBrush x:Key="tempoBackground" x:Name="tempoBackground" Color="DarkCyan"/>
 
-    <SolidColorBrush x:Key="SelectedPartBackground" x:Name="SelectedPartBackground" Color="Yellow"/>
+    <SolidColorBrush x:Key="SelectedPartBackground" x:Name="SelectedPartBackground" Color="{ThemeResource SystemAccentColor}"/>
     
     <smv:OnSymbolToStringConverter x:Key="sym2string"/>
     <smv:OnKeyToStringConverter x:Key="key2string"/>
@@ -50,16 +53,23 @@
     <smv:PartTimeToTextConverter x:Key="parttime2text"/>
     <smv:PartNameToTextConverter x:Key="partname2text"/>
     <smv:BlackKeyToColorConverter x:Key="blackKey2color"
-                                    BlackKeyBrush="{StaticResource blackKeyBackground}"/>
-    <smv:BoolToColorConverter     x:Key="bool2color"
-                                    KeyBrush="{StaticResource keyBackground}"
-                                    PressedKeyBrush="{StaticResource pressedKeyBackground}"/>
+                                  BaseKeyBrush="{StaticResource keyBackground}"
+                                  BlackKeyBrush="{StaticResource blackKeyBackground}"/>
+    <smv:BlackKeyToColorConverter x:Key="reversedBlackKey2color"
+                                  BaseKeyBrush="{StaticResource textBrush}"
+                                  BlackKeyBrush="{StaticResource altTextBrush}"/>
+    <smv:BoolToColorConverter     x:Key="pressed2color"
+                                  KeyBrush="{StaticResource keyBackground}"
+                                  PressedKeyBrush="{StaticResource pressedKeyBackground}"/>
+    <smv:BoolToColorConverter     x:Key="enabled2color"
+                                  KeyBrush="{StaticResource keyBackground}"
+                                  PressedKeyBrush="{StaticResource disabledKeyBackground}"/>
     <smv:KeyStateToColorConverter x:Key="actionKeyState2color"
-                                    KeyBrush="{StaticResource actionKeyForeground}"
-                                    PressedKeyBrush="{StaticResource keyForeground}"/>
+                                  PressedKeyBrush="{StaticResource actionKeyForeground}"
+                                  KeyBrush="{StaticResource keyForeground}"/>
     <smv:KeyStateToColorConverter x:Key="ctrlKeyState2color"
-                                    KeyBrush="{StaticResource ctrlKeyForeground}"
-                                    PressedKeyBrush="{StaticResource keyForeground}"/>
+                                  PressedKeyBrush="{StaticResource ctrlKeyForeground}"
+                                  KeyBrush="{StaticResource keyForeground}"/>
     <smv:PSymbolToVerticalPosConverter x:Key="symbol2ypos"
                                        LineSpacing="{StaticResource LineSpacing}"/>
     <smv:MultiplicatedLengthConverter x:Key="HalvedLength" Multiplicator="0.5"/>
@@ -80,10 +90,44 @@
                                 Width="{TemplateBinding Width}"
                                 >
                         <Grid>
-                            <Rectangle Fill="{Binding IsEnabled, RelativeSource={RelativeSource TemplatedParent}, 
-                                    Converter={StaticResource bool2color}}" Opacity="1.0"/>
                             <Rectangle Fill="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
-                                    Converter={StaticResource blackKey2color}}" Opacity="0.5"/>
+                                    Converter={StaticResource blackKey2color}}" Opacity="0.9"/>
+                            <Rectangle Fill="{TemplateBinding Background}" Opacity="1.0"/>
+                            <TextBlock
+                                        FontFamily="Segoe MDL2 Assets"
+                                        FontSize="{TemplateBinding FontSize}"
+                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Foreground="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
+                                    Converter={StaticResource reversedBlackKey2color}}"
+                                        >
+                                        <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource key2string}}"/>
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Setter Property="Width" Value="{StaticResource NoteWidth}"/>
+        <Setter Property="Height" Value="{StaticResource NoteHeight}"/>
+        <Setter Property="FontSize" Value="14"/>
+    </Style>
+
+    <Style x:Key="KeyboardCtrlBtnStyle" TargetType="ContentControl" BasedOn="{StaticResource KeyboardBtnStyle}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Height="{TemplateBinding Height}"
+                                Width="{TemplateBinding Width}"
+                                >
+                        <Grid>
+                            <Rectangle Fill="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
+                                    Converter={StaticResource blackKey2color}}" Opacity="1"/>
+                            <Rectangle Fill="{Binding IsEnabled, RelativeSource={RelativeSource TemplatedParent}, 
+                                    Converter={StaticResource enabled2color}}" Opacity="0.1"/>
                             <Rectangle Fill="{TemplateBinding Background}" Opacity="0.8"/>
                             <TextBlock
                                         FontFamily="Segoe MDL2 Assets"
@@ -98,10 +142,8 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-
-        <Setter Property="Width" Value="{StaticResource NoteWidth}"/>
-        <Setter Property="Height" Value="{StaticResource NoteHeight}"/>
-        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="{StaticResource textBrush}"/>
+        <Setter Property="Width" Value="{StaticResource CtrlWidth}"/>
     </Style>
 
     <ControlTemplate TargetType="ContentControl" x:Key="SymbolControlTemplate">
@@ -117,7 +159,7 @@
 
             <TextBlock x:Name="symbolTextBlock"
                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                   Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
+                   Foreground="{ThemeResource SystemControlForegroundAltHighBrush}">
                 <!--<Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>-->
                 <Run FontFamily="Segoe MDL2 Assets" Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
             </TextBlock>
@@ -210,7 +252,7 @@
     <Style TargetType="ContentControl" x:Key="SnapPointStyle">
         <Setter Property="Height" Value="20"/>
         <Setter Property="Width" Value="3"/>
-        <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundChromeMediumBrush}"/>
+        <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundBaseMediumBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
@@ -240,7 +282,7 @@
     <Style TargetType="ContentControl" x:Key="CursorPositionStyle">
         <Setter Property="Width" Value="3"/>
         <Setter Property="Height" Value="100"/>
-        <Setter Property="Background" Value="DarkRed"/>
+        <Setter Property="Background" Value="{StaticResource ctrlKeyForeground}"/>
         <Setter Property="Template" Value="{StaticResource CursorPositionTemplate}"/>
     </Style>
 

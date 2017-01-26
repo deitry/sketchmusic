@@ -234,6 +234,7 @@ public:
 public ref class SketchMusic::View::BlackKeyToColorConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 {
 public:
+	property Windows::UI::Xaml::Media::Brush^ BaseKeyBrush;
 	property Windows::UI::Xaml::Media::Brush^ BlackKeyBrush;
 
 	// на основе клавиши выдаёт её графическое отображение
@@ -241,7 +242,7 @@ public:
 	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
 	{
 		SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(value);
-		if (key == nullptr) return nullptr;
+		if (key == nullptr) return BaseKeyBrush;
 
 		switch (key->type)
 		{
@@ -250,7 +251,7 @@ public:
 			break;
 		case SketchMusic::View::KeyType::genericNote:
 		default:
-			return nullptr; // для остальных остаётся классический бэкграунд
+			return BaseKeyBrush; // для остальных остаётся классический бэкграунд
 		}
 
 		Windows::UI::Xaml::Media::Brush^ brush = nullptr;
@@ -262,6 +263,7 @@ public:
 			brush = BlackKeyBrush;
 			break;
 		default:
+			brush = BaseKeyBrush;
 			break;
 		}
 
@@ -288,21 +290,18 @@ public:
 	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
 	{
 		SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(value);
-		if (key == nullptr) return nullptr;
+		if (key == nullptr) return KeyBrush;
 		auto ctrl = dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(key->parent);
-		if (ctrl == nullptr) return nullptr;
-
-		Windows::UI::Xaml::Media::Brush^ brush = nullptr;
+		if (ctrl == nullptr) return KeyBrush;
 
 		if (key->value)
 		{
-			brush = KeyBrush;
+			return PressedKeyBrush;
 		}
 		else
 		{
-			brush = PressedKeyBrush;
+			return KeyBrush;
 		}
-		return brush;
 	}
 
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
