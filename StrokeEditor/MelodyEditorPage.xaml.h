@@ -23,7 +23,7 @@ struct std::less<SketchMusic::View::Key^>
 namespace StrokeEditor
 {
 	/// <summary>
-	/// Пустая страница, которую можно использовать саму по себе или для перехода внутри фрейма.
+	/// Страница универсального редактора CompositionData
 	/// </summary>
 	[Windows::Foundation::Metadata::WebHostHidden]
 	public ref class MelodyEditorPage sealed
@@ -39,16 +39,35 @@ namespace StrokeEditor
 		Windows::Foundation::EventRegistrationToken playerStateChangeToken;
 		Windows::Foundation::EventRegistrationToken bpmChangeToken;
 		Windows::Foundation::EventRegistrationToken curPosChangeToken;
+		Windows::Foundation::EventRegistrationToken canUndoChangeToken;
+		Windows::Foundation::EventRegistrationToken canRedoChangeToken;
+		Windows::Foundation::EventRegistrationToken KeyDownToken;
+		Windows::Foundation::EventRegistrationToken KeyUpToken;
 
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
-		//void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
-
+		
 		SketchMusic::CompositionData^ _texts;
 
-		SketchMusic::Commands::Handler^ moveSym;
-		SketchMusic::Commands::Handler^ addSym;
-		SketchMusic::Commands::Handler^ deleteSym;
+		// команды
+		SketchMusic::Commands::Command^ MoveSymCommand;
+		SketchMusic::Commands::Command^ AddSymCommand;
+		SketchMusic::Commands::Command^ DeleteSymCommand;
+		SketchMusic::Commands::Command^ AddMultipleSymCommand;
+		SketchMusic::Commands::Command^ DeleteMultipleSymCommand;
+		SketchMusic::Commands::Command^ AddTextCommand;
+		SketchMusic::Commands::Command^ DeleteTextCommand;
 
+		// обработчики
+		SketchMusic::Commands::Handler^ MoveSymHandler;
+		SketchMusic::Commands::Handler^ ReverseMoveSymHandler;
+		SketchMusic::Commands::Handler^ AddSymHandler;
+		SketchMusic::Commands::Handler^ DeleteSymHandler;
+		SketchMusic::Commands::Handler^ AddMultipleSymHandler;
+		SketchMusic::Commands::Handler^ DeleteMultipleSymHandler;
+		SketchMusic::Commands::Handler^ AddTextHandler;
+		SketchMusic::Commands::Handler^ DeleteTextHandler;
+
+		bool ctrlPressed;
 		bool preventMenuClose;
 		bool recording;
 		bool cycling;
@@ -66,8 +85,7 @@ namespace StrokeEditor
 		void _keyboard_KeyboardPressed(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ e);
 		void _keyboard_KeyReleased(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ e);
 		void ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
-		//void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
-
+		
 		void UpdateChordViews(SketchMusic::Cursor^ pos);
 
 		SketchMusic::Idea^ _idea;
@@ -85,24 +103,21 @@ namespace StrokeEditor
 	private:
 
 		void menu_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
-		void _textRow_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
 		void Page_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
 		void MoveLeftCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void MoveRightCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void PartsList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
 		void MenuButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
-		void MenuSplitView_PaneClosing(Windows::UI::Xaml::Controls::SplitView^ sender, Windows::UI::Xaml::Controls::SplitViewPaneClosingEventArgs^ args);
-		void SettingsView_PaneClosing(Windows::UI::Xaml::Controls::SplitView^ sender, Windows::UI::Xaml::Controls::SplitViewPaneClosingEventArgs^ args);
 		void UndoItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void RedoItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
-	};
 
-	//public ref class MelodyEditorArgs sealed
-	//{
-	//	property Platform::Object^ Data;	// может быть как CompositionArgs, так и Idea
-	//	property int Selected;	// передаём информацию о том, какую часть необходимо отображать, если данные содержат несколько частей
-	//
-	//	MelodyEditorArgs(Platform::Object^ data, int select) { Data = data; Selected = select; }
-	//	MelodyEditorArgs(Platform::Object^ data) { Data = data; Selected = 0; }
-	//};
+
+		void AddSymbolToText(SketchMusic::Text^ text, SketchMusic::PositionedSymbol^ symbol);
+		void DeleteSymbolFromText(SketchMusic::Text^ text, SketchMusic::PositionedSymbol^ symbol);
+		void Backspace();
+		void OnCanRedoChanged(Platform::Object ^sender, bool args);
+		void OnCanUndoChanged(Platform::Object ^sender, bool args);
+		void OnKeyDown(Windows::UI::Core::CoreWindow ^sender, Windows::UI::Core::KeyEventArgs ^args);
+		void OnKeyUp(Windows::UI::Core::CoreWindow ^sender, Windows::UI::Core::KeyEventArgs ^args);
+	};
 }

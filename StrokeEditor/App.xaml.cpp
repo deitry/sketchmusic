@@ -301,8 +301,9 @@ void StrokeEditor::App::SaveData()
 	if (_CurrentIdea)
 	{
 		// сохранить данные - сериализовать
-		if (_CurrentIdea->Content)
+		if (_CurrentIdea->Content && _CurrentIdea->Content->HasContent())
 			_CurrentIdea->SerializedContent = _CurrentIdea->Content->serialize()->Stringify();
+		else return;
 
 		// обновить modified time
 		long long time;

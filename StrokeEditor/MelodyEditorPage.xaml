@@ -97,9 +97,16 @@
                             Click="MenuButton_Click"/>
 
                         <Button Name="homeItem" Style="{StaticResource MenuBtnStyle}" Click="MenuButton_Click">
-                        <StackPanel Orientation="Horizontal">
+                            <ToolTipService.ToolTip>
+                                <ToolTip>
+                                    <ToolTip.Content>
+                                        <TextBlock x:Uid="BackTip"/>
+                                    </ToolTip.Content>
+                                </ToolTip>
+                            </ToolTipService.ToolTip>
+                            <StackPanel Orientation="Horizontal">
                             <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE72B;"/>
-                                <TextBlock Name="GoBackTxt" Text="Вернуться назад" Style="{StaticResource ItemTextStyle}"/>
+                            <TextBlock Name="GoBackTxt" Text="Вернуться назад" Style="{StaticResource ItemTextStyle}"/>
                         </StackPanel>
                     </Button>
                     
@@ -207,14 +214,14 @@
                     </Button>
                 </StackPanel>
                     <StackPanel Orientation="Vertical" VerticalAlignment="Bottom">
-                        <Button Name="RedoItem" Style="{StaticResource MenuBtnStyle}" Click="RedoItem_Click">
+                        <Button Name="RedoItem" Style="{StaticResource MenuBtnStyle}" Click="RedoItem_Click" IsEnabled="False">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE7A6;" />
                                 <TextBlock Style="{StaticResource ItemTextStyle}" Text="Вернуть"/>
                             </StackPanel>
                         </Button>
                         
-                        <Button Name="UndoItem" Style="{StaticResource MenuBtnStyle}" Click="UndoItem_Click">
+                        <Button Name="UndoItem" Style="{StaticResource MenuBtnStyle}" Click="UndoItem_Click" IsEnabled="False">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE7A7;" />
                                 <TextBlock Style="{StaticResource ItemTextStyle}" Text="Отменить"/>
@@ -271,7 +278,6 @@
                                  HorizontalAlignment="Left"
                                  VerticalAlignment="Stretch"
                                  Margin="5,12,5,5"
-                                 SizeChanged="_textRow_SizeChanged"
                                  />
                     
                     <!--<Button Name="HamburgerButton2" Style="{StaticResource MenuBtnStyle}"

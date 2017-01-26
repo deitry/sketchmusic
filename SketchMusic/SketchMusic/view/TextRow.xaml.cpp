@@ -45,11 +45,10 @@ SketchMusic::View::TextRow::TextRow()
 
 /**
 Создаём столько элементов привязки, сколько нужно
-Может вообще отдельные объекты создавать не надо, а можно обойтись по одному объекту на долю?
 При масштабировании увеличивать ширину объекта
 А точки привязки будут очень условные -
 - по обработчику движения (лучше PointerEntered?) мыши определяем текущий контрол - текущую долю
-- исходя из scale решаем сколько должно быть точек привязки и рисуем один-единственный кружок,
+- исходя из quantize решаем сколько должно быть точек привязки и рисуем один-единственный кружок,
 соответствующий ближайшей к указателю точке
 */
 void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int newScale, int selectedPart)
@@ -238,7 +237,7 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 			// - переносим в предыдущую строку все элементы
 			while (second->Children->Size > 0)
 			{
-				// TODO : можно сделать поэффективнее
+				// TODO : можно сделать поэффективнее?
 				auto child = second->Children->GetAt(0);
 				second->Children->RemoveAt(0);
 				first->Children->Append(child);
@@ -261,27 +260,9 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 	RedrawText();
 }
 
-//void SketchMusic::View::TextRow::SetText(SketchMusic::Text^ text)
-//{
-//	// добавляем текст в список
-//	// делаем его "главным"
-//	unsigned int ndx = 0;
-//	if (!data->texts->IndexOf(text, &ndx))
-//		this->data->texts->Append(text);
-//
-//	current = text;
-//
-//	if (_mainPanel == nullptr)
-//		return;
-//
-//	AllocateSnapPoints(text, 1, -1);
-//	InvalidateText();
-//	RedrawText();
-//}
-
-void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textCollection, SketchMusic::Text^ format)
+void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textCollection, SketchMusic::Text^ selected)
 {
-	SetText(textCollection, format, -1);
+	SetText(textCollection, selected, -1);
 }
 
 void SketchMusic::View::TextRow::SetText(CompositionData ^ textCollection, SketchMusic::Text ^ selected, int selectedPart)
@@ -333,7 +314,7 @@ void SketchMusic::View::TextRow::InvalidateText()
 	{
 		// - проверка на то, что если текст отличен от текста форматирования и это не нота - пропускаем
 
-		this->AddSymbol(current, symbol);
+		this->AddSymbolView(current, symbol);
 	}
 	// аналогично - для управляющих символов
 	symbols = data->ControlText->getText();
@@ -341,7 +322,7 @@ void SketchMusic::View::TextRow::InvalidateText()
 	{
 		// - проверка на то, что если текст отличен от текста форматирования и это не нота - пропускаем
 
-		this->AddSymbol(data->ControlText, symbol);
+		this->AddSymbolView(data->ControlText, symbol);
 	}
 }
 
@@ -384,7 +365,7 @@ void SketchMusic::View::TextRow::SetCursor(SketchMusic::Cursor^ pos)
 }
 
 // работа с отдельными символами
-void SketchMusic::View::TextRow::AddSymbol(Text^ source, PositionedSymbol^ sym)
+void SketchMusic::View::TextRow::AddSymbolView(Text^ source, PositionedSymbol^ sym)
 {
 	if (sym->_sym->GetSymType() == SymbolType::NPART) return;
 
@@ -433,59 +414,53 @@ void SketchMusic::View::TextRow::AddSymbol(Text^ source, PositionedSymbol^ sym)
 	SetNoteOnCanvas(bt);
 }
 
-// скрыть ненужные точки привязки
-// показать нужные
-void SketchMusic::View::TextRow::SetSnapPointsVisibility(int newScale)
+// Удаление визуального представления символа
+// TODO : убого как-то, надо переделать
+void SketchMusic::View::TextRow::DeleteSymbolView(PositionedSymbol ^ symbol)
 {
-	// проходимся по всем плейсхолдерам
-	for (auto row : _mainPanel->Children)
+	if (dynamic_cast<SketchMusic::SNewLine^>(symbol->_sym))
 	{
-		auto rowPanel = dynamic_cast<StackPanel^>(static_cast<Object^>(row));
-		int i = 0;
-		for (auto&& phold : rowPanel->Children)
-		{
-			// степень вложенности привязок определяем по тегам ... ну и по индексу
-			int tick = i*newScale % initialised;
-			if (tick == 0)
-			{
-				phold->Visibility = Windows::UI::Xaml::Visibility::Visible;
-			}
-			else
-			{
-				phold->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-			}
-			i++;
-		}
+		// вставляем разрыв строки
+		this->DeleteLineBreak(symbol->_pos);
+		return;
 	}
-	_mainPanel->UpdateLayout();
+
+	int i = 0;
+	while (i < _canvas->Children->Size)
+	{
+		auto ctrl = dynamic_cast<ContentControl^>(_canvas->Children->GetAt(i));
+		if (ctrl)
+		{
+			// по тегу проверяем, что нота принадлежит текущей дорожке
+			auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
+			if (((Text^)ctrl->Tag == current || (Text^)ctrl->Tag == data->ControlText) && (psym != nullptr))
+			{
+				// если это та самая нота
+				if (psym->_pos->EQ(symbol->_pos) && (psym->_sym == symbol->_sym))
+				{
+					_canvas->Children->RemoveAt(i);
+					continue;
+				}
+			}
+		}
+		i++;
+	}
 }
 
-void SketchMusic::View::TextRow::InsertNoteObject(PositionedSymbol^ note)
+ContentControl ^ SketchMusic::View::TextRow::GetSymbolView(PositionedSymbol ^ symbol)
 {
-	/*
-	// обрабатываем символы форматирования
-	if (dynamic_cast<SketchMusic::SSpace^>(sym->_sym))
+	for (auto&& child : _canvas->Children)
 	{
-	Windows::UI::Xaml::Controls::Canvas^ cnv = _placeholders->GetAt(sym->_pos->getBeat() - 1);	// берём предыдущий плейсхолдер
-	cnv->Width += (double)(this->Resources->Lookup("PlaceholderWidth"));
-	return;
+		auto ctrl = dynamic_cast<ContentControl^>(static_cast<Object^>(child));
+		if (ctrl == nullptr) continue;
+		auto note = dynamic_cast<PositionedSymbol^>(ctrl->DataContext);
+		if (note == nullptr) continue;
+
+		//if ((note->_pos->EQ(symbol->_pos)) && (note->_sym->EQ(symbol->_sym))) return ctrl;
+		if (symbol == note) return ctrl;
 	}
 
-	// создаём объект символа
-	Windows::UI::Xaml::Controls::ContentControl^ bt = ref new Windows::UI::Xaml::Controls::ContentControl;
-	bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(this->Resources->Lookup("SymbolButtonStyle"));
-	bt->Content = sym;
-	bt->Holding += ref new Windows::UI::Xaml::Input::HoldingEventHandler(this, &StrokeEditor::MainPage::OnHolding);
-	bt->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &StrokeEditor::MainPage::onSymbolPointerPressed);
-	bt->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &StrokeEditor::MainPage::_panel_PointerReleased);
-	bt->Tag = "note";
-
-	// привязываем свежесозданный символ к канвасу, отвечающему за соответствующую долю
-	Windows::UI::Xaml::Controls::Canvas^ cnv = _placeholders->GetAt(sym->_pos->getBeat());
-	cnv->Children->Append(bt);
-	cnv->SetLeft(bt, sym->_pos->getTick()*cnv->Width / 32);
-	cnv->SetTop(bt, 0);
-	*/
+	return nullptr;
 }
 
 int SketchMusic::View::TextRow::GetControlIndexAtPos(Cursor^ pos, int offset)
@@ -718,4 +693,11 @@ void SketchMusic::View::TextRow::SetNoteOnCanvas(ContentControl ^ note)
 	_canvas->SetLeft(note, point.X - PlaceholderWidth / 2);
 	double offsetY = GetOffsetY(psym->_sym);
 	_canvas->SetTop(note, point.Y + offsetY);
+}
+
+void SketchMusic::View::TextRow::SetSymbolView(PositionedSymbol ^ oldSymbol, PositionedSymbol^ newSymbol)
+{
+	auto ctrl = GetSymbolView(oldSymbol);
+	ctrl->DataContext = newSymbol;
+	SetNoteOnCanvas(ctrl);
 }

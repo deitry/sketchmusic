@@ -12,6 +12,7 @@ using namespace SketchMusic::View;
 using namespace Platform;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::UI::Input;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Data;
@@ -24,6 +25,9 @@ using namespace Windows::UI::Xaml::Media;
 
 SketchMusic::View::BaseKeyboard::BaseKeyboard()
 {
+	this->Loaded += ref new Windows::UI::Xaml::RoutedEventHandler(this, &SketchMusic::View::BaseKeyboard::OnLoaded);
+	this->Unloaded += ref new Windows::UI::Xaml::RoutedEventHandler(this, &SketchMusic::View::BaseKeyboard::OnUnloaded);
+
 	InitializeComponent();
 
 	_dict = this->Resources;
@@ -158,12 +162,32 @@ void SketchMusic::View::BaseKeyboard::OnPlayStopState(Key ^ key)
 	}
 }
 
+//void SketchMusic::View::BaseKeyboard::gestureRecognizer_Holding(GestureRecognizer ^ sender, HoldingEventArgs ^ args)
+//{
+//	if (args->HoldingState == HoldingState::Started)
+//	{
+//		concurrency::create_task([=]
+//		{
+//			while (true)
+//			{
+//				wait(100);
+//				PushKey(sender);
+//			}
+//		}, HoldingTokenSource.get_token());
+//	}
+//	else
+//	{
+//		HoldingTokenSource.cancel();
+//	}
+//}
+
 void SketchMusic::View::BaseKeyboard::OnKeyboardStateChanged(Object^ object, KeyboardState ^ state)
 {
 	// проходимся по всем кнопкам и меняем их состояние согласно их типу
 	for (auto&& pkey : _keys)
 	{
-		auto key = pkey.first;
+		auto ctrl = pkey.first;
+		auto key = dynamic_cast<Key^>(ctrl->Content);
 		switch (state->state)
 		{
 		case KeyboardStateEnum::control:
@@ -199,8 +223,44 @@ void SketchMusic::View::BaseKeyboard::PushKey(Object^ sender)
 	ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
 	if (ctrl)
 	{
+		ctrl->Background = (SolidColorBrush^)_dict->Lookup("draggedForegroundBrush");
 		Key^ key = dynamic_cast<Key^>(ctrl->Content);
+		for (auto&& iter : _keys)
+		{
+			if (iter.first == ctrl)
+			{
+				iter.second = true;
+				break;
+			}
+		}
 		OnPushKey(key);
+
+		if (key->type == KeyType::backspace || key->type == KeyType::move)
+		{
+			HoldingTokenSource = concurrency::cancellation_token_source();
+			Windows::UI::Core::CoreWindow::GetForCurrentThread()->Dispatcher->RunAsync(
+				Windows::UI::Core::CoreDispatcherPriority::Low, ref new Windows::UI::Core::DispatchedHandler([=]()
+			{
+				auto cancelToken = HoldingTokenSource.get_token();
+				concurrency::create_task([=]
+				{
+					concurrency::wait(500);
+					int i = 0;
+					while (true)
+					{
+						if (i < 10) wait(100);
+						else if (i < 100) wait(30);
+						else wait(10);
+
+						if (cancelToken.is_canceled() || pressedKeys == 0)
+							concurrency::cancel_current_task();
+
+						OnPushKey(key);
+						i++;
+					}
+				}, cancelToken);
+			}));
+		}
 	}
 }
 
@@ -208,7 +268,6 @@ void SketchMusic::View::BaseKeyboard::OnPushKey(Key ^ key)
 {
 	if (key == nullptr) return;
 	KeyboardEventArgs^ args = ref new KeyboardEventArgs(key, this->pressedKeys);
-	((ContentControl^)key->parent)->Background = (SolidColorBrush^)_dict->Lookup("draggedForegroundBrush");
 
 	if (key)
 	{
@@ -261,7 +320,7 @@ void SketchMusic::View::BaseKeyboard::OnPushKey(Key ^ key)
 		case KeyType::play:
 		case KeyType::move:
 		case KeyType::space:
-		case KeyType::deleteSym:
+		case KeyType::backspace:
 		default:
 			KeyPressed(this, args);
 			break;
@@ -279,6 +338,13 @@ void SketchMusic::View::BaseKeyboard::onKeyboardControlPressed(Platform::Object^
 	//mousePressed = true;
 	auto el = dynamic_cast<Windows::UI::Xaml::FrameworkElement^>(sender);
 	el->CapturePointer(e->Pointer);
+
+	//auto ps = e->GetIntermediatePoints(nullptr);
+	//if (ps && ps->Size > 0)
+	//{
+	//	gr->ProcessDownEvent(ps->GetAt(0));
+	//	e->Handled = true;
+	//}
 }
 
 void SketchMusic::View::BaseKeyboard::onKeyboardControlEntered(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
@@ -297,6 +363,11 @@ void SketchMusic::View::BaseKeyboard::onKeyboardControlEntered(Platform::Object^
 void SketchMusic::View::BaseKeyboard::InitializePage()
 {
 	//this->TabNavigation = Windows::UI::Xaml::Input::KeyboardNavigationMode::Cycle;
+	//gr = ref new GestureRecognizer;
+	//gr->GestureSettings = Windows::UI::Input::GestureSettings::HoldWithMouse | Windows::UI::Input::GestureSettings::Hold;
+	//gr->Holding += ref new Windows::Foundation::TypedEventHandler<Windows::UI::Input::GestureRecognizer ^, Windows::UI::Input::HoldingEventArgs ^>
+	//	(this, &SketchMusic::View::BaseKeyboard::gestureRecognizer_Holding);
+	//gr->ShowGestureFeedback = true;
 
 	if (mainPanel == nullptr) return;
 
@@ -315,7 +386,7 @@ void SketchMusic::View::BaseKeyboard::InitializePage()
 				if (key)
 				{
 					key->parent = ctrl;
-					_keys.insert(std::make_pair(key, false));
+					_keys.push_back(std::make_pair(ctrl, false));
 				}
 				
 				// позже для оптимизации можно будет часть клавиш держать в одном массиве, часть в другом
@@ -324,19 +395,31 @@ void SketchMusic::View::BaseKeyboard::InitializePage()
 				// для тача
 				ctrl->PointerEntered += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::onKeyboardControlEntered);
 				ctrl->PointerExited += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::OnPointerExited);
+				//if (key->type == KeyType::backspace || key->type == KeyType::move)
+				//	ctrl->Holding += ref new Windows::UI::Xaml::Input::HoldingEventHandler(this, &BaseKeyboard::OnHolding);
 
 				// для мыши	
 				ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::onKeyboardControlPressed);
 				ctrl->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::OnPointerReleased);
-
-				ctrl->KeyDown += ref new Windows::UI::Xaml::Input::KeyEventHandler(this, &BaseKeyboard::OnKeyDown);
-				ctrl->KeyUp += ref new Windows::UI::Xaml::Input::KeyEventHandler(this, &BaseKeyboard::OnKeyUp);
 			}
 		}
 	}
+}
 
-	// специально проверяем на тот случай если курсор убегает за пределы клавиш и мы не знаем, отпустили его или нет
-	//grid->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &BaseKeyboard::OnPointerReleased);
+void SketchMusic::View::BaseKeyboard::OnLoaded(Platform::Object ^ sender, Windows::UI::Xaml::RoutedEventArgs ^ e)
+{
+	KeyDownToken =
+		Window::Current->CoreWindow->KeyDown
+		+= ref new Windows::Foundation::TypedEventHandler<Windows::UI::Core::CoreWindow ^, Windows::UI::Core::KeyEventArgs ^>(this, &SketchMusic::View::BaseKeyboard::OnKeyDown);
+	KeyUpToken =
+		Window::Current->CoreWindow->KeyUp
+		+= ref new Windows::Foundation::TypedEventHandler<Windows::UI::Core::CoreWindow ^, Windows::UI::Core::KeyEventArgs ^>(this, &SketchMusic::View::BaseKeyboard::OnKeyUp);
+}
+
+void SketchMusic::View::BaseKeyboard::OnUnloaded(Platform::Object ^ sender, Windows::UI::Xaml::RoutedEventArgs ^ e)
+{
+	Window::Current->CoreWindow->KeyUp -= KeyUpToken;
+	Window::Current->CoreWindow->KeyDown -= KeyDownToken;
 }
 
 
@@ -350,141 +433,337 @@ void SketchMusic::View::BaseKeyboard::OnPointerReleased(Platform::Object ^sender
 		return;
 
 	ReleaseKey(sender);
+
+	//auto ps = e->GetIntermediatePoints(nullptr);
+	//if (ps != nullptr && ps->Size > 0)
+	//{
+	//	gr->ProcessUpEvent(ps->GetAt(0));
+	//	e->Handled = true;
+	//	gr->CompleteGesture();
+	//}
 }
 
-inline SketchMusic::View::Key^ GetKey(std::multimap<Key^, bool> keys, KeyType type, int val = 0)
+void SketchMusic::View::BaseKeyboard::OnPointerMoved(Platform::Object ^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^ e)
 {
-	for (auto&& iter : keys)
+	//gr->ProcessMoveEvents(e->GetIntermediatePoints(nullptr));
+	//e->Handled = true;
+}
+
+void SketchMusic::View::BaseKeyboard::OnHolding(Platform::Object ^ sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs ^ e)
+{
+
+}
+
+inline std::pair<ContentControl^, bool> GetControl(std::vector<std::pair<ContentControl^, bool>> keys, String^ tag)
+{
+	for (auto&& ctrl : keys)
 	{
-		if (iter.first->originalType == type && iter.first->originalValue == val && !iter.second) return iter.first;
+		if (((String^)ctrl.first->Tag) == tag)
+		{
+			return ctrl;
+		}
 	}
-	return nullptr;
+	return std::make_pair(nullptr,false);
 }
 
-void SketchMusic::View::BaseKeyboard::OnKeyDown(Platform::Object ^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs ^ e)
+void SketchMusic::View::BaseKeyboard::OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs ^e)
 {
-	if (e->KeyStatus.WasKeyDown) return;
+	if (e->KeyStatus.WasKeyDown == true)
+		return;
 
 	using Windows::System::VirtualKey;
-	SketchMusic::View::Key^ smkey = nullptr;
+	std::pair<ContentControl^, bool> ctrl;
 
-	switch (e->Key)
+	bool isShift = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Shift) != Windows::UI::Core::CoreVirtualKeyStates::None);
+	bool isCtrl = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Control) != Windows::UI::Core::CoreVirtualKeyStates::None);
+	bool isAlt = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Menu) != Windows::UI::Core::CoreVirtualKeyStates::None);
+
+	//if (isShift && isAlt)
+	//{
+	//	ctrl = GetControl(_keys, "layout");
+	//	if (ctrl.first && !ctrl.second)
+	//		PushKey(ctrl.first);
+	//}
+
+	switch (e->VirtualKey)
 	{
-	case VirtualKey::Left: smkey = GetKey(_keys, KeyType::move, -1); break;
-	case VirtualKey::Right: smkey = GetKey(_keys, KeyType::move, 1);break;
-	case VirtualKey::Back: smkey = GetKey(_keys, KeyType::deleteSym);break;
-	case VirtualKey::Space: smkey = GetKey(_keys, KeyType::play);break;
+	case VirtualKey::Left: ctrl = GetControl(_keys, "left"); break;
+	case VirtualKey::Right: ctrl = GetControl(_keys, "right");break;
+	case VirtualKey::Back: ctrl = GetControl(_keys, "backsp");break;
+	case VirtualKey::Space: ctrl = GetControl(_keys, "play");break;
 		// альтернатива для обобщённых нот?
-	case VirtualKey::Number1: smkey = GetKey(_keys, KeyType::note, 11); break;
-	case VirtualKey::Number2: smkey = GetKey(_keys, KeyType::note, 12); break;
-	case VirtualKey::Number3: smkey = GetKey(_keys, KeyType::note, 13); break;
-	case VirtualKey::Number4: smkey = GetKey(_keys, KeyType::note, 14); break;
-	case VirtualKey::Number5: smkey = GetKey(_keys, KeyType::note, 15); break;
-	case VirtualKey::Number6: smkey = GetKey(_keys, KeyType::note, 16); break;
-	case VirtualKey::Number7: smkey = GetKey(_keys, KeyType::note, 17); break;
-	case VirtualKey::Number8: smkey = GetKey(_keys, KeyType::note, 18); break;
-	case VirtualKey::Number9: smkey = GetKey(_keys, KeyType::note, 19); break;
-	case VirtualKey::Number0: smkey = GetKey(_keys, KeyType::note, 20); break;
-	case VirtualKey::Q: 
-		smkey = GetKey(_keys, KeyType::note, 8); 
-		break;
-	case VirtualKey::W: smkey = GetKey(_keys, KeyType::note, 9); break;
-	case VirtualKey::E: 
-		smkey = GetKey(_keys, KeyType::note, 10);
-		break;
-	case VirtualKey::R: smkey = GetKey(_keys, KeyType::note, 11); break;
-	case VirtualKey::T: smkey = GetKey(_keys, KeyType::note, 12); break;
-	case VirtualKey::Y: smkey = GetKey(_keys, KeyType::note, 13); break;
-	case VirtualKey::U: smkey = GetKey(_keys, KeyType::note, 14); break;
-	case VirtualKey::I: smkey = GetKey(_keys, KeyType::note, 15); break;
-	case VirtualKey::O: smkey = GetKey(_keys, KeyType::note, 16); break;
-	case VirtualKey::P: smkey = GetKey(_keys, KeyType::note, 17); break;
-	case VirtualKey::A: smkey = GetKey(_keys, KeyType::note, 3); break;
-	case VirtualKey::S: smkey = GetKey(_keys, KeyType::note, 4); break;
-	case VirtualKey::D: smkey = GetKey(_keys, KeyType::note, 5); break;
-	case VirtualKey::F: smkey = GetKey(_keys, KeyType::note, 6); break;
-	case VirtualKey::G: smkey = GetKey(_keys, KeyType::note, 7); break;
-	case VirtualKey::H: smkey = GetKey(_keys, KeyType::note, 8); break;
-	case VirtualKey::J: smkey = GetKey(_keys, KeyType::note, 9); break;
-	case VirtualKey::K: smkey = GetKey(_keys, KeyType::note, 10); break;
-	case VirtualKey::L: smkey = GetKey(_keys, KeyType::note, 11); break;
-	case VirtualKey::Z: smkey = GetKey(_keys, KeyType::note, 0); break;
-	case VirtualKey::X: smkey = GetKey(_keys, KeyType::note, 1); break;
-	case VirtualKey::C: smkey = GetKey(_keys, KeyType::note, 2); break;
-	case VirtualKey::V: smkey = GetKey(_keys, KeyType::note, 3); break;
-	case VirtualKey::B: smkey = GetKey(_keys, KeyType::note, 4); break;
-	case VirtualKey::N: smkey = GetKey(_keys, KeyType::note, 5); break;
-	case VirtualKey::M: smkey = GetKey(_keys, KeyType::note, 6); break;
-	case VirtualKey::Subtract: smkey = GetKey(_keys, KeyType::octave, 1); break;
-	case VirtualKey::Add: smkey = GetKey(_keys, KeyType::octave, -1); break;
-	case VirtualKey::Control: smkey = GetKey(_keys, KeyType::control, 0); break;
-	case VirtualKey::Enter: smkey = GetKey(_keys, KeyType::enter, 0); break;
-	case VirtualKey::Shift: smkey = GetKey(_keys, KeyType::record, 0); break;
-	case VirtualKey::CapitalLock: smkey = GetKey(_keys, KeyType::record, 0); break; // капс лок не будем обрабатывать в релизе ? оО
-	}
-	OnPushKey(smkey);
-}
-
-void SketchMusic::View::BaseKeyboard::OnKeyUp(Platform::Object ^ sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs ^ e)
-{
-	using Windows::System::VirtualKey;
-	SketchMusic::View::Key^ smkey = nullptr;
-
-	switch (e->Key)
-	{
-	case VirtualKey::Left: smkey = GetKey(_keys, KeyType::move, -1); break;
-	case VirtualKey::Right: smkey = GetKey(_keys, KeyType::move, 1);break;
-	case VirtualKey::Back: smkey = GetKey(_keys, KeyType::deleteSym);break;
-	case VirtualKey::Space: smkey = GetKey(_keys, KeyType::play);break;
-		// альтернатива для обобщённых нот?
-	case VirtualKey::Number1: smkey = GetKey(_keys, KeyType::note, 11); break;
-	case VirtualKey::Number2: smkey = GetKey(_keys, KeyType::note, 12); break;
-	case VirtualKey::Number3: smkey = GetKey(_keys, KeyType::note, 13); break;
-	case VirtualKey::Number4: smkey = GetKey(_keys, KeyType::note, 14); break;
-	case VirtualKey::Number5: smkey = GetKey(_keys, KeyType::note, 15); break;
-	case VirtualKey::Number6: smkey = GetKey(_keys, KeyType::note, 16); break;
-	case VirtualKey::Number7: smkey = GetKey(_keys, KeyType::note, 17); break;
-	case VirtualKey::Number8: smkey = GetKey(_keys, KeyType::note, 18); break;
-	case VirtualKey::Number9: smkey = GetKey(_keys, KeyType::note, 19); break;
-	case VirtualKey::Number0: smkey = GetKey(_keys, KeyType::note, 20); break;
+	case VirtualKey::Number1: 
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q1, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_1"); break;
+	case VirtualKey::Number2: 
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q2, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_2"); break;
+	case VirtualKey::Number3: 
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q3, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_3"); break;
+	case VirtualKey::Number4: 
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q4, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_4"); break;
+	case VirtualKey::Number5:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q5, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_5"); break;
+	case VirtualKey::Number6:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q1t, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_6"); break;
+	case VirtualKey::Number7:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q2t, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_7"); break;
+	case VirtualKey::Number8:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q3t, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_8"); break;
+	case VirtualKey::Number9:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q4t, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_9"); break;
+	case VirtualKey::Number0:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			OnQuantizeClick(q5t, nullptr); return;
+		}
+		else ctrl = GetControl(_keys, "1_10"); break;
 	case VirtualKey::Q:
-		smkey = GetKey(_keys, KeyType::note, 8);
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "quant");
+		else ctrl = GetControl(_keys, "2_2"); 
 		break;
-	case VirtualKey::W: smkey = GetKey(_keys, KeyType::note, 9); break;
-	case VirtualKey::E:
-		smkey = GetKey(_keys, KeyType::note, 10);
+	case VirtualKey::W: ctrl = GetControl(_keys, "2_3"); break;
+	case VirtualKey::E: 
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "eraser");
+		else ctrl = GetControl(_keys, "2_4");
 		break;
-	case VirtualKey::R: smkey = GetKey(_keys, KeyType::note, 11); break;
-	case VirtualKey::T: smkey = GetKey(_keys, KeyType::note, 12); break;
-	case VirtualKey::Y: smkey = GetKey(_keys, KeyType::note, 13); break;
-	case VirtualKey::U: smkey = GetKey(_keys, KeyType::note, 14); break;
-	case VirtualKey::I: smkey = GetKey(_keys, KeyType::note, 15); break;
-	case VirtualKey::O: smkey = GetKey(_keys, KeyType::note, 16); break;
-	case VirtualKey::P: smkey = GetKey(_keys, KeyType::note, 17); break;
-	case VirtualKey::A: smkey = GetKey(_keys, KeyType::note, 3); break;
-	case VirtualKey::S: smkey = GetKey(_keys, KeyType::note, 4); break;
-	case VirtualKey::D: smkey = GetKey(_keys, KeyType::note, 5); break;
-	case VirtualKey::F: smkey = GetKey(_keys, KeyType::note, 6); break;
-	case VirtualKey::G: smkey = GetKey(_keys, KeyType::note, 7); break;
-	case VirtualKey::H: smkey = GetKey(_keys, KeyType::note, 8); break;
-	case VirtualKey::J: smkey = GetKey(_keys, KeyType::note, 9); break;
-	case VirtualKey::K: smkey = GetKey(_keys, KeyType::note, 10); break;
-	case VirtualKey::L: smkey = GetKey(_keys, KeyType::note, 11); break;
-	case VirtualKey::Z: smkey = GetKey(_keys, KeyType::note, 0); break;
-	case VirtualKey::X: smkey = GetKey(_keys, KeyType::note, 1); break;
-	case VirtualKey::C: smkey = GetKey(_keys, KeyType::note, 2); break;
-	case VirtualKey::V: smkey = GetKey(_keys, KeyType::note, 3); break;
-	case VirtualKey::B: smkey = GetKey(_keys, KeyType::note, 4); break;
-	case VirtualKey::N: smkey = GetKey(_keys, KeyType::note, 5); break;
-	case VirtualKey::M: smkey = GetKey(_keys, KeyType::note, 6); break;
-	case VirtualKey::Subtract: smkey = GetKey(_keys, KeyType::octave, 1); break;
-	case VirtualKey::Add: smkey = GetKey(_keys, KeyType::octave, -1); break;
-	case VirtualKey::Control: smkey = GetKey(_keys, KeyType::control, 0); break;
-	case VirtualKey::Enter: smkey = GetKey(_keys, KeyType::enter, 0); break;
-	case VirtualKey::Shift: smkey = GetKey(_keys, KeyType::record, 0); break;
-	case VirtualKey::CapitalLock: smkey = GetKey(_keys, KeyType::record, 0); break; // капс лок не будем обрабатывать в релизе ? оО
+	case VirtualKey::R: ctrl = GetControl(_keys, "2_5"); break;
+	case VirtualKey::T: 
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "tempo");
+		else ctrl = GetControl(_keys, "2_6"); break;
+	case VirtualKey::Y: if (!ctrlPressed) ctrl = GetControl(_keys, "2_7"); break;
+	case VirtualKey::U: ctrl = GetControl(_keys, "2_8"); break;
+	case VirtualKey::I: ctrl = GetControl(_keys, "2_9"); break;
+	case VirtualKey::O: ctrl = GetControl(_keys, "2_10"); break;
+	case VirtualKey::P: ctrl = GetControl(_keys, "2_11"); break;
+	case VirtualKey::A: ctrl = GetControl(_keys, "3_2"); break;
+	case VirtualKey::S: if (!ctrlPressed) ctrl = GetControl(_keys, "3_3"); break;
+	case VirtualKey::D: ctrl = GetControl(_keys, "3_4"); break;
+	case VirtualKey::F: ctrl = GetControl(_keys, "3_5"); break;
+	case VirtualKey::G: ctrl = GetControl(_keys, "3_6"); break;
+	case VirtualKey::H:
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "hide");
+		else ctrl = GetControl(_keys, "3_7"); break;
+	case VirtualKey::J: ctrl = GetControl(_keys, "3_8"); break;
+	case VirtualKey::K: ctrl = GetControl(_keys, "3_9"); break;
+	case VirtualKey::L:
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "cycle");
+		else ctrl = GetControl(_keys, "3_10"); break;
+	case (VirtualKey) 186: ctrl = GetControl(_keys, "3_11"); break;
+	case VirtualKey::Z: if (!ctrlPressed) ctrl = GetControl(_keys, "4_3"); break;
+	case VirtualKey::X: ctrl = GetControl(_keys, "4_4"); break;
+	case VirtualKey::C: ctrl = GetControl(_keys, "4_5"); break;
+	case VirtualKey::V: ctrl = GetControl(_keys, "4_6"); break;
+	case VirtualKey::B: ctrl = GetControl(_keys, "4_7"); break;
+	case VirtualKey::N: ctrl = GetControl(_keys, "4_8"); break;
+	case VirtualKey::M: ctrl = GetControl(_keys, "4_9"); break;
+	case (VirtualKey)188: ctrl = GetControl(_keys, "4_10"); break;
+	case (VirtualKey)190: ctrl = GetControl(_keys, "4_11"); break;
+
+	case (VirtualKey)189:
+	case VirtualKey::Subtract: ctrl = GetControl(_keys, "-"); break;
+	case (VirtualKey)187:
+	case VirtualKey::Add: ctrl = GetControl(_keys, "+"); break;
+	case VirtualKey::Control: ctrlPressed = true; ctrl = GetControl(_keys, "ctrl"); break;
+	case VirtualKey::Enter:
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "end");
+		else ctrl = GetControl(_keys, "enter"); break;
+	case VirtualKey::Shift: ctrl = GetControl(_keys, "rec"); break;	
+	case VirtualKey::CapitalLock: ctrl = GetControl(_keys, "rec"); break;
 	}
-	OnReleaseKey(smkey);
+
+	if ((isTempoFlyoutOpened || isLayoutFlyoutOpened || isQuantizeFlyoutOpened))
+	{
+		if ((e->VirtualKey >= VirtualKey::Number0) && (e->VirtualKey <= VirtualKey::Number9) && (ctrl.first && !ctrl.second))
+			PushKey(ctrl.first);
+	}
+	else if (ctrl.first && !ctrl.second)
+		PushKey(ctrl.first);
+}
+
+void SketchMusic::View::BaseKeyboard::OnKeyUp(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs ^e)
+{
+	using Windows::System::VirtualKey;
+	std::pair<ContentControl^, bool> ctrl;
+
+	bool isShift = sender->GetForCurrentThread()->GetKeyState(VirtualKey::Shift) != Windows::UI::Core::CoreVirtualKeyStates::None;
+	bool isCtrl = sender->GetForCurrentThread()->GetKeyState(VirtualKey::Control) != Windows::UI::Core::CoreVirtualKeyStates::None;
+	bool isAlt = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Menu) != Windows::UI::Core::CoreVirtualKeyStates::None);
+
+	//if (isShift && isAlt)
+	//{
+	//	ctrl = GetControl(_keys, "layout");
+	//	if (ctrl.first && !ctrl.second)
+	//		ReleaseKey(ctrl.first);
+	//}
+
+	switch (e->VirtualKey)
+	{
+	case VirtualKey::Left: ctrl = GetControl(_keys, "left"); break;
+	case VirtualKey::Right: ctrl = GetControl(_keys, "right");break;
+	case VirtualKey::Back: ctrl = GetControl(_keys, "backsp");break;
+	case VirtualKey::Space: ctrl = GetControl(_keys, "play");break;
+		// альтернатива для обобщённых нот?
+	case VirtualKey::Number1:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_1"); break;
+	case VirtualKey::Number2:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_2"); break;
+	case VirtualKey::Number3:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_3"); break;
+	case VirtualKey::Number4:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_4"); break;
+	case VirtualKey::Number5:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_5"); break;
+	case VirtualKey::Number6:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_6"); break;
+	case VirtualKey::Number7:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_7"); break;
+	case VirtualKey::Number8:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_8"); break;
+	case VirtualKey::Number9:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_9"); break;
+	case VirtualKey::Number0:
+		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		{
+			return;
+		}
+		else ctrl = GetControl(_keys, "1_10"); break;
+	case VirtualKey::Q:
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "quant");
+		else ctrl = GetControl(_keys, "2_2");
+		break;
+	case VirtualKey::W: ctrl = GetControl(_keys, "2_3"); break;
+	case VirtualKey::E:
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "eraser");
+		else ctrl = GetControl(_keys, "2_4");
+		break;
+	case VirtualKey::R: ctrl = GetControl(_keys, "2_5"); break;
+	case VirtualKey::T:
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "tempo");
+		else ctrl = GetControl(_keys, "2_6"); break;
+	case VirtualKey::Y: ctrl = GetControl(_keys, "2_7"); break;
+	case VirtualKey::U: ctrl = GetControl(_keys, "2_8"); break;
+	case VirtualKey::I: ctrl = GetControl(_keys, "2_9"); break;
+	case VirtualKey::O: ctrl = GetControl(_keys, "2_10"); break;
+	case VirtualKey::P: ctrl = GetControl(_keys, "2_11"); break;
+	case VirtualKey::A: ctrl = GetControl(_keys, "3_2"); break;
+	case VirtualKey::S: ctrl = GetControl(_keys, "3_3"); break;
+	case VirtualKey::D: ctrl = GetControl(_keys, "3_4"); break;
+	case VirtualKey::F: ctrl = GetControl(_keys, "3_5"); break;
+	case VirtualKey::G: ctrl = GetControl(_keys, "3_6"); break;
+	case VirtualKey::H:
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "hide");
+		else ctrl = GetControl(_keys, "3_7"); break;
+	case VirtualKey::J: ctrl = GetControl(_keys, "3_8"); break;
+	case VirtualKey::K: ctrl = GetControl(_keys, "3_9"); break;
+	case VirtualKey::L:
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "cycle");
+		else ctrl = GetControl(_keys, "3_10"); break;
+	case (VirtualKey)186: ctrl = GetControl(_keys, "3_11"); break;
+	case VirtualKey::Z: ctrl = GetControl(_keys, "4_3"); break;
+	case VirtualKey::X: ctrl = GetControl(_keys, "4_4"); break;
+	case VirtualKey::C: ctrl = GetControl(_keys, "4_5"); break;
+	case VirtualKey::V: ctrl = GetControl(_keys, "4_6"); break;
+	case VirtualKey::B: ctrl = GetControl(_keys, "4_7"); break;
+	case VirtualKey::N: ctrl = GetControl(_keys, "4_8"); break;
+	case VirtualKey::M: ctrl = GetControl(_keys, "4_9"); break;
+	case (VirtualKey)188: ctrl = GetControl(_keys, "4_10"); break;
+	case (VirtualKey)190: ctrl = GetControl(_keys, "4_11"); break;
+	case (VirtualKey)189:
+	case VirtualKey::Subtract: ctrl = GetControl(_keys, "-"); break;
+	case (VirtualKey)187:
+	case VirtualKey::Add: ctrl = GetControl(_keys, "+"); break;
+	case VirtualKey::Control: ctrlPressed = false; ctrl = GetControl(_keys, "ctrl"); if (ctrl.first) { ReleaseKey(ctrl.first); PushKey(ctrl.first); } break;
+	case VirtualKey::Enter:
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "end");
+		else ctrl = GetControl(_keys, "enter"); break;
+	case VirtualKey::Shift: ctrl = GetControl(_keys, "rec"); if (ctrl.first) { ReleaseKey(ctrl.first); PushKey(ctrl.first); } break;
+	case VirtualKey::CapitalLock: ctrl = GetControl(_keys, "rec"); break;
+	}
+	if (ctrl.first)
+		ReleaseKey(ctrl.first);
 }
 
 void SketchMusic::View::BaseKeyboard::OnPointerExited(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
@@ -506,15 +785,26 @@ void SketchMusic::View::BaseKeyboard::ReleaseKey(Object^ sender)
 		dynamic_cast<Windows::UI::Xaml::Controls::ContentControl^>(static_cast<Object^>(sender));
 
 	if (ctrl == nullptr) return;
+	for (auto&& iter : _keys)
+	{
+		if (iter.first == ctrl)
+		{
+			iter.second = false;
+			break;
+		}
+	}
 
 	Key^ key = dynamic_cast<Key^>(ctrl->Content);
 	if (key == nullptr) return;
 
+	HoldingTokenSource.cancel();
 	OnReleaseKey(key);
 }
 
 void SketchMusic::View::BaseKeyboard::OnReleaseKey(Key ^ key)
 {
+	if (key == nullptr) return;
+
 	auto ctrl = ((ContentControl^)key->parent);
 	ctrl->Background = nullptr;
 
@@ -603,13 +893,13 @@ void SketchMusic::View::BaseKeyboard::OnClick(Platform::Object ^sender, Windows:
 void SketchMusic::View::BaseKeyboard::OnQuantizeClick(Platform::Object ^ sender, Windows::UI::Xaml::RoutedEventArgs ^ e)
 {
 	// 
-	auto bt = dynamic_cast<Button^>(e->OriginalSource);
+	auto bt = dynamic_cast<Button^>(sender);//e->OriginalSource);
 	if (bt)
 	{
 		quantizeNeed->IsChecked = true;
 
 		// на сколько надо поделить
-		int div = std::stoi(((String^)bt->Tag)->Data());
+		int div = std::stoi(((String^)bt->DataContext)->Data());
 
 		auto key = ref new Key(KeyType::quantization, div);
 		auto args = ref new KeyboardEventArgs(key, this->pressedKeys);
@@ -720,4 +1010,40 @@ void SketchMusic::View::BaseKeyboard::precountNeed_Click(Platform::Object^ sende
 void SketchMusic::View::BaseKeyboard::TempoSlider_ValueChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^ e)
 {
 	BpmTxt->Text = L"BPM = " + TempoSlider->Value;
+}
+
+
+void SketchMusic::View::BaseKeyboard::QuantizeFlyout_Opened(Platform::Object^ sender, Platform::Object^ e)
+{
+	isQuantizeFlyoutOpened = true;
+}
+
+
+void SketchMusic::View::BaseKeyboard::QuantizeFlyout_Closed(Platform::Object^ sender, Platform::Object^ e)
+{
+	isQuantizeFlyoutOpened = false;
+}
+
+
+void SketchMusic::View::BaseKeyboard::TempoFlyout_Opened(Platform::Object^ sender, Platform::Object^ e)
+{
+	isTempoFlyoutOpened = true;
+}
+
+
+void SketchMusic::View::BaseKeyboard::TempoFlyout_Closed(Platform::Object^ sender, Platform::Object^ e)
+{
+	isTempoFlyoutOpened = false;
+}
+
+
+void SketchMusic::View::BaseKeyboard::LayoutFlyout_Opened(Platform::Object^ sender, Platform::Object^ e)
+{
+	isLayoutFlyoutOpened = true;
+}
+
+
+void SketchMusic::View::BaseKeyboard::LayoutFlyout_Closed(Platform::Object^ sender, Platform::Object^ e)
+{
+	isLayoutFlyoutOpened = false;
 }

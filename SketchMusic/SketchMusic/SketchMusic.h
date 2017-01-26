@@ -120,6 +120,7 @@ namespace SketchMusic
 		Windows::Data::Json::IJsonValue^ serialize();
 
 		void ApplyParts(IObservableVector<PartDefinition^>^ parts);
+		bool HasContent();
 
 		CompositionData();
 	};
@@ -247,7 +248,8 @@ namespace SketchMusic
 	public:
 		SymbolType GetSymType();
 		Platform::String^ ToString();	// представление в текстовом виде значения
-		//Platform::String^ Serialize();	// сохранение в строке с отметкой типа
+		
+		bool EQ(ISymbol^ second);
 	};
 
 	public interface class INote
@@ -287,6 +289,9 @@ namespace SketchMusic
 
 		virtual SymbolType GetSymType() { return SymbolType::NOTE; }
 		virtual Platform::String^ ToString() { return _val.ToString(); }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol^ second);
 		//virtual Platform::String^ Serialize() { return "note," + valToString(_val); }	// приставка указывает на тип
 	};
 
@@ -297,6 +302,9 @@ namespace SketchMusic
 
 		virtual SymbolType GetSymType() { return SymbolType::SPACE; }
 		virtual Platform::String^ ToString() { return L"\uE75D"; }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 		//virtual Platform::String^ Serialize() { return "space"; }
 	};
 
@@ -311,6 +319,9 @@ namespace SketchMusic
 
 		virtual SymbolType GetSymType() { return SymbolType::ACCENT; }
 		virtual Platform::String^ ToString() { return L"\uE9A9"; }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 		//virtual Platform::String^ Serialize() { return "space"; }
 	};
 
@@ -332,6 +343,9 @@ namespace SketchMusic
 		
 		virtual SymbolType GetSymType() { return SymbolType::CLEF; }
 		virtual Platform::String^ ToString() { return "Clef"; }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 	};
 
 	public ref class SNewPart sealed : public SketchMusic::ISymbol
@@ -349,6 +363,9 @@ namespace SketchMusic
 
 		virtual SymbolType GetSymType() { return SymbolType::NPART; }
 		virtual Platform::String^ ToString() { return L"\uE70B" + category; }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 	};
 
 	// Вместо использования PositionedSymbol для оперирования на уровне частей в редакторе композиции,
@@ -405,6 +422,9 @@ namespace SketchMusic
 
 		virtual SymbolType GetSymType() { return SymbolType::TEMPO; }
 		virtual Platform::String^ ToString() { return value.ToString(); }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 	};
 
 	public ref class SRNote sealed : public ISymbol, public SketchMusic::INote
@@ -424,6 +444,9 @@ namespace SketchMusic
 
 		virtual SymbolType GetSymType() { return SymbolType::RNOTE; }
 		virtual Platform::String^ ToString() { return valToString(_val); }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 		//virtual Platform::String^ Serialize() { return "rnote," + valToString(_val); }
 	};
 
@@ -451,6 +474,9 @@ namespace SketchMusic
 
 		virtual SymbolType GetSymType() { return SymbolType::GNOTE; }
 		virtual Platform::String^ ToString() { return L"" + _valX + ";" + _valY; }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 		//virtual Platform::String^ Serialize() { return "gnote," + valToString(_val); }
 	};
 
@@ -469,6 +495,9 @@ namespace SketchMusic
 		virtual property int _val;
 		virtual property int _velocity;
 		virtual property int _voice;
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 		//virtual Platform::String^ Serialize() { return "end"; }
 	};
 
@@ -482,7 +511,7 @@ namespace SketchMusic
 		// модификаторы аккорда - включение (или выключение) ступеней в аккорд
 		bool _2;
 		bool _3ex;	// ВЫКЛЮЧАЕТ ступень из аккорда. Нужно для получения нетерцовых аккордов
-		bool _4;			
+		bool _4;
 		bool _5ex;	// ВЫКЛЮЧАЕТ ступень из аккорда.
 		bool _6;
 		bool _7;
@@ -499,7 +528,6 @@ namespace SketchMusic
 		bool _6dim;
 		bool _6aug;
 		bool dom;		// = _7dim; "доминантность" 7аккорда. Вне зависимости от _7 изменяет положение ступени звукоряда
-			
 	};
 
 	/**
@@ -509,7 +537,7 @@ namespace SketchMusic
 	public ref class SChord sealed : public ISymbol //, INote
 	{
 	private:
-		
+		bool ModulatorsEQ(SChordMod m);
 
 	public:
 		SChord() {}
@@ -527,6 +555,9 @@ namespace SketchMusic
 		property int bass;			// значение ноты в басу
 
 		property SChordMod mod;	// модификаторы
+
+								// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 
 		// Унаследовано через INote
 		//virtual property int _val;
@@ -546,6 +577,9 @@ namespace SketchMusic
 
 		virtual SymbolType GetSymType() { return SymbolType::NLINE; }
 		virtual Platform::String^ ToString() { return L"\uE751"; }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 		//virtual Platform::String^ Serialize() { return "nline"; }
 	};
 
@@ -561,6 +595,9 @@ namespace SketchMusic
 
 		virtual SymbolType GetSymType() { return SymbolType::STRING; }
 		virtual Platform::String^ ToString() { return value; }
+
+		// Унаследовано через ISymbol
+		virtual bool EQ(ISymbol ^ second);
 		//virtual Platform::String^ Serialize() { return "string," + value; }
 	};
 
@@ -718,7 +755,22 @@ namespace SketchMusic
 		public ref class SymbolHandlerArgs sealed
 		{
 		public:
-			SymbolHandlerArgs(Text^ text, PositionedSymbol^ oldSym, PositionedSymbol^ newSym)
+			SymbolHandlerArgs(Text^ text, PositionedSymbol^ sym)
+			{
+				_text = text;
+				_sym = sym;
+			}
+
+			property Text^ _text;
+			property PositionedSymbol^ _sym;
+		};
+
+		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+		public ref class SymbolPairHandlerArgs sealed
+		{
+		public:
+			// Конструктор для операций с двумя символами (перемещение, удаление в диапазоне)
+			SymbolPairHandlerArgs(Text^ text, PositionedSymbol^ oldSym, PositionedSymbol^ newSym)
 			{
 				_text = text;
 				_oldSym = oldSym;
@@ -731,6 +783,31 @@ namespace SketchMusic
 		};
 
 		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+		public ref class MultiSymbolHandlerArgs sealed
+		{
+		public:
+			// Конструктор для операций с одним символом (добавление/удаление)
+			MultiSymbolHandlerArgs(Text^ text, IVector<PositionedSymbol^>^ sym)
+			{
+				_text = text;
+				_OldSymbols = sym;
+			}
+
+			// Конструктор для операций с двумя символами (перемещение, удаление в диапазоне)
+			MultiSymbolHandlerArgs(Text^ text, IVector<PositionedSymbol^>^ oldSym, IVector<PositionedSymbol^>^ newSym)
+			{
+				_text = text;
+				_OldSymbols = oldSym;
+				_NewSymbols = newSym;
+			}
+
+			property Text^ _text;
+			property IVector<PositionedSymbol^>^ _OldSymbols;
+			property IVector<PositionedSymbol^>^ _NewSymbols;
+		};
+
+		[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+		// Вставка/удаление долей
 		public ref class BeatHandlerArgs sealed
 		{
 			Text^ text;
@@ -761,45 +838,50 @@ namespace SketchMusic
 		public ref class Command sealed
 		{
 		private:
-			Handler^ _handler;
-			Handler^ _unexecute;
-			CanExecuteMethod^ _canExecute;
+			Handler^ _Handler;
+			Handler^ _Unexecute;
+			CanExecuteMethod^ _CanExecute;
 
 		public:
-
-			Command(Handler^ handler, CanExecuteMethod^ canExecute, Handler^ unexecute)
+			Command(Handler^ handler, Handler^ unexecute)
 			{
-				_handler = handler;
-				_canExecute = canExecute;
-				_unexecute = unexecute;
+				_Handler = handler;
+				_Unexecute = unexecute;
+			}
+
+			Command(Handler^ handler, Handler^ unexecute, CanExecuteMethod^ canExecute)
+			{
+				_Handler = handler;
+				_CanExecute = canExecute;
+				_Unexecute = unexecute;
 			}
 
 		internal:
 
 			virtual bool CanExecute(Object^ parameter)
 			{
-				if (_canExecute)
-					return _canExecute(parameter);
-
+				if (_CanExecute)
+					return _CanExecute(parameter);
 				return true;
 			}
 
 			virtual bool Execute(Object^ parameter)
 			{
-				if (_handler) // && CanExecute
-					return _handler(parameter);
+				if (_Handler) // && CanExecute
+					return _Handler(parameter);
 				return false;
 			}
 
 			virtual bool Unexecute(Object^ parameter)
 			{
-				if (_unexecute)
-					return _unexecute(parameter);
+				if (_Unexecute)
+					return _Unexecute(parameter);
 				return false;
 			}
 
 			virtual event EventHandler<Platform::Object^>^ CanExecuteChanged;
 		};
+
 		public ref class CommandState sealed		// команда вместе с её параметром
 		{
 		public:
@@ -818,17 +900,28 @@ namespace SketchMusic
 			property Object^ _args;
 		};
 
-		const int DEFAULT_MAX_COM = 20;
+		const int DEFAULT_MAX_COM = 100;
 		
 		// принимает команды и хранит историю
-		public ref class CommandManager sealed
+		//[Windows::UI::Xaml::Data::Bindable]
+		public ref class CommandManager sealed //: Windows::UI::Xaml::Data::INotifyPropertyChanged
 		{
 		private:
 			// История команд
 			Windows::Foundation::Collections::IVector<SketchMusic::Commands::CommandState^>^ _commands;
-			int _CurrentIndex;	// указывает индекс последней выполненной команды (-1, если ничего нет)
+			//void OnPropertyChanged(Platform::String^ propertyName);
+			int m_index;
+			bool m_canUndo;
+			bool m_canRedo;
 
 		public:
+
+			//virtual event Windows::UI::Xaml::Data::PropertyChangedEventHandler^ PropertyChanged;
+
+			// делаем вручную, потому что мне не удалось заставить работать привязки через ProertyChanged
+			event EventHandler<bool>^ CanUndoChanged;	
+			event EventHandler<bool>^ CanRedoChanged;
+
 			CommandManager()
 			{
 				MaxCommandCount = DEFAULT_MAX_COM;
@@ -844,18 +937,46 @@ namespace SketchMusic
 			}
 
 			property int MaxCommandCount; // максимальное количество команд
-			bool CanUndo() { return (_CurrentIndex >= 0) ? true : false; }
-			bool CanRedo()
+			property int _CurrentIndex	// указывает индекс последней выполненной команды (-1, если ничего нет)
 			{
-				int max = (_commands->Size - 1); // по непонятной причине, если просто вставить выражение в возвращаемое значение,
-					// то возвращается false
-				return (_CurrentIndex < max);
+				int get() { return m_index; }
+				void set(int ind)
+				{ 
+					m_index = ind;
+					if (m_index >= 0) 
+						CanUndo = true;
+					else CanUndo = false;
+					//int max = ; // по непонятной причине, если просто вставить выражение в возвращаемое значение,
+					if (m_index < ((int)_commands->Size - 1))
+						CanRedo = true;
+					else CanRedo = false;
+				}
+			}
+			property bool CanUndo { bool get() { return m_canUndo; }
+				void set(bool can) 
+				{
+					if (m_canUndo == can) return;
+					m_canUndo = can;
+					//OnPropertyChanged(L"CanUndo");
+					CanUndoChanged(this, m_canUndo);
+				} 
+			}
+			property bool CanRedo
+			{
+				bool get() { return m_canRedo; }
+				void set(bool can)
+				{
+					if (m_canRedo == can) return;
+					m_canRedo = can;
+					//OnPropertyChanged(L"CanRedo");
+					CanRedoChanged(this, m_canRedo);
+				}
 			}
 
 			// список доступных манипуляций
 			bool Undo()
 			{
-				if (CanUndo())
+				if (CanUndo)
 				{
 					// "разделываем" последнюю выполненую команду, уменьшаем счётчик
 					return _commands->GetAt(_CurrentIndex--)->Unexecute();
@@ -865,7 +986,7 @@ namespace SketchMusic
 
 			bool Redo()
 			{
-				if (CanRedo())
+				if (CanRedo)
 				{
 					return ExecuteCurrent();
 				}
@@ -885,8 +1006,9 @@ namespace SketchMusic
 				return _commands->GetAt(++_CurrentIndex)->Execute();
 			}
 
-			bool AddAndExecute(SketchMusic::Commands::CommandState^ command)
+			bool AddAndExecute(SketchMusic::Commands::Command^ command, Platform::Object^ args)
 			{
+				auto commandState = ref new CommandState(command, args);
 				// если мы посередине списка команд - убираем все последующие, чтобы не создавать параллельных веток
 				if (_CurrentIndex != _commands->Size - 1)
 				{
@@ -904,7 +1026,7 @@ namespace SketchMusic
 					_CurrentIndex--;
 				}
 
-				_commands->Append(command);
+				_commands->Append(commandState);
 				return ExecuteCurrent();
 			}
 		};
@@ -1004,7 +1126,7 @@ namespace SketchMusic
 			shift			= 10,
 			record			= 11,
 			cycling			= 12,
-			deleteSym		= 13,
+			backspace		= 13,
 			control			= 14,
 			tempo			= 15,
 			zoom			= 16,

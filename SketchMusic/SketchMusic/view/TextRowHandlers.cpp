@@ -20,11 +20,6 @@ void SketchMusic::View::TextRow::OnLoaded(Platform::Object ^sender, Windows::UI:
 	//InvalidateText();
 }
 
-void SketchMusic::View::TextRow::OnApplyTemplate()
-{
-	
-}
-
 void SketchMusic::View::TextRow::InitializePage()
 {
 	_dict = this->Resources;
@@ -36,6 +31,8 @@ void SketchMusic::View::TextRow::InitializePage()
 	//_mainPanel = (StackPanel^)GetTemplateChild("_mainPanel");
 	_mainPanel->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
 	_mainPanel->PointerWheelChanged += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerWheelChanged);
+	//_mainPanel->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerReleased);
+	_scrollViewer->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerReleased);
 
 	//_canvas = (Canvas^)GetTemplateChild("_canvas");
 	_canvas->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
@@ -81,6 +78,7 @@ void SketchMusic::View::TextRow::OnPointerWheelChanged(Platform::Object ^sender,
 // выбор ноты или чего-нибудь ещё
 void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
 {
+	_isPressed = true;
 	// TODO : если второй палец 
 	// - если нота уже "поднята", ничего не происходит
 	// - если нота не "поднята", то замеряем расстояние между пальцами
@@ -104,21 +102,24 @@ void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Wind
 		auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
 		if (((Text^)ctrl->Tag == current || (Text^)ctrl->Tag == data->ControlText) && (psym != nullptr))
 		{
+			_CommandManager->AddAndExecute(
+				DeleteSymCommand,
+				ref new SketchMusic::Commands::SymbolHandlerArgs(((Text^)ctrl->Tag),psym));
+			
 			// удаляем представление элемента с панели
-			unsigned int ind;
-			if (_canvas->Children->IndexOf(ctrl, &ind))
-				_canvas->Children->RemoveAt(ind);
-
-			// удаляем сам элемент из массива
-			((Text^)ctrl->Tag)->deleteSymbol(psym->_pos, psym->_sym);
+			//unsigned int ind;
+			//if (_canvas->Children->IndexOf(ctrl, &ind))
+			//	_canvas->Children->RemoveAt(ind);
+			//
+			//// удаляем сам элемент из массива
+			//((Text^)ctrl->Tag)->deleteSymbol(psym->_pos, psym->_sym);
 		}
+		
 		return;
 	}
 
 	_scrollViewer->HorizontalScrollMode = ScrollMode::Disabled;
 	_scrollViewer->VerticalScrollMode = ScrollMode::Disabled;
-	//ScrollViewer::SetHorizontalScrollMode(_mainPanel, ScrollMode::Disabled);
-	//ScrollViewer::SetVerticalScrollMode(_mainPanel, ScrollMode::Disabled);
 	_lastPoint = e->GetCurrentPoint(_canvas)->Position;
 	_lastPoint.X -= Canvas::GetLeft(ctrl);
 	_lastPoint.Y -= Canvas::GetTop(ctrl);
@@ -147,11 +148,6 @@ void SketchMusic::View::TextRow::OnPointerMoved(Platform::Object ^sender, Window
 
 		if (ctrl != _currentSnapPoint)
 		{
-			//if (_currentSnapPoint)
-			//{
-			//	_currentSnapPoint->Background = ref new SolidColorBrush(Windows::UI::Colors::Transparent);
-			//}
-			//ctrl->Background = ref new SolidColorBrush(Windows::UI::Colors::Orange);
 			_currentSnapPoint = ctrl;
 		}
 	}
@@ -163,6 +159,23 @@ void SketchMusic::View::TextRow::OnPointerMoved(Platform::Object ^sender, Window
 		_snapPoint->Visibility = Windows::UI::Xaml::Visibility::Visible;
 		Canvas::SetLeft(_snapPoint, point.X);
 		Canvas::SetTop(_snapPoint, point.Y - 10);
+	}
+
+	// Если включён ластик - удаляем символ
+	if (EraserTool && (_isPressed) && (_dragged == nullptr))
+	{
+		ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
+		if (ctrl)
+		{
+			auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
+			if (psym && ((Text^)ctrl->Tag == current || (Text^)ctrl->Tag == data->ControlText))
+			{
+				_CommandManager->AddAndExecute(
+					DeleteSymCommand,
+					ref new SketchMusic::Commands::SymbolHandlerArgs(((Text^)ctrl->Tag), psym));
+			}
+		}
+		return;
 	}
 
 	// - связываем выделенный элемент с курсором
@@ -177,36 +190,60 @@ void SketchMusic::View::TextRow::OnPointerMoved(Platform::Object ^sender, Window
 // отпускание ноты или чего-нибудь ещё
 void SketchMusic::View::TextRow::OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
 {
+	_isPressed = false;
 	if (_dragged == nullptr)
 		return;
 
 	if (_currentSnapPoint != nullptr)
 	{
+		// TODO ? лучше не вызывать напрямую здесь команду, а "поднимать" событие о том, что появился запрос на перемещение
+
 		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(_dragged->DataContext);
+		if (psym)
+		{
+			auto newPos = GetPositionOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
+			if (!(psym->_pos->EQ(newPos)))
+			{
+				_CommandManager->AddAndExecute(
+					MoveSymCommand,
+					ref new SketchMusic::Commands::SymbolPairHandlerArgs(
+						dynamic_cast<SketchMusic::Text^>(_dragged->Tag),
+						psym,
+						ref new PositionedSymbol(
+							newPos,
+							psym->_sym)));
+			}
+			else
+			{
+				// если вычисленная новая позиция та же, просто отрисовываем
+				SetNoteOnCanvas(_dragged);
+			}
+		}
+
 		//INote^ inote = dynamic_cast<INote^>(psym->_sym);
 		// привязываем к ближайшей точке привязки
-		auto point = GetCoordinatsOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
-		_canvas->SetLeft(_dragged, point.X - PlaceholderWidth/2);
-		double offsetY = GetOffsetY(psym->_sym);
-		_canvas->SetTop(_dragged, point.Y + offsetY);
-
-		// перемещаем символ "фактически"
-		Text^ text = dynamic_cast<SketchMusic::Text^>(_dragged->Tag);
-		if (psym && text)
-		{
-			SketchMusic::Cursor^ newpos = this->GetPositionOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
-
-			// вообще, если мы до сюда дошли, то всё должно быть хорошо
-			if (newpos == nullptr)
-				throw ref new Exception(1, "Не удалось вычислить новое положение ноты");
-
-			text->moveSymbol(psym, newpos);
-			psym->_pos = newpos;
-
-			// TODO : вызываем событие, которое говорит, что такая-то нота была перемещена
-			// без события мы не сможем записать в основной программе в CommandManager команду,
-			// а значит и не сможем в будущем отменить перемещение
-		}
+		//auto point = GetCoordinatsOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
+		//_canvas->SetLeft(_dragged, point.X - PlaceholderWidth/2);
+		//double offsetY = GetOffsetY(psym->_sym);
+		//_canvas->SetTop(_dragged, point.Y + offsetY);
+		//
+		//// перемещаем символ "фактически"
+		//Text^ text = dynamic_cast<SketchMusic::Text^>(_dragged->Tag);
+		//if (psym && text)
+		//{
+		//	SketchMusic::Cursor^ newpos = this->GetPositionOfControl(_currentSnapPoint, e->GetCurrentPoint(_currentSnapPoint)->Position);
+		//
+		//	// вообще, если мы до сюда дошли, то всё должно быть хорошо
+		//	if (newpos == nullptr)
+		//		throw ref new Exception(1, "Не удалось вычислить новое положение ноты");
+		//
+		//	text->moveSymbol(psym, newpos);
+		//	psym->_pos = newpos;
+		//
+		//	// TODO : вызываем событие, которое говорит, что такая-то нота была перемещена
+		//	// без события мы не сможем записать в основной программе в CommandManager команду,
+		//	// а значит и не сможем в будущем отменить перемещение
+		//}
 	}
 
 	_isMoving = false;
@@ -329,7 +366,7 @@ void SketchMusic::View::TextRow::SetScale(int scaleFactor)
 }
 
 // удаляем все ноты, находящиеся между текущим и положением курсора на единицу влево согласно текущему масштабу
-void SketchMusic::View::TextRow::Backspace()
+/*void SketchMusic::View::TextRow::Backspace()
 {	
 	// если курсор стоит в начале новой строки, то удаляем строку, символы переносим в строку предыдущую
 	for (auto&& iter : breakLine)
@@ -389,4 +426,5 @@ void SketchMusic::View::TextRow::Backspace()
 
 	// перемещаем курсор на шаг назад
 	this->MoveCursorLeft();
-}
+}*/
+

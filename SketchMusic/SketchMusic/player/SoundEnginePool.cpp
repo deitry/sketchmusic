@@ -12,13 +12,13 @@ using namespace SketchMusic::Player;
 */
 ISoundEngine^ SoundEnginePool::GetIfAvailable(Instrument^ instrument)
 {
-	for (auto iter = _available.begin(); iter != _available.end(); iter++)
+	for (auto&& iter : _available)
 	{
-		if ((*iter)->getInstrument()->_name == instrument->_name)
+		if (iter.first->getInstrument()->_name == instrument->_name && iter.second)
 		{
 			// если доступен, возвращаем, удаляя из списка доступных
-			auto result = *iter;
-			_available.erase(iter);
+			auto result = iter.first;
+			iter.second = false;
 			return result;
 		}
 	}
@@ -61,7 +61,14 @@ void SoundEnginePool::ReleaseSoundEngine(ISoundEngine^ engine)
 
 	engine->Stop();
 	// возвращаем в список доступных
-	_available.push_back(engine);
+	for (auto&& iter : _available)
+	{
+		if (iter.first == engine)
+		{
+			iter.second = true;
+			break;
+		}
+	}
 }
 
 SoundEnginePool::~SoundEnginePool()
@@ -105,7 +112,7 @@ void SoundEnginePool::AddSoundEngine(Instrument^ instrument)
 	}
 
 	_engines.push_back(engine);
-	_available.push_back(engine);
+	_available.push_back(std::make_pair(engine,true));
 }
 
 void SoundEnginePool::DeleteSoundEngine(Instrument^ instrument)

@@ -85,13 +85,14 @@ void SketchMusic::Text::deleteSymbol(Cursor^ cur, ISymbol^ sym)
 	}
 }
 
-void SketchMusic::Text::deleteNLine(Cursor^ cur)
+// ”дал€ем разрыв строки из текста. ≈сли удалили - возвращаем true, если такого символа нету - false
+bool SketchMusic::Text::deleteNLine(Cursor^ cur)
 {
 	// проходимс€ по всем нотам в этом месте
 	// если есть SNewLine - удал€ем - только один!
 	auto psym = _t.find(cur);
 	if (psym == _t.end())
-		return;
+		return false;
 
 	auto left = _t.lower_bound(cur);
 	auto right = _t.upper_bound(cur);
@@ -100,10 +101,10 @@ void SketchMusic::Text::deleteNLine(Cursor^ cur)
 		if (left->second->GetSymType() == SketchMusic::SymbolType::NLINE)
 		{
 			_t.erase(left);
-			return;
+			return true;
 		}
 	}
-	
+	return false;
 }
 
 void SketchMusic::Text::deleteSymbols(Cursor^ begin, Cursor^ end)
@@ -149,10 +150,12 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::GetSymbols(Cursor ^ from, Cursor 
 {
 	Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
 
-	if (from->EQ(to)) return vect;
-	
+	if (from== nullptr && to == nullptr) return vect;
+
 	auto left = from ? _t.lower_bound(from) : _t.begin();
-	auto right = to ? _t.lower_bound(to) : _t.end();
+	if (left == _t.end()) return vect;
+
+	auto right = ((to) ? ((from->EQ(to)) ? _t.upper_bound(from) : _t.lower_bound(to)) : _t.end());
 	if (left == right) return vect;
 
 	//for (std::pair<Cursor^, ISymbol^> sym : this->_t)

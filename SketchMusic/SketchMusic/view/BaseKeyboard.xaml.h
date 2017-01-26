@@ -27,6 +27,12 @@ namespace SketchMusic
 		private:
 			bool input;
 			bool tempoPressed;
+			bool ctrlPressed;
+
+			bool isTempoFlyoutOpened;
+			bool isQuantizeFlyoutOpened;
+			bool isLayoutFlyoutOpened;
+
 			//std::vector<SketchMusic::View::Key^> inputBuffer;
 			//int octaveModificator;
 
@@ -42,16 +48,27 @@ namespace SketchMusic
 			SketchMusic::View::KeyboardState^ currentState;	// состояние клавиатуры. Изменяется при нажатии всяких контрол, шифт и так далее
 
 			int pressedKeys;	// суммарное количество нажатых клавиш
+			
+
+			//Windows::UI::Input::GestureRecognizer^ gr;
+			//void gestureRecognizer_Holding(Windows::UI::Input::GestureRecognizer^ sender, Windows::UI::Input::HoldingEventArgs^ args);
 
 
-			std::multimap<SketchMusic::View::Key^, bool> _keys;	// сохраняем ссылки на клавиши, чтобы уведомлять их об изменении состояния
+			std::vector<std::pair<Windows::UI::Xaml::Controls::ContentControl^, bool>> _keys;	// сохраняем ссылки на клавиши, чтобы уведомлять их об изменении состояния
 																// вторым параметром отмечаем, что клавиша в данный момент нажата
 
 			concurrency::cancellation_token_source releaseToken;
+			concurrency::cancellation_token_source HoldingTokenSource;
+
+			Windows::Foundation::EventRegistrationToken KeyDownToken;
+			Windows::Foundation::EventRegistrationToken KeyUpToken;
 
 			Windows::UI::Xaml::ResourceDictionary^ _dict;
 
 			SketchMusic::View::KeyboardType _layout;
+		protected:
+			virtual void OnLoaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e) override;
+			virtual void OnUnloaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e) override;
 
 		public:
 			BaseKeyboard();
@@ -71,8 +88,10 @@ namespace SketchMusic
 			// для мыши
 			void onKeyboardControlPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 			void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
-			void OnKeyDown(Platform::Object ^sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs ^e);
-			void OnKeyUp(Platform::Object ^sender, Windows::UI::Xaml::Input::KeyRoutedEventArgs ^e);
+			void OnPointerMoved(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
+			void OnHolding(Platform::Object ^sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs ^e);
+			void OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs ^e);
+			void OnKeyUp(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs ^e);
 			void OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 			void OnQuantizeClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 
@@ -86,6 +105,12 @@ namespace SketchMusic
 			void Button_Click_1(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 			void precountNeed_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 			void TempoSlider_ValueChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs^ e);
+			void QuantizeFlyout_Opened(Platform::Object^ sender, Platform::Object^ e);
+			void QuantizeFlyout_Closed(Platform::Object^ sender, Platform::Object^ e);
+			void TempoFlyout_Opened(Platform::Object^ sender, Platform::Object^ e);
+			void TempoFlyout_Closed(Platform::Object^ sender, Platform::Object^ e);
+			void LayoutFlyout_Opened(Platform::Object^ sender, Platform::Object^ e);
+			void LayoutFlyout_Closed(Platform::Object^ sender, Platform::Object^ e);
 		};
 	}
 }

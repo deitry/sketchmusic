@@ -17,7 +17,7 @@ ref class SketchMusic::Player::SoundEnginePool sealed
 {
 private:
 	std::list<ISoundEngine^> _engines;
-	std::list<ISoundEngine^> _available;		// для отображения доступных саунденжинов
+	std::list<std::pair<ISoundEngine^, bool>> _available;		// для отображения доступных саунденжинов
 		// ! - количество доступных будет больше, чем количество всех, потому что туда будут добавляться копии
 	
 	Microsoft::WRL::ComPtr<IXAudio2> _xaudio2;	// нужен для успешного создания саунденжинов

@@ -30,7 +30,7 @@
     <Page.TopAppBar>
         <CommandBar x:Name="commandBar">
             <AppBarButton Name="GoMenuBtn" Label="В меню" Click="GoMenuBtn_Click" Icon="Home"/>
-            <AppBarButton Name="HelpBtn" Label="В меню" Click="HelpBtn_Click" Icon="Home"/>
+            <AppBarButton Name="HelpBtn" Label="Помощь" Click="HelpBtn_Click" Icon="Help"/>
             <AppBarSeparator/>
             <AppBarButton Label="Сортировка" Icon="Sort">
                 <Button.Flyout>

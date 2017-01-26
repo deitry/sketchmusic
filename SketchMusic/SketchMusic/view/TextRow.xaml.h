@@ -34,6 +34,7 @@ private:
 	ContentControl^ _currentSnapPoint;
 	ContentControl^ _snapPoint;
 	bool _isMoving;
+	bool _isPressed;
 
 	// 1..32, 1 - 1 ктрл - одна доля, 32 - на одну долю 32 ктрла
 	int initialised;	// до какой степени масштаба инициализировано
@@ -53,8 +54,6 @@ internal:
 	// вспомогательные функции для удобной работы с символами
 	//void InsertSpaceSymbol(PositionedSymbol^ symbol);	// нужно будет не просто делать один из плейсхолдеров шире,
 	// но ещё и перемещать "пробел", если в результате масштаба данный плейсхолдер окажется невидимым
-	//void CreateNoteObject(ISymbol^ note);
-	void InsertNoteObject(PositionedSymbol^ note);
 	ContentControl^ GetControlAtPos(Cursor^ pos, int offset = 0);
 	int GetControlIndexAtPos(Cursor^ pos, int offset);
 
@@ -65,7 +64,6 @@ internal:
 	void InvalidateText();
 	void RedrawText();
 	void AllocateSnapPoints(Text^ text, int newScale, int selectedPart);
-	void SetSnapPointsVisibility(int newScale);
 	void InsertLineBreak(Cursor^ pos);
 	void DeleteLineBreak(Cursor^ pos);
 	void SetBackgroundColor(ContentControl^ ctrl);
@@ -74,6 +72,15 @@ internal:
 	void SetNoteOnCanvas(ContentControl^ note);
 
 public:
+	// команды для манипуляциии с текстом
+	property SketchMusic::Commands::CommandManager^ _CommandManager; // Передаём извне, поскольку общий для приложения
+	property SketchMusic::Commands::Command^ MoveSymCommand;	// перемещение символа
+	property SketchMusic::Commands::Command^ AddSymCommand;		// добавление нового символа
+	property SketchMusic::Commands::Command^ DeleteSymCommand;	// удаление символа
+	property SketchMusic::Commands::Command^ AddMultipleSymCommand;	// удаление символа
+	property SketchMusic::Commands::Command^ DeleteMultipleSymCommand;	// удаление символа
+
+
 	property Cursor^ currentPosition;
 	property Text^ current;
 	property Text^ format;
@@ -86,12 +93,7 @@ public:
 	property bool EraserTool;	// если true - по нажатию на кнопку удаляем
 
 	TextRow();
-	void OnApplyTemplate() override;
 	void InitializePage();
-
-	//void SetText(SketchMusic::Text^ text);
-	//void SetFormat(SketchMusic::Text^ format);	// оставляем возможность ноты брать из одного текста, 
-	// а формат из другого - чтобы легче было работать с несколькими дорожками	SketchMusic::Text^ GetText();
 
 	// универсальная функция
 	void SetText(CompositionData^ textCollection, SketchMusic::Text^ current);
@@ -100,15 +102,10 @@ public:
 	void SetCursor(SketchMusic::Cursor^ pos);
 
 	// работа с отдельными символами
-	void AddSymbol(Text^ source, PositionedSymbol^ symbol);
-	//void DeleteSymbol(PositionedSymbol^ symbol);
-	void Backspace();
-	//void DeleteRange(Cursor^ from, Cursor^ to);
-	//void MoveSymbol(PositionedSymbol^ newSymbol, PositionedSymbol^ oldSymbol);
-
-	// как будет осуществляться вставка долей?
-	// легче всего, создав класс реализующий ISymbol и передавать как обычно.
-	// Необычным будет только действие на текст
+	void AddSymbolView(Text^ source, PositionedSymbol^ symbol);
+	void DeleteSymbolView(PositionedSymbol^ symbol);
+	ContentControl^ GetSymbolView(PositionedSymbol^ symbol);
+	void SetSymbolView(PositionedSymbol^ oldSymbol, PositionedSymbol^ newSymbol);
 
 	// отображение
 	void SetScale(int scaleFactor);
@@ -121,11 +118,6 @@ public:
 	void OnPointerPressed(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 	void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 	void OnLoaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
-
-	// события
-	event EventHandler<SketchMusic::Commands::SymbolHandlerArgs^>^ SymbolAdded;
-	event EventHandler<SketchMusic::Commands::SymbolHandlerArgs^>^ SymbolMoved;
-	event EventHandler<SketchMusic::Commands::SymbolHandlerArgs^>^ SymbolDeleted;
 
 	// как будет осуществляться вставка долей?
 	// легче всего, создав класс реализующий ISymbol и передавать как обычно.

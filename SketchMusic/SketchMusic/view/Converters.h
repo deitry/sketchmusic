@@ -131,9 +131,8 @@ public:
 			break;
 		case KeyType::cycling:
 			result += L"\ue1cd";	// круговая стрелка
-									//result += L"\ue1cс";	// однократный повтор
 			break;
-		case KeyType::deleteSym:
+		case KeyType::backspace:
 			result += L"\ue750";
 			break;
 		case KeyType::eraser:
