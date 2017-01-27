@@ -11,6 +11,7 @@
         <Style x:Key="MenuBtnStyle" TargetType="Button">
             <Setter Property="Margin" Value="0,10"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Width" Value="230"/>
         </Style>
     </Page.Resources>
     
@@ -26,13 +27,56 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="1" HorizontalAlignment="Center" Orientation="Vertical">
             <!--<Button Name="CreateCompositionBtn" Content="Создать композицию" Click="CreateCompositionBtn_Click" Style="{StaticResource MenuBtnStyle}"/>-->
-            <Button Name="CreateIdeaBtn" Content="Записать идею" Click="CreateIdeaBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+            <Button Name="CreateIdeaBtn" Click="CreateIdeaBtn_Click" Style="{StaticResource MenuBtnStyle}">
+                <Button.Content>
+                    <Grid Width="{Binding Width, ElementName=OpenCompositionLibraryBtn}">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xEC87;" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Записать идею" HorizontalAlignment="Center"/>
+                    </Grid>
+                </Button.Content>
+            </Button>
             <Line Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="150" Y1="0" Y2="0" HorizontalAlignment="Stretch" Margin="10"/>
-            <Button Name="OpenCompositionLibraryBtn" Content="Обзор проектов" Click="OpenCompositionLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
-            <Button Name="OpenLibraryBtn" Content="Открыть библиотеку" Click="OpenLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+            <Button Name="OpenCompositionLibraryBtn" Click="OpenCompositionLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}">
+                <Button.Content>
+                    <Grid Width="{Binding Width, ElementName=OpenCompositionLibraryBtn}">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8B7;" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Обзор проектов" HorizontalAlignment="Center"/>
+                    </Grid>
+                </Button.Content>
+            </Button>
+            <Button Name="OpenLibraryBtn" Click="OpenLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}">
+                <Button.Content>
+                    <Grid Width="{Binding Width, ElementName=OpenCompositionLibraryBtn}">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8F1;" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Открыть библиотеку" HorizontalAlignment="Center"/>
+                    </Grid>
+                </Button.Content>
+            </Button>
             <Line Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="150" Y1="0" Y2="0" HorizontalAlignment="Stretch" Margin="10"/>
-            <Button Name="HelpBtn" Content="Справка"  Click="AboutBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
-            <Button Name="AboutBtn" Content="О программе"  Click="AboutBtn_Click" Style="{StaticResource MenuBtnStyle}"/>
+            <Button Name="HelpBtn" Click="HelpBtn_Click" Style="{StaticResource MenuBtnStyle}">
+                <Button.Content>
+                    <Grid Width="{Binding Width, ElementName=OpenCompositionLibraryBtn}">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE897;" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Справка" HorizontalAlignment="Center"/>
+                    </Grid>
+                </Button.Content>
+            </Button>
+            <Button Name="SettingsBtn" Click="SettingsBtn_Click" Style="{StaticResource MenuBtnStyle}">
+                <Button.Content>
+                    <Grid Width="{Binding Width, ElementName=OpenCompositionLibraryBtn}">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE713;" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Настройки" HorizontalAlignment="Center"/>
+                    </Grid>
+                </Button.Content>
+            </Button>
+            <Button Name="AboutBtn" Click="AboutBtn_Click" Style="{StaticResource MenuBtnStyle}">
+                <Button.Content>
+                    <Grid Width="{Binding Width, ElementName=OpenCompositionLibraryBtn}">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE91C;" HorizontalAlignment="Left"/>
+                        <TextBlock Text="О программе" HorizontalAlignment="Center"/>
+                    </Grid>
+                </Button.Content>
+            </Button>
         </StackPanel>
     </Grid>
 </Page>

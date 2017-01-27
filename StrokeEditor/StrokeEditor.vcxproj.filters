@@ -29,6 +29,9 @@
     <Filter Include="Other Pages">
       <UniqueIdentifier>{38ac8137-4a02-47c1-a1a2-fda4f4ad8b99}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Dialogs">
+      <UniqueIdentifier>{fc7a100b-ecea-443b-a245-8767e429ea17}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp" />
@@ -106,9 +109,6 @@
     <Page Include="CompositionOverviewPage.xaml">
       <Filter>Composition</Filter>
     </Page>
-    <Page Include="EditCompositionDialog.xaml">
-      <Filter>Composition</Filter>
-    </Page>
     <Page Include="AboutPage.xaml">
       <Filter>Other Pages</Filter>
     </Page>
@@ -123,6 +123,15 @@
     </Page>
     <Page Include="MelodyEditorPage.xaml">
       <Filter>Editors</Filter>
+    </Page>
+    <Page Include="SettingsPage.xaml">
+      <Filter>Other Pages</Filter>
+    </Page>
+    <Page Include="EditCompositionDialog.xaml">
+      <Filter>Dialogs</Filter>
+    </Page>
+    <Page Include="ManageInstrumentsDialog.xaml">
+      <Filter>Dialogs</Filter>
     </Page>
   </ItemGroup>
   <ItemGroup>

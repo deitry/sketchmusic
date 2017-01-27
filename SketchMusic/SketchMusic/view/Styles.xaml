@@ -15,8 +15,8 @@
     <x:Double x:Key="BeatWidth">45.0</x:Double>
     <x:Double x:Key="EnderWidth">2.0</x:Double>
     <x:Double x:Key="PlaceholderWidth">13.0</x:Double>
-    <x:Double x:Key="SymbolWidth">25.0</x:Double>
-    <x:Double x:Key="SymbolHeight">20.0</x:Double>
+    <x:Double x:Key="SymbolWidth">18.0</x:Double>
+    <x:Double x:Key="SymbolHeight">13.0</x:Double>
     <x:Double x:Key="GSymbolWidth">30.0</x:Double>
     <x:Double x:Key="GSymbolHeight">25.0</x:Double>
     <x:Double x:Key="LineSpacing">15</x:Double>
@@ -96,7 +96,7 @@
                             <TextBlock
                                         FontFamily="Segoe MDL2 Assets"
                                         FontSize="{TemplateBinding FontSize}"
-                                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                         Foreground="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
                                     Converter={StaticResource reversedBlackKey2color}}"
                                         >
@@ -147,23 +147,26 @@
     </Style>
 
     <ControlTemplate TargetType="ContentControl" x:Key="SymbolControlTemplate">
-        <Grid BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-            <Ellipse x:Name="symbolEllipse" 
-                         Fill="{TemplateBinding Background}" 
-                         Width="{TemplateBinding Width}" 
-                         Height="{TemplateBinding Height}"/>
-            <Ellipse x:Name="foregroundEllipse" 
-                         Fill="{TemplateBinding Foreground}" 
-                         Width="{TemplateBinding Width}" 
-                         Height="{TemplateBinding Height}"/>
+        <Canvas>
+            <Grid>
+                <Ellipse x:Name="symbolEllipse" 
+                             Fill="{TemplateBinding Background}" 
+                             Width="{TemplateBinding Width}" 
+                             Height="{TemplateBinding Height}"/>
+                <Ellipse x:Name="foregroundEllipse" 
+                             Fill="{TemplateBinding Foreground}" 
+                             Width="{TemplateBinding Width}" 
+                             Height="{TemplateBinding Height}"/>
 
-            <TextBlock x:Name="symbolTextBlock"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                   Foreground="{ThemeResource SystemControlForegroundAltHighBrush}">
-                <!--<Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>-->
-                <Run FontFamily="Segoe MDL2 Assets" Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
-            </TextBlock>
-        </Grid>
+                <TextBlock x:Name="symbolTextBlock"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="{ThemeResource SystemControlForegroundAltHighBrush}">
+                    <Run FontFamily="Segoe MDL2 Assets" 
+                         Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
+                </TextBlock>
+            </Grid>
+            <Line X1="1" X2="1" Y1="7" Y2="-20" Stroke="{TemplateBinding Background}" StrokeThickness="1"/>
+        </Canvas>
     </ControlTemplate>
 
     <ControlTemplate TargetType="ContentControl" x:Key="GNoteControlTemplate">
@@ -192,6 +195,7 @@
         <Setter Property="Height" Value="{StaticResource SymbolHeight}"/>
         <Setter Property="Padding" Value="10,10,10,10"/>
         <Setter Property="Template" Value="{StaticResource SymbolControlTemplate}"/>
+        <Setter Property="FontSize" Value="10"/>
         <!--<Setter Property="ContentTemplate" Value="{StaticResource SymbolControlData}"/>
         <Setter Property="Tag" Value="Note"/>-->
     </Style>

@@ -75,7 +75,7 @@ void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note, Sketc
 
 		if (_keyboardEngine)
 		{
-			_keyboardEngine->Play(note, 0, noteOff);
+			_keyboardEngine->Play(note, duration, noteOff);
 		}
 	});
 }

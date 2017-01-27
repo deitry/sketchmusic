@@ -325,10 +325,7 @@ Windows::Data::Json::IJsonValue ^ SketchMusic::CompositionData::serialize()
 
 	for (auto&& text : texts)
 	{
-		if (text->getSize())
-		{
-			json->Append(static_cast<SketchMusic::Text^>(text)->serialize());
-		}
+		json->Append(static_cast<SketchMusic::Text^>(text)->serialize());
 	}
 	return json;
 }

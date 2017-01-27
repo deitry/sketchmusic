@@ -296,6 +296,7 @@ SketchMusic::Text ^ SketchMusic::Text::deserialize(Windows::Data::Json::JsonObje
 {
 	SketchMusic::Text^ text = ref new SketchMusic::Text;
 	text->instrument = ref new Instrument(json->GetNamedString(t::INSTR), 
+										  json->GetNamedString(t::INSTR_FNAME, nullptr),
 										  json->GetNamedString(t::INSTR_PRESET,nullptr));
 
 	auto jArr = json->GetNamedArray(t::NOTES_ARRAY);

@@ -19,7 +19,7 @@ SketchMusic::Player::SFSoundEngine::SFSoundEngine(Microsoft::WRL::ComPtr<IXAudio
 	*/
 	this->_instrument = instrument;
 		
-	auto data = SketchMusic::SFReader::SFData::ReadSFData(instrument->_name);
+	auto data = SketchMusic::SFReader::SFData::ReadSFData(instrument->FileName);
 	if (data == nullptr)
 		throw ref new Exception(0, "Не удалось создать объект");
 
@@ -129,11 +129,18 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 		{
 			if (!(pZone->inZone(note->_val + MIDIKEYTOA4, 100))) continue;
 			// обработка генераторов pZone?
+			
 
 			for (auto iZone : pZone->instrument->zones)
 			{
 				if (!(iZone->sample)) continue;
 				if (!(iZone->inZone(note->_val + MIDIKEYTOA4, 100))) continue;
+
+				if (iZone->sample->sampleType != 1)
+				{
+					int i = 0;
+					(--i)++;
+				}
 
 				IXAudio2SourceVoice* voice = this->GetVoice();
 				if (voice == nullptr) return;
@@ -161,18 +168,106 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 				double freq = 440 * pow(2., (note->_val) / 12.);
 				
 				// генераторы
+				for (auto iter = pZone->generators.begin(); iter != pZone->generators.end(); iter++)
+				{
+					switch (iter->first)
+					{
+					case SFGeneratorID::pan:
+					case SFGeneratorID::initialAttenuation:
+						break;
+
+					case SFGeneratorID::coarseTune:
+						freq *= pow(2., (iter->second->val.sword) / 12.);
+						break;
+					case SFGeneratorID::fineTune:
+						freq *= pow(2., (iter->second->val.sword / 100.) / 12.);
+						break;
+
+					case SFGeneratorID::reverbEffectsSend:
+					case SFGeneratorID::chorusEffectsSend:
+						break;
+
+					case SFGeneratorID::overridingRootKey:
+						origFreq = 440 * pow(2., (iter->second->val.sword - MIDIKEYTOA4) / 12.);
+						break;
+
+					case SFGeneratorID::initialFilterFc:
+					case SFGeneratorID::initialFilterQ:
+					case SFGeneratorID::modLfoToPitch:
+					case SFGeneratorID::modLfoToVolume:
+					case SFGeneratorID::modLfoToFilterFc:
+					case SFGeneratorID::delayModLFO:
+					case SFGeneratorID::freqModLFO:
+					case SFGeneratorID::freqVibLFO:
+					case SFGeneratorID::delayVibLFO:
+					case SFGeneratorID::vibLfoToPitch:
+						break;
+					case SFGeneratorID::keynum:
+						freq = 440 * pow(2., (iter->second->val.sword - MIDIKEYTOA4) / 12.);
+						break;
+					case SFGeneratorID::velocity:
+					case SFGeneratorID::modEnvToPitch:
+					case SFGeneratorID::modEnvToFilterFc:
+						break;
+					case SFGeneratorID::startAddrsOffset:
+						_buffer.PlayBegin += iter->second->val.sword;
+						break;
+					case SFGeneratorID::startAddrsCoarseOffset:
+						_buffer.PlayBegin += iter->second->val.sword * 32768;
+						break;
+					case SFGeneratorID::endAddrsOffset:
+						_buffer.PlayLength += iter->second->val.sword;
+						break;
+					case SFGeneratorID::endAddrsCoarseOffset:
+						_buffer.PlayLength += iter->second->val.sword * 32768;
+						break;
+					case SFGeneratorID::startloopAddrsOffset:
+						_buffer.LoopBegin += iter->second->val.sword;
+						break;
+					case SFGeneratorID::startloopAddrsCoarseOffset:
+						_buffer.LoopBegin += 32768 * iter->second->val.sword;
+						break;
+					case SFGeneratorID::endloopAddrsOffset:
+						_buffer.LoopLength += iter->second->val.sword;
+						break;
+					case SFGeneratorID::endloopAddrsCoarseOffset:
+						_buffer.LoopLength += 32768 * iter->second->val.sword;
+						break;
+
+					case SFGeneratorID::delayVolEnv:
+					case SFGeneratorID::attackVolEnv:
+					case SFGeneratorID::holdVolEnv:
+					case SFGeneratorID::keynumToVolEnvHold:
+					case SFGeneratorID::decayVolEnv:
+					case SFGeneratorID::sustainVolEnv:
+					case SFGeneratorID::keynumToVolEnvDecay:
+					case SFGeneratorID::releaseVolEnv:
+					case SFGeneratorID::delayModEnv:
+					case SFGeneratorID::attackModEnv:
+					case SFGeneratorID::holdModEnv:
+					case SFGeneratorID::keynumToModEnvHold:
+					case SFGeneratorID::decayModEnv:
+					case SFGeneratorID::sustainModEnv:
+					case SFGeneratorID::keynumToModEnvDecay:
+					case SFGeneratorID::releaseModEnv:
+						break;
+					case SFGeneratorID::sampleModes:
+						iZone->sampleMode = iter->second->val.uword;
+						break;
+					}
+				}
+
 				for (auto iter = iZone->generators.begin(); iter != iZone->generators.end(); iter++)
 				{
 					switch (iter->first)
 					{
 					case SFGeneratorID::pan:
 						// range checking is done in the fluid_pan function 
-						/*voice->pan = _GEN(voice, GEN_PAN);
-						voice->amp_left = fluid_pan(voice->pan, 1) * voice->synth_gain / 32768.0f;
-						voice->amp_right = fluid_pan(voice->pan, 0) * voice->synth_gain / 32768.0f;
-						UPDATE_RVOICE_BUFFERS2(fluid_rvoice_buffers_set_amp, 0, voice->amp_left);
-						UPDATE_RVOICE_BUFFERS2(fluid_rvoice_buffers_set_amp, 1, voice->amp_right);
-						*/
+						//voice->pan = _GEN(voice, GEN_PAN);
+						//voice->amp_left = fluid_pan(voice->pan, 1) * voice->synth_gain / 32768.0f;
+						//voice->amp_right = fluid_pan(voice->pan, 0) * voice->synth_gain / 32768.0f;
+						//UPDATE_RVOICE_BUFFERS2(fluid_rvoice_buffers_set_amp, 0, voice->amp_left);
+						//UPDATE_RVOICE_BUFFERS2(fluid_rvoice_buffers_set_amp, 1, voice->amp_right);
 						break;
 
 					case SFGeneratorID::initialAttenuation:
@@ -186,21 +281,19 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 						//UPDATE_RVOICE_R1(fluid_rvoice_set_attenuation, voice->attenuation);
 						break;
 
-						// The pitch is calculated from three different generators.
 						// Read comment in fluidsynth.h about GEN_PITCH.
-
 						//case SFGeneratorID::pitch: // используетя в fluid под номером 59 ...
 					case SFGeneratorID::coarseTune:
 						freq *= pow(2., (iter->second->val.sword) / 12.);
 						break;
 					case SFGeneratorID::fineTune:
-						freq *= pow(2., (iter->second->val.sword/100) / 12.); // ???
-						
-						// The testing for allowed range is done in 'fluid_ct2hz'
-						//voice->pitch = (_GEN(voice, GEN_PITCH)
-						//	+ 100.0f * _GEN(voice, GEN_COARSETUNE)
-						//	+ _GEN(voice, GEN_FINETUNE));
-						//UPDATE_RVOICE_R1(fluid_rvoice_set_pitch, voice->pitch);
+						freq *= pow(2., (iter->second->val.sword / 100.) / 12.); // ???
+
+																				// The testing for allowed range is done in 'fluid_ct2hz'
+																				//voice->pitch = (_GEN(voice, GEN_PITCH)
+																				//	+ 100.0f * _GEN(voice, GEN_COARSETUNE)
+																				//	+ _GEN(voice, GEN_FINETUNE));
+																				//UPDATE_RVOICE_R1(fluid_rvoice_set_pitch, voice->pitch);
 						break;
 
 					case SFGeneratorID::reverbEffectsSend:
@@ -212,7 +305,7 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 						break;
 
 					case SFGeneratorID::chorusEffectsSend:
-						/* The generator unit is 'tenths of a percent'. */
+						// The generator unit is 'tenths of a percent'.
 						//voice->chorus_send = _GEN(voice, GEN_CHORUSSEND) / 1000.0f;
 						//fluid_clip(voice->chorus_send, 0.0, 1.0);
 						//voice->amp_chorus = voice->chorus_send * voice->synth_gain / 32768.0f;
@@ -239,7 +332,7 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 						//if (voice->sample != NULL) {
 						//	x *= (fluid_real_t)voice->output_rate / voice->sample->samplerate;
 						//}
-						///* voice->pitch depends on voice->root_pitch, so calculate voice->pitch now */
+						/// voice->pitch depends on voice->root_pitch, so calculate voice->pitch now
 						//fluid_voice_calculate_gen_pitch(voice);
 						//UPDATE_RVOICE_R1(fluid_rvoice_set_root_pitch_hz, x);
 
@@ -404,16 +497,16 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 
 					case SFGeneratorID::startAddrsOffset:              /* SF2.01 section 8.1.3 # 0 */
 						_buffer.PlayBegin += iter->second->val.sword;
-						
+						break;
 					case SFGeneratorID::startAddrsCoarseOffset:
-						_buffer.PlayBegin += iter->second->val.sword * 32768;	
+						_buffer.PlayBegin += iter->second->val.sword * 32768;
 						break;
 					case SFGeneratorID::endAddrsOffset:                 /* SF2.01 section 8.1.3 # 1 */
 						_buffer.PlayLength += iter->second->val.sword;
 						break;
 					case SFGeneratorID::endAddrsCoarseOffset:           /* SF2.01 section 8.1.3 # 12 */
 						_buffer.PlayLength += iter->second->val.sword * 32768;
-						
+
 						//if (voice->sample != NULL) {
 						//	z = (voice->sample->end
 						//		+ (int)_GEN(voice, GEN_ENDADDROFS)
@@ -426,13 +519,13 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 						_buffer.LoopBegin += iter->second->val.sword;
 						break;
 					case SFGeneratorID::startloopAddrsCoarseOffset:     /* SF2.01 section 8.1.3 # 45 */
-						_buffer.LoopBegin += 32768*iter->second->val.sword;
+						_buffer.LoopBegin += 32768 * iter->second->val.sword;
 						break;
 					case SFGeneratorID::endloopAddrsOffset:
 						_buffer.LoopLength += iter->second->val.sword;
 						break;
 					case SFGeneratorID::endloopAddrsCoarseOffset:
-						_buffer.LoopLength += 32768*iter->second->val.sword;
+						_buffer.LoopLength += 32768 * iter->second->val.sword;
 						break;
 
 						// Conversion functions differ in range limit
@@ -544,6 +637,10 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 					_buffer.LoopBegin = XAUDIO2_NO_LOOP_REGION;
 					_buffer.LoopLength = 0;
 				}
+
+				if (iZone->sample->pitchAdj != 0)
+			 		freq *= pow(2., (iZone->sample->pitchAdj/ 100.) / 12.);
+
 				this->setFrequency(voice, freq, origFreq);
 
 				HRESULT hr = voice->SubmitSourceBuffer(&_buffer);

@@ -599,8 +599,11 @@ void SketchMusic::View::BaseKeyboard::OnKeyDown(Windows::UI::Core::CoreWindow^ s
 	case (VirtualKey)188: ctrl = GetControl(_keys, "4_10"); break;
 	case (VirtualKey)190: ctrl = GetControl(_keys, "4_11"); break;
 
+	case VirtualKey::Down:
 	case (VirtualKey)189:
 	case VirtualKey::Subtract: ctrl = GetControl(_keys, "-"); break;
+	
+	case VirtualKey::Up:
 	case (VirtualKey)187:
 	case VirtualKey::Add: ctrl = GetControl(_keys, "+"); break;
 	case VirtualKey::Control: ctrlPressed = true; ctrl = GetControl(_keys, "ctrl"); break;
@@ -750,9 +753,12 @@ void SketchMusic::View::BaseKeyboard::OnKeyUp(Windows::UI::Core::CoreWindow^ sen
 	case VirtualKey::M: ctrl = GetControl(_keys, "4_9"); break;
 	case (VirtualKey)188: ctrl = GetControl(_keys, "4_10"); break;
 	case (VirtualKey)190: ctrl = GetControl(_keys, "4_11"); break;
+	
+	case VirtualKey::Down:
 	case (VirtualKey)189:
 	case VirtualKey::Subtract: ctrl = GetControl(_keys, "-"); break;
 	case (VirtualKey)187:
+	case VirtualKey::Up:
 	case VirtualKey::Add: ctrl = GetControl(_keys, "+"); break;
 	case VirtualKey::Control: ctrlPressed = false; ctrl = GetControl(_keys, "ctrl"); if (ctrl.first) { ReleaseKey(ctrl.first); PushKey(ctrl.first); } break;
 	case VirtualKey::Enter:

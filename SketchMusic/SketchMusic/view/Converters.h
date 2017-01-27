@@ -70,8 +70,9 @@ public:
 		switch (key->type)
 		{
 		case KeyType::note:
-			result += "" + key->value;
-			break;
+		{
+			return (ref new SNote(key->value))->ToString();
+		}
 		case KeyType::relativeNote:
 			result += "" + key->value + "r";
 			break;

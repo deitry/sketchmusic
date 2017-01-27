@@ -172,7 +172,7 @@
                             <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xE710;"/>
                                 <TextBlock Style="{StaticResource ItemTextStyle}" Text="Добавить дорожку"
                                        Name="addCtrl">
-                                <FlyoutBase.AttachedFlyout>
+                                <!--<FlyoutBase.AttachedFlyout>
                                     <Flyout x:Name="InstrumentsFlyout">
                                         <ListView x:Name="InstrumentList"
                                   ItemsSource="{Binding}"
@@ -191,7 +191,7 @@
                                             </ListView.ItemTemplate>
                                         </ListView>
                                     </Flyout>
-                                </FlyoutBase.AttachedFlyout>
+                                </FlyoutBase.AttachedFlyout>-->
                             </TextBlock>
                         </StackPanel>
                     </Button>

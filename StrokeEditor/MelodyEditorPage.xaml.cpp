@@ -8,6 +8,7 @@
 #include "concrt.h"
 #include "LibraryEntryPage.xaml.h"
 #include "CompositionEditorPage.xaml.h"
+#include "ManageInstrumentsDialog.xaml.h"
 
 using namespace StrokeEditor;
 using namespace SketchMusic;
@@ -25,10 +26,10 @@ using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
 using namespace Windows::UI::Xaml::Interop;
-
 using namespace concurrency;
 using namespace Windows::Storage;
 using namespace Windows::Storage::Streams;
+using namespace Windows::Data::Json;
 
 // Шаблон элемента пустой страницы задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -96,36 +97,36 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	((App^)App::Current)->WriteToDebugFile("Загрузка настроек завершена");
 
 	((App^)App::Current)->WriteToDebugFile("Почти всё");
-	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
-	{
-		create_task([=]
-		{
-			auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
-			return create_task(folder->GetFolderAsync("SketchMusic\\resources\\"));
-		}).then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
-		{
-			auto resourceFolder = resourceFolderTask.get();
-			return create_task(resourceFolder->GetFilesAsync());
-		}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
-		{
-			availableInstruments = ref new Platform::Collections::Vector<Instrument^>;
-			auto list = resourceListTask.get();
-			for (auto&& file : list)
-			{
-				availableInstruments->Append(ref new Instrument(file->Name));
-			}
-		}).then([=]
-		{		
-			if (InstrumentList)
-			{
-			this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
-			{
-				InstrumentList->DataContext = availableInstruments;
-			}));
-			}
-		});
-		((App^)App::Current)->WriteToDebugFile("Составляем список инструментов");
-	}));
+	//this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
+	//{
+	//	create_task([=]
+	//	{
+	//		auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
+	//		return create_task(folder->GetFolderAsync("SketchMusic\\resources\\"));
+	//	}).then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
+	//	{
+	//		auto resourceFolder = resourceFolderTask.get();
+	//		return create_task(resourceFolder->GetFilesAsync());
+	//	}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
+	//	{
+	//		availableInstruments = ref new Platform::Collections::Vector<Instrument^>;
+	//		auto list = resourceListTask.get();
+	//		for (auto&& file : list)
+	//		{
+	//			availableInstruments->Append(ref new Instrument(file->Name));
+	//		}
+	//	}).then([=]
+	//	{		
+	//		if (InstrumentList)
+	//		{
+	//		this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
+	//		{
+	//			InstrumentList->DataContext = availableInstruments;
+	//		}));
+	//		}
+	//	});
+	//	((App^)App::Current)->WriteToDebugFile("Составляем список инструментов");
+	//}));
 
 	ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
 	if (list)
@@ -162,7 +163,24 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 		{
 			// принудительно, пока нет выбора других инструментов
 			_idea->Content = ref new CompositionData();
-			_idea->Content->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
+			
+			Windows::Storage::ApplicationDataContainer^ localSettings =
+				Windows::Storage::ApplicationData::Current->LocalSettings;
+			if (localSettings->Values->HasKey("default_instr"))
+			{
+				auto str = (String^)localSettings->Values->Lookup("default_instr");
+				JsonObject^ json = ref new JsonObject;
+				if (JsonObject::TryParse(str, &json))
+				{
+					auto instr = Instrument::Deserialize(json);
+					if (instr)
+						_idea->Content->texts->Append(ref new Text(instr));
+				}
+			}
+
+			// если ключа не было или не смогли восстановить инструмент
+			if (_idea->Content->texts->Size == 0)
+				_idea->Content->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
 		}
 	}
 
@@ -734,7 +752,7 @@ void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender
 							auto preset = dynamic_cast<SketchMusic::SFReader::SFPreset^>(list->SelectedItem);
 							if (preset)
 							{
-								this->_texts->texts->Append(ref new Text(ref new Instrument(instr->_name, preset->name)));
+								this->_texts->texts->Append(ref new Text(ref new Instrument(instr->_name, instr->FileName, preset->name)));
 								list->SelectedItem = nullptr;
 							}
 						}
@@ -743,7 +761,7 @@ void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender
 			});
 		}));
 	}
-	InstrumentsFlyout->Hide();
+	//InstrumentsFlyout->Hide();
 }
 
 
@@ -765,72 +783,6 @@ void StrokeEditor::MelodyEditorPage::DeleteTextBtn_Click(Platform::Object^ sende
 			_textRow->SetText(_texts, _texts->texts->GetAt(new_index), (_compositionArgs ?_compositionArgs->Selected : -1));
 		}
 		DeleteTextFlyout->Hide();
-	}
-}
-
-
-void StrokeEditor::MelodyEditorPage::menu_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
-{
-	if (HamburgerButton == (ContentControl^)e->ClickedItem)
-	{
-		bool isOpen = !MenuSplitView->IsPaneOpen;
-		MenuSplitView->IsPaneOpen = isOpen;
-		MenuSeparator->X2 = (isOpen ? menu->ActualWidth : 22.);
-		MenuSeparator2->X2 = (isOpen ? menu->ActualWidth : 22.);
-		MenuSeparator3->X2 = (isOpen ? menu->ActualWidth : 22.);
-	}
-	else if (homeItem == (ContentControl^)e->ClickedItem)
-	{
-		GoBackBtn_Click(this, nullptr);
-	}
-	else if (SaveItem == (ContentControl^)e->ClickedItem)
-	{
-		SaveData();
-	}
-	else if (textsItem == (ContentControl^)e->ClickedItem)
-	{
-		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(textsCtrl);
-	}
-	else if (partsItem == (ContentControl^)e->ClickedItem)
-	{
-		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(partsCtrl);
-	}
-	else if (addItem == (ContentControl^)e->ClickedItem)
-	{
-		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(addCtrl);
-	}
-	else if (deleteItem == (ContentControl^)e->ClickedItem)
-	{
-		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(deleteCtrl);
-	}
-	else if (PlayItem == (ContentControl^)e->ClickedItem)
-	{
-		playAll_Click();
-	}
-	else if (ChangeViewItem == (ContentControl^)e->ClickedItem)
-	{
-		// TODO : если типов представления нот будет больше, сделать через флайаут или контентдиалог
-		viewType = viewType == ViewType::TextRow ? ViewType::ChordView : ViewType::TextRow;
-		
-		// Соответствующим образом меняем представление
-		switch (viewType)
-		{
-		case ViewType::TextRow:
-			_textRow->Visibility = Windows::UI::Xaml::Visibility::Visible;
-			_ChordViewGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-			break;
-		case ViewType::ChordView:
-			_textRow->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-			_ChordViewGrid->Visibility = Windows::UI::Xaml::Visibility::Visible;
-			UpdateChordViews(_textRow->currentPosition);
-			break;
-		}
-		
-	}
-	else if (settingsItem == (ContentControl^)e->ClickedItem)
-	{
-		//myFrame->Navigate(settingsItem->GetType());
-		SettingsView->IsPaneOpen = !SettingsView->IsPaneOpen;
 	}
 }
 
@@ -960,7 +912,26 @@ void StrokeEditor::MelodyEditorPage::MenuButton_Click(Platform::Object^ sender, 
 	}
 	else if (addItem == (ContentControl^)e->OriginalSource)
 	{
-		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(addCtrl);
+		//Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(addCtrl);
+		auto dialog = ref new ManageInstrumentsDialog;
+
+		create_task(dialog->ShowAsync())
+			.then([=](ContentDialogResult result)
+		{
+			if (result == ContentDialogResult::Primary)
+			{
+				this->Dispatcher->RunAsync(
+					Windows::UI::Core::CoreDispatcherPriority::Normal,
+					ref new Windows::UI::Core::DispatchedHandler([=]() {
+
+					Windows::Storage::ApplicationDataContainer^ localSettings =
+						Windows::Storage::ApplicationData::Current->LocalSettings;
+
+					this->_texts->texts->Append(ref new Text(dialog->Selected));
+
+				}));
+			}
+		});
 	}
 	else if (deleteItem == (ContentControl^)e->OriginalSource)
 	{

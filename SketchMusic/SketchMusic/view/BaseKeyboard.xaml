@@ -186,27 +186,27 @@
                     HorizontalAlignment="Left"
                     Tag="0">
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="11" Tag="1_1"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="12" Tag="1_1"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="12" Tag="1_2"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="13" Tag="1_2"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="13" Tag="1_3"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="14" Tag="1_3"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="14" Tag="1_4"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="15" Tag="1_4"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="15" Tag="1_5"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="16" Tag="1_5"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="16" Tag="1_6"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="17" Tag="1_6"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="17" Tag="1_7"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="18" Tag="1_7"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="18" Tag="1_8"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="19" Tag="1_8"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="19" Tag="1_9"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="20" Tag="1_9"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="20" Tag="1_10"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="21" Tag="1_10"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="21" Tag="1_11"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="22" Tag="1_11"/>
         </StackPanel>
 
         <!-- Row 2 -->
@@ -215,27 +215,27 @@
                     HorizontalAlignment="Left"
                     Tag="0">
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="7" Tag="2_1"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="6" Tag="2_1"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="8" Tag="2_2"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="7" Tag="2_2"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="9" Tag="2_3"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="8" Tag="2_3"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="10" Tag="2_4"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="9" Tag="2_4"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="11" Tag="2_5"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="10" Tag="2_5"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="12" Tag="2_6"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="11" Tag="2_6"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="13" Tag="2_7"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="12" Tag="2_7"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="14" Tag="2_8"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="13" Tag="2_8"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="15" Tag="2_9"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="14" Tag="2_9"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="16" Tag="2_10"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="15" Tag="2_10"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="17" Tag="2_11"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="16" Tag="2_11"/>
         </StackPanel>
         <!-- Row 3 -->
         <StackPanel x:Name="_Row3"
@@ -244,27 +244,27 @@
                     HorizontalAlignment="Left"
                     Tag="0">
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="2" Tag="3_1"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="3" Tag="3_1"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="3" Tag="3_2"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="4" Tag="3_2"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="4" Tag="3_3"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="5" Tag="3_3"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="5" Tag="3_4"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="6" Tag="3_4"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="6" Tag="3_5"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="7" Tag="3_5"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="7" Tag="3_6"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="8" Tag="3_6"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="8" Tag="3_7"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="9" Tag="3_7"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="9" Tag="3_8"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="10" Tag="3_8"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="10" Tag="3_9"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="11" Tag="3_9"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="11" Tag="3_10"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="12" Tag="3_10"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="12" Tag="3_11"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="13" Tag="3_11"/>
         </StackPanel>
 
         <!-- Row 4 -->
@@ -273,27 +273,27 @@
                     HorizontalAlignment="Left"
                     Tag="0">
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="-2" Tag="4_1"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="-3" Tag="4_1"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="-1" Tag="4_2"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="-2" Tag="4_2"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="0" Tag="4_3"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="-1" Tag="4_3"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="1" Tag="4_4"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="0" Tag="4_4"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="2" Tag="4_5"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="1" Tag="4_5"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="3" Tag="4_6"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="2" Tag="4_6"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="4" Tag="4_7"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="3" Tag="4_7"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="5" Tag="4_8"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="4" Tag="4_8"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="6" Tag="4_9"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="5" Tag="4_9"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="7" Tag="4_10"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="6" Tag="4_10"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="8" Tag="4_11"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="7" Tag="4_11"/>
         </StackPanel>
 
 

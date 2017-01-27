@@ -176,9 +176,10 @@ internal:
 	std::map<SFGeneratorID, SFGenAmount^> generators;
 
 	bool inZone(int key, int vel)
-	{
-		if ((keyLo || keyHi) &&
+	{ 
+		if (((keyLo || keyHi)) &&
 			((key < keyLo) || (key > keyHi))) return false;
+		
 		if (vel != -1)
 		{
 			if ((velLo || velHi) &&
@@ -259,7 +260,7 @@ internal:
 
 	bool inZone(int key, int vel = -1)
 	{
-		if (//(keyLo || keyHi) &&
+		if ((keyLo || keyHi) &&
 			((key < keyLo) || (key > keyHi))) return false;
 		if (vel != -1)
 		{

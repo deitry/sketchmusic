@@ -24,13 +24,14 @@ SketchMusic::SFReader::SFData::SFData()
 
 SFData^ SketchMusic::SFReader::SFData::ReadSFData(Platform::String^ fileName)
 {
-	auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
-	auto path = folder->Path;
-	auto fileName1 = "SketchMusic\\resources\\" + fileName;
+	//auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
+	//auto path = folder->Path;
+
+	//auto fileName1 = "SketchMusic\\resources\\" + fileName;
 
 	auto getData = create_task([=]() -> task < StorageFile^ >
 	{
-		return create_task(folder->GetFileAsync(fileName1));
+		return create_task(StorageFile::GetFileFromPathAsync(fileName));
 	})
 		.then([=](task<StorageFile^> fileOpenTask)->task < IRandomAccessStream^ >
 	{

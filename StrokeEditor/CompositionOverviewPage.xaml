@@ -14,7 +14,11 @@
     <Page.TopAppBar>
         <CommandBar x:Name="commandBar">
             <AppBarButton Name="GoMenuBtn" Label="В меню" Click="GoMenuBtn_Click" Icon="Home"/>
-            <AppBarButton Name="SetWorkingFolderBtn" Label="Выбрать папку с проектами" Click="SetWorkingFolderBtn_Click" Icon="Library"/>
+            <AppBarButton Name="SetWorkingFolderBtn" Label="Выбрать папку" Click="SetWorkingFolderBtn_Click" >
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE8B7;"/>
+                </AppBarButton.Icon>
+            </AppBarButton>
             <AppBarSeparator/>
             <AppBarButton Label="Сортировка" Icon="Sort">
                 <Button.Flyout>
