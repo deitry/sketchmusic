@@ -97,49 +97,11 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	((App^)App::Current)->WriteToDebugFile("Загрузка настроек завершена");
 
 	((App^)App::Current)->WriteToDebugFile("Почти всё");
-	//this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
-	//{
-	//	create_task([=]
-	//	{
-	//		auto folder = Windows::ApplicationModel::Package::Current->InstalledLocation;
-	//		return create_task(folder->GetFolderAsync("SketchMusic\\resources\\"));
-	//	}).then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
-	//	{
-	//		auto resourceFolder = resourceFolderTask.get();
-	//		return create_task(resourceFolder->GetFilesAsync());
-	//	}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
-	//	{
-	//		availableInstruments = ref new Platform::Collections::Vector<Instrument^>;
-	//		auto list = resourceListTask.get();
-	//		for (auto&& file : list)
-	//		{
-	//			availableInstruments->Append(ref new Instrument(file->Name));
-	//		}
-	//	}).then([=]
-	//	{		
-	//		if (InstrumentList)
-	//		{
-	//		this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
-	//		{
-	//			InstrumentList->DataContext = availableInstruments;
-	//		}));
-	//		}
-	//	});
-	//	((App^)App::Current)->WriteToDebugFile("Составляем список инструментов");
-	//}));
 
-	ListView^ list = dynamic_cast<ListView^>(TextsFlyout->Content);
-	if (list)
-	{
-		list->DataContext = _texts->texts;
-		list->SelectedIndex = 0;
-	}
+	TextsList->DataContext = _texts->texts;
+	TextsList->SelectedIndex = 0;
 
-	ListView^ list2 = dynamic_cast<ListView^>(PartsFlyout->Content);
-	if (list2)
-	{
-		list2->DataContext = _texts->getParts();
-	}
+	PartsList->DataContext = _texts->getParts();
 	
 	viewType = ViewType::TextRow;
 
@@ -161,7 +123,6 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 		}
 		else
 		{
-			// принудительно, пока нет выбора других инструментов
 			_idea->Content = ref new CompositionData();
 			
 			Windows::Storage::ApplicationDataContainer^ localSettings =
@@ -198,8 +159,22 @@ void StrokeEditor::MelodyEditorPage::LoadComposition()
 	// полагаем, что у композиции данные уже существуют
 	if (_compositionArgs->Project->Data->texts->Size == 0)
 	{
-		// принудительно, пока нет выбора других инструментов
-		_compositionArgs->Project->Data->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
+		Windows::Storage::ApplicationDataContainer^ localSettings =
+			Windows::Storage::ApplicationData::Current->LocalSettings;
+		
+		if (localSettings->Values->HasKey("default_instr"))
+		{
+			auto str = (String^)localSettings->Values->Lookup("default_instr");
+			JsonObject^ json = ref new JsonObject;
+			if (JsonObject::TryParse(str, &json))
+			{
+				auto instr = Instrument::Deserialize(json);
+				if (instr)
+					_compositionArgs->Project->Data->texts->Append(ref new Text(instr));
+			}
+		}
+		if (_compositionArgs->Project->Data->texts->Size == 0)
+			_compositionArgs->Project->Data->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
 	}
 
 	_texts = _compositionArgs->Project->Data;
@@ -327,17 +302,8 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		((App^)App::Current)->_manager->CanRedoChanged += 
 		ref new Windows::Foundation::EventHandler<bool>(this, &StrokeEditor::MelodyEditorPage::OnCanRedoChanged);
 	
-	//Binding^ canUndoBinding = ref new Binding();
-	//canUndoBinding->Source = ((App^)App::Current)->_manager->CanUndo;
-	//canUndoBinding->Mode = BindingMode::OneWay;
-	//UndoItem->DataContext = ((App^)App::Current)->_manager;
-	//UndoItem->SetBinding(UndoItem->IsEnabledProperty, canUndoBinding);
-
-	//Binding^ canRedoBinding = ref new Binding();
-	//canRedoBinding->Source = ((App^)App::Current)->_manager->CanRedo;
-	//canRedoBinding->Mode = BindingMode::OneWay;
-	//RedoItem->DataContext = ((App^)App::Current)->_manager;
-	//RedoItem->SetBinding(RedoItem->IsEnabledProperty, canRedoBinding);
+	// подписка на событие нажатия ноты, чтобы её озвучить
+	_textRow->SymbolPressed += ref new Windows::Foundation::EventHandler<SketchMusic::PositionedSymbol ^>(this, &StrokeEditor::MelodyEditorPage::OnSymbolPressed);
 }
 
 
@@ -659,15 +625,6 @@ void StrokeEditor::MelodyEditorPage::OnStateChanged(Platform::Object ^sender, Sk
 }
 
 
-void StrokeEditor::MelodyEditorPage::OnBpmChanged(Platform::Object ^sender, float args)
-{
-	//this->Dispatcher->RunAsync(
-	//	Windows::UI::Core::CoreDispatcherPriority::Normal,
-	//	ref new Windows::UI::Core::DispatchedHandler([=]() {
-	//	this->BPMText->Text = "" + ((App^)App::Current)->_player->_BPM;
-	//}));
-}
-
 void StrokeEditor::MelodyEditorPage::OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor^ pos)
 {
 	create_task(this->Dispatcher->RunAsync(
@@ -689,6 +646,25 @@ void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^
 		else
 		{
 			// даём возможность поменять инструмент текста
+			auto dialog = ref new ManageInstrumentsDialog;
+
+			create_task(dialog->ShowAsync())
+				.then([=](ContentDialogResult result)
+			{
+				if (result == ContentDialogResult::Primary)
+				{
+					this->Dispatcher->RunAsync(
+						Windows::UI::Core::CoreDispatcherPriority::Normal,
+						ref new Windows::UI::Core::DispatchedHandler([=]() {
+
+						Windows::Storage::ApplicationDataContainer^ localSettings =
+							Windows::Storage::ApplicationData::Current->LocalSettings;
+
+						this->_texts->texts->Append(ref new Text(dialog->Selected));
+
+					}));
+				}
+			});
 		}
 	}
 	TextsFlyout->Hide();
@@ -1105,4 +1081,60 @@ void StrokeEditor::MelodyEditorPage::OnKeyUp(Windows::UI::Core::CoreWindow ^send
 	using Windows::System::VirtualKey;
 	if (args->VirtualKey == VirtualKey::Control)
 		ctrlPressed = false;
+}
+
+// Озвучиваем нажатый на textRow символ
+void StrokeEditor::MelodyEditorPage::OnSymbolPressed(Platform::Object ^sender, SketchMusic::PositionedSymbol ^args)
+{
+	auto snote = dynamic_cast<SketchMusic::SNote^>(args->_sym);
+	if (snote)
+	{
+		((App^)App::Current)->_player->playSingleNote(snote, _textRow->current->instrument, 500, nullptr);
+	}
+}
+
+
+void StrokeEditor::MelodyEditorPage::TextsList_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
+{
+	Text^ text = dynamic_cast<Text^>(TextsList->SelectedItem); // e->AddedItems->First()->Current
+	if (text)
+	{
+		if (text != _textRow->current)
+		{
+			_textRow->SetText(_texts, text, _compositionArgs ? _compositionArgs->Selected : -1);
+		}
+		else
+		{
+			// даём возможность поменять инструмент текста
+			auto dialog = ref new ManageInstrumentsDialog;
+
+			create_task(dialog->ShowAsync())
+				.then([=](ContentDialogResult result)
+			{
+				if (result == ContentDialogResult::Primary)
+				{
+					this->Dispatcher->RunAsync(
+						Windows::UI::Core::CoreDispatcherPriority::Normal,
+						ref new Windows::UI::Core::DispatchedHandler([=]() {
+
+						Windows::Storage::ApplicationDataContainer^ localSettings =
+							Windows::Storage::ApplicationData::Current->LocalSettings;
+
+						_textRow->current->instrument = dialog->Selected;
+						//TextsList->ItemsSource = _texts;
+					}));
+				}
+			});
+		}
+	}
+	TextsFlyout->Hide();
+}
+
+
+void StrokeEditor::MelodyEditorPage::TextsFlyout_Opened(Platform::Object^ sender, Platform::Object^ e)
+{
+	int sel = TextsList->SelectedIndex;
+	TextsList->DataContext = nullptr;
+	TextsList->DataContext = _texts->texts;
+	TextsList->SelectedIndex = sel;
 }

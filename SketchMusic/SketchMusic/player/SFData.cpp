@@ -181,8 +181,9 @@ bool SketchMusic::SFReader::SFData::ReadPdta(DataReader^ dataReader)
 			int size = pbag->size;
 
 			SFPresetZone^ pZone = nullptr;
-			for (auto preset : this->presets)
+			for (auto&& pset : this->presets)
 			{
+				SFPreset^ preset = pset;	// явно приводим итератор к типу, чтобы удобно было контролировать при отладке
 				for (int i = 0; i < preset->zCnt; i++)
 				{
 					SFPresetZone^ zone = SFPresetZone::ReadZone(dataReader);
@@ -214,10 +215,12 @@ bool SketchMusic::SFReader::SFData::ReadPdta(DataReader^ dataReader)
 		if (pmod && pmod->size && !(pmod->size % SFMODSIZE))
 		{
 			int size = pmod->size;
-			for (auto preset : this->presets)
+			for (auto&& pset : this->presets)
 			{
-				for (auto zone : preset->zones)
+				SFPreset^ preset = pset;
+				for (auto&& zn : preset->zones)
 				{
+					SFPresetZone^ zone = zn;
 					// сравниваем индексы
 					for (int i = 0; i < zone->modCnt; i++)
 					{
@@ -240,10 +243,12 @@ bool SketchMusic::SFReader::SFData::ReadPdta(DataReader^ dataReader)
 		if (pgen && pgen->size && !(pgen->size % SFGENSIZE))
 		{
 			int size = pgen->size;
-			for (auto preset : this->presets)
+			for (auto&& pset : this->presets)
 			{
-				for (auto zone : preset->zones)
+				SFPreset^ preset = pset;
+				for (auto&& zn : preset->zones)
 				{
+					SFPresetZone^ zone = zn;
 					// сравниваем индексы
 					bool hasInstr = false;
 					for (int i = 0; i < zone->genCnt; i++)
@@ -315,8 +320,9 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 		int size = ibag->size;
 
 		SFInstrumentZone^ pZone = nullptr;
-		for (auto instrument : this->instruments)
+		for (auto&& instr : this->instruments)
 		{
+			SFInstrument^ instrument = instr;
 			for (int i = 0; i < instrument->zCnt; i++)
 			{
 				SFInstrumentZone^ zone = SFInstrumentZone::ReadZone(dataReader);
@@ -349,10 +355,12 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 	if (imod && imod->size && !(imod->size % SFMODSIZE))
 	{
 		int size = imod->size;
-		for (auto instrument : this->instruments)
+		for (auto&& instr : this->instruments)
 		{
-			for (auto zone : instrument->zones)
+			SFInstrument^ instrument = instr;
+			for (auto&& zn : instrument->zones)
 			{
+				SFInstrumentZone^ zone = zn;
 				// сравниваем индексы
 				for (int i = 0; i < zone->modCnt; i++)
 				{
@@ -375,10 +383,12 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 	if (igen && igen->size && !(igen->size % SFGENSIZE))
 	{
 		int size = igen->size;
-		for (auto instrument : this->instruments)
+		for (auto&& instr : this->instruments)
 		{
-			for (auto zone : instrument->zones)
+			SFInstrument^ instrument = instr;
+			for (auto&& zn : instrument->zones)
 			{
+				SFInstrumentZone^ zone = zn;
 				// сравниваем индексы
 				bool hasSample = false;
 				for (int i = 0; i < zone->genCnt; i++)
@@ -430,15 +440,21 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 	}
 
 	// fixup pgen 
-	for (auto preset : this->presets)
+	for (auto&& pset : this->presets)
 	{
-		for (auto zone : preset->zones)
+		SFPreset^ preset = pset;
+		for (auto&& zn : preset->zones)
 		{
-			zone->instrument = this->instruments->GetAt(zone->instrNum);
-			for (auto gen : zone->generators)
+			SFPresetZone^ zone = zn;
+			for (auto&& generator : zone->generators)
 			{
+				std::pair<SFGeneratorID, SFGenAmount^> gen = generator;
 				switch (gen.first)
 				{
+				case SketchMusic::SFReader::SFGeneratorID::instrument:
+					// иначе будем присваивать 0-й инструмент глобальным зонам
+					zone->instrument = this->instruments->GetAt(gen.second->val.sword);
+					break;
 				case SketchMusic::SFReader::SFGeneratorID::keyRange:
 					zone->keyHi = gen.second->val.range.hi;
 					zone->keyLo = gen.second->val.range.lo;
@@ -454,15 +470,18 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 
 	// fixup igen
 	// связывание сэмпла с зоной инструмента
-	for (auto instrument : this->instruments)
+	for (auto&& instr : this->instruments)
 	{
-		for (auto zone : instrument->zones)
+		SFInstrument^ instrument = instr;
+		for (auto zn : instrument->zones)
 		{
-			zone->sample = this->samples->GetAt(zone->sampleNum);
+			SFInstrumentZone^ zone = zn;
 			for (auto gen : zone->generators)
 			{
 				switch (gen.first)
 				{
+				case SketchMusic::SFReader::SFGeneratorID::sampleID:
+					zone->sample = this->samples->GetAt(gen.second->val.uword);
 				case SketchMusic::SFReader::SFGeneratorID::keyRange:
 					zone->keyHi = gen.second->val.range.hi;
 					zone->keyLo = gen.second->val.range.lo;
@@ -484,8 +503,9 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 
 	// fixup sample
 	// конвертация меток о конце семпла в смещение относительно начала... оно надо?
-	for (auto sample : this->samples)
+	for (auto&& smpl : this->samples)
 	{
+		SFSample^ sample = smpl;
 		sample->end -= sample->start;
 		sample->loopEnd -= sample->loopStart;
 		

@@ -138,9 +138,9 @@
                                 <TextBlock Style="{StaticResource ItemTextStyle}" Text="Дорожки"
                                        Name="textsCtrl">
                                 <FlyoutBase.AttachedFlyout>
-                                    <Flyout x:Name="TextsFlyout">
-                                        <ListView ItemsSource="{Binding}" x:Name="TextsList" SelectionChanged="ListView_SelectionChanged" Width="auto"
-                                                  CanReorderItems="True" CanDragItems="True" AllowDrop="True">
+                                    <Flyout x:Name="TextsFlyout" Opened="TextsFlyout_Opened">
+                                        <ListView ItemsSource="{Binding}" x:Name="TextsList" Width="auto"
+                                                  CanReorderItems="True" CanDragItems="True" AllowDrop="True" IsItemClickEnabled="True" ItemClick="TextsList_ItemClick">
                                             <ListView.ItemTemplate>
                                                 <DataTemplate>
                                                     <TextBlock FontSize="14" Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">

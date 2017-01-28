@@ -13,38 +13,27 @@ ref class SketchMusic::Player::SFSoundEngine sealed : ISoundEngine
 {
 private:
 	static const int MAX_VOICES = 16;
-	bool locked;
 
 	SketchMusic::Instrument^ _instrument;
-	std::vector<IXAudio2SourceVoice*> _voices;		// пул всех голосов
-	std::map<int, bool> _available;	// пул свободных голосов - можно выкинуть
-	int _available_voices;
 	unsigned int _currentVoice;
 
 	Microsoft::WRL::ComPtr<IXAudio2> _pXAudio2;
-	WAVEFORMATEX waveformat;
 	SFPreset^ _sfPreset;	// данные о семплах
-		// TODO : оставить только отдельные пресеты, остаьльные данные игнорировать для оптимизации
 	Platform::Array<unsigned char>^ _sData;
 
-	concurrency::cancellation_token_source* stopToken;
+	concurrency::cancellation_token_source stopToken;
 
 	void playNote(SketchMusic::INote^ note, int duration = 0, NoteOff^ noteOff = nullptr);
-		// TODO : ужесточить до SketchMusic::SNote ? Тогда Енжин сможет проигрывать только конкретизованные ноты
 	void setFrequency(IXAudio2SourceVoice* voice, double freq, double origFreq);
-
-	
-	IXAudio2SourceVoice* GetVoice();
+		
+	IXAudio2SourceVoice* InitializeVoice(SFSample^ sample);
 	void ReleaseVoice(IXAudio2SourceVoice* voice);
-	void stopVoice(IXAudio2SourceVoice* voice);
 
-	void InitializeVoices();
-	void DestroyVoices();
-
+	SFSoundEngine();
 	~SFSoundEngine();
 
 internal:
-	SFSoundEngine(Microsoft::WRL::ComPtr<IXAudio2> pXAudio2, SketchMusic::Instrument^ instrument);
+	static SFSoundEngine^ GetSFSoundEngine(Microsoft::WRL::ComPtr<IXAudio2> pXAudio2, SketchMusic::Instrument^ instrument);
 	SFSoundEngine(Microsoft::WRL::ComPtr<IXAudio2> pXAudio2, SketchMusic::SFReader::SFData^ soundFont);	// конструктор на основе уже созданного soundFont
 	
 	SFSoundEngine(SFSoundEngine^ engine);

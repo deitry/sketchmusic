@@ -119,6 +119,7 @@ public:
 	void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 	void OnLoaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 
+	event Windows::Foundation::EventHandler<PositionedSymbol^>^ SymbolPressed;
 	// как будет осуществляться вставка долей?
 	// легче всего, создав класс реализующий ISymbol и передавать как обычно.
 	// Необычным будет только действие на текст

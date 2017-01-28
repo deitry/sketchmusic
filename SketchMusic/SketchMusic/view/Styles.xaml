@@ -25,7 +25,9 @@
     <SolidColorBrush x:Key="keyColorBackground" x:Name="keyColorBackground" Color="DarkOrange"/> <!-- Фон клавиши -->
     <SolidColorBrush x:Key="blackKeyColorBackground" x:Name="blackColorBackground" Color="DarkRed"/> <!-- Фон "чёрной" клавиши -->
     <SolidColorBrush x:Key="keyBackground" x:Name="keyBackground" Color="{ThemeResource SystemAltHighColor}"/>
-    <SolidColorBrush x:Key="blackKeyBackground" x:Name="blackKeyBackground" Color="{ThemeResource SystemBaseHighColor}"/>
+    <SolidColorBrush x:Key="darkKeyBackground" x:Name="darkKeyBackground" Color="{ThemeResource SystemAltHighColor}" Opacity="0.7"/>
+    <SolidColorBrush x:Key="whiteKeyBackground" x:Name="whiteKeyBackground" Color="White"/>
+    <SolidColorBrush x:Key="blackKeyBackground" x:Name="blackKeyBackground" Color="Black"/>
     <SolidColorBrush x:Key="keyForeground" x:Name="keyForeground" Color="{ThemeResource SystemBaseHighColor}"/>
     <SolidColorBrush x:Key="pressedKeyBackground" x:Name="pressedKeyBackground" Color="{ThemeResource SystemAccentColor}" Opacity="0.6"/>
     <SolidColorBrush x:Key="disabledKeyBackground" x:Name="disabledKeyBackground" Color="{ThemeResource SystemBaseMediumLowColor}"/>
@@ -53,11 +55,17 @@
     <smv:PartTimeToTextConverter x:Key="parttime2text"/>
     <smv:PartNameToTextConverter x:Key="partname2text"/>
     <smv:BlackKeyToColorConverter x:Key="blackKey2color"
-                                  BaseKeyBrush="{StaticResource keyBackground}"
+                                  BaseKeyBrush="{StaticResource whiteKeyBackground}"
                                   BlackKeyBrush="{StaticResource blackKeyBackground}"/>
     <smv:BlackKeyToColorConverter x:Key="reversedBlackKey2color"
                                   BaseKeyBrush="{StaticResource textBrush}"
                                   BlackKeyBrush="{StaticResource altTextBrush}"/>
+    <smv:BlackKeyToColorConverter x:Key="blackKey2textcolor"
+                                  BaseKeyBrush="Black"
+                                  BlackKeyBrush="White"/>
+    <smv:BlackKeyToColorConverter x:Key="darkThemeWhiteKey2color"
+                                  BlackKeyBrush="Transparent"
+                                  BaseKeyBrush="{StaticResource darkKeyBackground}"/>
     <smv:BoolToColorConverter     x:Key="pressed2color"
                                   KeyBrush="{StaticResource keyBackground}"
                                   PressedKeyBrush="{StaticResource pressedKeyBackground}"/>
@@ -92,13 +100,15 @@
                         <Grid>
                             <Rectangle Fill="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
                                     Converter={StaticResource blackKey2color}}" Opacity="0.9"/>
+                            <Rectangle Fill="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
+                                    Converter={StaticResource darkThemeWhiteKey2color}}" Opacity="0.9"/>
                             <Rectangle Fill="{TemplateBinding Background}" Opacity="1.0"/>
                             <TextBlock
                                         FontFamily="Segoe MDL2 Assets"
                                         FontSize="{TemplateBinding FontSize}"
                                         HorizontalAlignment="Left" VerticalAlignment="Bottom"
                                         Foreground="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
-                                    Converter={StaticResource reversedBlackKey2color}}"
+                                    Converter={StaticResource blackKey2textcolor}}"
                                         >
                                         <Run Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource key2string}}"/>
                             </TextBlock>
@@ -124,8 +134,7 @@
                                 Width="{TemplateBinding Width}"
                                 >
                         <Grid>
-                            <Rectangle Fill="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, 
-                                    Converter={StaticResource blackKey2color}}" Opacity="1"/>
+                            <Rectangle Fill="{StaticResource keyBackground}" Opacity="1"/>
                             <Rectangle Fill="{Binding IsEnabled, RelativeSource={RelativeSource TemplatedParent}, 
                                     Converter={StaticResource enabled2color}}" Opacity="0.1"/>
                             <Rectangle Fill="{TemplateBinding Background}" Opacity="0.8"/>

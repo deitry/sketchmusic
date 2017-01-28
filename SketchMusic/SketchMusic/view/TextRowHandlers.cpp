@@ -118,6 +118,9 @@ void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Wind
 		return;
 	}
 
+	auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
+	if (psym) SymbolPressed(this, psym);
+
 	_scrollViewer->HorizontalScrollMode = ScrollMode::Disabled;
 	_scrollViewer->VerticalScrollMode = ScrollMode::Disabled;
 	_lastPoint = e->GetCurrentPoint(_canvas)->Position;

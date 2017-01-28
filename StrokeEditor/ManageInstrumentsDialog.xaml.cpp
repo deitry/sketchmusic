@@ -150,6 +150,8 @@ void StrokeEditor::ManageInstrumentsDialog::InstrumentList_ItemClick(Platform::O
 	auto instr = dynamic_cast<Instrument^>(e->ClickedItem);
 	if (instr)
 	{
+		// cбрасываем список, чтобы во время выполнения асинхронного чтения не возникало желания ткнуть в него
+		//PresetList->Items->Clear();
 		// спрашиваем у плеера, загружен ли такой инструмент и есть ли у него пресеты
 		// - выводим окошко со списком доступных пресетов
 		this->Dispatcher->RunAsync(

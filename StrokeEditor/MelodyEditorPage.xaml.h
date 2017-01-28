@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <map>
 #include "MelodyEditorPage.g.h"
 #include "CompositionEditorPage.xaml.h"
 
@@ -93,7 +94,6 @@ namespace StrokeEditor
 		CompositionNavigationArgs^ _compositionArgs;
 		void LoadComposition();
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
-		void OnBpmChanged(Platform::Object ^sender, float args);
 		void OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor^ pos);
 
 		Windows::Foundation::Collections::IVector<SketchMusic::Instrument^>^ availableInstruments;
@@ -118,5 +118,8 @@ namespace StrokeEditor
 		void OnCanUndoChanged(Platform::Object ^sender, bool args);
 		void OnKeyDown(Windows::UI::Core::CoreWindow ^sender, Windows::UI::Core::KeyEventArgs ^args);
 		void OnKeyUp(Windows::UI::Core::CoreWindow ^sender, Windows::UI::Core::KeyEventArgs ^args);
+		void OnSymbolPressed(Platform::Object ^sender, SketchMusic::PositionedSymbol ^args);
+		void TextsList_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
+		void TextsFlyout_Opened(Platform::Object^ sender, Platform::Object^ e);
 	};
 }
