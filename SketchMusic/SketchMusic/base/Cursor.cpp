@@ -49,6 +49,8 @@ SketchMusic::Cursor^ SketchMusic::Cursor::dec()
 
 bool SketchMusic::Cursor::EQ(SketchMusic::Cursor^ that)
 {
+	if (that == nullptr) return false;
+
 	if ((this->_beat == that->_beat) && (this->_tick == that->_tick))
 	{
 		return true;

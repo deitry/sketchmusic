@@ -427,3 +427,47 @@ void StrokeEditor::LibraryOverviewPage::HelpBtn_Click(Platform::Object^ sender, 
 {
 
 }
+
+
+void StrokeEditor::LibraryOverviewPage::Grid_Holding(Platform::Object^ sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs^ e)
+{
+	// пропускаем только нажатие тачем
+	if ((e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||
+		(e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Pen))
+		return;
+
+	OpenContextMenu(sender, e->GetPosition(nullptr));
+}
+
+
+void StrokeEditor::LibraryOverviewPage::Grid_RightTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs^ e)
+{
+	// не пропускаем тач
+	if (e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Touch)
+		return;
+
+	OpenContextMenu(sender, e->GetPosition(nullptr));
+}
+
+void StrokeEditor::LibraryOverviewPage::OpenContextMenu(Platform::Object ^ ctrl, Windows::Foundation::Point point)
+{
+	if (_CurrentContext) return;
+	if (ctrl == nullptr) return;
+
+	FrameworkElement^ element = dynamic_cast<FrameworkElement^>(ctrl);
+	if (element == nullptr) return;
+
+	unsigned int index = 0;
+	if (LibView->Items->IndexOf(element->DataContext, &index))
+	{
+		_CurrentContext = element;
+		LibView->SelectedIndex = index;
+		LibraryItemContextMenu->ShowAt(nullptr, point);
+	}
+}
+
+
+void StrokeEditor::LibraryOverviewPage::LibraryItemContextMenu_Closed(Platform::Object^ sender, Platform::Object^ e)
+{
+	_CurrentContext = nullptr;
+}

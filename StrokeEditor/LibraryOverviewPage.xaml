@@ -25,6 +25,16 @@
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
+
+        <MenuFlyout x:Key="LibraryItemContextMenu" x:Name="LibraryItemContextMenu"
+                    Closed="LibraryItemContextMenu_Closed">
+            <MenuFlyoutItem Text="Изменить оценку" x:Name="RateItem"/>
+            <MenuFlyoutItem Text="Изменить теги" x:Name="EditTagsItem"/>
+            <MenuFlyoutSeparator/>
+            <MenuFlyoutItem Text="Создать копию" x:Name="CopyItem"/>
+            <MenuFlyoutItem Text="Переименовать" x:Name="RenameItem"/>
+            <MenuFlyoutItem Text="Удалить" x:Name="DeleteItem"/>
+        </MenuFlyout>
     </Page.Resources>
 
     <Page.TopAppBar>
@@ -75,12 +85,17 @@
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0" VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Auto">
-            <GridView Name="LibView" IsItemClickEnabled="True" SelectionChanged="LibView_SelectionChanged">
+        <ScrollViewer Grid.Row="0" VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Auto"
+                      IsHoldingEnabled="False" IsRightTapEnabled="False">
+            <GridView Name="LibView" IsItemClickEnabled="True" SelectionChanged="LibView_SelectionChanged"
+                      IsHoldingEnabled="False" IsRightTapEnabled="False">
                 <GridView.ItemTemplate>
                     <DataTemplate>
                         <Grid VerticalAlignment="Stretch" HorizontalAlignment="Left" Height="130" Width="180" 
-                              BorderBrush="{ThemeResource AppBarSeparatorForeground}" BorderThickness="1">
+                              BorderBrush="{ThemeResource AppBarSeparatorForeground}" BorderThickness="1"
+                              Background="Transparent"
+                              Holding="Grid_Holding" RightTapped="Grid_RightTapped"
+                              IsHoldingEnabled="True" IsRightTapEnabled="True">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>

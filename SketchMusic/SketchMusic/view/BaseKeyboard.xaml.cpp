@@ -330,7 +330,7 @@ void SketchMusic::View::BaseKeyboard::OnPushKey(Key ^ key)
 
 void SketchMusic::View::BaseKeyboard::onKeyboardControlPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
-	// нажатие мышкой - только для нот
+	// не пропускаем тач
 	if (e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Touch)
 		return;
 
@@ -349,11 +349,9 @@ void SketchMusic::View::BaseKeyboard::onKeyboardControlPressed(Platform::Object^
 
 void SketchMusic::View::BaseKeyboard::onKeyboardControlEntered(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
-	// нажатие тачем или мышкой, если она не отжималась
+	// пропускаем только нажатие тачем, не пропускаем мышку и стилус
 	if ((e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||
 		(e->Pointer->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Pen)
-		//&& (!mousePressed)	// оставим на будущее, когда я придумаю, как сделать отпускание.
-		// а может, эта штука вовсе не нужна
 		)
 		return;
 
@@ -454,10 +452,23 @@ void SketchMusic::View::BaseKeyboard::OnHolding(Platform::Object ^ sender, Windo
 
 }
 
-inline std::pair<ContentControl^, bool> GetControl(std::vector<std::pair<ContentControl^, bool>> keys, String^ tag)
+std::pair<ContentControl^, bool> SketchMusic::View::BaseKeyboard::GetControl(std::vector<std::pair<ContentControl^, bool>> keys, String^ tag)
 {
 	for (auto&& ctrl : keys)
 	{
+		auto key = dynamic_cast<SketchMusic::View::Key^>(ctrl.first->Content);
+		if (key == nullptr) continue;
+
+		if (key->type == KeyType::note || key->type == KeyType::genericNote)
+		{
+			// проверка на тип раскладки - только для нот
+			auto el = dynamic_cast<FrameworkElement^>(ctrl.first->Parent);
+			if (el == nullptr) continue;
+			auto str = (String^)el->Tag;int type = std::stoi(str->Data());
+			KeyboardType kType = static_cast<KeyboardType>(type);
+			if (kType != _layout) continue;
+		}
+
 		if (((String^)ctrl.first->Tag) == tag)
 		{
 			return ctrl;
@@ -557,7 +568,10 @@ void SketchMusic::View::BaseKeyboard::OnKeyDown(Windows::UI::Core::CoreWindow^ s
 			ctrl = GetControl(_keys, "quant");
 		else ctrl = GetControl(_keys, "2_2"); 
 		break;
-	case VirtualKey::W: ctrl = GetControl(_keys, "2_3"); break;
+	case VirtualKey::W: 
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "end");
+		else ctrl = GetControl(_keys, "2_3"); break;
 	case VirtualKey::E: 
 		if (ctrlPressed)
 			ctrl = GetControl(_keys, "eraser");
@@ -573,6 +587,8 @@ void SketchMusic::View::BaseKeyboard::OnKeyDown(Windows::UI::Core::CoreWindow^ s
 	case VirtualKey::I: ctrl = GetControl(_keys, "2_9"); break;
 	case VirtualKey::O: ctrl = GetControl(_keys, "2_10"); break;
 	case VirtualKey::P: ctrl = GetControl(_keys, "2_11"); break;
+	case (VirtualKey)219: ctrl = GetControl(_keys, "2_12"); break;
+	case (VirtualKey)221: ctrl = GetControl(_keys, "2_13"); break;
 	case VirtualKey::A: ctrl = GetControl(_keys, "3_2"); break;
 	case VirtualKey::S: if (!ctrlPressed) ctrl = GetControl(_keys, "3_3"); break;
 	case VirtualKey::D: ctrl = GetControl(_keys, "3_4"); break;
@@ -598,6 +614,7 @@ void SketchMusic::View::BaseKeyboard::OnKeyDown(Windows::UI::Core::CoreWindow^ s
 	case VirtualKey::M: ctrl = GetControl(_keys, "4_9"); break;
 	case (VirtualKey)188: ctrl = GetControl(_keys, "4_10"); break;
 	case (VirtualKey)190: ctrl = GetControl(_keys, "4_11"); break;
+	case (VirtualKey)191: ctrl = GetControl(_keys, "4_12"); break;
 
 	case VirtualKey::Down:
 	case (VirtualKey)189:
@@ -712,7 +729,10 @@ void SketchMusic::View::BaseKeyboard::OnKeyUp(Windows::UI::Core::CoreWindow^ sen
 			ctrl = GetControl(_keys, "quant");
 		else ctrl = GetControl(_keys, "2_2");
 		break;
-	case VirtualKey::W: ctrl = GetControl(_keys, "2_3"); break;
+	case VirtualKey::W: 
+		if (ctrlPressed)
+			ctrl = GetControl(_keys, "end");
+		else ctrl = GetControl(_keys, "2_3"); break;
 	case VirtualKey::E:
 		if (ctrlPressed)
 			ctrl = GetControl(_keys, "eraser");
@@ -728,6 +748,8 @@ void SketchMusic::View::BaseKeyboard::OnKeyUp(Windows::UI::Core::CoreWindow^ sen
 	case VirtualKey::I: ctrl = GetControl(_keys, "2_9"); break;
 	case VirtualKey::O: ctrl = GetControl(_keys, "2_10"); break;
 	case VirtualKey::P: ctrl = GetControl(_keys, "2_11"); break;
+	case (VirtualKey)219: ctrl = GetControl(_keys, "2_12"); break;
+	case (VirtualKey)221: ctrl = GetControl(_keys, "2_13"); break;
 	case VirtualKey::A: ctrl = GetControl(_keys, "3_2"); break;
 	case VirtualKey::S: ctrl = GetControl(_keys, "3_3"); break;
 	case VirtualKey::D: ctrl = GetControl(_keys, "3_4"); break;
@@ -753,7 +775,8 @@ void SketchMusic::View::BaseKeyboard::OnKeyUp(Windows::UI::Core::CoreWindow^ sen
 	case VirtualKey::M: ctrl = GetControl(_keys, "4_9"); break;
 	case (VirtualKey)188: ctrl = GetControl(_keys, "4_10"); break;
 	case (VirtualKey)190: ctrl = GetControl(_keys, "4_11"); break;
-	
+	case (VirtualKey)191: ctrl = GetControl(_keys, "4_12"); break;
+
 	case VirtualKey::Down:
 	case (VirtualKey)189:
 	case VirtualKey::Subtract: ctrl = GetControl(_keys, "-"); break;
@@ -952,6 +975,7 @@ void SketchMusic::View::BaseKeyboard::MenuFlyoutItem_Click(Platform::Object^ sen
 		{
 		case KeyboardType::Basic:
 		case KeyboardType::Generic:
+		case KeyboardType::Classic:
 			for (auto&& row : mainPanel->Children)
 			{
 				auto el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));

@@ -40,16 +40,17 @@
 
         <Grid Grid.Row="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="2*"/>
-                <RowDefinition Height="*"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
 
-            <smv:CompositionView Grid.Row="0"
+            <smv:CompositionView Grid.Row="2"
                                  x:Name="CompositionView"
                                  HorizontalAlignment="Center"
                                  Margin="10"
-                                 Width="800"/>
+                                 Width="800"
+                                 Height="100"/>
 
             <Slider Grid.Row="1" 
                 HorizontalAlignment="Stretch"
@@ -57,7 +58,7 @@
                 Margin="10"
                 VerticalAlignment="Center"/>
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal"
-                    Grid.Row="2">
+                    Grid.Row="0">
                 <Button x:Name="PlayCompositionBtn" FontFamily="Segoe MDL2 Assets" Content="&#xE768;" Margin="5,0,5,0" Click="PlayCompositionBtn_Click"/>
                 <CheckBox x:Name="NeedMetronomeChbx" Content="Метроном" Click="NeedMetronomeChbx_Click"/>
                 <CheckBox x:Name="NeedGenericChbx" Content="Обобщённые ноты" Click="NeedGenericChbx_Click"/>
@@ -147,8 +148,8 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="8*"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="5*"/>
+                                <ColumnDefinition Width="3*"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="{Binding DataContext,
                                                                 RelativeSource={RelativeSource TemplatedParent},

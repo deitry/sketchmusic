@@ -195,3 +195,13 @@ void StrokeEditor::ManageInstrumentsDialog::Button_Click(Platform::Object^ sende
 		((App^)Application::Current)->_player->playSingleNote(ref new SketchMusic::SNote(0), instrument,500, nullptr);
 	}
 }
+
+
+void StrokeEditor::ManageInstrumentsDialog::ManageInstrumentsDialog_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
+{
+	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width;
+	// адаптация к ширине экрана
+	if (width > 500)
+		width *= 0.9;
+	this->Width = width;
+}

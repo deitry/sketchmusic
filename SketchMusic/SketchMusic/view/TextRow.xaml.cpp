@@ -131,6 +131,8 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 			ContentControl^ ctrl = ref new ContentControl;
 			ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerPressed);
 			ctrl->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &SketchMusic::View::TextRow::OnPointerMoved);
+			ctrl->RightTapped += ref new Windows::UI::Xaml::Input::RightTappedEventHandler(this, &SketchMusic::View::TextRow::OnRightTapped);
+			ctrl->Holding += ref new Windows::UI::Xaml::Input::HoldingEventHandler(this, &SketchMusic::View::TextRow::OnHolding);
 			ctrl->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("PlaceholderControlStyle"));
 			ctrl->DataContext = (prev + i + 1);
 			// TODO : настраивать Width согласно newScale
@@ -539,7 +541,7 @@ Cursor^ SketchMusic::View::TextRow::GetPositionOfControl(Windows::UI::Xaml::Cont
 		currentRowIndex += rowPanel->Children->Size;
 	}
 
-	return nullptr;
+	return ref new Cursor;
 }
 
 Point SketchMusic::View::TextRow::GetCoordinatsOfPosition(Cursor^ pos)
@@ -700,4 +702,39 @@ void SketchMusic::View::TextRow::SetSymbolView(PositionedSymbol ^ oldSymbol, Pos
 	auto ctrl = GetSymbolView(oldSymbol);
 	ctrl->DataContext = newSymbol;
 	SetNoteOnCanvas(ctrl);
+}
+
+void SketchMusic::View::TextRow::OpenPlaceholderContextDialog(ContentControl^ ctrl, Windows::Foundation::Point point)
+{
+	if (CurrentHolded) return;
+	if (ctrl == nullptr) return;
+
+	CurrentHolded = ctrl;
+	ctrl->Background = SelectedPlaceholderBackground;
+	PlaceholderContextMenu->ShowAt(ctrl, point);
+}
+
+void SketchMusic::View::TextRow::OnRightTapped(Platform::Object ^sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs ^e)
+{
+	// не пропускаем тач
+	if (e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Touch)
+		return;
+
+	ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
+	if (ctrl)
+		OpenPlaceholderContextDialog(ctrl, e->GetPosition(ctrl));
+}
+
+
+void SketchMusic::View::TextRow::OnHolding(Platform::Object ^sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs ^e)
+{
+	// пропускаем только нажатие тачем
+	if ((e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||
+		(e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Pen))
+		return;
+
+	ContentControl^ ctrl = dynamic_cast<ContentControl^>(sender);
+	if (ctrl)
+		OpenPlaceholderContextDialog(ctrl, e->GetPosition(ctrl));
+
 }

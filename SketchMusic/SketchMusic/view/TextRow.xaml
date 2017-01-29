@@ -14,6 +14,26 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="ms-appx:///SketchMusic/SketchMusic/view/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="SelectedPlaceholderBackground" x:Name="SelectedPlaceholderBackground" Color="{ThemeResource SystemAccentColorLight2}"/>
+
+            <MenuFlyout x:Key="PlaceholderContextMenu" x:Name="PlaceholderContextMenu">
+                <MenuFlyoutItem Text="Вставить" x:Name="PasteItem"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Добавить доли" x:Name="AddBeatItem"/>
+                <MenuFlyoutItem Text="Удалить доли" x:Name="DeleteBeatItem"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Изменить размер" x:Name="SetMeterItem"/>
+                <MenuFlyoutItem Text="Изменить ключ" x:Name="SetClefItem"/>
+            </MenuFlyout>
+
+            <MenuFlyout x:Key="SelectionContextMenu" x:Name="SelectionContextMenu">
+                <MenuFlyoutItem Text="Копировать" x:Name="CopySelectionItem"/>
+                <MenuFlyoutItem Text="Вставить" x:Name="PasteSelectionItem"/>
+                <MenuFlyoutItem Text="Удалить" x:Name="DeleteSelectionItem"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Транспонировать" x:Name="TransposeItem"/>
+            </MenuFlyout>
         </ResourceDictionary>
     </UserControl.Resources>
 

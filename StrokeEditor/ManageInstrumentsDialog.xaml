@@ -16,7 +16,8 @@
     PrimaryButtonText="Ок"
     SecondaryButtonText="Отмена"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
-    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick"
+    SizeChanged="ManageInstrumentsDialog_SizeChanged">
 
     <Grid HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>

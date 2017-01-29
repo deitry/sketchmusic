@@ -90,8 +90,6 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 	auto end = dynamic_cast<SNoteEnd^>(note);
 	if (end) return;
 
-	stopToken = cancellation_token_source();
-
 	// - проходимся по всем зонам и т.д., вычисляем конечные параметры звука
 	if (_sfPreset)
 	{
@@ -258,6 +256,7 @@ void SketchMusic::Player::SFSoundEngine::Play(Windows::Foundation::Collections::
 void SketchMusic::Player::SFSoundEngine::Stop()
 {
 	stopToken.cancel();
+	stopToken = cancellation_token_source();
 }
 
 // попользовались - избавились

@@ -9,6 +9,13 @@
 
     <Page.Resources>
         <local:FileToTextConverter x:Key="file2text"/>
+
+        <MenuFlyout x:Key="OverviewItemContextMenu" x:Name="OverviewItemContextMenu" 
+                    Opened="OverviewItemContextMenu_Opened" Closed="OverviewItemContextMenu_Closed">
+            <MenuFlyoutItem Text="Создать копию" x:Name="CopyItem"/>
+            <MenuFlyoutItem Text="Переименовать" x:Name="RenameItem"/>
+            <MenuFlyoutItem Text="Удалить" x:Name="DeleteItem"/>
+        </MenuFlyout>
     </Page.Resources>
     
     <Page.TopAppBar>
@@ -20,35 +27,10 @@
                 </AppBarButton.Icon>
             </AppBarButton>
             <AppBarSeparator/>
-            <AppBarButton Label="Сортировка" Icon="Sort">
-                <Button.Flyout>
-                    <Flyout x:Name="SortingFlyout">
-                        <ListView Name="SortingList">
-                            <TextBlock Text="по дате"/>
-                            <TextBlock Text="по оценке"/>
-                        </ListView>
-                    </Flyout>
-                </Button.Flyout>
-            </AppBarButton>
-            <AppBarButton Label="Фильтрация" Icon="Filter">
-                <Button.Flyout>
-                    <Flyout x:Name="FilterFlyout">
-                        <ListView Name="FilterList" SelectionMode="Multiple" SelectionChanged="FilterList_SelectionChanged">
-                            <TextBlock Text="последние 3 дня" Tag="0"/>
-                            <TextBlock Text="оценка 6 и выше" Tag="1"/>
-                            <TextBlock Text="имеет тег 'todo'" Tag="2"/>
-                        </ListView>
-                    </Flyout>
-                </Button.Flyout>
-            </AppBarButton>
             <AppBarButton Name="RefreshBtn" Label="Обновить" Icon="Refresh" Click="RefreshBtn_Click"/>
             <AppBarSeparator/>
             <AppBarButton Name="CreateEntryBtn" Label="Создать новую идею" Icon="Add" Click="CreateEntryBtn_Click"/>
             <AppBarSeparator/>
-            <!--<AppBarButton Name="PlayBtn" Label="Воспроизвести" Icon="Play" HorizontalAlignment="Right"
-                        IsEnabled="False" 
-                        Click="PlayBtn_Click"/>-->
-            <!-- IsEnabled="{Binding ElementName=LibView, Path=SelectedItem, Converter={StaticResource ObjectToBoolConverter}}" -->
             <AppBarButton Name="EditBtn" Label="Редактировать" Icon="Edit" HorizontalAlignment="Right" 
                                 IsEnabled="False" 
                                 Click="EditBtn_Click"/>
@@ -59,7 +41,8 @@
         <ListView x:Name="CompositionListView" SelectionChanged="CompositionListView_SelectionChanged">
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Grid BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}" BorderThickness="1">
+                    <Grid BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}" BorderThickness="1"
+                          Holding="Grid_Holding" RightTapped="Grid_RightTapped">
                         <TextBlock Text="{Binding Converter={StaticResource file2text}}"/>
                     </Grid>
                 </DataTemplate>

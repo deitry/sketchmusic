@@ -1096,7 +1096,7 @@ void StrokeEditor::MelodyEditorPage::OnSymbolPressed(Platform::Object ^sender, S
 
 void StrokeEditor::MelodyEditorPage::TextsList_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
 {
-	Text^ text = dynamic_cast<Text^>(TextsList->SelectedItem); // e->AddedItems->First()->Current
+	Text^ text = dynamic_cast<Text^>(e->ClickedItem); // TextsList->SelectedItem
 	if (text)
 	{
 		if (text != _textRow->current)

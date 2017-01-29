@@ -35,7 +35,7 @@
                     </Grid>
                 </Button.Content>
             </Button>
-            <Line Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="150" Y1="0" Y2="0" HorizontalAlignment="Stretch" Margin="10"/>
+            <Line Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="210" Y1="0" Y2="0" HorizontalAlignment="Stretch" Margin="10"/>
             <Button Name="OpenCompositionLibraryBtn" Click="OpenCompositionLibraryBtn_Click" Style="{StaticResource MenuBtnStyle}">
                 <Button.Content>
                     <Grid Width="{Binding Width, ElementName=OpenCompositionLibraryBtn}">
@@ -52,7 +52,7 @@
                     </Grid>
                 </Button.Content>
             </Button>
-            <Line Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="150" Y1="0" Y2="0" HorizontalAlignment="Stretch" Margin="10"/>
+            <Line Stroke="{ThemeResource SystemControlForegroundBaseLowBrush}" X1="0" X2="210" Y1="0" Y2="0" HorizontalAlignment="Stretch" Margin="10"/>
             <Button Name="HelpBtn" Click="HelpBtn_Click" Style="{StaticResource MenuBtnStyle}">
                 <Button.Content>
                     <Grid Width="{Binding Width, ElementName=OpenCompositionLibraryBtn}">

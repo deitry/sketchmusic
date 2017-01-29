@@ -56,6 +56,9 @@ namespace SketchMusic
 
 			std::vector<std::pair<Windows::UI::Xaml::Controls::ContentControl^, bool>> _keys;	// сохраняем ссылки на клавиши, чтобы уведомлять их об изменении состояния
 																// вторым параметром отмечаем, что клавиша в данный момент нажата
+			
+			std::pair<Windows::UI::Xaml::Controls::ContentControl^, bool> 
+				GetControl(std::vector<std::pair<Windows::UI::Xaml::Controls::ContentControl^, bool>> keys, Platform::String^ tag);
 
 			concurrency::cancellation_token_source releaseToken;
 			concurrency::cancellation_token_source HoldingTokenSource;

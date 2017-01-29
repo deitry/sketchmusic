@@ -29,5 +29,6 @@ namespace StrokeEditor
 
 		//SketchMusic::CompositionData^ test;
 		//SketchMusic::Text^ testText;
+		void ManageInstrumentsDialog_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
 	};
 }

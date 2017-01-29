@@ -33,6 +33,13 @@ namespace StrokeEditor
 		void SetWorkingFolderBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void PlayBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void CompositionListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e);
+		void Grid_Holding(Platform::Object^ sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs^ e);
+		void Grid_RightTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs^ e);
+
+		void OpenContextMenu(Platform::Object^ ctrl, Windows::Foundation::Point point);
+		FrameworkElement^ _CurrentContext;
+		void OverviewItemContextMenu_Opened(Platform::Object^ sender, Platform::Object^ e);
+		void OverviewItemContextMenu_Closed(Platform::Object^ sender, Platform::Object^ e);
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]

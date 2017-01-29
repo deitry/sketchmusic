@@ -30,6 +30,7 @@ private:
 	std::vector<Windows::UI::Xaml::Controls::ContentControl^> notes;
 	Windows::UI::Xaml::ResourceDictionary^ _dict;
 	ContentControl^ _dragged;
+	ContentControl^ CurrentHolded;	// для выделения удерживаемого плейсхолдера
 	Windows::Foundation::Point _lastPoint;
 	ContentControl^ _currentSnapPoint;
 	ContentControl^ _snapPoint;
@@ -52,8 +53,6 @@ private:
 
 internal:
 	// вспомогательные функции для удобной работы с символами
-	//void InsertSpaceSymbol(PositionedSymbol^ symbol);	// нужно будет не просто делать один из плейсхолдеров шире,
-	// но ещё и перемещать "пробел", если в результате масштаба данный плейсхолдер окажется невидимым
 	ContentControl^ GetControlAtPos(Cursor^ pos, int offset = 0);
 	int GetControlIndexAtPos(Cursor^ pos, int offset);
 
@@ -67,6 +66,7 @@ internal:
 	void InsertLineBreak(Cursor^ pos);
 	void DeleteLineBreak(Cursor^ pos);
 	void SetBackgroundColor(ContentControl^ ctrl);
+	void OpenPlaceholderContextDialog(ContentControl^ ctrl, Windows::Foundation::Point point);
 
 	double GetOffsetY(ISymbol^ sym);
 	void SetNoteOnCanvas(ContentControl^ note);
@@ -79,7 +79,11 @@ public:
 	property SketchMusic::Commands::Command^ DeleteSymCommand;	// удаление символа
 	property SketchMusic::Commands::Command^ AddMultipleSymCommand;	// удаление символа
 	property SketchMusic::Commands::Command^ DeleteMultipleSymCommand;	// удаление символа
+	property SketchMusic::Commands::Command^ AddBeatCommand;	// удаление символа
+	property SketchMusic::Commands::Command^ DeleteBeatCommand;	// удаление символа
 
+	property SketchMusic::Commands::Handler^ AddBeatHandler;
+	property SketchMusic::Commands::Handler^ DeleteBeatHandler;
 
 	property Cursor^ currentPosition;
 	property Text^ current;
@@ -114,14 +118,21 @@ public:
 
 	// обработка событий
 	void OnPointerWheelChanged(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
+	void HighlightSnapPoint(Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 	void OnPointerMoved(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 	void OnPointerPressed(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 	void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 	void OnLoaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 
+	void AddBeatItem_Click(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
+	void DeleteBeatItem_Click(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
+	void PlaceholderContextMenuOnClosed(Object^ sender, Platform::Object^ args);
+
 	event Windows::Foundation::EventHandler<PositionedSymbol^>^ SymbolPressed;
 	// как будет осуществляться вставка долей?
 	// легче всего, создав класс реализующий ISymbol и передавать как обычно.
 	// Необычным будет только действие на текст
+	void OnRightTapped(Platform::Object ^sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs ^e);
+	void OnHolding(Platform::Object ^sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs ^e);
 };
 
