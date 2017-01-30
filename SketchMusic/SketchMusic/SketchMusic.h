@@ -28,6 +28,7 @@ namespace SketchMusic
 	ref class Cursor;
 	ref class PartDefinition;
 	ref class Idea;
+	ref class PositionedIdea;
 	
 	public enum class IdeaCategoryEnum
 		// категория, к которой относится идея. Будет использоваться 

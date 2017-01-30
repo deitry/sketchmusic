@@ -180,6 +180,9 @@
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="view\IdeaMap.xaml.h">
+      <DependentUpon>view\IdeaMap.xaml</DependentUpon>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -211,6 +214,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SettingsPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="view\IdeaMap.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
@@ -292,6 +298,9 @@
     </ClCompile>
     <ClCompile Include="sqlite3.c">
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsWinRT>
+    </ClCompile>
+    <ClCompile Include="view\IdeaMap.xaml.cpp">
+      <DependentUpon>view\IdeaMap.xaml</DependentUpon>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

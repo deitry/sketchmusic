@@ -34,7 +34,7 @@ namespace SketchMusic
 		//SketchMusic::Idea^	Parent;			// ссылка на родительскую идею.
 		property int Parent;					// хэш родительской идеи
 		property byte Rating;					// оценка, данная данной идее
-		
+
 			// ссылки на объекты не продержатся дальше первого же удаления-восстановления объектов из бд (мы же собираемся их хранить?)
 
 			// Может, это и не актуально, но мне кажется, что будет весьма полезно иметь связи с исходной идеей.
@@ -53,11 +53,11 @@ namespace SketchMusic
 		property Platform::String^ Projects;	// в каких проектах идея задействована
 		property long long CreationTime;		// время и дата создания идеи. Пригодится для сортировки и фильтрации
 		property long long ModifiedTime;
-		
+
 		// Унаследовано через INotifyPropertyChanged
 		//virtual event PropertyChangedEventHandler ^ PropertyChanged;
 		//void RaisePropertyChanged() { PropertyChanged(this, ref new PropertyChangedEventArgs("")); }
-		
+
 		// время последней модификации - нужно?
 	};
 
@@ -76,12 +76,12 @@ namespace SketchMusic
 			//t.tm_hour -= 4;
 			//printf_s("%04i/%02i/%02i %02i:%02i:%02i\n\n", t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
 			// TODO : сделать через форматирование
-			Platform::String^ str = "" + t.tm_year + "." + 
-				((t.tm_mon < 10) ? "0" : "") + t.tm_mon + "." + 
+			Platform::String^ str = "" + t.tm_year + "." +
+				((t.tm_mon < 10) ? "0" : "") + t.tm_mon + "." +
 				((t.tm_mday < 10) ? "0" : "") + t.tm_mday + " " +
 				t.tm_hour;
 			str += ":" + ((t.tm_min < 10) ? "0" : "") + t.tm_min + ":" +
-						 ((t.tm_sec<10) ? "0" : "") + t.tm_sec;
+				((t.tm_sec < 10) ? "0" : "") + t.tm_sec;
 			return str;
 		}
 		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
@@ -90,5 +90,19 @@ namespace SketchMusic
 		}
 
 		TimeToStrConverter() {}
+	};
+
+	// Класс для размещения идеи в тексте. Аналогично PositionedSymbol имеет точку вставки, но помимо этого содержит так же длину
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+	public ref class PositionedIdea sealed
+	{
+	public:
+		// вообще говоря, вряд ли мы будем пользоваться прямо-таки точным расположением и
+		// в большинстве случаев скорее всего хватит указания номера доли.
+
+		property SketchMusic::Cursor^ Pos;		// исходное положение
+		property SketchMusic::Cursor^ Length;	// длина. Праввая граница рассчитывается как Pos + Length
+
+		property SketchMusic::Idea^ Content;		// собствено идея
 	};
 }

@@ -45,6 +45,8 @@
     <ClCompile Include="CompositionEditorPage.xaml.cpp" />
     <ClCompile Include="CompositionOverviewPage.xaml.cpp" />
     <ClCompile Include="EditCompositionDialog.xaml.cpp" />
+    <ClCompile Include="ManageInstrumentsDialog.xaml.cpp" />
+    <ClCompile Include="SettingsPage.xaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -59,6 +61,8 @@
     <ClInclude Include="CompositionOverviewPage.xaml.h" />
     <ClInclude Include="EditCompositionDialog.xaml.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="ManageInstrumentsDialog.xaml.h" />
+    <ClInclude Include="SettingsPage.xaml.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -132,6 +136,9 @@
     </Page>
     <Page Include="ManageInstrumentsDialog.xaml">
       <Filter>Dialogs</Filter>
+    </Page>
+    <Page Include="view\IdeaMap.xaml">
+      <Filter>Composition</Filter>
     </Page>
   </ItemGroup>
   <ItemGroup>

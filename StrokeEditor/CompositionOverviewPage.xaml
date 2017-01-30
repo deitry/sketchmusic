@@ -20,20 +20,30 @@
     
     <Page.TopAppBar>
         <CommandBar x:Name="commandBar">
-            <AppBarButton Name="GoMenuBtn" Label="В меню" Click="GoMenuBtn_Click" Icon="Home"/>
-            <AppBarButton Name="SetWorkingFolderBtn" Label="Выбрать папку" Click="SetWorkingFolderBtn_Click" >
-                <AppBarButton.Icon>
-                    <FontIcon Glyph="&#xE8B7;"/>
-                </AppBarButton.Icon>
-            </AppBarButton>
-            <AppBarSeparator/>
-            <AppBarButton Name="RefreshBtn" Label="Обновить" Icon="Refresh" Click="RefreshBtn_Click"/>
-            <AppBarSeparator/>
-            <AppBarButton Name="CreateEntryBtn" Label="Создать новую идею" Icon="Add" Click="CreateEntryBtn_Click"/>
-            <AppBarSeparator/>
-            <AppBarButton Name="EditBtn" Label="Редактировать" Icon="Edit" HorizontalAlignment="Right" 
-                                IsEnabled="False" 
-                                Click="EditBtn_Click"/>
+            <CommandBar.Content>
+                <TextBlock x:Name="TitleTxt" Margin="15,4,4,15" VerticalAlignment="Center"
+                           FontSize="24" PointerPressed="TitleTxt_PointerPressed"
+                           >
+                </TextBlock>
+            </CommandBar.Content>
+            <CommandBar.PrimaryCommands>
+                <AppBarButton Name="GoMenuBtn" Label="В меню" Click="GoMenuBtn_Click" Icon="Home"/>
+                <AppBarButton Name="SetWorkingFolderBtn" Label="Выбрать папку" Click="SetWorkingFolderBtn_Click" >
+                    <AppBarButton.Icon>
+                        <FontIcon Glyph="&#xE8B7;"/>
+                    </AppBarButton.Icon>
+                </AppBarButton>
+                <AppBarSeparator/>
+                <AppBarButton  Icon="Delete" Label="Удалить" Name="DeleteBtn" Click="DeleteBtn_Click" IsEnabled="False"/>
+                <AppBarSeparator/>
+                <AppBarButton Name="RefreshBtn" Label="Обновить" Icon="Refresh" Click="RefreshBtn_Click"/>
+                <AppBarSeparator/>
+                <AppBarButton Name="CreateEntryBtn" Label="Создать новую идею" Icon="Add" Click="CreateEntryBtn_Click"/>
+                <AppBarSeparator/>
+                <AppBarButton Name="EditBtn" Label="Редактировать" Icon="Edit" HorizontalAlignment="Right" 
+                                    IsEnabled="False" 
+                                    Click="EditBtn_Click"/>
+            </CommandBar.PrimaryCommands>
         </CommandBar>
     </Page.TopAppBar>
     

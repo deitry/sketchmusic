@@ -42,30 +42,6 @@ CompositionOverviewPage::CompositionOverviewPage()
 
 void StrokeEditor::CompositionOverviewPage::InitializePage()
 {
-	//folderPicker->SuggestedStartLocation = PickerLocationId::MusicLibrary;
-	
-	//auto async = create_task(folderPicker->PickSingleFolderAsync()
-	//).then([=](task<StorageFolder^> getFolderTask)
-	//{
-	//	auto folder = getFolderTask.get();
-	//	if (folder != nullptr)
-	//	{
-	//		// Application now has read/write access to all contents in the picked folder (including other sub-folder contents)
-	//		Windows::Storage::AccessCache::StorageApplicationPermissions::FutureAccessList->AddOrReplace("PickedFolderToken", folder);
-	//	}
-	//	return create_task(folder->GetFilesAsync());
-	//}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
-	//{
-	//	auto list = resourceListTask.get();
-	//	for (auto&& file : list)
-	//	{
-	//		compositionList->Append(file->Name);
-	//	}
-	//});
-
-	//async.wait();
-	//auto folder = folderPicker->PickSingleFolderAsync();
-
 	Windows::Storage::ApplicationDataContainer^ localSettings =
 		Windows::Storage::ApplicationData::Current->LocalSettings;
 
@@ -160,22 +136,22 @@ void StrokeEditor::CompositionOverviewPage::EditBtn_Click(Platform::Object^ send
 }
 
 
-void StrokeEditor::CompositionOverviewPage::SetWorkingFolderBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void StrokeEditor::CompositionOverviewPage::SetWorkspace()
 {
 	FolderPicker^ folderPicker = ref new FolderPicker;
 	folderPicker->FileTypeFilter->Append("*");
-	
+
 	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Low, ref new Windows::UI::Core::DispatchedHandler([=]()
 	{
 		create_task(folderPicker->PickSingleFolderAsync())
 			.then([=](StorageFolder^ folder)
-		{			
+		{
 			if (folder != nullptr)
 			{
 				Windows::Storage::ApplicationDataContainer^ localSettings =
 					Windows::Storage::ApplicationData::Current->LocalSettings;
 				localSettings->Values->Insert("workspace_path", folder->Path);
-				
+
 				Windows::Storage::AccessCache::StorageApplicationPermissions::FutureAccessList->AddOrReplace("PickedFolderToken", folder);
 
 				Workspace = folder;
@@ -201,6 +177,11 @@ void StrokeEditor::CompositionOverviewPage::SetWorkingFolderBtn_Click(Platform::
 	}));
 }
 
+void StrokeEditor::CompositionOverviewPage::SetWorkingFolderBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	SetWorkspace();
+}
+
 
 void StrokeEditor::CompositionOverviewPage::PlayBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
@@ -210,7 +191,9 @@ void StrokeEditor::CompositionOverviewPage::PlayBtn_Click(Platform::Object^ send
 
 void StrokeEditor::CompositionOverviewPage::CompositionListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
 {
-	EditBtn->IsEnabled = CompositionListView->SelectedItem == nullptr ? false : true;
+	bool need = CompositionListView->SelectedItem == nullptr ? false : true;
+	EditBtn->IsEnabled = need;
+	DeleteBtn->IsEnabled = need;
 }
 
 
@@ -262,4 +245,44 @@ void StrokeEditor::CompositionOverviewPage::OverviewItemContextMenu_Opened(Platf
 void StrokeEditor::CompositionOverviewPage::OverviewItemContextMenu_Closed(Platform::Object^ sender, Platform::Object^ e)
 {
 	_CurrentContext = nullptr;
+}
+
+
+void StrokeEditor::CompositionOverviewPage::TitleTxt_PointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
+{
+	// делаем то же самое, как если бы нажали на кнопку смены папки
+	SetWorkspace();
+}
+
+
+void StrokeEditor::CompositionOverviewPage::DeleteBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	ContentDialog^ deleteFileDialog = ref new ContentDialog();
+
+	deleteFileDialog->Title = "Удалить проект?";
+	deleteFileDialog->Content = "Ппроект будет удалён безвозвратно. Вы уверены?";
+	deleteFileDialog->PrimaryButtonText = "Удалить";
+	deleteFileDialog->SecondaryButtonText = "Отмена";
+
+	auto dialog = concurrency::create_task(deleteFileDialog->ShowAsync());
+	dialog.then([=](concurrency::task<ContentDialogResult> t)
+	{
+		ContentDialogResult result = t.get();
+
+		// Delete the file if the user clicked the primary button. 
+		/// Otherwise, do nothing. 
+		if (result == ContentDialogResult::Primary)
+		{
+			auto item = dynamic_cast<StorageFile^>(CompositionListView->SelectedItem);
+			if (item)
+			{
+				item->DeleteAsync();
+
+				CompositionListView->SelectedItem = nullptr;
+				unsigned int index;
+				if (compositionList->IndexOf(item, &index))
+					compositionList->RemoveAt(index);
+			}
+		}
+	});
 }

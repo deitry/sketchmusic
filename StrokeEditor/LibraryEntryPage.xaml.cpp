@@ -155,7 +155,7 @@ void StrokeEditor::LibraryEntryPage::DeleteBtn_Click(Platform::Object^ sender, W
 	ContentDialog^ deleteFileDialog = ref new ContentDialog();
 	
 	deleteFileDialog->Title = "Удалить идею?";
-	deleteFileDialog->Content = "Если вы подтвердите, то идея удалится безвозвратно. Вы уверены?";
+	deleteFileDialog->Content = "Идея будет удалена безвозвратно. Вы уверены?";
 	deleteFileDialog->PrimaryButtonText = "Удалить";
 	deleteFileDialog->SecondaryButtonText = "Отмена";
 	

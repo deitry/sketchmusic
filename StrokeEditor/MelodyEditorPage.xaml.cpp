@@ -592,12 +592,18 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyReleased(Platform::Object^ sen
 	switch (args->key->type)
 	{
 	case KeyType::enter:
+	{
+		int beat = _textRow->currentPosition->Beat;
+		if (_textRow->currentPosition->Tick > 0) beat++;
 		// создаём команду на добавление ноты в текст и сохраняем её в истории
+		auto newpos = ref new SketchMusic::Cursor(beat);
 		((App^)App::Current)->_manager->AddAndExecute(
 			AddSymCommand,
 			ref new SMC::SymbolHandlerArgs(_texts->ControlText,
-				ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), ref new SNewLine)));
+				ref new PositionedSymbol(newpos, ref new SNewLine)));
+		_textRow->SetCursor(newpos);
 		break;
+	}
 	}
 }
 
