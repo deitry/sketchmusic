@@ -42,7 +42,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="2*"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <smv:CompositionView Grid.Row="2"
@@ -50,7 +50,7 @@
                                  HorizontalAlignment="Center"
                                  Margin="10"
                                  Width="800"
-                                 Height="100"/>
+                                 Height="60"/>
 
             <Slider Grid.Row="1" 
                 HorizontalAlignment="Stretch"
@@ -127,8 +127,8 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="8*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="5*"/>
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="Категория" HorizontalAlignment="Center"/>
             <TextBlock Grid.Column="1" Text="Динамика" HorizontalAlignment="Center"/>

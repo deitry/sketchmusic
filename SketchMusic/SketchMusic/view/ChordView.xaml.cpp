@@ -26,7 +26,7 @@ SketchMusic::View::ChordView::ChordView()
 	InitializeComponent();
 }
 
-void SketchMusic::View::ChordView::SetNotes(Windows::Foundation::Collections::IVector<PositionedSymbol^>^ notes)
+void SketchMusic::View::ChordView::SetNotes(Windows::Foundation::Collections::IObservableVector<PositionedSymbol^>^ notes)
 {
 	Notes = notes;
 	_ItemsControl->ItemsSource = Notes;

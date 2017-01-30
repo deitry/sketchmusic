@@ -18,8 +18,8 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 
           VerticalAlignment="Center" 
           HorizontalAlignment="Center"
-          Margin="100,20,100,20"
-          Padding="20,20,20,20">
+          Margin="10"
+          Padding="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>

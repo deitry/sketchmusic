@@ -60,6 +60,7 @@ bool SketchMusic::Cursor::EQ(SketchMusic::Cursor^ that)
 
 bool SketchMusic::Cursor::GT(SketchMusic::Cursor^ that)
 {
+	if (that == nullptr) return false;
 	if (this->_beat > that->_beat) return true;
 	if ((this->_beat == that->_beat) && (this->_tick > that->_tick)) return true;
 	return false;
@@ -67,6 +68,7 @@ bool SketchMusic::Cursor::GT(SketchMusic::Cursor^ that)
 
 bool SketchMusic::Cursor::LT(SketchMusic::Cursor^ that)
 {
+	if (that == nullptr) return false;
 	if (this->_beat < that->_beat) return true;
 	if ((this->_beat == that->_beat) && (this->_tick < that->_tick)) return true;
 	return false;
@@ -74,6 +76,7 @@ bool SketchMusic::Cursor::LT(SketchMusic::Cursor^ that)
 
 bool SketchMusic::Cursor::LE(SketchMusic::Cursor^ that)
 {
+	if (that == nullptr) return false;
 	if (this->_beat < that->_beat) return true;
 	if ((this->_beat == that->_beat) && (this->_tick <= that->_tick)) return true;
 	return false;

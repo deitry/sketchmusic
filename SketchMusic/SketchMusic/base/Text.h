@@ -64,12 +64,12 @@ public:
 	//void MoveSymbols(Cursor^ leftBound, Cursor^ rightBound, Cursor^ to);
 
 	unsigned int getSize() { return _t.size(); }
-	IVector<PositionedSymbol^>^ getText();
-	IVector<PositionedSymbol^>^ GetSymbols(Cursor^ from, Cursor^ to);
+	IObservableVector<PositionedSymbol^>^ getText();
+	IObservableVector<PositionedSymbol^>^ GetSymbols(Cursor^ from, Cursor^ to);
 	
 	// получение нот в конкретной точке и сбоку от неё - для последовательного редактирования
-	IVector<PositionedSymbol^>^ getNotesAt(Cursor^ pos, SymbolType type);
-	IVector<PositionedSymbol^>^ getNotesAtExcluding(Cursor^ pos, SymbolType type);
+	IObservableVector<PositionedSymbol^>^ getNotesAt(Cursor^ pos, SymbolType type);
+	IObservableVector<PositionedSymbol^>^ getNotesAtExcluding(Cursor^ pos, SymbolType type);
 	Cursor^ getPosAtLeft(Cursor^ pos);
 	Cursor^ getPosAtRight(Cursor^ pos);
 	

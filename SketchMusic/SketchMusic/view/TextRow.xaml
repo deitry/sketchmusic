@@ -15,7 +15,7 @@
                 <ResourceDictionary Source="ms-appx:///SketchMusic/SketchMusic/view/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <SolidColorBrush x:Key="SelectedPlaceholderBackground" x:Name="SelectedPlaceholderBackground" Color="{ThemeResource SystemAccentColorLight2}"/>
+            <SolidColorBrush x:Key="SelectedPlaceholderBackground" x:Name="SelectedPlaceholderBackground" Color="{ThemeResource SystemAccentColor}"/>
 
             <MenuFlyout x:Key="PlaceholderContextMenu" x:Name="PlaceholderContextMenu">
                 <MenuFlyoutItem Text="Вставить" x:Name="PasteItem"/>

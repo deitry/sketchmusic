@@ -199,7 +199,7 @@
     <Style TargetType="ContentControl" x:Key="SymbolControlStyle" x:Name="SymbolControlStyle">
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="Foreground" Value="Transparent"/>
-        <Setter Property="Background" Value="{StaticResource keyBackground}"/>
+        <Setter Property="Background" Value="{StaticResource noteBackground}"/>
         <Setter Property="Width" Value="{StaticResource SymbolWidth}"/>
         <Setter Property="Height" Value="{StaticResource SymbolHeight}"/>
         <Setter Property="Padding" Value="10,10,10,10"/>
@@ -213,6 +213,8 @@
         <Setter Property="Width" Value="{StaticResource GSymbolWidth}"/>
         <Setter Property="Height" Value="{StaticResource GSymbolHeight}"/>
         <Setter Property="Template" Value="{StaticResource GNoteControlTemplate}"/>
+
+
     </Style>
 
     <Style TargetType="ContentControl" x:Key="SymbolCtrlStyle" x:Name="SymbolCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">

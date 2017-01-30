@@ -820,11 +820,28 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 	// сюда - только обычные ноты
 	CurrentChord->SetNotes(txt->getNotesAt(pos, SymbolType::NOTE));
 	// сюда - все, кроме обычных
-	CurrentGChord->SetNotes(txt->getNotesAtExcluding(pos, SymbolType::NOTE));
+	auto notes = txt->getNotesAtExcluding(pos, SymbolType::NOTE);
+	// так сложно, потому что часть нот попадает в ControlText
+	auto notes2 = _texts->ControlText->getNotesAtExcluding(pos, SymbolType::NOTE);
+	for (auto&& note : notes2)
+	{
+		notes->Append(note);
+	}
+	CurrentGChord->SetNotes(notes);
 
 	auto prevPos = txt->getPosAtLeft(pos);
+	auto prevPos2 = _texts->ControlText->getPosAtRight(pos);	// TODO : можно сделать лучше
+	if (prevPos2 && prevPos2->GT(prevPos)) prevPos = prevPos2;
+
 	PrevChord->SetNotes(txt->getNotesAt(prevPos, SymbolType::NOTE));
-	PrevGChord->SetNotes(txt->getNotesAtExcluding(prevPos, SymbolType::NOTE));
+	notes = txt->getNotesAtExcluding(prevPos, SymbolType::NOTE);
+	// так сложно, потому что часть нот попадает в ControlText
+	notes2 = _texts->ControlText->getNotesAtExcluding(prevPos, SymbolType::NOTE);
+	for (auto&& note : notes2)
+	{
+		notes->Append(note);
+	}
+	PrevGChord->SetNotes(notes);
 
 	bool prevEnabled = (PrevChord->GetNotes() == nullptr) ? false : (PrevChord->GetNotes()->Size > 0);
 	if (prevEnabled == false) prevEnabled = (PrevGChord->GetNotes() == nullptr) ? false : (PrevGChord->GetNotes()->Size > 0);
@@ -836,8 +853,18 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 	else { MoveLeftCWBtn->IsEnabled = false; PrevPosTxt->Text = ""; }
 
 	auto nextPos = txt->getPosAtRight(pos);
+	auto nextPos2 = _texts->ControlText->getPosAtRight(pos);	// TODO : можно сделать лучше
+	if (nextPos2 && nextPos2->LT(nextPos)) nextPos = nextPos2;
+
 	NextChord->SetNotes(_textRow->current->getNotesAt(nextPos, SymbolType::NOTE));
-	NextGChord->SetNotes(_textRow->current->getNotesAtExcluding(nextPos, SymbolType::NOTE));
+	notes = txt->getNotesAtExcluding(nextPos, SymbolType::NOTE);
+	// так сложно, потому что часть нот попадает в ControlText
+	notes2 = _texts->ControlText->getNotesAtExcluding(nextPos, SymbolType::NOTE);
+	for (auto&& note : notes2)
+	{
+		notes->Append(note);
+	}
+	NextGChord->SetNotes(notes);
 	
 	bool nextEnabled = (NextChord->GetNotes() == nullptr) ? false : (NextChord->GetNotes()->Size > 0);
 	if (nextEnabled == false) nextEnabled = (NextGChord->GetNotes() == nullptr) ? false : (NextGChord->GetNotes()->Size > 0);

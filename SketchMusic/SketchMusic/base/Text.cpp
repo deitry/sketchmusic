@@ -134,7 +134,7 @@ void SketchMusic::Text::deleteSymbols(Cursor^ begin, Cursor^ end)
 	_t.erase(leftIter,rightIter);
 }
 
-IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
+IObservableVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 {
 	Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
 	
@@ -146,7 +146,7 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getText()
 	return vect;
 }
 
-IVector<PositionedSymbol^>^ SketchMusic::Text::GetSymbols(Cursor ^ from, Cursor ^ to)
+IObservableVector<PositionedSymbol^>^ SketchMusic::Text::GetSymbols(Cursor ^ from, Cursor ^ to)
 {
 	Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
 
@@ -168,10 +168,10 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::GetSymbols(Cursor ^ from, Cursor 
 }
 
 // Получаем ноты в данной позиции, имеющие тип type (или все, если type == unknown)
-IVector<PositionedSymbol^>^ SketchMusic::Text::getNotesAt(Cursor ^ pos, SymbolType type)
+IObservableVector<PositionedSymbol^>^ SketchMusic::Text::getNotesAt(Cursor ^ pos, SymbolType type)
 {
-	if (pos == nullptr) return nullptr;
 	Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
+	if (pos == nullptr) return vect;
 	
 	for (auto sym = _t.lower_bound(pos); sym != _t.upper_bound(pos); sym++)
 	{
@@ -183,11 +183,11 @@ IVector<PositionedSymbol^>^ SketchMusic::Text::getNotesAt(Cursor ^ pos, SymbolTy
 }
 
 // Получаем ноты в данной позиции, исключая те, которые имеют тип type (или все, если type == unknown)
-IVector<PositionedSymbol^>^ SketchMusic::Text::getNotesAtExcluding(Cursor ^ pos, SymbolType type)
+IObservableVector<PositionedSymbol^>^ SketchMusic::Text::getNotesAtExcluding(Cursor ^ pos, SymbolType type)
 {
-	if (pos == nullptr) return nullptr;
 	Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
-
+	if (pos == nullptr) return vect;
+	
 	for (auto sym = _t.lower_bound(pos); sym != _t.upper_bound(pos); sym++)
 	{
 		if (type == SymbolType::unknown || type != sym->second->GetSymType())

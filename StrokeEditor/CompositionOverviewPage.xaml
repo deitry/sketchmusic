@@ -42,6 +42,7 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Grid BorderBrush="{ThemeResource ApplicationSecondaryForegroundThemeBrush}" BorderThickness="1"
+                          Width="{Binding Width, ElementName=CompositionListView}"
                           Holding="Grid_Holding" RightTapped="Grid_RightTapped">
                         <TextBlock Text="{Binding Converter={StaticResource file2text}}"/>
                     </Grid>
