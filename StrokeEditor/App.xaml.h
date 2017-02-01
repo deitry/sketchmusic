@@ -62,7 +62,12 @@ namespace StrokeEditor
 		Windows::Storage::StorageFile^ DebugFile;
 		void WriteToDebugFile(Platform::String^ str);
 
-		void OpenLibrary(Platform::String^ dbName);
+		void OpenLibrary(Platform::String^ dbPath);
+		void SaveLibrary(Platform::String^ dbPath);
+		void CloseLibrary();
+
+		void OpenLocalOrExternalLibrary(Platform::String^ dbName);
+
 		int InsertIdea(SketchMusic::Idea^ idea);
 		int UpdateIdea(SketchMusic::Idea^ idea);
 		int DeleteIdea(SketchMusic::Idea^ idea);

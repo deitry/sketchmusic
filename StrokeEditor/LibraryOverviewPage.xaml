@@ -33,7 +33,7 @@
             <MenuFlyoutSeparator/>
             <MenuFlyoutItem Text="Создать копию" x:Name="CopyItem"/>
             <MenuFlyoutItem Text="Переименовать" x:Name="RenameItem"/>
-            <MenuFlyoutItem Text="Удалить" x:Name="DeleteItem"/>
+            <MenuFlyoutItem Text="Удалить" x:Name="DeleteItem" Click="DeleteItem_Click"/>
         </MenuFlyout>
     </Page.Resources>
 
@@ -66,6 +66,7 @@
                 </Button.Flyout>
             </AppBarButton>
             <AppBarButton Name="RefreshBtn" Label="Обновить" Icon="Refresh" Click="RefreshBtn_Click"/>
+            <AppBarButton Name="SaveBtn" Label="Сохранить" Icon="SaveLocal" Click="SaveBtn_Click"/>
             <AppBarSeparator/>
             <AppBarButton Name="CreateEntryBtn" Label="Создать новую идею" Icon="Add" Click="CreateEntryBtn_Click"/>
             <AppBarSeparator/>

@@ -65,6 +65,8 @@ namespace StrokeEditor
 		FrameworkElement^ _CurrentContext;
 
 		void LibraryItemContextMenu_Closed(Platform::Object^ sender, Platform::Object^ e);
+		void DeleteItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void SaveBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]

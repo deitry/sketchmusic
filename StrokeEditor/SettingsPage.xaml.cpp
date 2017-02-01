@@ -86,3 +86,59 @@ void StrokeEditor::SettingsPage::GoBackBtn_Click(Platform::Object^ sender, Windo
 {
 	this->Frame->Navigate(TypeName(StrokeEditor::MainMenuPage::typeid), nullptr);
 }
+
+
+void StrokeEditor::SettingsPage::SetLibFolderBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	// открыть диалог с выбором папки
+	FolderPicker^ folderPicker = ref new FolderPicker;
+	folderPicker->FileTypeFilter->Append("*");
+
+	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Low, ref new Windows::UI::Core::DispatchedHandler([=]()
+	{
+		create_task(folderPicker->PickSingleFolderAsync())
+			.then([=](StorageFolder^ folder)
+		{
+			if (folder != nullptr)
+			{
+				// сохраняем старый файл
+				((App^)App::Current)->SaveLibrary("ideaLibrary.db");
+
+				// сохраняем указанный в пикере путь
+				Windows::Storage::ApplicationDataContainer^ localSettings =
+					Windows::Storage::ApplicationData::Current->LocalSettings;
+				localSettings->Values->Insert("lib_path", folder->Path);
+
+				Windows::Storage::AccessCache::StorageApplicationPermissions::FutureAccessList->AddOrReplace("lib_path", folder);
+
+				// сбрасываем данные о библиотеке
+				((App^)App::Current)->ideaLibrary->Clear();
+				((App^)App::Current)->CloseLibrary();
+
+				// открываем в новой папке
+				((App^)App::Current)->OpenLocalOrExternalLibrary("ideaLibrary.db");
+			}
+		});
+	}));
+}
+
+
+void StrokeEditor::SettingsPage::ClearLibFolderBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	// сохраняем старый файл
+	((App^)App::Current)->SaveLibrary("ideaLibrary.db");
+	
+	// сбрасываем данные о библиотеке
+	((App^)App::Current)->ideaLibrary->Clear();
+
+	// закрываем библиотеку
+	((App^)App::Current)->CloseLibrary();
+
+	Windows::Storage::ApplicationDataContainer^ localSettings =
+		Windows::Storage::ApplicationData::Current->LocalSettings;
+	if (localSettings->Values->HasKey("lib_path"))
+		localSettings->Values->Remove("lib_path");
+
+	// открываем в новой папке
+	((App^)App::Current)->OpenLocalOrExternalLibrary("ideaLibrary.db");
+}

@@ -56,8 +56,9 @@ void StrokeEditor::App::InitializeApp()
 	Resuming += ref new EventHandler<Platform::Object^>(this, &App::OnResuming);
 
 	// TODO : в качестве аргумента - или ещё лучше (?) в качестве возвращаемого значения - передавать хендлер
-	OpenLibrary("\\ideaLibrary.db");
-	
+	// копируем файл из выбранной нами папки
+
+	OpenLocalOrExternalLibrary("ideaLibrary.db");
 
 	((App^)App::Current)->ideaLibrary = ref new Vector<SketchMusic::Idea^>();
 
@@ -150,14 +151,14 @@ void App::OnSuspending(Object^ sender, SuspendingEventArgs^ e)
 	// Сохранить состояние приложения и остановить все фоновые операции
 	SaveData();
 
-	sqlite3_close(libraryDB);
+	CloseLibrary();
 
 	deferral->Complete();
 }
 
 void StrokeEditor::App::OnResuming(Platform::Object ^ sender, Platform::Object ^ args)
 {
-	OpenLibrary("\\ideaLibrary.db");
+	OpenLocalOrExternalLibrary("ideaLibrary.db");
 }
 
 /// <summary>
@@ -190,19 +191,20 @@ void StrokeEditor::App::WriteToDebugFile(Platform::String ^ str)
 	}
 }
 
-void StrokeEditor::App::OpenLibrary(Platform::String ^ dbName)
+void StrokeEditor::App::OpenLibrary(Platform::String ^ dbPath)
 {
+	WriteToDebugFile("Открытие файла " + dbPath);
 	// создание базы данных, если отсутствует
 	//sqlite3* libraryDB; // объявление в хидере
-	String^ fullPath = Windows::Storage::ApplicationData::Current->LocalFolder->Path + dbName;
-	int size_needed = WideCharToMultiByte(CP_UTF8, 0, fullPath->Data(), fullPath->Length(), NULL, 0, NULL, NULL);
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, dbPath->Data(), dbPath->Length(), NULL, 0, NULL, NULL);
 	char *pathC = new char[size_needed + 1];
-	WideCharToMultiByte(CP_UTF8, 0, fullPath->Data(), fullPath->Length(), pathC, size_needed, NULL, NULL);
+	WideCharToMultiByte(CP_UTF8, 0, dbPath->Data(), dbPath->Length(), pathC, size_needed, NULL, NULL);
 	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
 	pathC[size_needed] = '\0';
 
 	if (sqlite3_open(pathC, &libraryDB))
 	{
+		WriteToDebugFile("Ошибка открытия/создания БД");
 		fprintf(stderr, "Ошибка открытия/создания БД: %s\n", sqlite3_errmsg(libraryDB));
 		sqlite3_close(libraryDB);
 	}
@@ -227,12 +229,104 @@ void StrokeEditor::App::OpenLibrary(Platform::String ^ dbName)
 			"'description' TEXT,"
 			"'rating' INTEGER);", NULL, 0, &zErrMsg);
 		if (rc != SQLITE_OK) {
+			WriteToDebugFile("Ошибка создания таблицы");
 			fprintf(stderr, "SQL error: %s\n", zErrMsg);
 			sqlite3_free(zErrMsg);
 		}
 	}
 
 	delete[] pathC;
+}
+
+void StrokeEditor::App::SaveLibrary(Platform::String ^ dbName)
+{
+	// копируем библиотеку из кэшированной папки, если указано место её хранения
+	Windows::Storage::ApplicationDataContainer^ localSettings =
+		Windows::Storage::ApplicationData::Current->LocalSettings;
+
+	// если нет соответствующего ключа -> мы храним библиотеку в локальной папке и сохранять ничего не надо
+	if (ideaLibrary && ideaLibrary->Size>0 && localSettings->Values->HasKey("lib_path"))
+	{
+		String^ targetPath = (String^)localSettings->Values->Lookup("lib_path");
+		// копируем файл в целевую папку
+		concurrency::create_task(Windows::Storage::ApplicationData::Current->LocalCacheFolder->TryGetItemAsync(dbName))
+			.then([=](IStorageItem^ item)
+		{
+			StorageFile^ file = dynamic_cast<StorageFile^>(item);
+			if (file)
+			{
+				concurrency::create_task(StorageFolder::GetFolderFromPathAsync(targetPath))
+					.then([=](StorageFolder^ targetFolder) {
+					if (targetFolder)
+					{
+						file->CopyAsync(targetFolder,
+							file->Name,
+							Windows::Storage::NameCollisionOption::ReplaceExisting);
+					}
+				});
+			}
+		});
+	}
+}
+
+void StrokeEditor::App::CloseLibrary()
+{
+	sqlite3_close(libraryDB);
+}
+
+void StrokeEditor::App::OpenLocalOrExternalLibrary(Platform::String ^ dbName)
+{
+	Windows::Storage::ApplicationDataContainer^ localSettings =
+		Windows::Storage::ApplicationData::Current->LocalSettings;
+	if (localSettings->Values->HasKey("lib_path"))
+	{
+		String^ targetPath = (String^)localSettings->Values->Lookup("lib_path");
+		// копируем файл в папку приложения
+		try
+		{
+			concurrency::create_task(StorageFolder::GetFolderFromPathAsync(targetPath)
+			).then([=](StorageFolder^ folder) {
+				try
+				{
+					if (folder)
+					{
+						concurrency::create_task(folder->TryGetItemAsync(dbName))
+							.then([=] (IStorageItem^ item) {
+
+							StorageFile^ file = dynamic_cast<StorageFile^>(item);
+							if (file)
+							{
+								concurrency::create_task(
+									file->CopyAsync(Windows::Storage::ApplicationData::Current->LocalCacheFolder,
+										file->Name,
+										Windows::Storage::NameCollisionOption::ReplaceExisting))
+									.then([=](StorageFile^ file) {
+									OpenLibrary(Windows::Storage::ApplicationData::Current->LocalCacheFolder->Path + "\\" + dbName);
+								});
+							}
+							else
+							{
+								WriteToDebugFile("Не найден файл библиотеки по адресу " + folder->Path);
+								OpenLibrary(Windows::Storage::ApplicationData::Current->LocalFolder->Path + "\\" + dbName);
+							}
+						});
+					}
+				}
+				catch (...)
+				{
+
+				}
+			});
+		}
+		catch (...)
+		{
+			OpenLibrary(Windows::Storage::ApplicationData::Current->LocalFolder->Path + "\\" + dbName);
+		}
+	}
+	else
+	{
+		OpenLibrary(Windows::Storage::ApplicationData::Current->LocalFolder->Path + "\\" + dbName);
+	}
 }
 
 int StrokeEditor::App::InsertIdea(SketchMusic::Idea ^ idea)
@@ -328,6 +422,8 @@ void StrokeEditor::App::SaveData()
 		// пишем в файл
 		FileIO::WriteTextAsync(_CurrentCompositionArgs->File, json->Stringify());
 	}
+	
+	SaveLibrary("ideaLibrary.db");
 }
 // Установить на плитке строку с последним открытым элементом
 // - передавать сюда название файла для композиции

@@ -4,6 +4,7 @@
 //
 
 #include <ppltasks.h>
+#include <string>
 
 #include "pch.h"
 #include "LibraryEntryPage.xaml.h"
@@ -30,11 +31,26 @@ using namespace Windows::UI::Xaml::Interop;
 LibraryEntryPage::LibraryEntryPage()
 {
 	InitializeComponent();
+
+	InitializePage();
 }
 
 void StrokeEditor::LibraryEntryPage::InitializePage()
 {
-	
+	auto vect = ref new Platform::Collections::Vector<IdeaCategoryEnum>;
+	vect->Append((IdeaCategoryEnum)1);
+	vect->Append((IdeaCategoryEnum)2);
+	vect->Append((IdeaCategoryEnum)6);
+	vect->Append((IdeaCategoryEnum)10);
+	vect->Append((IdeaCategoryEnum)11);
+	vect->Append((IdeaCategoryEnum)13);
+	vect->Append((IdeaCategoryEnum)15);
+	vect->Append((IdeaCategoryEnum)16);
+	vect->Append((IdeaCategoryEnum)20);
+	vect->Append((IdeaCategoryEnum)30);
+	vect->Append((IdeaCategoryEnum)90);
+	vect->Append((IdeaCategoryEnum)100);
+	categoryCombo->ItemsSource = vect;
 }
 
 void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
@@ -55,7 +71,7 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 	// TODO : очень плохо, надо каким-то образом сделать через привязку, триггеры, хз
 	entryNameTB->IsReadOnly = _isRead;
-	categoryTB->IsReadOnly = true;	// выбора нет
+	//categoryTB->IsReadOnly = true;	// выбора нет
 	creationTB->IsReadOnly = true;
 	descrTB->IsReadOnly = _isRead;
 	serContTB->IsReadOnly = true;
@@ -64,7 +80,19 @@ void StrokeEditor::LibraryEntryPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	//this->UpdateLayout();
 	
 	entryNameTB->Text = _entry->Name;
-	categoryTB->Text = (String^)(ref new SketchMusic::VerboseIdeaCategoryToStrConverter())->Convert(_entry->Category, TypeName(Platform::String::typeid), nullptr, nullptr);
+	auto converter = (VerboseIdeaCategoryToStrConverter^) this->Resources->Lookup("VerbCategory2Str");
+	//categoryTB->Text = (String^)converter->Convert(_entry->Category, TypeName(Platform::String::typeid), nullptr, nullptr);
+	
+	for (auto&& item : categoryCombo->Items)
+	{
+		auto cat = static_cast<SketchMusic::IdeaCategoryEnum>(static_cast<Object^>(item));
+		if (cat == _entry->Category)
+		{
+			categoryCombo->SelectedItem = item;
+			break;
+		}
+	}
+
 	descrTB->Text = _entry->Description;
 	tagsTB->Text = _entry->Tags;
 	serContTB->Text = _entry->SerializedContent;
@@ -215,4 +243,10 @@ void StrokeEditor::LibraryEntryPage::SaveBtn_Click(Platform::Object^ sender, Win
 void StrokeEditor::LibraryEntryPage::HomeBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	this->Frame->Navigate(TypeName(StrokeEditor::MainMenuPage::typeid));
+}
+
+
+void StrokeEditor::LibraryEntryPage::_this_Loaded(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+
 }

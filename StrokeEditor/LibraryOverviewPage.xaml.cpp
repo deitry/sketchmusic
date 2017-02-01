@@ -136,6 +136,7 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 			// нам поручили удалить эту запись
 			// TODO : указания к действию на основе передачи типа через аргументы
 			((App^)App::Current)->DeleteIdea(idea);
+			((App^)App::Current)->SaveLibrary("ideaLibrary.db");	// если работаем с внешним файлом - сразу копируем вовне
 			RefreshList();
 			return;
 		}
@@ -149,6 +150,7 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 			} else {
 				if (((App^)App::Current)->ideaLibrary) ((App^)App::Current)->ideaLibrary->Append(idea);
 			}
+			((App^)App::Current)->SaveLibrary("ideaLibrary.db");
 		}
 	}
 	if (((App^)App::Current)->ideaLibrary->Size == 0)
@@ -269,6 +271,7 @@ void StrokeEditor::LibraryOverviewPage::RefreshList()
 		char* zErrMsg;
 		int rc = sqlite3_exec(db, charQuery.c_str(), StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback, 0, &zErrMsg);
 		if (rc != SQLITE_OK) {
+			((App^)App::Current)->WriteToDebugFile("Не удалось получить список идей из библиотеки");
 			fprintf(stderr, "SQL error: %s\n", zErrMsg);
 			sqlite3_free(zErrMsg);
 		}
@@ -470,4 +473,57 @@ void StrokeEditor::LibraryOverviewPage::OpenContextMenu(Platform::Object ^ ctrl,
 void StrokeEditor::LibraryOverviewPage::LibraryItemContextMenu_Closed(Platform::Object^ sender, Platform::Object^ e)
 {
 	_CurrentContext = nullptr;
+}
+
+
+void StrokeEditor::LibraryOverviewPage::DeleteItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	ContentDialog^ deleteFileDialog = ref new ContentDialog();
+
+	deleteFileDialog->Title = "Удалить проект?";
+	deleteFileDialog->Content = "Ппроект будет удалён безвозвратно. Вы уверены?";
+	deleteFileDialog->PrimaryButtonText = "Удалить";
+	deleteFileDialog->SecondaryButtonText = "Отмена";
+
+	auto dialog = concurrency::create_task(deleteFileDialog->ShowAsync());
+	dialog.then([=](concurrency::task<ContentDialogResult> t)
+	{
+		ContentDialogResult result = t.get();
+
+		// Delete the file if the user clicked the primary button. 
+		/// Otherwise, do nothing. 
+		if (result == ContentDialogResult::Primary)
+		{
+			auto idea = dynamic_cast<Idea^>(LibView->SelectedItem);
+			if (idea)
+			{
+				((App^)App::Current)->DeleteIdea(idea);
+				((App^)App::Current)->SaveLibrary("ideaLibrary.db");
+
+				this->Dispatcher->RunAsync(
+					Windows::UI::Core::CoreDispatcherPriority::Normal,
+					ref new Windows::UI::Core::DispatchedHandler([=]() {
+					unsigned int index;
+					if (((App^)App::Current)->ideaLibrary->IndexOf(idea, &index))
+					{
+						LibView->SelectedItem = nullptr;
+						((App^)App::Current)->ideaLibrary->RemoveAt(index);
+					}
+				}));
+			}
+		}
+	});
+}
+
+
+void StrokeEditor::LibraryOverviewPage::SaveBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	((App^)App::Current)->SaveLibrary("ideaLibrary.db");
+
+	ContentDialog^ ok = ref new ContentDialog();
+	ok->Title = "Библиотека сохранена";
+	ok->Content = "Файл библиотеки был успешно сохранён";
+	ok->PrimaryButtonText = "Ок";
+	
+	auto dialog = concurrency::create_task(ok->ShowAsync());
 }

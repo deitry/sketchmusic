@@ -21,5 +21,7 @@ namespace StrokeEditor
 		void SetDefaultInstrBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void SetSF2FolderBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void SetLibFolderBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void ClearLibFolderBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }

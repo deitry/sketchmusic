@@ -26,6 +26,16 @@
                 <TextBlock Text="Выбрать папку для sf2"
                            TextWrapping="WrapWholeWords"/>
             </Button>
+            <Button x:Name="SetLibFolderBtn" Style="{StaticResource SettingsBtnStyle}" Click="SetLibFolderBtn_Click">
+                <TextBlock Text="Выбрать папку для библиотеки"
+                           TextWrapping="WrapWholeWords"/>
+            </Button>
+            
+            <Button x:Name="ClearLibFolderBtn" Style="{StaticResource SettingsBtnStyle}" Click="ClearLibFolderBtn_Click">
+                <TextBlock Text="Сбросить папку для библиотеки"
+                           TextWrapping="WrapWholeWords"/>
+            </Button>
+
             <Button x:Name="SetDefaultInstrBtn" Style="{StaticResource SettingsBtnStyle}" Click="SetDefaultInstrBtn_Click">
                 <TextBlock Text="Выбрать инструмент по умолчанию"
                            TextWrapping="WrapWholeWords"/>
