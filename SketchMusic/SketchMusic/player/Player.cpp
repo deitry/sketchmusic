@@ -4,6 +4,7 @@
 #include "../base/Cursor.h"
 #include "../base/Symbol.h"
 #include "../base/Text.h"
+#include "../base/Composition.h"
 #include "ISoundEngine.h"
 #include "SoundEnginePool.h"
 #include "SoundFont.h"

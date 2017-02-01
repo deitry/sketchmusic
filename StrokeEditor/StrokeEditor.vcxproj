@@ -180,8 +180,8 @@
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="sqlite3.h" />
-    <ClInclude Include="view\IdeaMap.xaml.h">
-      <DependentUpon>view\IdeaMap.xaml</DependentUpon>
+    <ClInclude Include="view\IdeaGrid.xaml.h">
+      <DependentUpon>view\IdeaGrid.xaml</DependentUpon>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -216,7 +216,7 @@
     <Page Include="SettingsPage.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="view\IdeaMap.xaml">
+    <Page Include="view\IdeaGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
@@ -299,8 +299,8 @@
     <ClCompile Include="sqlite3.c">
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsWinRT>
     </ClCompile>
-    <ClCompile Include="view\IdeaMap.xaml.cpp">
-      <DependentUpon>view\IdeaMap.xaml</DependentUpon>
+    <ClCompile Include="view\IdeaGrid.xaml.cpp">
+      <DependentUpon>view\IdeaGrid.xaml</DependentUpon>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

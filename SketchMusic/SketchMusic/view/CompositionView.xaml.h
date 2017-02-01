@@ -27,9 +27,10 @@ public:
 	property IObservableVector<PartDefinition^>^ Parts
 	{
 		IObservableVector<PartDefinition^>^ get() { return m_parts; }
+		void set(IObservableVector<PartDefinition^>^ parts);
 	}
 
-	void SetParts(IObservableVector<PartDefinition^>^ parts);
+	//void SetParts(IObservableVector<PartDefinition^>^ parts);
 	void UpdateSize();
 	void UpdateView();
 	void OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs^ args);

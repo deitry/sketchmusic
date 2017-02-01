@@ -493,7 +493,7 @@ bool SketchMusic::SFReader::SFData::ReadIdta(DataReader^ dataReader)
 				case SketchMusic::SFReader::SFGeneratorID::overridingRootKey:
 					if ((gen.second->val.sword >= 0) && (gen.second->val.sword <= 127))
 					{
-						zone->sample->origPitch = gen.second->val.sword;
+						zone->sample->origPitch = gen.second->val.uword;
 					}
 					break;
 				}

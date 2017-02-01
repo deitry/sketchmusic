@@ -28,6 +28,10 @@ namespace SketchMusic
 	ref class Cursor;
 	ref class PartDefinition;
 	ref class Idea;
+	ref class CompositionHeader;
+	ref class CompositionData;
+	//ref class CompositionLibrary;
+	ref class Composition;
 	ref class PositionedIdea;
 	
 	public enum class IdeaCategoryEnum
@@ -81,65 +85,7 @@ namespace SketchMusic
 	ref class Instrument;
 	ref class InstrumentToTextConverter;
 
-	/**
-	"Облегченная" версия класса Composition. Нужна для определения альбома
-	*/
-	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-	public ref class CompositionHeader sealed
-	{
-	public:
-		property String^ Name;
-		property String^ Description;
-		property String^ FileName;
-	};
-
-	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-	public ref class CompositionData sealed
-	{
-	private:
-		IObservableVector<Text^>^ m_texts;
-		void HandleControlSymbols();	// если мы будем сразу все управляющие символы добавлять в controlText, то эта функция не понадобится
-
-	public:
-		property int BPM;	// базовый темп
-
-		// TODO : добавить дорожку с "системными" данными? - вносить туда всё, что касается композиции в целом
-		// один текст воспринимается как одна дорожка
-		property IObservableVector<Text^>^ texts
-		{
-			IObservableVector<Text^>^ get() { return m_texts; }
-			void set(IObservableVector<Text^>^ _texts) { m_texts = _texts; HandleControlSymbols(); }
-		}
-
-		property Text^ ControlText;
-
-		IObservableVector<PartDefinition^>^ getParts();
-			// В дальнейшем сделаем controlText "хранителем" управляющих символов и прочая, что влияет непосредственно на композицию
-
-		static CompositionData^ deserialize(Windows::Data::Json::JsonArray^ json);
-		static CompositionData^ deserialize(Platform::String^ str);
-		Windows::Data::Json::IJsonValue^ serialize();
-
-		void ApplyParts(IObservableVector<PartDefinition^>^ parts);
-		bool HasContent();
-
-		CompositionData();
-	};
-
-	/**
-	Целиком определяет всю композицию
-	*/
-	public ref class Composition sealed
-	{
-	public:
-		property CompositionHeader^ Header;
-		property CompositionData^ Data;
-
-		Windows::Data::Json::IJsonValue^ Serialize();
-		static Composition^ Deserialize(Windows::Data::Json::JsonObject^ json);
-
-		Composition() { Header = ref new CompositionHeader; Data = ref new CompositionData; }
-	};
+	
 
 	// внутренняя структура
 
@@ -391,6 +337,7 @@ namespace SketchMusic
 
 	// Вместо использования PositionedSymbol для оперирования на уровне частей в редакторе композиции,
 	// будем создавать специальный объект, для этого предназначенный
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class PartDefinition sealed : Windows::UI::Xaml::Data::INotifyPropertyChanged
 	{
 	private:
@@ -1270,25 +1217,6 @@ namespace SketchMusic
 		ref class ChordView;		// для отображения нескольких нот
 		ref class CompositionView;	// для отображения композиции в целом
 	}
-
-	/**
-	Перспективный класс, определяющий набор композиций.
-	Нет нужды иметь в его рамках полностью заполненную композицию, поскольку мы вряд ли будем загружать их все одновременно.
-	*/
-	public ref class Album sealed
-	{
-	public:
-		property String^ name;
-		property Windows::Foundation::Collections::IVector<CompositionHeader^>^ _compositions;
-	};
-
-	public ref class Project sealed
-	{
-	//private :
-	public:
-		property String^ name;
-		property Windows::Foundation::Collections::IVector<Album^>^ _albums;
-	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class ISymbolFactory sealed

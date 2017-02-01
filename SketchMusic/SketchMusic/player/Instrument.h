@@ -12,6 +12,7 @@
 */
 namespace SketchMusic
 {
+	[Windows::Foundation::Metadata::WebHostHidden]
 	[Windows::UI::Xaml::Data::BindableAttribute]
 	public ref class Instrument sealed
 	{
@@ -21,6 +22,8 @@ namespace SketchMusic
 		// Инструмент будет только хранить названия тех семплов, которые ему нужны.
 	public:
 		Instrument() {}
+
+		[Windows::Foundation::Metadata::DefaultOverloadAttribute]
 		Instrument(Platform::String^ name) { _name = name; FileName = Windows::ApplicationModel::Package::Current->InstalledLocation->Path + "\\SketchMusic\\resources\\" + name; }
 		//Instrument(Platform::String^ name, Platform::String^ pset) { _name = name; preset = pset; }
 		Instrument(Platform::String^ name, Platform::String^ fname, Platform::String^ pset)
@@ -31,6 +34,7 @@ namespace SketchMusic
 			else FileName = Windows::ApplicationModel::Package::Current->InstalledLocation->Path + "\\SketchMusic\\resources\\" + name;
 			preset = pset; 
 		}
+
 		Instrument(SketchMusic::Instrument^ instr) 
 		{ 
 			_name = instr->_name; 

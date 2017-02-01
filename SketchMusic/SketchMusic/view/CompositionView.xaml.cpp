@@ -23,14 +23,13 @@ using namespace Windows::UI::Xaml::Navigation;
 
 CompositionView::CompositionView()
 {
-	Categories = ref new Platform::Collections::Map<String^, int>;
-	auto parts = ref new Platform::Collections::Vector<PartDefinition^>;
-
 	InitializeComponent();
-	SetParts(parts);
+
+	Categories = ref new Platform::Collections::Map<String^, int>;
+	Parts = ref new Platform::Collections::Vector<PartDefinition^>;
 }
 
-void SketchMusic::View::CompositionView::SetParts(IObservableVector<PartDefinition^>^ parts)
+void SketchMusic::View::CompositionView::Parts::set(IObservableVector<PartDefinition^>^ parts)
 {
 	m_parts = parts;
 	m_parts->VectorChanged += ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PartDefinition ^>(this,

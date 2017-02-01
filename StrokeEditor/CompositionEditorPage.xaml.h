@@ -62,5 +62,6 @@ namespace StrokeEditor
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
 		void OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor ^args);
 		void OnSelectionChange(Platform::Object ^sender, SketchMusic::PartDefinition ^args);
+		void ChangeViewBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }

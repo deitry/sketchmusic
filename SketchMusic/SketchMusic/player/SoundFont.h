@@ -438,7 +438,7 @@ public:
 	void addModulator(SFModulator^ mod)
 	{
 		// если такой модулятор уже есть, то он должен быть удалён
-		for (int i = 0; i < modulators->Size; i++)
+		for (unsigned int i = 0; i < modulators->Size; i++)
 		{
 			if (mod->EQ(modulators->GetAt(i)))
 			{

@@ -10,6 +10,7 @@
 #include "MelodyEditorPage.xaml.h"
 #include "MainMenuPage.xaml.h"
 #include "EditCompositionDialog.xaml.h"
+#include "view/IdeaGrid.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -172,6 +173,7 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 				CompositionProject->Header->Name = fileNameTxt->Text;
 				CompositionProject->Header->FileName = fileNameTxt->Text + ".jsm";
+				PositionedIdeasGrid->Project = CompositionProject;
 				SetParts(CompositionProject->Data->getParts());
 				AreButtonsEnabled(true);
 
@@ -226,13 +228,15 @@ void StrokeEditor::CompositionEditorPage::AreButtonsEnabled(bool isEnabled)
 
 void StrokeEditor::CompositionEditorPage::SetParts(IObservableVector<PartDefinition^>^ parts)
 {
-	CompositionView->SetParts(parts);
+	PositionedIdeasGrid->Parts = parts;
+	CompositionView->Parts = parts;
 	((App^)App::Current)->_CurrentParts = parts;
 	CompositionPartList->ItemsSource = parts;
 	parts->VectorChanged += 
 		ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PartDefinition ^>(this, &StrokeEditor::CompositionEditorPage::OnVectorChanged);
 	TitleTxt->Text = CompositionProject->Header->Name;
 	UpdateTotalLength();
+	PositionedIdeasGrid->UpdateGrid();
 }
 
 void StrokeEditor::CompositionEditorPage::UpdateTotalLength()
@@ -304,6 +308,7 @@ void StrokeEditor::CompositionEditorPage::Page_SizeChanged(Platform::Object^ sen
 	CompositionView->UpdateSize();
 
 	CompositionPartList->Width = width;
+	PositionedIdeasGrid->Width = width;
 }
 
 void StrokeEditor::CompositionEditorPage::CompositionPartList_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
@@ -464,7 +469,7 @@ void StrokeEditor::CompositionEditorPage::PlayCompositionBtn_Click(Platform::Obj
 	((App^)App::Current)->_player->needPlayGeneric= NeedGenericChbx->IsChecked->Value;		// последний символ - последняя часть
 	((App^)App::Current)->_player->quantize = 1;		// для обновления положения слайдера нам больше не надо
 	((App^)App::Current)->_player->precount = 0;
-	int start = CompositionSlider->Value;
+	int start = (int)CompositionSlider->Value;
 	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
 	{
 		auto async = concurrency::create_task([=]
@@ -524,4 +529,24 @@ void StrokeEditor::CompositionEditorPage::OnSelectionChange(Platform::Object ^se
 	unsigned int ind;
 	if (CompositionPartList->Items->IndexOf(args, &ind))
 		CompositionPartList->SelectedIndex = ind;
+}
+
+
+void StrokeEditor::CompositionEditorPage::ChangeViewBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	auto firstVisible = ListHeader->Visibility == Windows::UI::Xaml::Visibility::Collapsed ? true : false;
+	if (firstVisible)
+	{
+		ListHeader->Visibility = Windows::UI::Xaml::Visibility::Visible;
+		CompositionPartList->Visibility = Windows::UI::Xaml::Visibility::Visible;
+		PositionedIdeasGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+	}
+	else
+	{
+		ListHeader->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+		CompositionPartList->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+		PositionedIdeasGrid->Visibility = Windows::UI::Xaml::Visibility::Visible;
+		PositionedIdeasGrid->CreateGrid();
+		PositionedIdeasGrid->UpdateGrid();
+	}
 }

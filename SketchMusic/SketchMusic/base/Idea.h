@@ -1,10 +1,13 @@
 #pragma once
 
 #include "../SketchMusic.h"
+#include "CompositionData.h"
 #include <string>
 #include <vector>
 
 using namespace Windows::UI::Xaml::Data;
+using namespace Platform;
+using namespace SketchMusic;
 
 namespace SketchMusic
 {
@@ -86,7 +89,7 @@ namespace SketchMusic
 		}
 		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
 		{
-			return 0;
+			return (int)0;
 		}
 
 		TimeToStrConverter() {}
@@ -102,6 +105,7 @@ namespace SketchMusic
 
 		property SketchMusic::Cursor^ Pos;		// исходное положение
 		property SketchMusic::Cursor^ Length;	// длина. Праввая граница рассчитывается как Pos + Length
+		property int Layer;						// слой, на котором располагается идея
 
 		property SketchMusic::Idea^ Content;		// собствено идея
 	};

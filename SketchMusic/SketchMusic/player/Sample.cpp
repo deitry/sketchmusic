@@ -10,7 +10,7 @@ SketchMusic::Sample::Sample(Platform::String^ FileName)
 	// - если не нашли - подгружаем семпл по умолчанию
 	this->_name = "Square";
 	this->_frequency = 441;
-	this->_length = DISCRETIZATION_FREQ / this->_frequency * 2;
+	this->_length = (int) DISCRETIZATION_FREQ / this->_frequency * 2;
 	_sample = ref new Platform::Array<uint8>(this->_length);
 	
 	for (int i = 0; i < this->_length; )

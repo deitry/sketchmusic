@@ -423,7 +423,8 @@ void StrokeEditor::App::SaveData()
 		FileIO::WriteTextAsync(_CurrentCompositionArgs->File, json->Stringify());
 	}
 	
-	SaveLibrary("ideaLibrary.db");
+	// теперь "сохранение"-копирование делается после каждой значимой операции с библиотекой, так что сохранение на выходе уже излишне
+	//SaveLibrary("ideaLibrary.db");
 }
 // Установить на плитке строку с последним открытым элементом
 // - передавать сюда название файла для композиции

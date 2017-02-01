@@ -14,6 +14,7 @@ using namespace Windows::Foundation::Collections;
 using namespace Platform::Collections;
 using namespace SketchMusic;
 
+[Windows::Foundation::Metadata::WebHostHidden]
 public ref class SketchMusic::View::TestData sealed
 {
 public:

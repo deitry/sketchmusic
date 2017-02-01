@@ -42,6 +42,7 @@ internal:
 public:
 	Text();
 	Text(Windows::Data::Json::JsonObject^ json) {}
+	[Windows::Foundation::Metadata::DefaultOverloadAttribute]
 	Text(Instrument^ instrument);
 	
 	property SketchMusic::Instrument^ instrument;	// инструмент, который связывается с данной дорожкой
@@ -73,6 +74,7 @@ public:
 	Cursor^ getPosAtLeft(Cursor^ pos);
 	Cursor^ getPosAtRight(Cursor^ pos);
 	
+	[Windows::Foundation::Metadata::DefaultOverloadAttribute]
 	static Text^ deserialize(Platform::String^ str);
 	static Text^ deserialize(Windows::Data::Json::JsonObject^ json);
 	Windows::Data::Json::IJsonValue^ serialize();
@@ -85,6 +87,7 @@ public:
 	
 };
 
+[Windows::Foundation::Metadata::WebHostHidden]
 public ref class SketchMusic::TextIterator sealed : IIterator<PositionedSymbol^>
 {
 internal:

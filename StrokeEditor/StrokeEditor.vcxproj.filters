@@ -47,6 +47,7 @@
     <ClCompile Include="EditCompositionDialog.xaml.cpp" />
     <ClCompile Include="ManageInstrumentsDialog.xaml.cpp" />
     <ClCompile Include="SettingsPage.xaml.cpp" />
+    <ClCompile Include="view\IdeaGrid.xaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -63,6 +64,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="ManageInstrumentsDialog.xaml.h" />
     <ClInclude Include="SettingsPage.xaml.h" />
+    <ClInclude Include="view\IdeaGrid.xaml.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -137,7 +139,7 @@
     <Page Include="ManageInstrumentsDialog.xaml">
       <Filter>Dialogs</Filter>
     </Page>
-    <Page Include="view\IdeaMap.xaml">
+    <Page Include="view\IdeaGrid.xaml">
       <Filter>Composition</Filter>
     </Page>
   </ItemGroup>

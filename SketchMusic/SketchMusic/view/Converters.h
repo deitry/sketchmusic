@@ -495,7 +495,7 @@ public:
 		default:
 			return 0.03*scaling * static_cast<int>(psym->_sym->GetSymType());
 		}
-		return 0;
+		return (int)0;
 	}
 
 	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)

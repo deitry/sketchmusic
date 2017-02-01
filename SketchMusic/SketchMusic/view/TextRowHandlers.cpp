@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "TextRow.xaml.h"
 #include "../base/Text.h"
+#include "../base/Composition.h"
 
 using namespace SketchMusic;
 

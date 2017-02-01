@@ -123,7 +123,12 @@
                     x:Name="EditPartBtn" Click="EditPartBtn_Click"  IsEnabled="False"/>
         </StackPanel>
 
-        <Grid Grid.Row="2" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=CompositionPartList}">
+        <StackPanel Grid.Row="1" HorizontalAlignment="Right" Orientation="Horizontal" Margin="10,5,10,5">
+            <Button FontFamily="Segoe MDL2 Assets" Content="&#xE97C;" FontSize="18" 
+                    x:Name="ChangeViewBtn" Click="ChangeViewBtn_Click"/>
+        </StackPanel>
+
+        <Grid Name="ListHeader" Grid.Row="2" HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=CompositionPartList}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -136,40 +141,46 @@
             <TextBlock Grid.Column="3" Text="Длина" x:Name="FullLengthTxt" Margin="13,0,0,0" HorizontalAlignment="Center"/>
         </Grid>
 
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Visible" VerticalScrollMode="Enabled">
-            <ListView x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
-                      CanReorderItems="True" CanDragItems="True" AllowDrop="True" Width="800"
-                      ItemClick="CompositionPartList_ItemClick"
-                      SelectionChanged="CompositionPartList_SelectionChanged"
-                      >
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=CompositionPartList}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="5*"/>
-                                <ColumnDefinition Width="3*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0" Text="{Binding DataContext,
+
+        <ScrollViewer x:Name="PartsScrollViewer" Grid.Row="3" 
+                      VerticalScrollBarVisibility="Visible" VerticalScrollMode="Enabled">
+            <Grid>
+                <local:IdeaGrid x:Name="PositionedIdeasGrid"
+                                Visibility="Collapsed" Width="800" Height="400"/>
+                <ListView x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
+                          CanReorderItems="True" CanDragItems="True" AllowDrop="True" Width="800"
+                          ItemClick="CompositionPartList_ItemClick"
+                          SelectionChanged="CompositionPartList_SelectionChanged"
+                          >
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid HorizontalAlignment="Stretch" Width="{Binding Width, ElementName=CompositionPartList}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="5*"/>
+                                    <ColumnDefinition Width="3*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding DataContext,
+                                                                    RelativeSource={RelativeSource TemplatedParent},
+                                                                    Converter={StaticResource partcat2text}}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding DataContext,
+                                                                    RelativeSource={RelativeSource TemplatedParent}, 
+                                                                    Converter={StaticResource partdyn2text}}"
+                                                                    />
+                                <TextBlock Grid.Column="2" Text="{Binding DataContext,
+                                                                    RelativeSource={RelativeSource TemplatedParent}, 
+                                                                    Converter={StaticResource partname2text}}"
+                                                                    />
+                                <TextBlock Grid.Column="3" Text="{Binding DataContext,
                                                                 RelativeSource={RelativeSource TemplatedParent},
-                                                                Converter={StaticResource partcat2text}}"/>
-                            <TextBlock Grid.Column="1" Text="{Binding DataContext,
-                                                                RelativeSource={RelativeSource TemplatedParent}, 
-                                                                Converter={StaticResource partdyn2text}}"
-                                                                />
-                            <TextBlock Grid.Column="2" Text="{Binding DataContext,
-                                                                RelativeSource={RelativeSource TemplatedParent}, 
-                                                                Converter={StaticResource partname2text}}"
-                                                                />
-                            <TextBlock Grid.Column="3" Text="{Binding DataContext,
-                                                            RelativeSource={RelativeSource TemplatedParent},
-                                                            Converter={StaticResource parttime2text}}"
-                                        HorizontalAlignment="Center"/>
-                        </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                                                                Converter={StaticResource parttime2text}}"
+                                            HorizontalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </Grid>
         </ScrollViewer>
 
     </Grid>

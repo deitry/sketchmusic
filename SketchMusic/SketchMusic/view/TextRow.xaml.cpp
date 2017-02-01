@@ -6,6 +6,7 @@
 #include "pch.h"
 #include "TextRow.xaml.h"
 #include "../base/Text.h"
+#include "../base/Composition.h"
 
 using namespace SketchMusic;
 
@@ -117,7 +118,7 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int
 	
 	int prev = _startPos->Beat;
 
-	for (int rowCnt = 0; rowCnt < breakLine.size(); rowCnt++)
+	for (unsigned int rowCnt = 0; rowCnt < breakLine.size(); rowCnt++)
 	{
 		int current = breakLine[rowCnt]->_pos->Beat;
 		// добавляем новую строку
@@ -160,10 +161,10 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 {
 	// вставка разрыва строки
 	// - находим строку, в которую будем вставлять разрыв
-	int difBeat = pos->Beat - _startPos->Beat;
+	unsigned int difBeat = pos->Beat >= _startPos->Beat ? pos->Beat - _startPos->Beat : 0;
 	int ctrlCnt = 0;
 
-	for (int i = 0; i < _mainPanel->Children->Size; i++)
+	for (unsigned int i = 0; i < _mainPanel->Children->Size; i++)
 	{
 		auto rowPanel = dynamic_cast<StackPanel^>(static_cast<Object^>(_mainPanel->Children->GetAt(i)));
 		if (rowPanel == nullptr)
@@ -173,7 +174,7 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 		if (difBeat < ctrlCnt)
 		{
 			// - вычисляем индекс нового крайнего элемента
-			int rowEnd = ctrlCnt - difBeat;
+			unsigned int rowEnd = ctrlCnt - difBeat;
 
 			// - создаём новую строку, вставляем в _mainPanel
 			StackPanel^ newRow = ref new StackPanel;
@@ -427,7 +428,7 @@ void SketchMusic::View::TextRow::DeleteSymbolView(PositionedSymbol ^ symbol)
 		return;
 	}
 
-	int i = 0;
+	unsigned int i = 0;
 	while (i < _canvas->Children->Size)
 	{
 		auto ctrl = dynamic_cast<ContentControl^>(_canvas->Children->GetAt(i));

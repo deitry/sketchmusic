@@ -208,6 +208,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="SketchMusic\base\Composition.h" />
+    <ClInclude Include="SketchMusic\base\CompositionData.h" />
     <ClInclude Include="SketchMusic\base\Cursor.h" />
     <ClInclude Include="SketchMusic\base\Idea.h" />
     <ClInclude Include="SketchMusic\base\OnKeyToStringConverter.h" />
@@ -257,6 +259,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SketchMusic\base\Composition.cpp" />
     <ClCompile Include="SketchMusic\base\Cursor.cpp" />
     <ClCompile Include="SketchMusic\base\Idea.cpp" />
     <ClCompile Include="SketchMusic\base\Symbol.cpp" />
