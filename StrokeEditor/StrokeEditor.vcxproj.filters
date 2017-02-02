@@ -48,6 +48,7 @@
     <ClCompile Include="ManageInstrumentsDialog.xaml.cpp" />
     <ClCompile Include="SettingsPage.xaml.cpp" />
     <ClCompile Include="view\IdeaGrid.xaml.cpp" />
+    <ClCompile Include="dialogs\AddIdeaDialog.xaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -65,6 +66,7 @@
     <ClInclude Include="ManageInstrumentsDialog.xaml.h" />
     <ClInclude Include="SettingsPage.xaml.h" />
     <ClInclude Include="view\IdeaGrid.xaml.h" />
+    <ClInclude Include="dialogs\AddIdeaDialog.xaml.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -144,6 +146,18 @@
     </Page>
     <Page Include="dialogs\AddIdeaDialog.xaml">
       <Filter>Dialogs</Filter>
+    </Page>
+    <Page Include="editors\RhythmEditorPage.xaml">
+      <Filter>Editors</Filter>
+    </Page>
+    <Page Include="editors\ChordProgressionEditorPage.xaml">
+      <Filter>Editors</Filter>
+    </Page>
+    <Page Include="editors\MelodicSequenceEditorPage.xaml">
+      <Filter>Editors</Filter>
+    </Page>
+    <Page Include="editors\LyricsEditorPage.xaml">
+      <Filter>Editors</Filter>
     </Page>
   </ItemGroup>
   <ItemGroup>

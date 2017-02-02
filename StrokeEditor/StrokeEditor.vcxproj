@@ -150,6 +150,18 @@
     <ClInclude Include="dialogs\AddIdeaDialog.xaml.h">
       <DependentUpon>dialogs\AddIdeaDialog.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="editors\ChordProgressionEditorPage.xaml.h">
+      <DependentUpon>editors\ChordProgressionEditorPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="editors\LyricsEditorPage.xaml.h">
+      <DependentUpon>editors\LyricsEditorPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="editors\MelodicSequenceEditorPage.xaml.h">
+      <DependentUpon>editors\MelodicSequenceEditorPage.xaml</DependentUpon>
+    </ClInclude>
+    <ClInclude Include="editors\RhythmEditorPage.xaml.h">
+      <DependentUpon>editors\RhythmEditorPage.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="ManageInstrumentsDialog.xaml.h">
       <DependentUpon>ManageInstrumentsDialog.xaml</DependentUpon>
     </ClInclude>
@@ -193,6 +205,18 @@
     </ApplicationDefinition>
     <Page Include="AboutPage.xaml" />
     <Page Include="dialogs\AddIdeaDialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="editors\ChordProgressionEditorPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="editors\LyricsEditorPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="editors\MelodicSequenceEditorPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="editors\RhythmEditorPage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="ManageInstrumentsDialog.xaml">
@@ -266,6 +290,18 @@
     </ClCompile>
     <ClCompile Include="dialogs\AddIdeaDialog.xaml.cpp">
       <DependentUpon>dialogs\AddIdeaDialog.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="editors\ChordProgressionEditorPage.xaml.cpp">
+      <DependentUpon>editors\ChordProgressionEditorPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="editors\LyricsEditorPage.xaml.cpp">
+      <DependentUpon>editors\LyricsEditorPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="editors\MelodicSequenceEditorPage.xaml.cpp">
+      <DependentUpon>editors\MelodicSequenceEditorPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="editors\RhythmEditorPage.xaml.cpp">
+      <DependentUpon>editors\RhythmEditorPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="ManageInstrumentsDialog.xaml.cpp">
       <DependentUpon>ManageInstrumentsDialog.xaml</DependentUpon>

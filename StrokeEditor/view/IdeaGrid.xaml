@@ -16,13 +16,19 @@
         <sm:VerbosePosIdeaCategoryToStrConverter x:Key="verbPIdea2str"/>
         <SolidColorBrush x:Key="PrimaryLineBrush" Color="{ThemeResource SystemBaseHighColor}"/>
         <SolidColorBrush x:Key="SecondaryLineBrush" Color="{ThemeResource SystemBaseMediumColor}"/>
+        <SolidColorBrush x:Key="IdeaBackground" Color="LightGray" Opacity="1.0"/>
         <Style TargetType="ContentControl" x:Key="PIdeaStyle">
-            <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundAltMediumBrush}"/>
+            <Setter Property="Background" Value="{StaticResource IdeaBackground}"/>
             <Setter Property="Height" Value="{StaticResource LayerHeight}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
-                        <Button Content="{Binding Converter={StaticResource verbPIdea2str}}"/>
+                        <Grid Background="{TemplateBinding Background}"
+                              BorderBrush="{StaticResource SecondaryLineBrush}"
+                              BorderThickness="1">
+                            <ContentControl Content="{Binding Converter={StaticResource verbPIdea2str}}"
+                                            Background="{TemplateBinding Background}"/>
+                        </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -31,21 +37,21 @@
     
     <Grid>
         <Canvas Name="GridCanvas" 
-                AllowDrop="True" Drop="MainCanvas_Drop"
-                PointerPressed="MainCanvas_PointerPressed"
-                PointerMoved="MainCanvas_PointerMoved"
-                Background="Transparent">
+                AllowDrop="True"
+                >
             
         </Canvas>
         <Canvas Name="IdeaCanvas" 
-                AllowDrop="True" Drop="MainCanvas_Drop"
                 PointerPressed="MainCanvas_PointerPressed"
-                PointerMoved="MainCanvas_PointerMoved"
+                PointerMoved="OnPointerMoved"
+                PointerReleased="IdeaCanvas_PointerReleased"
                 Holding="IdeaCanvas_Holding"
                 RightTapped="IdeaCanvas_RightTapped"
                 DoubleTapped="IdeaCanvas_DoubleTapped"
                 Background="Transparent">
-
+            <!--DragEnter="IdeaCanvas_DragEnter" 
+                DragOver="IdeaCanvas_DragOver"
+                AllowDrop="True" Drop="MainCanvas_Drop"-->
         </Canvas>
     </Grid>
 </UserControl>

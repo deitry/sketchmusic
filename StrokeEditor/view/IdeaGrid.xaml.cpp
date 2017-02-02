@@ -20,6 +20,7 @@ using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace Windows::ApplicationModel::DataTransfer;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -64,6 +65,25 @@ void StrokeEditor::IdeaGrid::CreateGrid()
 
 		cur += part->Length;
 	}
+	// отдельно добавляем линию в самый конец
+	auto line = ref new Line;
+	//binding y с Height? или вручную менять в Update?
+	line->X1 = 0; line->X2 = 0;
+	line->Y1 = 0;
+	line->Y2 = GridCanvas->ActualHeight;
+
+	line->Stroke = (SolidColorBrush^)this->Resources->Lookup("PrimaryLineBrush");
+	line->StrokeThickness = 3;
+
+	auto pos = ref new Cursor(cur);
+	line->DataContext = pos;
+
+	Lines->Append(line);
+	GridCanvas->Children->Append(line);
+
+	auto point = GetCoordinatsOfPosition(pos);
+	GridCanvas->SetLeft(line, point.X);
+	GridCanvas->SetTop(line, 0);
 
 	// отрисовываем горизонтальные линии для слоёв
 	for (int i = 0; i < 9; i++)
@@ -191,10 +211,17 @@ void StrokeEditor::IdeaGrid::AddIdeaView(PositionedIdea ^ idea)
 	auto point = GetCoordinatsOfPosition(idea->Pos, idea->Layer);
 	IdeaCanvas->SetLeft(ctrl, point.X);
 	IdeaCanvas->SetTop(ctrl, point.Y);
+
 	// не забываем добавить хендлеры для 
 	// - нажатия на объект
+	ctrl->PointerPressed += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &StrokeEditor::IdeaGrid::OnPointerPressed);
+	ctrl->PointerMoved += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &StrokeEditor::IdeaGrid::OnPointerMoved);
+	ctrl->PointerReleased += ref new Windows::UI::Xaml::Input::PointerEventHandler(this, &StrokeEditor::IdeaGrid::OnPointerReleased);
 	// - вызова контекстного меню
+	//ctrl->Holding += ref new Windows::UI::Xaml::Input::HoldingEventHandler(this, &StrokeEditor::IdeaGrid::OnHolding);
+	//ctrl->RightTapped += ref new Windows::UI::Xaml::Input::RightTappedEventHandler(this, &StrokeEditor::IdeaGrid::OnRightTapped);
 	// - драг & дроп ?
+	//ctrl->CanDrag = true;
 }
 
 // удаляем визуальное отображение
@@ -266,20 +293,34 @@ void StrokeEditor::IdeaGrid::MainCanvas_Drop(Platform::Object^ sender, Windows::
 
 void StrokeEditor::IdeaGrid::MainCanvas_PointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
-	// не пропускаем тач
-	if (e->Pointer->PointerDeviceType != Windows::Devices::Input::PointerDeviceType::Touch)
-	{// - фиксируем положение
-	// - - вычисляем Cursor по X и слой по Y
-		auto point = e->GetCurrentPoint(GridCanvas)->Position;
-		CreateNewIdea(point);
-	}
-
+	//if (dynamic_cast<Canvas^>(sender) != IdeaCanvas) return;
+	//
+	//// не пропускаем тач
+	//if (e->Pointer->PointerDeviceType != Windows::Devices::Input::PointerDeviceType::Touch)
+	//{// - фиксируем положение
+	//// - - вычисляем Cursor по X и слой по Y
+	//	auto point = e->GetCurrentPoint(GridCanvas)->Position;
+	//	CreateNewIdea(point);
+	//}
 }
 
 
 void StrokeEditor::IdeaGrid::MainCanvas_PointerMoved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
-
+	//if (_Dragged)
+	//{
+	//	auto orig = e->GetCurrentPoint(IdeaCanvas)->Position;
+	//	orig.X -= _DraggedOffset.X;
+	//
+	//	if (orig.X < 0) orig.X = 0;
+	//	if (orig.X > GridCanvas->ActualWidth) orig.X = GridCanvas->ActualWidth;
+	//
+	//	auto pos = GetPositionOfPoint(orig);
+	//	auto point = GetCoordinatsOfPosition(pos, orig.Y / (double)this->Resources->Lookup("LayerHeight"));
+	//
+	//	IdeaCanvas->SetLeft(_Dragged, point.X);
+	//	IdeaCanvas->SetTop(_Dragged, point.Y);
+	//}
 }
 
 
@@ -310,10 +351,100 @@ void StrokeEditor::IdeaGrid::IdeaCanvas_RightTapped(Platform::Object^ sender, Wi
 void StrokeEditor::IdeaGrid::IdeaCanvas_DoubleTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::DoubleTappedRoutedEventArgs^ e)
 {
 	// пропускаем только нажатие тачем
-	if ((e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||
-		(e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Pen))
-		return;
+	//if ((e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||
+	//	(e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Pen))
+	//	return;
 
 	auto point = e->GetPosition(GridCanvas);
 	CreateNewIdea(point);
+}
+
+
+void StrokeEditor::IdeaGrid::OnPointerPressed(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
+{
+	if (_Dragged) return;
+
+	_Dragged = (ContentControl^)sender;
+	_DraggedOffset = e->GetCurrentPoint(_Dragged)->Position;
+}
+
+
+void StrokeEditor::IdeaGrid::OnHolding(Platform::Object ^sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs ^e)
+{
+
+}
+
+
+void StrokeEditor::IdeaGrid::OnRightTapped(Platform::Object ^sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs ^e)
+{
+
+}
+
+
+void StrokeEditor::IdeaGrid::OnPointerMoved(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
+{
+	if (_Dragged)
+	{
+		auto orig = e->GetCurrentPoint(IdeaCanvas)->Position;
+		orig.X -= _DraggedOffset.X;
+
+		if (orig.X < 0) orig.X = 0;
+		if (orig.X > GridCanvas->ActualWidth) orig.X = GridCanvas->ActualWidth;
+
+		auto pos = GetPositionOfPoint(orig);
+		auto point = GetCoordinatsOfPosition(pos, orig.Y / (double)this->Resources->Lookup("LayerHeight"));
+		
+		IdeaCanvas->SetLeft(_Dragged, point.X);
+		IdeaCanvas->SetTop(_Dragged, point.Y);
+	}
+}
+
+
+void StrokeEditor::IdeaGrid::OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e)
+{
+	if (_Dragged)
+	{
+		PositionedIdea^ idea = (PositionedIdea^)_Dragged->DataContext;
+		if (idea)
+		{
+			auto orig = e->GetCurrentPoint(IdeaCanvas)->Position;
+			auto pos = GetPositionOfPoint(orig);
+			idea->Pos = pos;
+			idea->Layer = orig.Y / (double)this->Resources->Lookup("LayerHeight");
+		}
+
+		_Dragged = nullptr;
+	}
+}
+
+
+void StrokeEditor::IdeaGrid::IdeaCanvas_DragEnter(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e)
+{
+	//e->Data
+}
+
+
+void StrokeEditor::IdeaGrid::IdeaCanvas_DragOver(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e)
+{
+	// разрешаем операции переноса из "общего хранилища" на сетку
+	// простой перенос в другое положение
+	//e->AcceptedOperation = DataPackageOperation::Move;
+}
+
+
+void StrokeEditor::IdeaGrid::IdeaCanvas_PointerReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
+{
+	if (_Dragged)
+	{
+		PositionedIdea^ idea = (PositionedIdea^)_Dragged->DataContext;
+		if (idea)
+		{
+			auto orig = e->GetCurrentPoint(IdeaCanvas)->Position;
+			auto pos = GetPositionOfPoint(orig);
+			idea->Pos = pos;
+			idea->Layer = orig.Y / (double)this->Resources->Lookup("LayerHeight");
+		}
+
+		_Dragged = nullptr;
+	}
 }

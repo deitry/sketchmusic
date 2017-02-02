@@ -8,6 +8,7 @@
 #include "view\IdeaGrid.g.h"
 
 using namespace SketchMusic;
+using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
 using namespace Windows::UI::Xaml::Shapes;
 using namespace Windows::UI::Xaml::Controls;
@@ -20,6 +21,9 @@ namespace StrokeEditor
 	private:
 		IObservableVector<PartDefinition^>^ m_parts;
 		IObservableVector<ContentControl^>^ IdeasCtrl;
+
+		ContentControl^ _Dragged;
+		Point _DraggedOffset;
 
 	public:
 		IdeaGrid();
@@ -41,8 +45,8 @@ namespace StrokeEditor
 
 	protected:
 		Windows::Foundation::Point GetCoordinatsOfPosition(Cursor^ pos, int layer = 0);
-		Cursor^ GetPositionOfPoint(Windows::Foundation::Point point);
-		void CreateNewIdea(Windows::Foundation::Point point);
+		Cursor^ GetPositionOfPoint(Point point);
+		void CreateNewIdea(Point point);
 		//void SetIdeaOnCanvas(PositionedIdea^ idea);
 
 	private:
@@ -55,5 +59,13 @@ namespace StrokeEditor
 		void IdeaCanvas_Holding(Platform::Object^ sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs^ e);
 		void IdeaCanvas_RightTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs^ e);
 		void IdeaCanvas_DoubleTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::DoubleTappedRoutedEventArgs^ e);
+		void OnPointerPressed(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
+		void OnHolding(Platform::Object ^sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs ^e);
+		void OnRightTapped(Platform::Object ^sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs ^e);
+		void OnPointerMoved(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
+		void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
+		void IdeaCanvas_DragEnter(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e);
+		void IdeaCanvas_DragOver(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e);
+		void IdeaCanvas_PointerReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
 	};
 }
