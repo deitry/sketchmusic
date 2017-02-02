@@ -48,13 +48,16 @@ namespace StrokeEditor
 	{
 	public:
 		LibraryEntryNavigationArgs() {}
-		LibraryEntryNavigationArgs(Platform::Object^ _idea, Platform::Boolean _isRead) //, StrokeEditor::LibraryOverviewPage^ _library 
+		LibraryEntryNavigationArgs(Platform::Object^ _idea)
 		{
-			idea = _idea; isRead = _isRead; //library = _library;
+			idea = _idea; isRead = true;
+		}
+		LibraryEntryNavigationArgs(Platform::Object^ _idea, Platform::Boolean _isRead)
+		{
+			idea = _idea; isRead = _isRead;
 		}
 
 		property Platform::Object^ idea;
 		property Platform::Boolean isRead;
-		//property StrokeEditor::LibraryOverviewPage^ library;
 	};
 }

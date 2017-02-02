@@ -37,6 +37,8 @@ namespace StrokeEditor
 			void set(IObservableVector<PartDefinition^>^ parts);
 		}
 
+		event EventHandler<Idea^>^ EditIdea;
+
 		void CreateGrid();	// создаём сетку
 		void UpdateGrid();	// перерисовываем сетку
 		void OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs ^ args);

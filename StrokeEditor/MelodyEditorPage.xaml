@@ -110,7 +110,7 @@
                         </StackPanel>
                     </Button>
                     
-                    <Button Name="partsItem" Style="{StaticResource MenuBtnStyle}" Click="MenuButton_Click">
+                    <Button Name="partsItem" Style="{StaticResource MenuBtnStyle}" Click="MenuButton_Click" Visibility="Collapsed">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontSize="{StaticResource MenuSymbolFontSize}" FontFamily="Segoe MDL2 Assets" Text="&#xEB05;" />
                             <TextBlock Text="Части" Style="{StaticResource ItemTextStyle}"

@@ -77,13 +77,17 @@ void StrokeEditor::CompositionEditorPage::InitializePage()
 		+= ref new Windows::Foundation::EventHandler<SketchMusic::Player::PlayerState>(this, &StrokeEditor::CompositionEditorPage::OnStateChanged);
 
 	CompositionView->SelectionChange += ref new Windows::Foundation::EventHandler<SketchMusic::PartDefinition ^>(this, &StrokeEditor::CompositionEditorPage::OnSelectionChange);
+
+	PositionedIdeasGrid->EditIdea += ref new Windows::Foundation::EventHandler<SketchMusic::Idea ^>(this, &StrokeEditor::CompositionEditorPage::OnEditIdea);
 }
 
 void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
 	auto args = reinterpret_cast<CompositionNavigationArgs^>(e->Parameter);
 	if (args == nullptr) return;
-	
+	if (args->SelectedIdea)
+		ChangeViewBtn_Click(this, nullptr);	// вернулись из редактора - переходим сразу на отображение идей
+
 	// если передаём целиком композицию, возвращаясь, например, из MelodyEditor
 	if (args->Project != nullptr)
 	{
@@ -289,7 +293,9 @@ void StrokeEditor::CompositionEditorPage::EditBtn_Click(Platform::Object^ sender
 	// применяем все изменения
 	CompositionProject->Data->ApplyParts(CompositionView->Parts);
 	// редактируем композицию, переставляя курсор на начало выбранной части
-	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), ref new CompositionNavigationArgs(nullptr, CompositionFile, CompositionProject, CompositionPartList->SelectedIndex));
+	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), 
+		ref new MelodyEditorArgs(this, 
+			ref new CompositionNavigationArgs(nullptr, CompositionFile, CompositionProject, CompositionPartList->SelectedIndex)));
 }
 
 
@@ -539,15 +545,23 @@ void StrokeEditor::CompositionEditorPage::ChangeViewBtn_Click(Platform::Object^ 
 	if (firstVisible)
 	{
 		ListHeader->Visibility = Windows::UI::Xaml::Visibility::Visible;
-		CompositionPartList->Visibility = Windows::UI::Xaml::Visibility::Visible;
+		PartsScrollViewer->Visibility = Windows::UI::Xaml::Visibility::Visible;
 		PositionedIdeasGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
 	}
 	else
 	{
 		ListHeader->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-		CompositionPartList->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+		PartsScrollViewer->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
 		PositionedIdeasGrid->Visibility = Windows::UI::Xaml::Visibility::Visible;
 		PositionedIdeasGrid->CreateGrid();
 		PositionedIdeasGrid->UpdateGrid();
 	}
+}
+
+
+void StrokeEditor::CompositionEditorPage::OnEditIdea(Platform::Object ^sender, SketchMusic::Idea ^args)
+{
+	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), 
+		ref new MelodyEditorArgs(this, 
+			ref new CompositionNavigationArgs(nullptr, CompositionFile, CompositionProject, args)));
 }

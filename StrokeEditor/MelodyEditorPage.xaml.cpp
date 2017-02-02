@@ -46,12 +46,31 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 	InitializePage();
 	((App^)App::Current)->WriteToDebugFile("Инициализация окна завершена");
 
-	_idea = dynamic_cast<Idea^>(e->Parameter);
-	if (_idea) LoadIdea();
+	auto args = dynamic_cast<MelodyEditorArgs^>(e->Parameter);
+	_Sender = args->Sender;
+
+	_idea = dynamic_cast<Idea^>(args->Args);
+	if (_idea)
+	{
+		((App^)App::Current)->_CurrentIdea = _idea;
+		LoadIdea();
+	}
 	else
 	{
-		_compositionArgs = dynamic_cast<CompositionNavigationArgs^>(e->Parameter);
-		if (_compositionArgs) LoadComposition();
+		_compositionArgs = dynamic_cast<CompositionNavigationArgs^>(args->Args);
+		if (_compositionArgs)
+		{
+			((App^)App::Current)->_CurrentCompositionArgs = _compositionArgs;
+			if (_compositionArgs->SelectedIdea)
+			{
+				_idea = _compositionArgs->SelectedIdea;
+				LoadIdea();
+			}
+			else
+			{
+				LoadComposition();
+			}
+		}
 	}
 
 	((App^)App::Current)->WriteToDebugFile("Загрузка данных завершена");
@@ -147,9 +166,6 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 
 	_texts = _idea->Content;
 	_textRow->SetText(_texts, nullptr);
-
-	((App^)App::Current)->_CurrentIdea = _idea;
-	partsItem->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
 }
 
 void StrokeEditor::MelodyEditorPage::LoadComposition()
@@ -180,7 +196,7 @@ void StrokeEditor::MelodyEditorPage::LoadComposition()
 	_texts = _compositionArgs->Project->Data;
 	_textRow->SetText(_texts, nullptr, _compositionArgs->Selected);
 
-	((App^)App::Current)->_CurrentCompositionArgs = _compositionArgs;
+	partsItem->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
 }
 
 void StrokeEditor::MelodyEditorPage::InitializePage()
@@ -325,23 +341,42 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	// очищаем менеджер команд
 	((App^)App::Current)->_manager->Clear();
 
-	// сохраняем данные в виде текста
 	if (_idea)
 	{
+		// сохраняем данные в виде текста
 		_idea->SerializedContent = _idea->Content->serialize()->Stringify();
-		this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(_idea, true));
 	}
 
+	// проверка на композицию раньше, потому что если редактируем идею внутри композиции, у нас может быть и то, и другое
 	if (_compositionArgs)
 	{
 		this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), _compositionArgs);
+	}
+	else if (_idea)
+	{	
+		this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(_idea, true));
 	}
 }
 
 
 void StrokeEditor::MelodyEditorPage::SaveData()
 {
-	if (_idea)
+	if (_compositionArgs)
+	{
+		// сохранить в файл
+		// сериализуем композицию
+		auto json = _compositionArgs->Project->Serialize();
+		// пишем в файл
+		create_task(FileIO::WriteTextAsync(_compositionArgs->File, json->Stringify()))
+			.then([=] {
+			auto dialog = ref new ContentDialog;
+			dialog->Title = "Сохранение в файл";
+			dialog->Content = "Успешно сохранено";
+			dialog->PrimaryButtonText = "Ок";
+			return dialog->ShowAsync();
+		});
+	}
+	else if (_idea)
 	{
 		// сохранить данные - сериализовать
 		_idea->SerializedContent = _idea->Content->serialize()->Stringify();
@@ -362,21 +397,6 @@ void StrokeEditor::MelodyEditorPage::SaveData()
 		dialog->Content = "Успешно сохранено";
 		dialog->PrimaryButtonText = "Ок";
 		create_task(dialog->ShowAsync());
-	}
-	else if (_compositionArgs)
-	{
-		// сохранить в файл
-		// сериализуем композицию
-		auto json = _compositionArgs->Project->Serialize();
-		// пишем в файл
-		create_task(FileIO::WriteTextAsync(_compositionArgs->File, json->Stringify()))
-			.then([=] {
-			auto dialog = ref new ContentDialog;
-			dialog->Title = "Сохранение в файл";
-			dialog->Content = "Успешно сохранено";
-			dialog->PrimaryButtonText = "Ок";
-			return dialog->ShowAsync();
-		});
 	}
 }
 

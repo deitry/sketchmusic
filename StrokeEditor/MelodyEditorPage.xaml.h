@@ -92,6 +92,8 @@ namespace StrokeEditor
 		SketchMusic::Idea^ _idea;
 		void LoadIdea();
 		CompositionNavigationArgs^ _compositionArgs;
+		Object^ _Sender;	// откуда мы пришли на эту страницу
+
 		void LoadComposition();
 		void OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args);
 		void OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor^ pos);
@@ -121,5 +123,14 @@ namespace StrokeEditor
 		void OnSymbolPressed(Platform::Object ^sender, SketchMusic::PositionedSymbol ^args);
 		void TextsList_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e);
 		void TextsFlyout_Opened(Platform::Object^ sender, Platform::Object^ e);
+	};
+
+	public ref class MelodyEditorArgs sealed
+	{
+	public:
+		MelodyEditorArgs(Object^ sender, Object^ args) { Sender = sender; Args = args; }
+
+		property Object^ Sender;
+		property Object^ Args;
 	};
 }

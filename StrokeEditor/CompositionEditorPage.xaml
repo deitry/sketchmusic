@@ -141,12 +141,12 @@
             <TextBlock Grid.Column="3" Text="Длина" x:Name="FullLengthTxt" Margin="13,0,0,0" HorizontalAlignment="Center"/>
         </Grid>
 
+        <local:IdeaGrid x:Name="PositionedIdeasGrid" Grid.Row="3" 
+                                Visibility="Collapsed" Width="800"/>
 
         <ScrollViewer x:Name="PartsScrollViewer" Grid.Row="3" 
                       VerticalScrollBarVisibility="Visible" VerticalScrollMode="Enabled">
             <Grid>
-                <local:IdeaGrid x:Name="PositionedIdeasGrid"
-                                Visibility="Collapsed" Width="800" Height="400"/>
                 <ListView x:Name="CompositionPartList"
                           CanReorderItems="True" CanDragItems="True" AllowDrop="True" Width="800"
                           ItemClick="CompositionPartList_ItemClick"

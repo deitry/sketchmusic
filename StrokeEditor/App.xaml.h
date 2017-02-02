@@ -20,16 +20,22 @@ namespace StrokeEditor
 		CompositionNavigationArgs() {}
 		CompositionNavigationArgs(StorageFolder^ _folder, StorageFile^ _file, Composition^ _project)
 		{
-			Workspace = _folder; File = _file; Project = _project; Selected = -1;
+			Workspace = _folder; File = _file; Project = _project; Selected = -1; SelectedIdea = nullptr;
 		}
 		CompositionNavigationArgs(StorageFolder^ _folder, StorageFile^ _file, Composition^ _project, int selected)
 		{
-			Workspace = _folder; File = _file; Project = _project; Selected = selected;
+			Workspace = _folder; File = _file; Project = _project; Selected = selected; SelectedIdea = nullptr;
+		}
+
+		CompositionNavigationArgs(StorageFolder^ _folder, StorageFile^ _file, Composition^ _project, Idea^ idea)
+		{
+			Workspace = _folder; File = _file; Project = _project; Selected = -1; SelectedIdea = idea;
 		}
 
 		property StorageFile^ File;
 		property StorageFolder^ Workspace;
 		property Composition^ Project;
+		property Idea^ SelectedIdea;
 		property int Selected;
 	};
 

@@ -6,6 +6,7 @@
 #include "pch.h"
 #include "IdeaGrid.xaml.h"
 #include "dialogs\AddIdeaDialog.xaml.h"
+#include "MelodyEditorPage.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -20,6 +21,7 @@ using namespace Windows::UI::Xaml::Data;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Media;
 using namespace Windows::UI::Xaml::Navigation;
+using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::ApplicationModel::DataTransfer;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
@@ -341,6 +343,7 @@ void StrokeEditor::IdeaGrid::OnPointerPressed(Platform::Object ^sender, Windows:
 	_Dragged = (ContentControl^)sender;
 	_DraggedOffset = e->GetCurrentPoint(_Dragged)->Position;
 	_Dragged->Background = (SolidColorBrush^)this->Resources->Lookup("SelectedIdeaBackground");
+	MainScrollViewer->VerticalScrollMode = ScrollMode::Disabled;
 }
 
 
@@ -351,7 +354,8 @@ void StrokeEditor::IdeaGrid::OnHolding(Platform::Object ^sender, Windows::UI::Xa
 		return;
 	e->Handled = true;
 	
-	OpenContextMenu(sender, e->GetPosition(nullptr));
+	if (!_Selected)
+		OpenContextMenu(sender, e->GetPosition(nullptr));
 }
 
 
@@ -401,6 +405,7 @@ void StrokeEditor::IdeaGrid::OnPointerReleased(Platform::Object ^sender, Windows
 		}
 
 		_Dragged = nullptr;
+		MainScrollViewer->VerticalScrollMode = ScrollMode::Enabled;
 	}
 }
 
@@ -408,6 +413,12 @@ void StrokeEditor::IdeaGrid::OnPointerReleased(Platform::Object ^sender, Windows
 void StrokeEditor::IdeaGrid::EditIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	// открыть редактор в зависимости от категории
+	// поскольку рабочий редактор пока только один, выбора нет
+	if (_Selected == nullptr) return;
+	auto posIdea = dynamic_cast<PositionedIdea^>(_Selected->DataContext);
+	if (posIdea == nullptr) return;
+	
+	EditIdea(this, posIdea->Content);
 }
 
 

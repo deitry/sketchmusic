@@ -61,7 +61,7 @@ void StrokeEditor::MainMenuPage::CreateCompositionBtn_Click(Platform::Object^ se
 void StrokeEditor::MainMenuPage::CreateIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	// открыть редактор мелодии
-	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), ref new Idea("", IdeaCategoryEnum::melody));
+	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), ref new MelodyEditorArgs(this, ref new Idea("", IdeaCategoryEnum::melody)));
 }
 
 

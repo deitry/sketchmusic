@@ -156,7 +156,7 @@ void StrokeEditor::LibraryEntryPage::EditBtn_Click(Platform::Object^ sender, Win
 {
 	// открыть страницу со сведениями о данной идее
 	SaveEntry();
-	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), this->_entry);
+	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), ref new MelodyEditorArgs(this, this->_entry));
 }
 
 

@@ -16,7 +16,7 @@
         <sm:VerbosePosIdeaCategoryToStrConverter x:Key="verbPIdea2str"/>
         <SolidColorBrush x:Key="PrimaryLineBrush" Color="{ThemeResource SystemBaseHighColor}"/>
         <SolidColorBrush x:Key="SecondaryLineBrush" Color="{ThemeResource SystemBaseMediumColor}"/>
-        <SolidColorBrush x:Key="IdeaBackground" Color="LightGray" Opacity="1.0"/>
+        <SolidColorBrush x:Key="IdeaBackground" Color="{ThemeResource SystemAltLowColor}" Opacity="1.0"/>
         <SolidColorBrush x:Key="SelectedIdeaBackground" Color="{ThemeResource SystemAccentColor}" Opacity="1.0"/>
         <Style TargetType="ContentControl" x:Key="PIdeaStyle">
             <Setter Property="Background" Value="{StaticResource IdeaBackground}"/>
@@ -24,7 +24,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
-                        <Grid Background="{TemplateBinding Background}"
+                        <Grid Background="{TemplateBinding Background}" Opacity="1"
                               BorderBrush="{StaticResource SecondaryLineBrush}"
                               BorderThickness="1">
                             <ContentControl Content="{Binding Converter={StaticResource verbPIdea2str}}"
@@ -41,21 +41,24 @@
         </MenuFlyout>
     </UserControl.Resources>
 
-    <Grid PointerMoved="OnPointerMoved"
-          PointerReleased="OnPointerReleased"
-          Holding="IdeaCanvas_Holding"
-          RightTapped="IdeaCanvas_RightTapped"
-          DoubleTapped="IdeaCanvas_DoubleTapped"
-          Background="Transparent">
-        <Canvas Name="GridCanvas" 
-                >
+    <ScrollViewer Name="MainScrollViewer" HorizontalScrollMode="Disabled" VerticalScrollMode="Enabled">
+        <Grid PointerMoved="OnPointerMoved"
+              PointerReleased="OnPointerReleased"
+              Holding="IdeaCanvas_Holding"
+              RightTapped="IdeaCanvas_RightTapped"
+              DoubleTapped="IdeaCanvas_DoubleTapped"
+              Background="Transparent"
+              Height="400">
+            <Canvas Name="GridCanvas" 
+                    >
             
-        </Canvas>
-        <Canvas Name="IdeaCanvas" 
-                >
-            <!--DragEnter="IdeaCanvas_DragEnter" 
-                DragOver="IdeaCanvas_DragOver"
-                AllowDrop="True" Drop="MainCanvas_Drop"-->
-        </Canvas>
-    </Grid>
+            </Canvas>
+            <Canvas Name="IdeaCanvas" 
+                    >
+                <!--DragEnter="IdeaCanvas_DragEnter" 
+                    DragOver="IdeaCanvas_DragOver"
+                    AllowDrop="True" Drop="MainCanvas_Drop"-->
+            </Canvas>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
