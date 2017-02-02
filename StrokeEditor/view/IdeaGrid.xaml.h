@@ -22,6 +22,7 @@ namespace StrokeEditor
 		IObservableVector<PartDefinition^>^ m_parts;
 		IObservableVector<ContentControl^>^ IdeasCtrl;
 
+		ContentControl^ _Selected;
 		ContentControl^ _Dragged;
 		Point _DraggedOffset;
 
@@ -50,11 +51,10 @@ namespace StrokeEditor
 		//void SetIdeaOnCanvas(PositionedIdea^ idea);
 
 	private:
-		void MainCanvas_Drop(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e);
-		void MainCanvas_PointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
-		void MainCanvas_PointerMoved(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
-
 		IVector<Line^>^ Lines;
+
+		void OpenContextMenu(Platform::Object^ sender, Windows::Foundation::Point point);
+
 		void UserControl_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e);
 		void IdeaCanvas_Holding(Platform::Object^ sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs^ e);
 		void IdeaCanvas_RightTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs^ e);
@@ -64,8 +64,8 @@ namespace StrokeEditor
 		void OnRightTapped(Platform::Object ^sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs ^e);
 		void OnPointerMoved(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
 		void OnPointerReleased(Platform::Object ^sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs ^e);
-		void IdeaCanvas_DragEnter(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e);
-		void IdeaCanvas_DragOver(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e);
-		void IdeaCanvas_PointerReleased(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e);
+		void EditIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void DeleteIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void IdeaContextMenu_Closed(Platform::Object^ sender, Platform::Object^ e);
 	};
 }

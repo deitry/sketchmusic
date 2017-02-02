@@ -17,6 +17,7 @@
         <SolidColorBrush x:Key="PrimaryLineBrush" Color="{ThemeResource SystemBaseHighColor}"/>
         <SolidColorBrush x:Key="SecondaryLineBrush" Color="{ThemeResource SystemBaseMediumColor}"/>
         <SolidColorBrush x:Key="IdeaBackground" Color="LightGray" Opacity="1.0"/>
+        <SolidColorBrush x:Key="SelectedIdeaBackground" Color="{ThemeResource SystemAccentColor}" Opacity="1.0"/>
         <Style TargetType="ContentControl" x:Key="PIdeaStyle">
             <Setter Property="Background" Value="{StaticResource IdeaBackground}"/>
             <Setter Property="Height" Value="{StaticResource LayerHeight}"/>
@@ -33,22 +34,25 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <MenuFlyout x:Key="IdeaContextMenu" x:Name="IdeaContextMenu"
+                    Closed="IdeaContextMenu_Closed">
+            <MenuFlyoutItem Name="EditIdeaBtn" Text="Редактировать" Click="EditIdeaBtn_Click"/>
+            <MenuFlyoutItem Name="DeleteIdeaBtn" Text="Удалить" Click="DeleteIdeaBtn_Click"/>
+        </MenuFlyout>
     </UserControl.Resources>
-    
-    <Grid>
+
+    <Grid PointerMoved="OnPointerMoved"
+          PointerReleased="OnPointerReleased"
+          Holding="IdeaCanvas_Holding"
+          RightTapped="IdeaCanvas_RightTapped"
+          DoubleTapped="IdeaCanvas_DoubleTapped"
+          Background="Transparent">
         <Canvas Name="GridCanvas" 
-                AllowDrop="True"
                 >
             
         </Canvas>
         <Canvas Name="IdeaCanvas" 
-                PointerPressed="MainCanvas_PointerPressed"
-                PointerMoved="OnPointerMoved"
-                PointerReleased="IdeaCanvas_PointerReleased"
-                Holding="IdeaCanvas_Holding"
-                RightTapped="IdeaCanvas_RightTapped"
-                DoubleTapped="IdeaCanvas_DoubleTapped"
-                Background="Transparent">
+                >
             <!--DragEnter="IdeaCanvas_DragEnter" 
                 DragOver="IdeaCanvas_DragOver"
                 AllowDrop="True" Drop="MainCanvas_Drop"-->

@@ -228,8 +228,8 @@ void StrokeEditor::CompositionEditorPage::AreButtonsEnabled(bool isEnabled)
 
 void StrokeEditor::CompositionEditorPage::SetParts(IObservableVector<PartDefinition^>^ parts)
 {
-	PositionedIdeasGrid->Parts = parts;
 	PositionedIdeasGrid->Ideas = CompositionProject->Lib->Ideas;
+	PositionedIdeasGrid->Parts = parts;
 	CompositionView->Parts = parts;
 	((App^)App::Current)->_CurrentParts = parts;
 	CompositionPartList->ItemsSource = parts;
