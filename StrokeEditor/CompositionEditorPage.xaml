@@ -147,7 +147,7 @@
             <Grid>
                 <local:IdeaGrid x:Name="PositionedIdeasGrid"
                                 Visibility="Collapsed" Width="800" Height="400"/>
-                <ListView x:Name="CompositionPartList" ItemsSource="{Binding Path=Parts, ElementName=CompositionView}"
+                <ListView x:Name="CompositionPartList"
                           CanReorderItems="True" CanDragItems="True" AllowDrop="True" Width="800"
                           ItemClick="CompositionPartList_ItemClick"
                           SelectionChanged="CompositionPartList_SelectionChanged"

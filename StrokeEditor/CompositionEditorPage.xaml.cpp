@@ -173,7 +173,7 @@ void StrokeEditor::CompositionEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 				CompositionProject->Header->Name = fileNameTxt->Text;
 				CompositionProject->Header->FileName = fileNameTxt->Text + ".jsm";
-				PositionedIdeasGrid->Project = CompositionProject;
+				//PositionedIdeasGrid->Project = CompositionProject;
 				SetParts(CompositionProject->Data->getParts());
 				AreButtonsEnabled(true);
 
@@ -229,6 +229,7 @@ void StrokeEditor::CompositionEditorPage::AreButtonsEnabled(bool isEnabled)
 void StrokeEditor::CompositionEditorPage::SetParts(IObservableVector<PartDefinition^>^ parts)
 {
 	PositionedIdeasGrid->Parts = parts;
+	PositionedIdeasGrid->Ideas = CompositionProject->Lib->Ideas;
 	CompositionView->Parts = parts;
 	((App^)App::Current)->_CurrentParts = parts;
 	CompositionPartList->ItemsSource = parts;

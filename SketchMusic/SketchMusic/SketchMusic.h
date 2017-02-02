@@ -189,6 +189,7 @@ namespace SketchMusic
 	};
 
 	ref class TimeToStrConverter;
+	ref class VerbosePosIdeaCategoryToStrConverter;
 
 	public interface class ISymbol
 	{
@@ -584,6 +585,7 @@ namespace SketchMusic
 		static Platform::String^ NOTES_ARRAY = "notes";	// обозначение массива с нотами
 		static Platform::String^ CONTROL_TEXT = "ctrl_txt";	// обозначение текста, содержащего общие для всех "инструментальных" текстов символы
 		static Platform::String^ TEXTS_ARRAY = "texts";	// обозначение массива с текстами
+		static Platform::String^ IDEAS_ARRAY = "ideas";	// обозначение массива с идеями
 		static Platform::String^ PROJ_NAME = "name";	// имя проекта
 		static Platform::String^ PROJ_DESC = "descr";	// описание проекта
 		static Platform::String^ PROJ_BPM = "bpm";		// базовый темп проекта
@@ -591,6 +593,20 @@ namespace SketchMusic
 		static Platform::String^ PART_CAT = "s";		// категория части
 		static Platform::String^ PART_DYN = "d";		// динамика части
 
+		static Platform::String^ IDEA_HASH = "h";	// хеш
+		static Platform::String^ IDEA_NAME = "n";	// название идеи
+		static Platform::String^ IDEA_MOD = "m";	// время изменения
+		static Platform::String^ IDEA_CRE = "t";	// время создания
+		static Platform::String^ IDEA_CAT = "c";	// категория идеи
+		static Platform::String^ IDEA_CONTENT = "s";	// сериализованное содержание
+		static Platform::String^ IDEA_PARENT = "a";	// хеш родительской идеи
+		static Platform::String^ IDEA_DESC = "d";	// описание
+		static Platform::String^ IDEA_RATE = "r";	// рейтинг
+		static Platform::String^ IDEA_TAGS = "g";	// теги
+		static Platform::String^ PIDEA_POS = "p";	// положение идеи в битах Beat
+		static Platform::String^ PIDEA_LEN = "l";	// длина идеи в битах Beat
+		static Platform::String^ PIDEA_LAY = "i";	// слой идеи
+		
 	}
 
 	// классы для обеспечения модели синтеза SoundFont

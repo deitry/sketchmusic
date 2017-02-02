@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:StrokeEditor"
+    xmlns:sm="using:SketchMusic"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -12,16 +13,39 @@
 
     <UserControl.Resources>
         <x:Double x:Key="LayerHeight">50</x:Double>
+        <sm:VerbosePosIdeaCategoryToStrConverter x:Key="verbPIdea2str"/>
         <SolidColorBrush x:Key="PrimaryLineBrush" Color="{ThemeResource SystemBaseHighColor}"/>
         <SolidColorBrush x:Key="SecondaryLineBrush" Color="{ThemeResource SystemBaseMediumColor}"/>
+        <Style TargetType="ContentControl" x:Key="PIdeaStyle">
+            <Setter Property="Background" Value="{ThemeResource SystemControlBackgroundAltMediumBrush}"/>
+            <Setter Property="Height" Value="{StaticResource LayerHeight}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Button Content="{Binding Converter={StaticResource verbPIdea2str}}"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
     
     <Grid>
-        <Canvas Name="MainCanvas" 
+        <Canvas Name="GridCanvas" 
                 AllowDrop="True" Drop="MainCanvas_Drop"
                 PointerPressed="MainCanvas_PointerPressed"
-                PointerMoved="MainCanvas_PointerMoved">
+                PointerMoved="MainCanvas_PointerMoved"
+                Background="Transparent">
             
+        </Canvas>
+        <Canvas Name="IdeaCanvas" 
+                AllowDrop="True" Drop="MainCanvas_Drop"
+                PointerPressed="MainCanvas_PointerPressed"
+                PointerMoved="MainCanvas_PointerMoved"
+                Holding="IdeaCanvas_Holding"
+                RightTapped="IdeaCanvas_RightTapped"
+                DoubleTapped="IdeaCanvas_DoubleTapped"
+                Background="Transparent">
+
         </Canvas>
     </Grid>
 </UserControl>

@@ -40,7 +40,7 @@ IObservableVector<PartDefinition^>^ SketchMusic::CompositionData::getParts()
 	std::pair<Cursor^, ISymbol^> prevTempo;
 	for (auto&& i : ControlText->_t)
 	{
-		if (i.second->GetSymType() == SymbolType::TEMPO)
+		if (i.second && i.second->GetSymType() == SymbolType::TEMPO)
 		{
 			auto tempo = dynamic_cast<STempo^>(i.second);
 			if (tempo)
@@ -252,8 +252,25 @@ IJsonValue^ SketchMusic::Composition::Serialize()
 	json->Insert(SerializationTokens::PROJ_BPM, JsonValue::CreateNumberValue(Data->BPM));
 	json->Insert(SerializationTokens::PROJ_DESC, JsonValue::CreateStringValue(Header->Description));
 	json->Insert(SerializationTokens::TEXTS_ARRAY, Data->serialize());
+	json->Insert(SerializationTokens::IDEAS_ARRAY, Lib->Serialize());
 	return json;
 }
+
+CompositionLibrary ^ SketchMusic::CompositionLibrary::Deserialize(Windows::Data::Json::JsonArray ^ json)
+{
+	auto lib = ref new CompositionLibrary;
+	for (auto i : json)
+	{
+		auto obj = i->GetObject();
+		auto posIdea = SketchMusic::PositionedIdea::Deserialize(obj);
+		if (posIdea)
+		{
+			lib->Ideas->Append(posIdea);
+		}
+	}
+	return lib;
+}
+
 
 Composition ^ SketchMusic::Composition::Deserialize(JsonObject ^ json)
 {
@@ -265,6 +282,22 @@ Composition ^ SketchMusic::Composition::Deserialize(JsonObject ^ json)
 	{
 		comp->Data = CompositionData::deserialize(texts);
 	}
+	auto ideas = json->GetNamedArray(SerializationTokens::IDEAS_ARRAY, nullptr);
+	if (ideas)
+	{
+		comp->Lib = CompositionLibrary::Deserialize(ideas);
+	}
 	comp->Data->BPM = json->GetNamedNumber(SerializationTokens::PROJ_BPM, 120);
 	return comp;
 }
+
+Windows::Data::Json::IJsonValue ^ SketchMusic::CompositionLibrary::Serialize()
+{
+	auto json = ref new JsonArray();
+	for (auto&& idea : Ideas)
+	{
+		json->Append(static_cast<SketchMusic::PositionedIdea^>(idea)->Serialize());
+	}
+	return json;
+}
+

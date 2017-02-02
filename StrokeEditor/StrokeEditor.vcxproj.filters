@@ -142,6 +142,9 @@
     <Page Include="view\IdeaGrid.xaml">
       <Filter>Composition</Filter>
     </Page>
+    <Page Include="dialogs\AddIdeaDialog.xaml">
+      <Filter>Dialogs</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StrokeEditor.rc" />

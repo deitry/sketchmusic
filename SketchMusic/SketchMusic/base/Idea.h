@@ -99,6 +99,8 @@ namespace SketchMusic
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
 	public ref class PositionedIdea sealed
 	{
+	private:
+		PositionedIdea() {}
 	public:
 		// вообще говоря, вряд ли мы будем пользоваться прямо-таки точным расположением и
 		// в большинстве случаев скорее всего хватит указания номера доли.
@@ -108,5 +110,59 @@ namespace SketchMusic
 		property int Layer;						// слой, на котором располагается идея
 
 		property SketchMusic::Idea^ Content;		// собствено идея
+
+		PositionedIdea(SketchMusic::Cursor^ pos, SketchMusic::Cursor^ length, int layer, SketchMusic::Idea^ idea)
+		{
+			Pos = pos; Length = length; Layer = layer; Content = idea;
+		}
+		PositionedIdea(SketchMusic::Cursor^ pos, int layer, SketchMusic::Idea^ idea)
+		{
+			Pos = pos; Layer = layer; Content = idea;
+		}
+
+		Windows::Data::Json::IJsonValue^ Serialize();
+		static PositionedIdea^ Deserialize(Windows::Data::Json::JsonObject^ json);
+	};
+
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+	public ref class VerbosePosIdeaCategoryToStrConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+	{
+	public:
+		virtual Object^ Convert(Platform::Object ^value, Windows::UI::Xaml::Interop::TypeName targetType, Platform::Object ^parameter, Platform::String ^language)
+		{
+			if (value == nullptr) return nullptr;
+			PositionedIdea^ idea = (PositionedIdea^)value;
+			if (idea->Content == nullptr)
+				return "Пусто";
+
+			IdeaCategoryEnum type = idea->Content->Category;
+			//int res = static_cast<int>(type);
+			switch (type)
+			{
+			case IdeaCategoryEnum::chord: return "Аккорд";
+			case IdeaCategoryEnum::chordProgression: return "Последовательность аккордов";
+			case IdeaCategoryEnum::combo: return "Комбинированная идея";
+			case IdeaCategoryEnum::dynamic: return "Динамика";
+			case IdeaCategoryEnum::instrument: return "Инструмент";
+			case IdeaCategoryEnum::lyrics: return "Текст/стихи";
+			case IdeaCategoryEnum::melodicSequence: return "Мелодическая последовательность";
+			case IdeaCategoryEnum::melody: return "Мелодия";
+			case IdeaCategoryEnum::name: return "Название";
+			case IdeaCategoryEnum::rhythm: return "Ритм";
+			case IdeaCategoryEnum::shape: return "Форма";
+			case IdeaCategoryEnum::tempo: return "Темп";
+			case IdeaCategoryEnum::none:
+			default: return "Неизвестный тип";
+			}
+			return "";
+		}
+		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+		{
+			if (value == nullptr) return nullptr;
+			int res = std::wcstol(dynamic_cast<String^>(value)->Data(), NULL, 10);
+			return res;
+		}
+
+		VerbosePosIdeaCategoryToStrConverter() {}
 	};
 }

@@ -147,6 +147,9 @@
     <ClInclude Include="AboutPage.xaml.h">
       <DependentUpon>AboutPage.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="dialogs\AddIdeaDialog.xaml.h">
+      <DependentUpon>dialogs\AddIdeaDialog.xaml</DependentUpon>
+    </ClInclude>
     <ClInclude Include="ManageInstrumentsDialog.xaml.h">
       <DependentUpon>ManageInstrumentsDialog.xaml</DependentUpon>
     </ClInclude>
@@ -189,6 +192,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="AboutPage.xaml" />
+    <Page Include="dialogs\AddIdeaDialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="ManageInstrumentsDialog.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -257,6 +263,9 @@
   <ItemGroup>
     <ClCompile Include="AboutPage.xaml.cpp">
       <DependentUpon>AboutPage.xaml</DependentUpon>
+    </ClCompile>
+    <ClCompile Include="dialogs\AddIdeaDialog.xaml.cpp">
+      <DependentUpon>dialogs\AddIdeaDialog.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="ManageInstrumentsDialog.xaml.cpp">
       <DependentUpon>ManageInstrumentsDialog.xaml</DependentUpon>

@@ -5,6 +5,7 @@
 
 #include "pch.h"
 #include "IdeaGrid.xaml.h"
+#include "dialogs\AddIdeaDialog.xaml.h"
 
 using namespace StrokeEditor;
 
@@ -26,6 +27,7 @@ IdeaGrid::IdeaGrid()
 {
 	InitializeComponent();
 	Lines = ref new Platform::Collections::Vector<Line^>;
+	IdeasCtrl = ref new Platform::Collections::Vector<ContentControl^>;
 }
 
 void StrokeEditor::IdeaGrid::CreateGrid()
@@ -33,7 +35,7 @@ void StrokeEditor::IdeaGrid::CreateGrid()
 	// предполагаем, что ширина нашего контрола актуальна
 	// удаляем старые линии - TODO : чтобы не пересоздавать, можно те что есть отрисовывать в нужных местах
 	Lines->Clear();
-	MainCanvas->Children->Clear();
+	GridCanvas->Children->Clear();
 
 	if (Parts == nullptr) return;
 
@@ -45,7 +47,7 @@ void StrokeEditor::IdeaGrid::CreateGrid()
 		//binding y с Height? или вручную менять в Update?
 		line->X1 = 0; line->X2 = 0;
 		line->Y1 = 0;
-		line->Y2 = MainCanvas->ActualHeight;
+		line->Y2 = GridCanvas->ActualHeight;
 
 		line->Stroke = (SolidColorBrush^)this->Resources->Lookup("PrimaryLineBrush");
 		line->StrokeThickness = 3;
@@ -54,11 +56,11 @@ void StrokeEditor::IdeaGrid::CreateGrid()
 		line->DataContext = pos;
 		
 		Lines->Append(line);
-		MainCanvas->Children->Append(line);
+		GridCanvas->Children->Append(line);
 
 		auto point = GetCoordinatsOfPosition(pos);
-		MainCanvas->SetLeft(line, point.X);
-		MainCanvas->SetTop(line, 0);
+		GridCanvas->SetLeft(line, point.X);
+		GridCanvas->SetTop(line, 0);
 
 		cur += part->Length;
 	}
@@ -70,17 +72,30 @@ void StrokeEditor::IdeaGrid::CreateGrid()
 		//binding y с Height? или вручную менять в Update?
 		line->Y1 = 0; line->Y2 = 0;
 		line->X1 = 0;
-		line->X2 = MainCanvas->ActualWidth;
+		line->X2 = GridCanvas->ActualWidth;
 
 		line->Stroke = (SolidColorBrush^)this->Resources->Lookup("SecondaryLineBrush");
 		line->StrokeThickness = 1;
-		
+
 		line->DataContext = i;
 		Lines->Append(line);
-		MainCanvas->Children->Append(line);
+		GridCanvas->Children->Append(line);
 
-		MainCanvas->SetTop(line, i*(double)this->Resources->Lookup("LayerHeight"));
-		MainCanvas->SetLeft(line, 0);
+		GridCanvas->SetTop(line, i*(double)this->Resources->Lookup("LayerHeight"));
+		GridCanvas->SetLeft(line, 0);
+	}
+
+	if (IdeasCtrl)
+	{
+		IdeasCtrl->Clear();
+		IdeaCanvas->Children->Clear();
+		if (Ideas)
+		{
+			for (auto&& idea : Ideas)
+			{
+				AddIdeaView(idea);
+			}
+		}
 	}
 }
 
@@ -94,34 +109,88 @@ void StrokeEditor::IdeaGrid::UpdateGrid()
 		auto pos = dynamic_cast<Cursor^>(line->DataContext);
 		if (pos)
 		{
-			line->Y2 = MainCanvas->ActualHeight;
+			line->Y2 = GridCanvas->ActualHeight;
 			// если есть положение - полагаем, что у нас 
 			auto point = GetCoordinatsOfPosition(pos);
-			MainCanvas->SetLeft(line, point.X);
-			MainCanvas->SetTop(line, 0);
+			GridCanvas->SetLeft(line, point.X);
+			GridCanvas->SetTop(line, 0);
 		}
 		else
 		{
 			int layer = (int)line->DataContext;
-			line->X2 = MainCanvas->ActualWidth;
-			MainCanvas->SetLeft(line, 0);
-			MainCanvas->SetTop(line, layer*(double)this->Resources->Lookup("LayerHeight"));
+			line->X2 = GridCanvas->ActualWidth;
+			GridCanvas->SetLeft(line, 0);
+			GridCanvas->SetTop(line, layer*(double)this->Resources->Lookup("LayerHeight"));
+		}
+	}
+
+	if (IdeasCtrl)
+	{
+		for (auto&& ctrl : IdeasCtrl)
+		{
+			auto idea = (PositionedIdea^)ctrl->DataContext;
+			auto point = GetCoordinatsOfPosition(idea->Pos, idea->Layer);
+			IdeaCanvas->SetLeft(ctrl, point.X);
+			IdeaCanvas->SetTop(ctrl, point.Y);
 		}
 	}
 }
 
-// Обновляем отрисовку частей - в частности, положение и размеры
-void StrokeEditor::IdeaGrid::UpdateIdeas()
+
+void StrokeEditor::IdeaGrid::Parts::set(IObservableVector<PartDefinition^>^ parts)
 {
-	// проходимся по списку частей
-	// - если есть положение, создаём визуальный объект
+	if (m_parts == parts) return;
+	if (parts)
+	{
+		m_parts = parts;
+		CreateGrid();
+		m_parts->VectorChanged+= ref new Windows::Foundation::Collections::VectorChangedEventHandler<SketchMusic::PartDefinition ^>(this,
+			&StrokeEditor::IdeaGrid::OnVectorChanged);
+	}
 }
+
+void StrokeEditor::IdeaGrid::OnVectorChanged(IObservableVector<PartDefinition^>^ sender, IVectorChangedEventArgs^ args)
+{
+	switch (args->CollectionChange)
+	{
+	case CollectionChange::ItemRemoved:
+	case CollectionChange::ItemInserted:
+		UpdateGrid();
+		break;
+	}
+}
+// Обновляем отрисовку частей - в частности, положение и размеры
+//void StrokeEditor::IdeaGrid::UpdateIdeas()
+//{
+//	if (IdeasCtrl == nullptr) return;
+//
+//	// проходимся по списку частей
+//	// - корректируем положение
+//	for (auto&& ctrl : IdeasCtrl)
+//	{
+//		auto idea = (PositionedIdea^)ctrl->DataContext;
+//		auto point = GetCoordinatsOfPosition(idea->Pos, idea->Layer);
+//		IdeaCanvas->SetLeft(ctrl, point.X);
+//		IdeaCanvas->SetTop(ctrl, point.Y);
+//	}
+//}
 
 // Создаём визуальное отображение для идеи
 void StrokeEditor::IdeaGrid::AddIdeaView(PositionedIdea ^ idea)
 {
 	// создаём графическое представление для данной идеи
+	ContentControl^ ctrl = ref new ContentControl;
+	ctrl->Style = (Windows::UI::Xaml::Style^) this->Resources->Lookup("PIdeaStyle");
+	ctrl->DataContext = idea;
+	//ctrl->Width = 50;
+	ctrl->Content = "idea";
 
+	IdeasCtrl->Append(ctrl);
+
+	IdeaCanvas->Children->Append(ctrl);
+	auto point = GetCoordinatsOfPosition(idea->Pos, idea->Layer);
+	IdeaCanvas->SetLeft(ctrl, point.X);
+	IdeaCanvas->SetTop(ctrl, point.Y);
 	// не забываем добавить хендлеры для 
 	// - нажатия на объект
 	// - вызова контекстного меню
@@ -144,11 +213,47 @@ Windows::Foundation::Point StrokeEditor::IdeaGrid::GetCoordinatsOfPosition(Curso
 		total += part->Length;
 	}
 
-	float newX = MainCanvas->ActualWidth * pos->Beat / total;
+	float newX = GridCanvas->ActualWidth * pos->Beat / total;
 	float newY = layer*(double)this->Resources->Lookup("LayerHeight");
 
 	return Windows::Foundation::Point(newX, newY);
 }
+
+Cursor ^ StrokeEditor::IdeaGrid::GetPositionOfPoint(Windows::Foundation::Point point)
+{
+	int total = 0;
+	for (auto&& part : Parts)
+	{
+		total += part->Length;
+	}
+
+	int newpos = (int)(point.X * total / GridCanvas->ActualWidth);
+	return ref new Cursor(newpos);
+}
+
+void StrokeEditor::IdeaGrid::CreateNewIdea(Windows::Foundation::Point point)
+{
+	auto pos = GetPositionOfPoint(point);
+	int layer = point.Y / (double)this->Resources->Lookup("LayerHeight");
+
+	auto dialog = ref new AddIdeaDialog;
+	concurrency::create_task(dialog->ShowAsync())
+		.then([=](ContentDialogResult result) {
+		if (result == ContentDialogResult::Primary)
+		{
+			auto idea = dialog->NewIdea;
+			if (idea)
+			{
+				// TODO - ставим флаг о том, что вводится новый элемент, чтобы можно было дальнейшим перемещением установить длину
+				// - для начала вставляем сразу, не даём выбора
+				auto posIdea = ref new PositionedIdea(pos, layer, idea);
+				Ideas->Append(posIdea);
+				AddIdeaView(posIdea);
+			}
+		}
+	});
+}
+
 
 void StrokeEditor::IdeaGrid::MainCanvas_Drop(Platform::Object^ sender, Windows::UI::Xaml::DragEventArgs^ e)
 {
@@ -161,9 +266,14 @@ void StrokeEditor::IdeaGrid::MainCanvas_Drop(Platform::Object^ sender, Windows::
 
 void StrokeEditor::IdeaGrid::MainCanvas_PointerPressed(Platform::Object^ sender, Windows::UI::Xaml::Input::PointerRoutedEventArgs^ e)
 {
-	// - фиксируем положение
-	// - ставим флаг о том, что вводится новый элемент
-	// - 
+	// не пропускаем тач
+	if (e->Pointer->PointerDeviceType != Windows::Devices::Input::PointerDeviceType::Touch)
+	{// - фиксируем положение
+	// - - вычисляем Cursor по X и слой по Y
+		auto point = e->GetCurrentPoint(GridCanvas)->Position;
+		CreateNewIdea(point);
+	}
+
 }
 
 
@@ -176,5 +286,34 @@ void StrokeEditor::IdeaGrid::MainCanvas_PointerMoved(Platform::Object^ sender, W
 void StrokeEditor::IdeaGrid::UserControl_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
 {
 	UpdateGrid();
-	UpdateIdeas();
+	//UpdateIdeas();
+}
+
+
+void StrokeEditor::IdeaGrid::IdeaCanvas_Holding(Platform::Object^ sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs^ e)
+{
+	// пропускаем только нажатие тачем
+	if ((e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||
+		(e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Pen))
+		return;
+}
+
+
+void StrokeEditor::IdeaGrid::IdeaCanvas_RightTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs^ e)
+{
+	// не пропускаем тач
+	if (e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Touch)
+		return;
+}
+
+
+void StrokeEditor::IdeaGrid::IdeaCanvas_DoubleTapped(Platform::Object^ sender, Windows::UI::Xaml::Input::DoubleTappedRoutedEventArgs^ e)
+{
+	// пропускаем только нажатие тачем
+	if ((e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||
+		(e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Pen))
+		return;
+
+	auto point = e->GetPosition(GridCanvas);
+	CreateNewIdea(point);
 }

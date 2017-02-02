@@ -1,0 +1,59 @@
+﻿<ContentDialog
+    x:Class="StrokeEditor.AddIdeaDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:StrokeEditor"
+    xmlns:sm="using:SketchMusic"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Новая идея"
+    PrimaryButtonText="Ок"
+    SecondaryButtonText="Отмена"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+
+    <ContentDialog.Resources>
+        <sm:VerboseIdeaCategoryToStrConverter x:Key="verbCat2str"/>
+        <sm:IdeaCategoryEnum x:Key="catTempo">1</sm:IdeaCategoryEnum>
+        <sm:IdeaCategoryEnum x:Key="catChord">chord</sm:IdeaCategoryEnum>
+        <sm:IdeaCategoryEnum x:Key="catMelody">melody</sm:IdeaCategoryEnum>
+        <sm:IdeaCategoryEnum x:Key="catRhythm">rhythm</sm:IdeaCategoryEnum>
+        <sm:IdeaCategoryEnum x:Key="catChordProg">chordProgression</sm:IdeaCategoryEnum>
+        <sm:IdeaCategoryEnum x:Key="catMelSeq">melodicSequence</sm:IdeaCategoryEnum>
+        <sm:IdeaCategoryEnum x:Key="catShape">shape</sm:IdeaCategoryEnum>
+        <sm:IdeaCategoryEnum x:Key="catLyrics">lyrics</sm:IdeaCategoryEnum>
+    </ContentDialog.Resources>
+    
+    <Grid>
+        <!--<Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Button Grid.Row="0" Grid.Column="0" DataContext="{StaticResource catRhythm}" Content="{Binding DataContext, Converter={StaticResource verbCat2str}}"/>
+        <Button Grid.Row="0" Grid.Column="1" DataContext="{StaticResource catMelSeq}" Content="{Binding DataContext, Converter={StaticResource verbCat2str}}"/>
+        <Button Grid.Row="0" Grid.Column="2" DataContext="{StaticResource catChord}" Content="{Binding DataContext, Converter={StaticResource verbCat2str}}"/>
+        <Button Grid.Row="0" Grid.Column="3" DataContext="{StaticResource catShape}" Content="{Binding DataContext, Converter={StaticResource verbCat2str}}"/>
+        <Button Grid.Row="1" Grid.Column="0" DataContext="{StaticResource catMelSeq}" Content="{Binding DataContext, Converter={StaticResource verbCat2str}}"/>
+        <Button Grid.Row="1" Grid.Column="1" DataContext="{StaticResource catMelody}" Content="{Binding DataContext, Converter={StaticResource verbCat2str}}"/>
+        <Button Grid.Row="1" Grid.Column="2" DataContext="{StaticResource catChordProg}" Content="{Binding DataContext, Converter={StaticResource verbCat2str}}"/>
+        <Button Grid.Row="1" Grid.Column="3" DataContext="{StaticResource catLyrics}" Content="{Binding DataContext, Converter={StaticResource verbCat2str}}"/>
+        -->
+        <GridView Name="CategoryGrid" SelectionChanged="CategoryGrid_SelectionChanged">
+            <GridView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource verbCat2str}}"/>
+                </DataTemplate>
+            </GridView.ItemTemplate>
+        </GridView>
+    </Grid>
+</ContentDialog>

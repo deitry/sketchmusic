@@ -22,10 +22,17 @@ namespace SketchMusic
 		property String^ FileName;
 	};
 
-	//public ref class CompositionLibrary sealed
-	//{
-	//	IVector<PositionedIdea^>^ Ideas;
-	//};
+	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
+	public ref class CompositionLibrary sealed
+	{
+	public:
+		property IObservableVector<PositionedIdea^>^ Ideas;
+
+		CompositionLibrary() { Ideas = ref new Platform::Collections::Vector<PositionedIdea^>; }
+
+		Windows::Data::Json::IJsonValue^ Serialize();
+		static CompositionLibrary^ Deserialize(Windows::Data::Json::JsonArray^ json);
+	};
 
 	/**
 	Целиком определяет всю композицию
@@ -36,13 +43,13 @@ namespace SketchMusic
 	public:
 		property CompositionHeader^ Header;
 		property CompositionData^ Data;
-		//property CompositionLibrary^ Lib;
-		property IVector<PositionedIdea^>^ Ideas;
+		property CompositionLibrary^ Lib;
+		//property IObservableVector<PositionedIdea^>^ Ideas;
 
 		Windows::Data::Json::IJsonValue^ Serialize();
 		static Composition^ Deserialize(Windows::Data::Json::JsonObject^ json);
 
-		Composition() { Header = ref new CompositionHeader; Data = ref new CompositionData; Ideas = ref new Platform::Collections::Vector<SketchMusic::PositionedIdea^>; }
+		Composition() { Header = ref new CompositionHeader; Data = ref new CompositionData; Lib = ref new CompositionLibrary; }
 	};
 
 	/**
