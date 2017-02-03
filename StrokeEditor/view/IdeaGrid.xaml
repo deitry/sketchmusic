@@ -19,16 +19,21 @@
         <SolidColorBrush x:Key="IdeaBackground" Color="{ThemeResource SystemAltLowColor}" Opacity="1.0"/>
         <SolidColorBrush x:Key="SelectedIdeaBackground" Color="{ThemeResource SystemAccentColor}" Opacity="1.0"/>
         <Style TargetType="ContentControl" x:Key="PIdeaStyle">
-            <Setter Property="Background" Value="{StaticResource IdeaBackground}"/>
+            <Setter Property="Background" Value="{StaticResource SystemControlBackgroundBaseLowBrush}"/>
+            <Setter Property="Foreground" Value="Transparent"/>
             <Setter Property="Height" Value="{StaticResource LayerHeight}"/>
+            <Setter Property="Width" Value="{StaticResource LayerHeight}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
                         <Grid Background="{TemplateBinding Background}" Opacity="1"
                               BorderBrush="{StaticResource SecondaryLineBrush}"
                               BorderThickness="1">
-                            <ContentControl Content="{Binding Converter={StaticResource verbPIdea2str}}"
-                                            Background="{TemplateBinding Background}"/>
+                            <Rectangle Fill="{TemplateBinding Foreground}"/>
+                            <TextBlock Text="{Binding Converter={StaticResource verbPIdea2str}}"
+                                       Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                                       FontSize="10" TextWrapping="WrapWholeWords"
+                                       />
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
@@ -36,6 +41,7 @@
         </Style>
         <MenuFlyout x:Key="IdeaContextMenu" x:Name="IdeaContextMenu"
                     Closed="IdeaContextMenu_Closed">
+            <MenuFlyoutItem Name="PlayIdeaBtn" Text="Воспроизвести" Click="PlayIdeaBtn_Click"/>
             <MenuFlyoutItem Name="EditIdeaBtn" Text="Редактировать" Click="EditIdeaBtn_Click"/>
             <MenuFlyoutItem Name="DeleteIdeaBtn" Text="Удалить" Click="DeleteIdeaBtn_Click"/>
         </MenuFlyout>

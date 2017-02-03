@@ -452,6 +452,10 @@ void StrokeEditor::CompositionEditorPage::TitleTxt_PointerPressed(Platform::Obje
 			this->Dispatcher->RunAsync(
 				Windows::UI::Core::CoreDispatcherPriority::Normal,
 				ref new Windows::UI::Core::DispatchedHandler([=]() {
+				// применяем все изменения, иначе они теряются
+				CompositionProject->Data->ApplyParts(CompositionView->Parts);
+				
+				// перерасчитываем длину частей, обновляем отображение, всё за один приём
 				SetParts(CompositionProject->Data->getParts());
 			}));
 		}
@@ -561,6 +565,9 @@ void StrokeEditor::CompositionEditorPage::ChangeViewBtn_Click(Platform::Object^ 
 
 void StrokeEditor::CompositionEditorPage::OnEditIdea(Platform::Object ^sender, SketchMusic::Idea ^args)
 {
+	// применяем все изменения, иначе они теряются
+	CompositionProject->Data->ApplyParts(CompositionView->Parts);
+
 	this->Frame->Navigate(TypeName(StrokeEditor::MelodyEditorPage::typeid), 
 		ref new MelodyEditorArgs(this, 
 			ref new CompositionNavigationArgs(nullptr, CompositionFile, CompositionProject, args)));

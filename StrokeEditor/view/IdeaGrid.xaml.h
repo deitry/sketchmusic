@@ -69,5 +69,6 @@ namespace StrokeEditor
 		void EditIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void DeleteIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void IdeaContextMenu_Closed(Platform::Object^ sender, Platform::Object^ e);
+		void PlayIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }

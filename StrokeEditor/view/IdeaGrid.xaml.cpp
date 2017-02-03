@@ -287,7 +287,7 @@ void StrokeEditor::IdeaGrid::CreateNewIdea(Windows::Foundation::Point point)
 void StrokeEditor::IdeaGrid::OpenContextMenu(Object^ sender, Windows::Foundation::Point point)
 {
 	_Selected = (ContentControl^)sender;
-	_Selected->Background = (SolidColorBrush^)this->Resources->Lookup("SelectedIdeaBackground");
+	_Selected->Foreground = (SolidColorBrush^)this->Resources->Lookup("SelectedIdeaBackground");
 	IdeaContextMenu->ShowAt(nullptr, point);
 }
 
@@ -342,7 +342,7 @@ void StrokeEditor::IdeaGrid::OnPointerPressed(Platform::Object ^sender, Windows:
 
 	_Dragged = (ContentControl^)sender;
 	_DraggedOffset = e->GetCurrentPoint(_Dragged)->Position;
-	_Dragged->Background = (SolidColorBrush^)this->Resources->Lookup("SelectedIdeaBackground");
+	_Dragged->Foreground = (SolidColorBrush^)this->Resources->Lookup("SelectedIdeaBackground");
 	MainScrollViewer->VerticalScrollMode = ScrollMode::Disabled;
 }
 
@@ -393,7 +393,7 @@ void StrokeEditor::IdeaGrid::OnPointerReleased(Platform::Object ^sender, Windows
 {
 	if (_Dragged)
 	{
-		_Dragged->Background = (SolidColorBrush^)this->Resources->Lookup("IdeaBackground");
+		_Dragged->Foreground = nullptr;//(SolidColorBrush^)this->Resources->Lookup("IdeaBackground");
 		PositionedIdea^ idea = (PositionedIdea^)_Dragged->DataContext;
 		if (idea)
 		{
@@ -450,7 +450,32 @@ void StrokeEditor::IdeaGrid::IdeaContextMenu_Closed(Platform::Object^ sender, Pl
 {
 	if (_Selected)
 	{
-		_Selected->Background = (SolidColorBrush^)this->Resources->Lookup("IdeaBackground");
+		_Selected->Foreground = nullptr;//(SolidColorBrush^)this->Resources->Lookup("IdeaBackground");
 		_Selected = nullptr;
+	}
+}
+
+
+void StrokeEditor::IdeaGrid::PlayIdeaBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	if (_Selected)
+	{
+		auto posIdea = dynamic_cast<PositionedIdea^>(_Selected->DataContext);
+		if (posIdea == nullptr) return;
+		if (posIdea->Content == nullptr) return;
+		if (posIdea->Content->Content == nullptr || posIdea->Content->SerializedContent == nullptr) return;
+
+		this->Dispatcher->RunAsync(
+			Windows::UI::Core::CoreDispatcherPriority::Normal,
+			ref new Windows::UI::Core::DispatchedHandler([=]() {
+			auto play = concurrency::create_task([=]
+			{
+				((App^)App::Current)->_player->stop();
+				((App^)App::Current)->_player->needMetronome = false;
+				((App^)App::Current)->_player->needPlayGeneric = false;
+				((App^)App::Current)->_player->StopAtLast = true;
+				((App^)App::Current)->_player->playText(posIdea->Content->GetContent(), ref new Cursor);
+			});
+		}));
 	}
 }

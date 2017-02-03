@@ -108,6 +108,7 @@ namespace SketchMusic
 		property SketchMusic::Cursor^ Pos;		// исходное положение
 		property SketchMusic::Cursor^ Length;	// длина. Праввая граница рассчитывается как Pos + Length
 		property int Layer;						// слой, на котором располагается идея
+		property bool Muted;					// если мы хотим, чтобы идея не воспроизводилась
 
 		property SketchMusic::Idea^ Content;		// собствено идея
 
