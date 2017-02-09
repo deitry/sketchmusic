@@ -21,7 +21,7 @@ private:
 	SFPreset^ _sfPreset;	// данные о семплах
 	Platform::Array<unsigned char>^ _sData;
 
-	concurrency::cancellation_token_source stopToken;
+	concurrency::cancellation_token_source* stopToken;
 
 	void playNote(SketchMusic::INote^ note, int duration = 0, NoteOff^ noteOff = nullptr);
 	void setFrequency(IXAudio2SourceVoice* voice, double freq, double origFreq);

@@ -324,8 +324,8 @@ void SketchMusic::View::TextRow::InvalidateText()
 	for (auto&& symbol : symbols)
 	{
 		// - проверка на то, что если текст отличен от текста форматирования и это не нота - пропускаем
-
-		this->AddSymbolView(data->ControlText, symbol);
+		if (symbol->_pos->Beat >= _startPos->Beat && symbol->_pos->Beat < _maxPos->Beat)
+			this->AddSymbolView(data->ControlText, symbol);
 	}
 }
 

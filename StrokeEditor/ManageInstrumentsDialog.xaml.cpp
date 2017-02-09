@@ -90,6 +90,7 @@ void StrokeEditor::ManageInstrumentsDialog::ContentDialog_Opened(Windows::UI::Xa
 			return create_task(resourceFolder->GetFilesAsync());
 		}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
 		{
+			resourceListTask.wait();
 			auto list = resourceListTask.get();
 			for (auto&& file : list)
 			{

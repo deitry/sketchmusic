@@ -4,7 +4,9 @@
 #include "../base/Cursor.h"
 #include "../base/Symbol.h"
 #include "../base/Text.h"
+#include "../base/Idea.h"
 #include "../base/Composition.h"
+#include "../base/CompositionData.h"
 #include "ISoundEngine.h"
 #include "SoundEnginePool.h"
 #include "SoundFont.h"
@@ -91,22 +93,26 @@ void SketchMusic::Player::Player::playMetronome()
 	}
 }
 
+
+// Для проигрывания идей и прочей мелочи
+void SketchMusic::Player::Player::playText(CompositionData^ data, Cursor^ pos) //, SketchMusic::Cursor^ end
+{
+	playText(data, nullptr, pos);
+}
+
 /**
-Принимает текст и проигрывает его начиная со start либо до конца, либо пока не придёт
-команда остановиться.
+Принимает данные о композиции и проигрывает их начиная с pos (а может и с нуля, в зависимости от настроек)
 */
-void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::Cursor^ pos) //, SketchMusic::Cursor^ end
+void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLibrary^ lib, Cursor^ pos) //, SketchMusic::Cursor^ end
 {
 	// - для каждой из дорожек инициализировать инструмент
 	// - - создать по соурс войсу на каждый семпл
 	// - - если такой инструмент уже проинициализирован, не трогать
 	// - пройтись по всем нотам
 	this->_state = s::PLAY;
-	
 
 	SketchMusic::Cursor^ cursor = ref new SketchMusic::Cursor(pos);
 	_cursor = cursor;
-	//_cursor->moveTo(pos);
 
 	// ----
 	// Этап 1: собираем итераторы со всего набора текстов, которые указывают
@@ -165,7 +171,6 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 						startIter = symbols->First();
 					}
 				}
-				
 			}
 		}
 
@@ -199,9 +204,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 				break;
 			}
 		}
-		
 	})
-
 		// прекаунт
 		.then([this, iterMap, cursor, data]
 	{
@@ -342,22 +345,19 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, SketchMusic::C
 			// квантизация
 			static int prevQuant = -1;
 			static int prevBeat = -1;
-			if (quantize)
+
+			int localQ = quantize ? quantize : 32;
+			int quant = cursor->Tick * localQ / TICK_IN_BEAT;
+			
+			int beat = cursor->Beat;
+			if ((quant != prevQuant) || (beat != prevBeat))
 			{
-				int quant = cursor->Tick * quantize / TICK_IN_BEAT;
-				int beat = cursor->Beat;
-				if ((quant != prevQuant) || (beat != prevBeat))
-				{
-					Cursor^ pos = ref new Cursor(cursor);
-					pos->Tick = (float) quant * TICK_IN_BEAT / quantize;	// округляем до ближайшего кванта
-					CursorPosChanged(this, pos);
-					prevQuant = quant;
-					prevBeat = beat;
-				}
-			} 
-			//else { // без квантизации сообщаем каждый раз
-			//	CursorPosChanged(this, cursor);
-			//}
+				Cursor^ pos = ref new Cursor(cursor);
+				pos->Tick = (float) quant * TICK_IN_BEAT / localQ;	// округляем до ближайшего кванта
+				CursorPosChanged(this, pos);
+				prevQuant = quant;
+				prevBeat = beat;
+			}
 
 			// остановка у конца - простой вариант
 			//if (end)

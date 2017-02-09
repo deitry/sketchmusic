@@ -196,7 +196,7 @@ void StrokeEditor::MelodyEditorPage::LoadComposition()
 	_texts = _compositionArgs->Project->Data;
 	_textRow->SetText(_texts, nullptr, _compositionArgs->Selected);
 
-	partsItem->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+	partsItem->Visibility = Windows::UI::Xaml::Visibility::Visible;
 }
 
 void StrokeEditor::MelodyEditorPage::InitializePage()

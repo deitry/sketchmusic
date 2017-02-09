@@ -37,7 +37,7 @@ SketchMusic::Player::SFSoundEngine^ SketchMusic::Player::SFSoundEngine::GetSFSou
 	engine->_soundFontData = data;
 	engine->SetPreset(instrument->preset);
 
-	engine->stopToken = cancellation_token_source();
+	engine->stopToken = new cancellation_token_source();
 
 	return engine;
 }
@@ -52,7 +52,7 @@ SketchMusic::Player::SFSoundEngine::SFSoundEngine(SFSoundEngine^ engine)
 	this->_soundFontData = engine->_soundFontData;
 	
 	//this->InitializeVoices();
-	this->stopToken = cancellation_token_source();
+	this->stopToken = new cancellation_token_source();
 
 	// на всякий случай останавливаем
 	this->Stop();
@@ -71,15 +71,23 @@ IXAudio2SourceVoice* SketchMusic::Player::SFSoundEngine::InitializeVoice(SFSampl
 	waveformat.cbSize = 0;
 
 	IXAudio2SourceVoice* pSourceVoice;
-	HRESULT hr = _pXAudio2->CreateSourceVoice(&pSourceVoice, &waveformat,0U,8.0F);
-	pSourceVoice->Start();
+	try
+	{
+		HRESULT hr = _pXAudio2->CreateSourceVoice(&pSourceVoice, &waveformat, 0U, 8.0F);
+		pSourceVoice->Start();
 
-	return pSourceVoice;
+		return pSourceVoice;
+	}
+	catch (...)
+	{
+		return nullptr;
+	}
 }
 
 SketchMusic::Player::SFSoundEngine::~SFSoundEngine()
 {
-	stopToken.cancel();
+	stopToken->cancel();
+	delete stopToken;
 }
 
 /**
@@ -199,7 +207,7 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 
 				voice->Start();
 
-				auto stop = (noteOff != nullptr) ? noteOff->GetToken() : stopToken.get_token();
+				auto stop = (noteOff != nullptr) ? noteOff->GetToken() : stopToken->get_token();
 				auto regToken = stop.register_callback([=]
 				{
 					auto release = concurrency::create_task([=]
@@ -255,8 +263,9 @@ void SketchMusic::Player::SFSoundEngine::Play(Windows::Foundation::Collections::
 
 void SketchMusic::Player::SFSoundEngine::Stop()
 {
-	stopToken.cancel();
-	stopToken = cancellation_token_source();
+	stopToken->cancel();
+	delete stopToken;
+	stopToken = new cancellation_token_source();
 }
 
 // попользовались - избавились

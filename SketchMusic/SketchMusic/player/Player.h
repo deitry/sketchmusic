@@ -1,5 +1,6 @@
 #pragma once
 #include "../SketchMusic.h"
+#include "../base/Composition.h"
 #include <xaudio2.h>
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
@@ -62,6 +63,7 @@ public:
 
 	Player();
 	
+	void playText(SketchMusic::CompositionData^ text, SketchMusic::CompositionLibrary^ lib, SketchMusic::Cursor^ start);
 	void playText(SketchMusic::CompositionData^ text, SketchMusic::Cursor^ start); //, SketchMusic::Cursor^ end
 	void playSingleNote(SketchMusic::INote^ note, SketchMusic::Instrument^ instrument, int duration, SketchMusic::Player::NoteOff^ stop); // для проигрывания ноты с клавиатуры
 
