@@ -3,9 +3,9 @@
 // Реализация класса EditCompositionDialog
 //
 
+#include "pch.h"
 #include <string>
 
-#include "pch.h"
 #include "EditCompositionDialog.xaml.h"
 
 using namespace StrokeEditor;

@@ -3,8 +3,8 @@
 // Реализация класса CompositionEditorPage
 //
 
-#include <string>
 #include "pch.h"
+#include <string>
 #include "CompositionEditorPage.xaml.h"
 #include "CompositionOverviewPage.xaml.h"
 #include "MelodyEditorPage.xaml.h"

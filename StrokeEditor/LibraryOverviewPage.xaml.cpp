@@ -3,11 +3,12 @@
 // Реализация класса LibraryOverviewPage
 //
 
+#include "pch.h"
+
 #include <string>
 #include <locale>
 #include <codecvt>
 
-#include "pch.h"
 #include "LibraryOverviewPage.xaml.h"
 #include "LibraryEntryPage.xaml.h"
 #include "MainMenuPage.xaml.h"
@@ -29,21 +30,22 @@ using namespace Windows::UI::Xaml::Interop;
 using Windows::Foundation::Collections::IVector;
 using Platform::Collections::Vector;
 
-// Шаблон элемента пустой страницы задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234238
+
 inline String^ StringFromAscIIChars(char* chars) //StrokeEditor::LibraryOverviewPage::
 {
 	if (!chars) return nullptr;
-	//
-	//size_t newsize = strlen(chars) + 1;
-	//wchar_t * wcstring = new wchar_t[newsize];
-	//size_t convertedChars = 0;
-	//mbstowcs_s(&convertedChars, wcstring, newsize, chars, _TRUNCATE);
-	//String^ str = ref new Platform::String(wcstring);
-	//delete[] wcstring;
-	//return str;
-	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-	std::wstring intermediateForm = converter.from_bytes(chars);
-	return ref new Platform::String(intermediateForm.c_str());
+
+	size_t newsize = strlen(chars) + 1;
+	wchar_t * wcstring = new wchar_t[newsize];
+	size_t convertedChars = 0;
+	mbstowcs_s(&convertedChars, wcstring, newsize, chars, _TRUNCATE);
+	String^ str = ref new Platform::String(wcstring);
+	delete[] wcstring;
+	return str;
+
+	//std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+	//std::wstring intermediateForm = converter.from_bytes(chars);
+	//return ref new Platform::String(intermediateForm.c_str());
 }
 
 int StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback(void *unused, int count, char **data, char **columns)
