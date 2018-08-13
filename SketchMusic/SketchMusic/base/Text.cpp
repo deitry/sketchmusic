@@ -345,6 +345,17 @@ void SketchMusic::Text::addBeat(Cursor^ position, Cursor^ offset)
 	// - начина€ с position сдвигаем все последующие ноты на offset
 	// - чо-то как-то не очень. ≈сть вариант разбивать все символы на строки - 
 	// тогда сдвигать надо будет только символы в рамках одной строки
+
+	//auto found = _t.find(position);
+	//for (auto&& iter = _t.rbegin(); !iter->first->LT(position); ++iter)
+	//{
+	//	iter->first->inc(offset);
+	//}
+
+	for (auto&& iter = _t.rbegin(); iter != _t.rend() && !iter->first->LT(position); ++iter)
+	{
+		iter->first->inc(offset);
+	}
 }
 
 void SketchMusic::Text::deleteBeat(Cursor^ position, Cursor^ offset)
@@ -352,4 +363,8 @@ void SketchMusic::Text::deleteBeat(Cursor^ position, Cursor^ offset)
 	// TODO
 	// - начина€ с position сдвигаем все последующие ноты на offset
 	// - выпадающие ноты удал€ем
+	for (auto&& iter = _t.find(position); iter != _t.end(); ++iter)
+	{
+		iter->first->dec(offset);
+	}
 }

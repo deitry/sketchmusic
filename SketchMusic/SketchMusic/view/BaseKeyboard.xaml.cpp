@@ -85,6 +85,14 @@ void SketchMusic::View::BaseKeyboard::OnControlPressed(Key ^ key)
 		key->type = KeyType::octave;
 		UpdateParent(key);
 		break;
+	case KeyType::move:
+		key->type = KeyType::beat;
+		UpdateParent(key);
+		break;
+	case KeyType::beat:
+		key->type = KeyType::move;
+		UpdateParent(key);
+		break;
 	//case KeyType::deleteSym:
 	//	key->type = KeyType::eraser;
 	//	UpdateParent(key);
@@ -319,6 +327,7 @@ void SketchMusic::View::BaseKeyboard::OnPushKey(Key ^ key)
 			break;
 		case KeyType::play:
 		case KeyType::move:
+		case KeyType::beat:
 		case KeyType::space:
 		case KeyType::backspace:
 		default:

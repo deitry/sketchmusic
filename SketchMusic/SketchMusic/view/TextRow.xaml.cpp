@@ -739,3 +739,8 @@ void SketchMusic::View::TextRow::OnHolding(Platform::Object ^sender, Windows::UI
 		OpenPlaceholderContextDialog(ctrl, e->GetPosition(ctrl));
 
 }
+
+void SketchMusic::View::TextRow::UpdateText()
+{
+	this->InvalidateText();
+}

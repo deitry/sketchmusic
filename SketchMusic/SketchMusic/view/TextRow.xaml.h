@@ -98,6 +98,7 @@ public:
 
 	TextRow();
 	void InitializePage();
+	void UpdateText();
 
 	// универсальная функция
 	void SetText(CompositionData^ textCollection, SketchMusic::Text^ current);

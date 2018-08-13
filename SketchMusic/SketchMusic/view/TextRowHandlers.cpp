@@ -23,12 +23,24 @@ void SketchMusic::View::TextRow::OnLoaded(Platform::Object ^sender, Windows::UI:
 
 void SketchMusic::View::TextRow::AddBeatItem_Click(Platform::Object ^ sender, Windows::UI::Xaml::RoutedEventArgs ^ e)
 {
-	// выполнить команду по добавлению долей
+	// TODO: выполнить команду по добавлению долей
+
+	_maxPos->incBeat();
+	if (this->data->texts->Size > 0)
+	{
+		AllocateSnapPoints(this->GetText(), this->scale, -1);
+	}
 }
 
 void SketchMusic::View::TextRow::DeleteBeatItem_Click(Platform::Object ^ sender, Windows::UI::Xaml::RoutedEventArgs ^ e)
 {
-	// выполнить команду по удалению долей
+	// TODO: выполнить команду по удалению долей
+	
+	_maxPos->decBeat();
+	if (this->data->texts->Size > 0)
+	{
+		AllocateSnapPoints(this->GetText(), this->scale, -1);
+	}
 }
 
 void SketchMusic::View::TextRow::PlaceholderContextMenuOnClosed(Object ^ sender, Platform::Object ^ args)

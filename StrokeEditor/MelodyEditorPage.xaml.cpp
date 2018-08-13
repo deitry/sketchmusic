@@ -10,14 +10,22 @@
 #include "CompositionEditorPage.xaml.h"
 #include "ManageInstrumentsDialog.xaml.h"
 
+namespace
+{
+	const double collapsedWidth = 22.;
+}
+
 using namespace StrokeEditor;
 using namespace SketchMusic;
-using namespace SketchMusic::View;
+namespace SM = SketchMusic;
+namespace SMV = SketchMusic::View;
 namespace SMC = SketchMusic::Commands;
 
 using namespace Platform;
 using namespace Windows::Foundation;
 using namespace Windows::Foundation::Collections;
+using namespace Windows::UI;
+using namespace Windows::UI::Core;
 using namespace Windows::UI::Xaml;
 using namespace Windows::UI::Xaml::Controls;
 using namespace Windows::UI::Xaml::Controls::Primitives;
@@ -40,7 +48,7 @@ MelodyEditorPage::MelodyEditorPage()
 	((App^)App::Current)->WriteToDebugFile("Инициализация компонентов завершена");
 }
 
-void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
+void MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 {
 	((App^)App::Current)->WriteToDebugFile("Переход на страницу");
 	InitializePage();
@@ -75,24 +83,28 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 	((App^)App::Current)->WriteToDebugFile("Загрузка данных завершена");
 
-	Windows::Storage::ApplicationDataContainer^ localSettings =
-		Windows::Storage::ApplicationData::Current->LocalSettings;
+	ApplicationDataContainer^ localSettings =
+		::ApplicationData::Current->LocalSettings;
 
 	if (localSettings)
 	{
 		if (localSettings->Values->HasKey("need_metronome"))
 		{
 			((App^)App::Current)->_player->needMetronome = (bool)localSettings->Values->Lookup("need_metronome");
-			_keyboard->SetKey(KeyType::metronome, ((App^)App::Current)->_player->needMetronome);
+			_keyboard->SetKey(SMV::KeyType::metronome, ((App^)App::Current)->_player->needMetronome);
 		}
-		else {
+		else 
+		{
 			((App^)App::Current)->_player->needMetronome = true;
 		}
 
 		if (localSettings->Values->HasKey("need_play_generic"))
 		{
-			((App^)App::Current)->_player->needPlayGeneric = (bool)localSettings->Values->Lookup("need_play_generic");
-			_keyboard->SetKey(KeyType::playGeneric, ((App^)App::Current)->_player->needPlayGeneric);
+			((App^)App::Current)->_player->needPlayGeneric 
+					= (bool)localSettings->Values->Lookup("need_play_generic");
+
+			_keyboard->SetKey(SMV::KeyType::playGeneric, 
+							  ((App^)App::Current)->_player->needPlayGeneric);
 		}
 		else {
 			((App^)App::Current)->_player->needPlayGeneric = true;
@@ -101,35 +113,39 @@ void StrokeEditor::MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 		if (localSettings->Values->HasKey("precount"))
 		{
 			Object^ obj = localSettings->Values->Lookup("precount");
-			bool has; if (obj) has = true; else has = false;	// не знаю, почему с ним так сложно.
-				// но почему-то тут периодически всё падает
+			bool has = (obj) ? true
+							 : false;
+			
+			// не знаю, почему с ним так сложно.
+			// но почему-то тут периодически всё падает
+			
 			((App^)App::Current)->_player->precount = has ? 4 : 0;
-			_keyboard->SetKey(KeyType::precount, ((App^)App::Current)->_player->precount);
+			_keyboard->SetKey(SMV::KeyType::precount, 
+							  ((App^)App::Current)->_player->precount);
 		}
-		else {
+		else 
+		{
 			((App^)App::Current)->_player->precount = 4;
 		}
 	}
 
 	((App^)App::Current)->_player->StopAtLast = false;
 
-	((App^)App::Current)->WriteToDebugFile("Загрузка настроек завершена");
-
-	((App^)App::Current)->WriteToDebugFile("Почти всё");
+	((App^)App::Current)->WriteToDebugFile("Загрузка настроек завершена. Почти всё");
 
 	TextsList->DataContext = _texts->texts;
 	TextsList->SelectedIndex = 0;
 
 	PartsList->DataContext = _texts->getParts();
 	
-	viewType = ViewType::TextRow;
+	viewType = SMV::ViewType::TextRow;
 
 	((App^)App::Current)->WriteToDebugFile("Инициализация страницы завершена");
 
-	_keyboard->Focus(Windows::UI::Xaml::FocusState::Programmatic);
+	_keyboard->Focus(Xaml::FocusState::Programmatic);
 }
 
-void StrokeEditor::MelodyEditorPage::LoadIdea()
+void MelodyEditorPage::LoadIdea()
 {
 	((App^)App::Current)->WriteToDebugFile("Загрузка данных идеи");
 
@@ -138,14 +154,15 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 		// восстанавливаем из сериализованного состояния
 		if (_idea->SerializedContent != nullptr)
 		{
-			_idea->Content = SketchMusic::CompositionData::deserialize(_idea->SerializedContent);
+			_idea->Content = CompositionData::deserialize(_idea->SerializedContent);
 		}
 		else
 		{
 			_idea->Content = ref new CompositionData();
 			
-			Windows::Storage::ApplicationDataContainer^ localSettings =
-				Windows::Storage::ApplicationData::Current->LocalSettings;
+			::ApplicationDataContainer^ localSettings =
+				::ApplicationData::Current->LocalSettings;
+
 			if (localSettings->Values->HasKey("default_instr"))
 			{
 				auto str = (String^)localSettings->Values->Lookup("default_instr");
@@ -154,13 +171,15 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 				{
 					auto instr = Instrument::Deserialize(json);
 					if (instr)
-						_idea->Content->texts->Append(ref new Text(instr));
+						_idea->Content->texts->Append(ref new SM::Text(instr));
 				}
 			}
 
 			// если ключа не было или не смогли восстановить инструмент
 			if (_idea->Content->texts->Size == 0)
-				_idea->Content->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
+			{
+				_idea->Content->texts->Append(ref new SM::Text(ref new Instrument("grand_piano.sf2")));
+			}
 		}
 	}
 
@@ -168,15 +187,15 @@ void StrokeEditor::MelodyEditorPage::LoadIdea()
 	_textRow->SetText(_texts, nullptr);
 }
 
-void StrokeEditor::MelodyEditorPage::LoadComposition()
+void MelodyEditorPage::LoadComposition()
 {
 	((App^)App::Current)->WriteToDebugFile("Загрузка данных композиции");
 
 	// полагаем, что у композиции данные уже существуют
 	if (_compositionArgs->Project->Data->texts->Size == 0)
 	{
-		Windows::Storage::ApplicationDataContainer^ localSettings =
-			Windows::Storage::ApplicationData::Current->LocalSettings;
+		ApplicationDataContainer^ localSettings =
+			ApplicationData::Current->LocalSettings;
 		
 		if (localSettings->Values->HasKey("default_instr"))
 		{
@@ -186,31 +205,35 @@ void StrokeEditor::MelodyEditorPage::LoadComposition()
 			{
 				auto instr = Instrument::Deserialize(json);
 				if (instr)
-					_compositionArgs->Project->Data->texts->Append(ref new Text(instr));
+					_compositionArgs->Project->Data->texts->Append(ref new SM::Text(instr));
 			}
 		}
+
 		if (_compositionArgs->Project->Data->texts->Size == 0)
-			_compositionArgs->Project->Data->texts->Append(ref new Text(ref new Instrument("grand_piano.sf2")));
+		{
+			_compositionArgs->Project->Data->texts->Append(ref new SM::Text(ref new Instrument("grand_piano.sf2")));
+		}
 	}
 
 	_texts = _compositionArgs->Project->Data;
 	_textRow->SetText(_texts, nullptr, _compositionArgs->Selected);
 
-	partsItem->Visibility = Windows::UI::Xaml::Visibility::Visible;
+	partsItem->Visibility = Xaml::Visibility::Visible;
 }
 
-void StrokeEditor::MelodyEditorPage::InitializePage()
+void MelodyEditorPage::InitializePage()
 {
 	((App^)App::Current)->WriteToDebugFile("Инициализация страницы");
 
 	// подгоняем ширину TextRow
-	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width - MenuSplitView->CompactPaneLength;
+	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width 
+				- MenuSplitView->CompactPaneLength;
 	_textRow->Width = width;
 
 	// Обработчики для команд
-	AddSymHandler = ref new SMC::Handler([=](Object^ args) -> bool {
-
-		SketchMusic::Commands::SymbolHandlerArgs^ symArgs = dynamic_cast<SketchMusic::Commands::SymbolHandlerArgs^>(args);
+	AddSymHandler = ref new SMC::Handler([=] (Object^ args) -> bool 
+	{
+		SMC::SymbolHandlerArgs^ symArgs = dynamic_cast<SMC::SymbolHandlerArgs^>(args);
 		if (symArgs == nullptr) return false;
 
 		AddSymbolToText(symArgs->_text, symArgs->_sym);
@@ -218,18 +241,18 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		return true;
 	});
 
-	DeleteSymHandler = ref new SMC::Handler([=](Object^ args) -> bool {
-
-		SketchMusic::Commands::SymbolHandlerArgs^ symArgs = dynamic_cast<SketchMusic::Commands::SymbolHandlerArgs^>(args);
+	DeleteSymHandler = ref new SMC::Handler([=] (Object^ args) -> bool 
+	{
+		SMC::SymbolHandlerArgs^ symArgs = dynamic_cast<SMC::SymbolHandlerArgs^>(args);
 		if (symArgs == nullptr) return false;
 		
 		DeleteSymbolFromText(symArgs->_text, symArgs->_sym);
 		return true;
 	});
 
-	MoveSymHandler = ref new SMC::Handler([=](Object^ args) -> bool {
-
-		SketchMusic::Commands::SymbolPairHandlerArgs^ symArgs = dynamic_cast<SketchMusic::Commands::SymbolPairHandlerArgs^>(args);
+	MoveSymHandler = ref new SMC::Handler([=] (Object^ args) -> bool 
+	{
+		SMC::SymbolPairHandlerArgs^ symArgs = dynamic_cast<SMC::SymbolPairHandlerArgs^>(args);
 		if (symArgs == nullptr) return false;
 
 		// - изменяем положение символа
@@ -239,8 +262,9 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		return true;
 	});
 	
-	ReverseMoveSymHandler = ref new SMC::Handler([=](Object^ args) -> bool {
-		SketchMusic::Commands::SymbolPairHandlerArgs^ symArgs = dynamic_cast<SketchMusic::Commands::SymbolPairHandlerArgs^>(args);
+	ReverseMoveSymHandler = ref new SMC::Handler([=] (Object^ args) -> bool 
+	{
+		SMC::SymbolPairHandlerArgs^ symArgs = dynamic_cast<SMC::SymbolPairHandlerArgs^>(args);
 		if (symArgs == nullptr) return false;
 
 		// - изменяем положение символа
@@ -250,7 +274,8 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		return true;
 	});
 
-	AddMultipleSymHandler = ref new SketchMusic::Commands::Handler([=](Object^ args) -> bool {
+	AddMultipleSymHandler = ref new SMC::Handler([=](Object^ args) -> bool 
+	{
 		SMC::MultiSymbolHandlerArgs^ symArgs = dynamic_cast<SMC::MultiSymbolHandlerArgs^>(args);
 		if (symArgs == nullptr) return false;
 
@@ -262,7 +287,7 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 		return true;
 	});
 
-	DeleteMultipleSymHandler = ref new SMC::Handler([=](Object^ args) -> bool {
+	DeleteMultipleSymHandler = ref new SMC::Handler([=] (Object^ args) -> bool {
 		SMC::MultiSymbolHandlerArgs^ symArgs = dynamic_cast<SMC::MultiSymbolHandlerArgs^>(args);
 		if (symArgs == nullptr) return false;
 
@@ -288,42 +313,55 @@ void StrokeEditor::MelodyEditorPage::InitializePage()
 	_textRow->DeleteSymCommand = DeleteSymCommand;
 	_textRow->MoveSymCommand = MoveSymCommand;
 
-	(safe_cast<::SketchMusic::View::BaseKeyboard^>(this->_keyboard))->KeyPressed += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
-		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MelodyEditorPage::_keyboard_KeyboardPressed);
-	(safe_cast<::SketchMusic::View::BaseKeyboard^>(this->_keyboard))->KeyReleased += ref new ::Windows::Foundation::EventHandler<::SketchMusic::View::KeyboardEventArgs^>(this, (void(::StrokeEditor::MelodyEditorPage::*)
-		(::Platform::Object^, ::SketchMusic::View::KeyboardEventArgs^))&MelodyEditorPage::_keyboard_KeyReleased);
+	(safe_cast<::SMV::BaseKeyboard^>(this->_keyboard))->KeyPressed 
+		+= ref new ::EventHandler<::SMV::KeyboardEventArgs^>
+						(this, (void(MelodyEditorPage::*) (::Platform::Object^, ::SMV::KeyboardEventArgs^)) &MelodyEditorPage::_keyboard_KeyboardPressed);
+
+	(safe_cast<::SMV::BaseKeyboard^>(this->_keyboard))->KeyReleased 
+		+= ref new ::EventHandler<::SMV::KeyboardEventArgs^>
+						(this, (void(MelodyEditorPage::*) (::Platform::Object^, ::SMV::KeyboardEventArgs^)) &MelodyEditorPage::_keyboard_KeyReleased);
 	
 	curPosChangeToken = 
-		((App^)App::Current)->_player->CursorPosChanged += 
-		ref new Windows::Foundation::EventHandler<SketchMusic::Cursor ^>(this, &StrokeEditor::MelodyEditorPage::OnCursorPosChanged);
+		((App^)App::Current)->_player->CursorPosChanged 
+			+= ref new EventHandler<SM::Cursor ^>(this, &MelodyEditorPage::OnCursorPosChanged);
+	
 	playerStateChangeToken =
-		((App^)App::Current)->_player->StateChanged += 
-		ref new Windows::Foundation::EventHandler<SketchMusic::Player::PlayerState>(this, &StrokeEditor::MelodyEditorPage::OnStateChanged);
+		((App^)App::Current)->_player->StateChanged 
+			+= ref new EventHandler<SM::Player::PlayerState>
+												(this, &MelodyEditorPage::OnStateChanged);
 
 	KeyDownToken =
 		Window::Current->CoreWindow->KeyDown 
-		+= ref new Windows::Foundation::TypedEventHandler<Windows::UI::Core::CoreWindow ^, Windows::UI::Core::KeyEventArgs ^>(this, &StrokeEditor::MelodyEditorPage::OnKeyDown);
+			+= ref new TypedEventHandler<CoreWindow ^, KeyEventArgs ^>
+												(this, &MelodyEditorPage::OnKeyDown);
 
 	KeyUpToken =
 		Window::Current->CoreWindow->KeyUp 
-		+= ref new Windows::Foundation::TypedEventHandler<Windows::UI::Core::CoreWindow ^, Windows::UI::Core::KeyEventArgs ^>(this, &StrokeEditor::MelodyEditorPage::OnKeyUp);
+			+= ref new TypedEventHandler<CoreWindow ^, KeyEventArgs ^>
+												(this, &MelodyEditorPage::OnKeyUp);
+	
 	//bpmChangeToken = 
-	//	((App^)App::Current)->_player->BpmChanged += ref new Windows::Foundation::EventHandler<float>(this, &StrokeEditor::MelodyEditorPage::OnBpmChanged);
+	//	((App^)App::Current)->_player->BpmChanged += ref new EventHandler<float>(this, &MelodyEditorPage::OnBpmChanged);
 
 	// привязка состояния
 	canUndoChangeToken =
-		((App^)App::Current)->_manager->CanUndoChanged += 
-		ref new Windows::Foundation::EventHandler<bool>(this, &StrokeEditor::MelodyEditorPage::OnCanUndoChanged);
+		((App^)App::Current)->_manager->CanUndoChanged 
+				+= ref new EventHandler<bool>(this, &MelodyEditorPage::OnCanUndoChanged);
+
 	canRedoChangeToken =
-		((App^)App::Current)->_manager->CanRedoChanged += 
-		ref new Windows::Foundation::EventHandler<bool>(this, &StrokeEditor::MelodyEditorPage::OnCanRedoChanged);
+		((App^)App::Current)->_manager->CanRedoChanged 
+				+= ref new EventHandler<bool>(this, &MelodyEditorPage::OnCanRedoChanged);
 	
 	// подписка на событие нажатия ноты, чтобы её озвучить
-	_textRow->SymbolPressed += ref new Windows::Foundation::EventHandler<SketchMusic::PositionedSymbol ^>(this, &StrokeEditor::MelodyEditorPage::OnSymbolPressed);
+	_textRow->SymbolPressed 
+		+= ref new EventHandler<SketchMusic::PositionedSymbol ^>(
+												this, 
+												&MelodyEditorPage::OnSymbolPressed);
 }
 
 
-void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, 
+									   RoutedEventArgs^ e)
 {
 	// остановить проигрывание, если идёт
 	((App^)App::Current)->_player->cycling = false;
@@ -331,8 +369,8 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	((App^)App::Current)->_player->stopKeyboard();
 	
 	// сохраняем настройки
-	Windows::Storage::ApplicationDataContainer^ localSettings =
-		Windows::Storage::ApplicationData::Current->LocalSettings;
+	ApplicationDataContainer^ localSettings =
+		ApplicationData::Current->LocalSettings;
 
 	// отписка от события
 	(((App^)App::Current)->_player)->StateChanged -= playerStateChangeToken;
@@ -350,16 +388,18 @@ void StrokeEditor::MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, W
 	// проверка на композицию раньше, потому что если редактируем идею внутри композиции, у нас может быть и то, и другое
 	if (_compositionArgs)
 	{
-		this->Frame->Navigate(TypeName(StrokeEditor::CompositionEditorPage::typeid), _compositionArgs);
+		this->Frame->Navigate(TypeName(CompositionEditorPage::typeid), 
+							  _compositionArgs);
 	}
 	else if (_idea)
 	{	
-		this->Frame->Navigate(TypeName(StrokeEditor::LibraryEntryPage::typeid), ref new LibraryEntryNavigationArgs(_idea, true));
+		this->Frame->Navigate(TypeName(LibraryEntryPage::typeid), 
+							  ref new LibraryEntryNavigationArgs(_idea, true));
 	}
 }
 
 
-void StrokeEditor::MelodyEditorPage::SaveData()
+void MelodyEditorPage::SaveData()
 {
 	if (_compositionArgs)
 	{
@@ -400,27 +440,30 @@ void StrokeEditor::MelodyEditorPage::SaveData()
 	}
 }
 
-void StrokeEditor::MelodyEditorPage::playAll_Click()
+void MelodyEditorPage::playAll_Click()
 {
-	if (((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::STOP)
+	if (((App^)App::Current)->_player->_state != SM::Player::PlayerState::STOP)
 	{
 		((App^)App::Current)->_player->stop();
 		((App^)App::Current)->WriteToDebugFile("Остановка плеера");
 		return;
 	}
 
-	this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([this]()
+	this->Dispatcher->RunAsync(CoreDispatcherPriority::Normal, 
+							   ref new DispatchedHandler([this] ()
 	{
 		auto async = concurrency::create_task([this]
 		{
 			//((App^)App::Current)->_player->stop();
 			((App^)App::Current)->WriteToDebugFile("Запуск плеера");
-			((App^)App::Current)->_player->playText(this->_texts, ref new SketchMusic::Cursor(_textRow->currentPosition));
+			((App^)App::Current)->_player->playText(this->_texts, 
+													ref new SM::Cursor(_textRow->currentPosition));
 		});
 	}));
 }
 
-void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ args)
+void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender, 
+												 SMV::KeyboardEventArgs^ args)
 {
 	if (_textRow->current == nullptr) return;
 
@@ -428,179 +471,244 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^
 	{
 		switch (args->key->type)
 		{
-		case SketchMusic::View::KeyType::metronome:
-		{
-			((App^)App::Current)->_player->needMetronome = (bool)args->key->value;
-			Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert("need_metronome", ((App^)App::Current)->_player->needMetronome);
-			break;
-		}
-		case SketchMusic::View::KeyType::playGeneric:
-		{
-			((App^)App::Current)->_player->needPlayGeneric = (bool)args->key->value;
-			Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert("need_play_generic", ((App^)App::Current)->_player->needMetronome);
-			break;
-		}
-		case SketchMusic::View::KeyType::quantization:
-		{
-			((App^)App::Current)->_player->quantize = args->key->value;
-			_textRow->quantize = args->key->value;
-			break;
-		}
-		case SketchMusic::View::KeyType::precount:
-		{
-			((App^)App::Current)->_player->precount = args->key->value;
-			Windows::Storage::ApplicationData::Current->LocalSettings->Values->Insert("precount", ((App^)App::Current)->_player->needMetronome);
-			break;
-		}
-		case SketchMusic::View::KeyType::end:
-		case SketchMusic::View::KeyType::note:
-		case SketchMusic::View::KeyType::relativeNote:
-		case SketchMusic::View::KeyType::genericNote:
-		{
-			SketchMusic::ISymbol^ sym = SketchMusic::ISymbolFactory::CreateSymbol(args->key->type, args->key->value);
-
-			auto snote = dynamic_cast<SketchMusic::SNote^>(sym);
-			if (snote)
+			case SMV::KeyType::metronome:
 			{
-				SketchMusic::Player::NoteOff^ noteOff = ref new SketchMusic::Player::NoteOff;
-				((App^)App::Current)->_player->playSingleNote(snote, _textRow->current->instrument, 0, noteOff);
-				// сохраняем noteOff где-нибудь, ассоциированно с нажатой клавишей
-				notesPlayingMap.insert(std::make_pair(args->key, noteOff));
+				((App^)App::Current)->_player->needMetronome = (bool)args->key->value;
+				ApplicationData::Current->LocalSettings->Values->Insert(
+														"need_metronome", 
+														((App^)App::Current)->_player->needMetronome);
+				break;
 			}
-
-			// надо добавлять сразу аккордами
-			if (recording)
+			case SMV::KeyType::playGeneric:
 			{
-				
-				Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]
-				{
-					auto delay = concurrency::create_task([=]
-					{
-						// небольшая задержка, чтобы можно было нажимать чуть-чуть заранее
-						concurrency::wait(20);
+				((App^)App::Current)->_player->needPlayGeneric = (bool)args->key->value;
+				ApplicationData::Current->LocalSettings->Values->Insert(
+														"need_play_generic", 
+														((App^)App::Current)->_player->needMetronome);
+				break;
+			}
+			case SMV::KeyType::quantization:
+			{
+				((App^)App::Current)->_player->quantize = args->key->value;
+				_textRow->quantize = args->key->value;
+				break;
+			}
+			case SMV::KeyType::precount:
+			{
+				((App^)App::Current)->_player->precount = args->key->value;
+				ApplicationData::Current->LocalSettings->Values->Insert(
+												"precount", 
+												((App^)App::Current)->_player->needMetronome);
+				break;
+			}
+			case SMV::KeyType::end:
+			case SMV::KeyType::note:
+			case SMV::KeyType::relativeNote:
+			case SMV::KeyType::genericNote:
+			{
+				SM::ISymbol^ sym = SM::ISymbolFactory::CreateSymbol(args->key->type, 
+																	args->key->value);
 
-						Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=] {
-							// создаём команду на добавление ноты в текст и сохраняем её в истории
-							((App^)App::Current)->_manager->AddAndExecute(
-								AddSymCommand,
-								ref new SMC::SymbolHandlerArgs(
-									_textRow->current,
-									ref new PositionedSymbol(
-										ref new SketchMusic::Cursor(((App^)App::Current)->_player->quantize ? _textRow->currentPosition : ((App^)App::Current)->_player->_cursor), 
-										sym)));
-						}));
-					});
-				}));
-				//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
-				//	+ " / tick = " + _textRow->currentPosition->getTick();
-
-				if (!appending && ((App^)App::Current)->_player->_state != SketchMusic::Player::PlayerState::PLAY)
+				auto snote = dynamic_cast<SM::SNote^>(sym);
+				if (snote)
 				{
-					appending = true;
-					Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]
+					SM::Player::NoteOff^ noteOff = ref new SM::Player::NoteOff;
+					((App^)App::Current)->_player->playSingleNote(snote, _textRow->current->instrument, 
+																  0, noteOff);
+
+					// сохраняем noteOff где-нибудь, ассоциированно с нажатой клавишей
+					notesPlayingMap.insert(std::make_pair(args->key, noteOff));
+				}
+
+				// надо добавлять сразу аккордами
+				if (recording)
+				{
+					//Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->
+					Dispatcher->RunAsync(CoreDispatcherPriority::Normal, 
+										 ref new DispatchedHandler([=]
 					{
-						auto delay = concurrency::create_task([this]
+						auto delay = concurrency::create_task([=]
 						{
-							unsigned int timeout = 600 * 60 / ((App^)App::Current)->_player->_BPM / _textRow->scale;
-							concurrency::wait(timeout);
-							Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=] {
-								this->appending = false;
-								if (this->viewType == ViewType::TextRow)
-								{
-									this->_textRow->MoveCursorRight();
-								}
-								else
-								{
-									this->MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
-								}
-							}));
+							// небольшая задержка, чтобы можно было нажимать чуть-чуть заранее
+							concurrency::wait(20);
 
+							Dispatcher->RunAsync(CoreDispatcherPriority::Normal, 
+												 ref new DispatchedHandler(
+								[=] ()
+							{
+								// создаём команду на добавление ноты в текст и сохраняем её в истории
+								((App^)App::Current)->_manager->AddAndExecute(
+									AddSymCommand,
+									ref new SMC::SymbolHandlerArgs(
+										_textRow->current,
+										ref new PositionedSymbol(
+											ref new SM::Cursor(((App^)App::Current)->_player->quantize 
+																			? _textRow->currentPosition 
+																			: ((App^)App::Current)->_player->_cursor), 
+											sym)));
+							}));
 						});
 					}));
-				}
-			}
-			break;
-		}
-		case SketchMusic::View::KeyType::tempo:
-		{
-			SketchMusic::ISymbol^ sym = ref new SketchMusic::STempo(args->key->value);
+					//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
+					//	+ " / tick = " + _textRow->currentPosition->getTick();
 
-			// создаём команду на добавление ноты в текст и сохраняем её в истории
-			((App^)App::Current)->_manager->AddAndExecute(
-				AddSymCommand,
-				ref new SMC::SymbolHandlerArgs(
-					_texts->ControlText, 
-					ref new PositionedSymbol(ref new SketchMusic::Cursor(_textRow->currentPosition), sym)));
-			break;
-		}
-		case SketchMusic::View::KeyType::enter:
-			// перенос строки обрабатываем на отпускании
-			break;
-		case SketchMusic::View::KeyType::move:
-		{
-			Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=] 
-			{
-				if (args->key->value >= 0)
-				{
-					if (viewType == ViewType::TextRow)
-						_textRow->MoveCursorRight();
-					else MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
+					if (!appending 
+						&& ((App^)App::Current)->_player->_state != SM::Player::PlayerState::PLAY)
+					{
+						appending = true;
+						//Windows::ApplicationModel::Core::CoreApplication::GetCurrentView()->CoreWindow->
+							Dispatcher->RunAsync(CoreDispatcherPriority::Normal, 
+												 ref new DispatchedHandler(
+							[=] ()
+						{
+							auto delay = concurrency::create_task([this]
+							{
+								unsigned int timeout = 600 * 60 
+														/ ((App^)App::Current)->_player->_BPM 
+														/ _textRow->scale;
+								concurrency::wait(timeout);
+
+								Dispatcher->RunAsync(CoreDispatcherPriority::Normal, 
+													 ref new DispatchedHandler([=] 
+								{
+									this->appending = false;
+									if (this->viewType == SMV::ViewType::TextRow)
+									{
+										this->_textRow->MoveCursorRight();
+									}
+									else
+									{
+										this->MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
+									}
+								}));
+							});
+						}));
+					}
 				}
-				else
-				{
-					if (viewType == ViewType::TextRow) _textRow->MoveCursorLeft();
-					else MoveLeftCWBtn_Click(this, ref new RoutedEventArgs);
-				}
-			}));
-			break;
-		}
-		case SketchMusic::View::KeyType::record:
-			recording = args->key->value;
-			((App^)App::Current)->_player->recording = recording;
-			break;
-		case SketchMusic::View::KeyType::backspace:
-		{
-			Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=] 
+				break;
+			}
+			case SMV::KeyType::tempo:
 			{
-				Backspace();
-			}));
-			break;
-		}
-		case SketchMusic::View::KeyType::stop:
-			((App^)App::Current)->_player->stop();
-			((App^)App::Current)->_player->stopKeyboard();
-			break;
-		case SketchMusic::View::KeyType::play:
-			playAll_Click();
-			break;
-		case SketchMusic::View::KeyType::cycling:
-			((App^)App::Current)->_player->cycling = args->key->value;
-			((App^)App::Current)->_player->StopAtLast = ((App^)App::Current)->_player->cycling;
-			break;
-		case SketchMusic::View::KeyType::zoom:
-			_textRow->SetScale(args->key->value * 2);
-			break;
-		case SketchMusic::View::KeyType::hide:
-			//_textRow->Height = 
-			break;
-		case SketchMusic::View::KeyType::eraser:
-			_textRow->EraserTool = args->key->value;
-			break;
-		case SketchMusic::View::KeyType::octave:
-		case SketchMusic::View::KeyType::space:
-		default:
-			break;
+				SM::ISymbol^ sym = ref new SM::STempo(args->key->value);
+
+				// создаём команду на добавление ноты в текст и сохраняем её в истории
+				((App^)App::Current)->_manager->AddAndExecute(
+					AddSymCommand,
+					ref new SMC::SymbolHandlerArgs(
+						_texts->ControlText, 
+						ref new PositionedSymbol(ref new SM::Cursor(_textRow->currentPosition), 
+												 sym)));
+				break;
+			}
+			case SMV::KeyType::enter:
+				// перенос строки обрабатываем на отпускании
+				break;
+			case SMV::KeyType::move:
+			{
+				Dispatcher->RunAsync(CoreDispatcherPriority::Normal, 
+									 ref new DispatchedHandler([=] 
+				{
+					if (args->key->value >= 0)
+					{
+						if (viewType == SMV::ViewType::TextRow)
+							_textRow->MoveCursorRight();
+						else MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
+					}
+					else
+					{
+						if (viewType == SMV::ViewType::TextRow)
+							_textRow->MoveCursorLeft();
+						else MoveLeftCWBtn_Click(this, ref new RoutedEventArgs);
+					}
+				}));
+				break;
+			}
+			case SMV::KeyType::beat:
+			{
+				Dispatcher->RunAsync(CoreDispatcherPriority::Normal,
+					ref new DispatchedHandler([=]
+				{
+					// TODO: через команды, чтобы можно было отменять/возвращать
+
+					if (args->key->value >= 0)
+					{
+						// добавить долю вперёд
+						_texts->ControlText->addBeat(_textRow->currentPosition, ref new SM::Cursor(1));
+						for (SM::Text^ text : _texts->texts)
+						{
+							text->addBeat(_textRow->currentPosition, ref new SM::Cursor(1));
+						}
+
+						// FIXME: сейчас - для увеличения размера
+						_textRow->AddBeatItem_Click(this, ref new RoutedEventArgs());
+					}
+					else
+					{
+						// удалить долю
+						_texts->ControlText->deleteBeat(_textRow->currentPosition, ref new SM::Cursor(1));
+						for (SM::Text^ text : _texts->texts)
+						{
+							text->deleteBeat(_textRow->currentPosition, ref new SM::Cursor(1));
+						}
+
+						// FIXME: сейчас - для уменьшения размера
+						_textRow->DeleteBeatItem_Click(this, ref new RoutedEventArgs());
+					}
+					_textRow->UpdateText();
+				}));
+				break;
+			}
+			case SMV::KeyType::record:
+				recording = args->key->value;
+				((App^)App::Current)->_player->recording = recording;
+				break;
+			case SMV::KeyType::backspace:
+			{
+				Dispatcher->RunAsync(CoreDispatcherPriority::Normal, ref new DispatchedHandler([=] 
+				{
+					Backspace();
+				}));
+				break;
+			}
+			case SMV::KeyType::stop:
+				((App^)App::Current)->_player->stop();
+				((App^)App::Current)->_player->stopKeyboard();
+				break;
+			case SMV::KeyType::play:
+				playAll_Click();
+				break;
+			case SMV::KeyType::cycling:
+				((App^)App::Current)->_player->cycling = args->key->value;
+				((App^)App::Current)->_player->StopAtLast = ((App^)App::Current)->_player->cycling;
+				break;
+			case SMV::KeyType::zoom:
+				_textRow->SetScale(args->key->value * 2);
+				break;
+			case SMV::KeyType::hide:
+				break;
+			case SMV::KeyType::eraser:
+				_textRow->EraserTool = args->key->value;
+				break;
+			case SMV::KeyType::control:
+				ctrlPressed = !ctrlPressed;
+				break;
+			case SMV::KeyType::octave:
+			case SMV::KeyType::space:
+			default:
+				break;
 		}
 	}
 }
 
-void StrokeEditor::MelodyEditorPage::_keyboard_KeyReleased(Platform::Object^ sender, SketchMusic::View::KeyboardEventArgs^ args)
+void MelodyEditorPage::_keyboard_KeyReleased(Platform::Object^ sender, 
+											 SMV::KeyboardEventArgs^ args)
 {
 	// на отпускание клавиши мы должны
 	// - прекращать звучание
 	for (auto noteIter = notesPlayingMap.begin(); noteIter != notesPlayingMap.end(); noteIter++)
 	{
-		if (((*noteIter).first->type == args->key->type) && ((*noteIter).first->value == args->key->value))
+		if (((*noteIter).first->type == args->key->type) 
+		 && ((*noteIter).first->value == args->key->value))
 		{
 			(*noteIter).second->Cancel();
 			notesPlayingMap.erase(noteIter);
@@ -611,38 +719,43 @@ void StrokeEditor::MelodyEditorPage::_keyboard_KeyReleased(Platform::Object^ sen
 	// обрабатывание событий отпускания некоторых клавиш
 	switch (args->key->type)
 	{
-	case KeyType::enter:
-	{
-		int beat = _textRow->currentPosition->Beat;
-		if (_textRow->currentPosition->Tick > 0) beat++;
-		// создаём команду на добавление ноты в текст и сохраняем её в истории
-		auto newpos = ref new SketchMusic::Cursor(beat);
-		((App^)App::Current)->_manager->AddAndExecute(
-			AddSymCommand,
-			ref new SMC::SymbolHandlerArgs(_texts->ControlText,
-				ref new PositionedSymbol(newpos, ref new SNewLine)));
-		_textRow->SetCursor(newpos);
-		break;
-	}
+		case SMV::KeyType::enter:
+		{
+			int beat = _textRow->currentPosition->Beat;
+			if (_textRow->currentPosition->Tick > 0) beat++;
+			// создаём команду на добавление ноты в текст и сохраняем её в истории
+			auto newpos = ref new SM::Cursor(beat);
+			((App^)App::Current)->_manager->AddAndExecute(
+				AddSymCommand,
+				ref new SMC::SymbolHandlerArgs(_texts->ControlText,
+					ref new PositionedSymbol(newpos, ref new SNewLine)));
+			_textRow->SetCursor(newpos);
+			break;
+		}
 	}
 }
 
-void StrokeEditor::MelodyEditorPage::OnStateChanged(Platform::Object ^sender, SketchMusic::Player::PlayerState args)
+void MelodyEditorPage::OnStateChanged(Platform::Object ^sender, 
+									  SM::Player::PlayerState args)
 {
 	this->Dispatcher->RunAsync(
-		Windows::UI::Core::CoreDispatcherPriority::Normal,
-		ref new Windows::UI::Core::DispatchedHandler([=]() {
+		CoreDispatcherPriority::Normal,
+		ref new DispatchedHandler([=]() {
 		((App^)App::Current)->WriteToDebugFile("Обработка изменения состояния плеера");
 		switch (args)
 		{
-		case SketchMusic::Player::PlayerState::PLAY:
-			this->_keyboard->OnKeyboardStateChanged(this, ref new SketchMusic::View::KeyboardState(SketchMusic::View::KeyboardStateEnum::play));
+		case SM::Player::PlayerState::PLAY:
+			this->_keyboard->OnKeyboardStateChanged(this, 
+													ref new SMV::KeyboardState(
+														SMV::KeyboardStateEnum::play));
 			PlayItemTxt1->Text = L"\uE769";
 			PlayItemTxt2->Text = L"Остановить";
 			break;
-		case SketchMusic::Player::PlayerState::STOP:
-		case SketchMusic::Player::PlayerState::WAIT:
-			this->_keyboard->OnKeyboardStateChanged(this, ref new SketchMusic::View::KeyboardState(SketchMusic::View::KeyboardStateEnum::stop));
+		case SM::Player::PlayerState::STOP:
+		case SM::Player::PlayerState::WAIT:
+			this->_keyboard->OnKeyboardStateChanged(this, 
+													ref new SMV::KeyboardState(
+																SMV::KeyboardStateEnum::stop));
 			PlayItemTxt1->Text = L"\uE768";
 			PlayItemTxt2->Text = L"Воспроизвести";
 			break;
@@ -650,24 +763,29 @@ void StrokeEditor::MelodyEditorPage::OnStateChanged(Platform::Object ^sender, Sk
 	}));
 }
 
-
-void StrokeEditor::MelodyEditorPage::OnCursorPosChanged(Platform::Object ^sender, SketchMusic::Cursor^ pos)
+void MelodyEditorPage::OnCursorPosChanged(Platform::Object ^sender, 
+										  SM::Cursor^ pos)
 {
 	create_task(this->Dispatcher->RunAsync(
-		Windows::UI::Core::CoreDispatcherPriority::Low,
-		ref new Windows::UI::Core::DispatchedHandler([=]() {
+		CoreDispatcherPriority::Low,
+		ref new DispatchedHandler(
+			[=]() 
+	{
 		_textRow->SetCursor(pos);
 	})));
 }
 
-void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+void MelodyEditorPage::ListView_SelectionChanged(Platform::Object^ sender, 
+												 SelectionChangedEventArgs^ e)
 {
-	Text^ text = dynamic_cast<Text^>(TextsList->SelectedItem); // e->AddedItems->First()->Current
+	SM::Text^ text = dynamic_cast<SM::Text^>(TextsList->SelectedItem); // e->AddedItems->First()->Current
 	if (text)
 	{
 		if (text != _textRow->current)
 		{
-			_textRow->SetText(_texts, text, _compositionArgs ? _compositionArgs->Selected : -1);
+			_textRow->SetText(_texts, text, 
+							  _compositionArgs ? _compositionArgs->Selected 
+											   : -1);
 		}
 		else
 		{
@@ -680,14 +798,13 @@ void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^
 				if (result == ContentDialogResult::Primary)
 				{
 					this->Dispatcher->RunAsync(
-						Windows::UI::Core::CoreDispatcherPriority::Normal,
-						ref new Windows::UI::Core::DispatchedHandler([=]() {
+						CoreDispatcherPriority::Normal,
+						ref new DispatchedHandler([=] () {
 
-						Windows::Storage::ApplicationDataContainer^ localSettings =
-							Windows::Storage::ApplicationData::Current->LocalSettings;
+						ApplicationDataContainer^ localSettings =
+							ApplicationData::Current->LocalSettings;
 
-						this->_texts->texts->Append(ref new Text(dialog->Selected));
-
+						this->_texts->texts->Append(ref new SM::Text(dialog->Selected));
 					}));
 				}
 			});
@@ -696,7 +813,8 @@ void StrokeEditor::MelodyEditorPage::ListView_SelectionChanged(Platform::Object^
 	TextsFlyout->Hide();
 }
 
-void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
+void MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender, 
+										  ItemClickEventArgs^ e)
 {
 	auto instr = dynamic_cast<Instrument^>(e->ClickedItem);
 	if (instr)
@@ -704,17 +822,19 @@ void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender
 		// спрашиваем у плеера, загружен ли такой инструмент и есть ли у него пресеты
 		// - выводим окошко со списком доступных пресетов
 		this->Dispatcher->RunAsync(
-			Windows::UI::Core::CoreDispatcherPriority::Normal,
-			ref new Windows::UI::Core::DispatchedHandler([=]() {
+			CoreDispatcherPriority::Normal,
+			ref new DispatchedHandler([=]() {
 			
 			auto init = concurrency::create_task([=]
 			{
 				// такая обёртка, если асинхронно будем читать данные, если они ешё не созданы
 				return ((App^)App::Current)->_player->GetSFData(instr);
-			}).then([=](SketchMusic::SFReader::SFData^ data)->void {
+			})
+				.then([=] (SM::SFReader::SFData^ data)->void 
+			{
 				this->Dispatcher->RunAsync(
-					Windows::UI::Core::CoreDispatcherPriority::Normal,
-					ref new Windows::UI::Core::DispatchedHandler([=]() {
+					CoreDispatcherPriority::Normal,
+					ref new DispatchedHandler([=]() {
 				
 					if (data == nullptr) return;
 
@@ -727,13 +847,13 @@ void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender
 					list->ItemTemplate = (DataTemplate^) this->Resources->Lookup("myResourceTemplate");
 					list->ItemsSource = data->presets;
 					list->IsItemClickEnabled = true;
-					list->ItemClick += ref new Windows::UI::Xaml::Controls::ItemClickEventHandler([=](Object^, Object^)
+					list->ItemClick += ref new ItemClickEventHandler([=] (Object^, Object^)
 					{
 						presetListDlg->Hide();
 					});
 					Button^ btn = ref new Button;
 					btn->Content = "Отмена";
-					btn->Click += ref new Windows::UI::Xaml::RoutedEventHandler([=](Object^, Object^)
+					btn->Click += ref new RoutedEventHandler([=] (Object^, Object^)
 					{
 						presetListDlg->Hide();
 					});
@@ -745,16 +865,18 @@ void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender
 					presetListDlg->Content = grid;
 
 					auto dialog = concurrency::create_task(presetListDlg->ShowAsync());
-					dialog.then([=](concurrency::task<ContentDialogResult> t)
+					dialog.then([=] (concurrency::task<ContentDialogResult> t)
 					{
 						ContentDialogResult result = t.get();
 
 						if (list->SelectedItem)// result == ContentDialogResult::Primary)
 						{
-							auto preset = dynamic_cast<SketchMusic::SFReader::SFPreset^>(list->SelectedItem);
+							auto preset = dynamic_cast<SM::SFReader::SFPreset^>(list->SelectedItem);
 							if (preset)
 							{
-								this->_texts->texts->Append(ref new Text(ref new Instrument(instr->_name, instr->FileName, preset->name)));
+								this->_texts->texts->Append(ref new SM::Text(ref new Instrument(instr->_name, 
+																							instr->FileName, 
+																							preset->name)));
 								list->SelectedItem = nullptr;
 							}
 						}
@@ -767,38 +889,51 @@ void StrokeEditor::MelodyEditorPage::ListView_ItemClick(Platform::Object^ sender
 }
 
 
-void StrokeEditor::MelodyEditorPage::DeleteTextBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void MelodyEditorPage::DeleteTextBtn_Click(Platform::Object^ sender, 
+										   RoutedEventArgs^ e)
 {
 	auto list = dynamic_cast<ListView^>(TextsFlyout->Content);
 	if (list)
 	{
-		Text^ text = dynamic_cast<Text^>(list->SelectedItem);
+		SM::Text^ text = dynamic_cast<SM::Text^>(list->SelectedItem);
 		auto size = _texts->texts->Size;
 		if (text && (size > 1)) // последний удалить нельзя
 		{
 			unsigned int index;
 			_texts->texts->IndexOf(text, &index);
 			unsigned int new_index = index;
-			if (new_index> (size - 2)) { new_index = size - 2; }	// size-1 = крайний элемент; size-1-1 = крайний элемент после удаления
+			
+			if (new_index > (size - 2)) 
+			{ 
+				// size-1 = крайний элемент; size-1-1 = крайний элемент после удаления
+				new_index = size - 2;
+			}	
 			TextsList->SelectedIndex = new_index;
 			_texts->texts->RemoveAt(index);
-			_textRow->SetText(_texts, _texts->texts->GetAt(new_index), (_compositionArgs ?_compositionArgs->Selected : -1));
+			_textRow->SetText(_texts, _texts->texts->GetAt(new_index), 
+							  (_compositionArgs) 
+									?_compositionArgs->Selected 
+									: -1);
 		}
 		DeleteTextFlyout->Hide();
 	}
 }
 
 
-void StrokeEditor::MelodyEditorPage::Page_SizeChanged(Platform::Object^ sender, Windows::UI::Xaml::SizeChangedEventArgs^ e)
+void MelodyEditorPage::Page_SizeChanged(Platform::Object^ sender, 
+										SizeChangedEventArgs^ e)
 {
-	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width
-		- MenuSplitView->CompactPaneLength - _textRow->Margin.Left - _textRow->Margin.Right;
+	using namespace Windows::UI::ViewManagement;
+	auto width = ApplicationView::GetForCurrentView()->VisibleBounds.Width
+				- MenuSplitView->CompactPaneLength 
+				- _textRow->Margin.Left - _textRow->Margin.Right;
 	_textRow->Width = width;
 }
 
 
 // переместить курсор к ближайшей левой ноте
-void StrokeEditor::MelodyEditorPage::MoveLeftCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void MelodyEditorPage::MoveLeftCWBtn_Click(Platform::Object^ sender, 
+										   RoutedEventArgs^ e)
 {
 	Cursor^ prevPos = nullptr;
 	auto notes = PrevChord->GetNotes();
@@ -816,7 +951,8 @@ void StrokeEditor::MelodyEditorPage::MoveLeftCWBtn_Click(Platform::Object^ sende
 
 
 // переместить курсор к ближайшей правой ноте
-void StrokeEditor::MelodyEditorPage::MoveRightCWBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void MelodyEditorPage::MoveRightCWBtn_Click(Platform::Object^ sender, 
+											RoutedEventArgs^ e)
 {
 	Cursor^ nextPos = nullptr;
 	auto notes = NextChord->GetNotes();
@@ -832,9 +968,10 @@ void StrokeEditor::MelodyEditorPage::MoveRightCWBtn_Click(Platform::Object^ send
 	}
 }
 
-void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
+void MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 {
-	if (this->viewType != ViewType::ChordView) return;
+	if (this->viewType != SMV::ViewType::ChordView) 
+		return;
 
 	auto txt = _textRow->current;
 	if (txt == nullptr) return;
@@ -843,10 +980,13 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 	_textRow->SetCursor(pos);
 
 	CurPosTxt->Text = L"" + pos->Beat + ":" + pos->Tick;
+	
 	// сюда - только обычные ноты
 	CurrentChord->SetNotes(txt->getNotesAt(pos, SymbolType::NOTE));
+	
 	// сюда - все, кроме обычных
 	auto notes = txt->getNotesAtExcluding(pos, SymbolType::NOTE);
+	
 	// так сложно, потому что часть нот попадает в ControlText
 	auto notes2 = _texts->ControlText->getNotesAtExcluding(pos, SymbolType::NOTE);
 	for (auto&& note : notes2)
@@ -861,6 +1001,7 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 
 	PrevChord->SetNotes(txt->getNotesAt(prevPos, SymbolType::NOTE));
 	notes = txt->getNotesAtExcluding(prevPos, SymbolType::NOTE);
+	
 	// так сложно, потому что часть нот попадает в ControlText
 	notes2 = _texts->ControlText->getNotesAtExcluding(prevPos, SymbolType::NOTE);
 	for (auto&& note : notes2)
@@ -869,21 +1010,36 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 	}
 	PrevGChord->SetNotes(notes);
 
-	bool prevEnabled = (PrevChord->GetNotes() == nullptr) ? false : (PrevChord->GetNotes()->Size > 0);
-	if (prevEnabled == false) prevEnabled = (PrevGChord->GetNotes() == nullptr) ? false : (PrevGChord->GetNotes()->Size > 0);
+	bool prevEnabled = (PrevChord->GetNotes() == nullptr) 
+		? false 
+		: (PrevChord->GetNotes()->Size > 0);
+	
+	if (prevEnabled == false)
+	{
+		prevEnabled = (PrevGChord->GetNotes() == nullptr)
+			? false
+			: (PrevGChord->GetNotes()->Size > 0);
+	}
 	
 	if (prevEnabled)
 	{
-		MoveLeftCWBtn->IsEnabled = true; PrevPosTxt->Text = L"" + prevPos->Beat + ":" + prevPos->Tick ;
+		MoveLeftCWBtn->IsEnabled = true; 
+		PrevPosTxt->Text = L"" + prevPos->Beat + ":" + prevPos->Tick ;
 	}
-	else { MoveLeftCWBtn->IsEnabled = false; PrevPosTxt->Text = ""; }
+	else 
+	{ 
+		MoveLeftCWBtn->IsEnabled = false; 
+		PrevPosTxt->Text = ""; 
+	}
 
 	auto nextPos = txt->getPosAtRight(pos);
 	auto nextPos2 = _texts->ControlText->getPosAtRight(pos);	// TODO : можно сделать лучше
-	if (nextPos2 && nextPos2->LT(nextPos)) nextPos = nextPos2;
+	if (nextPos2 && nextPos2->LT(nextPos)) 
+		nextPos = nextPos2;
 
 	NextChord->SetNotes(_textRow->current->getNotesAt(nextPos, SymbolType::NOTE));
 	notes = txt->getNotesAtExcluding(nextPos, SymbolType::NOTE);
+	
 	// так сложно, потому что часть нот попадает в ControlText
 	notes2 = _texts->ControlText->getNotesAtExcluding(nextPos, SymbolType::NOTE);
 	for (auto&& note : notes2)
@@ -892,18 +1048,32 @@ void StrokeEditor::MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 	}
 	NextGChord->SetNotes(notes);
 	
-	bool nextEnabled = (NextChord->GetNotes() == nullptr) ? false : (NextChord->GetNotes()->Size > 0);
-	if (nextEnabled == false) nextEnabled = (NextGChord->GetNotes() == nullptr) ? false : (NextGChord->GetNotes()->Size > 0);
+	bool nextEnabled = (NextChord->GetNotes() == nullptr) 
+						? false 
+						: (NextChord->GetNotes()->Size > 0);
+	
+	if (nextEnabled == false)
+	{
+		nextEnabled = (NextGChord->GetNotes() == nullptr)
+			? false
+			: (NextGChord->GetNotes()->Size > 0);
+	}
 
 	if (nextEnabled)
 	{
-		MoveRightCWBtn->IsEnabled = true; NextPosTxt->Text = L"" + nextPos->Beat + ":" + nextPos->Tick;
+		MoveRightCWBtn->IsEnabled = true; 
+		NextPosTxt->Text = L"" + nextPos->Beat + ":" + nextPos->Tick;
 	}
-	else { MoveRightCWBtn->IsEnabled = false; NextPosTxt->Text = ""; }
+	else 
+	{ 
+		MoveRightCWBtn->IsEnabled = false; 
+		NextPosTxt->Text = ""; 
+	}
 
 }
 
-void StrokeEditor::MelodyEditorPage::PartsList_SelectionChanged(Platform::Object^ sender, Windows::UI::Xaml::Controls::SelectionChangedEventArgs^ e)
+void MelodyEditorPage::PartsList_SelectionChanged(Platform::Object^ sender, 
+												  SelectionChangedEventArgs^ e)
 {
 	if (PartsList->SelectedItem)
 	{
@@ -913,15 +1083,17 @@ void StrokeEditor::MelodyEditorPage::PartsList_SelectionChanged(Platform::Object
 }
 
 
-void StrokeEditor::MelodyEditorPage::MenuButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void MelodyEditorPage::MenuButton_Click(Platform::Object^ sender, 
+										RoutedEventArgs^ e)
 {
-	if ((HamburgerButton == (ContentControl^)e->OriginalSource) )//|| (HamburgerButton2 == (ContentControl^)e->OriginalSource))
+	if ((HamburgerButton == (ContentControl^)e->OriginalSource))
 	{
 		bool isOpen = !MenuSplitView->IsPaneOpen;
 		MenuSplitView->IsPaneOpen = isOpen;
-		MenuSeparator->X2 = (isOpen ? menu->ActualWidth : 22.);
-		MenuSeparator2->X2 = (isOpen ? menu->ActualWidth : 22.);
-		MenuSeparator3->X2 = (isOpen ? menu->ActualWidth : 22.);
+		auto width = (isOpen ? menu->ActualWidth : ::collapsedWidth);
+		MenuSeparator->X2 = width;
+		MenuSeparator2->X2 = width;
+		MenuSeparator3->X2 = width;
 	}
 	else if (homeItem == (ContentControl^)e->OriginalSource)
 	{
@@ -933,11 +1105,11 @@ void StrokeEditor::MelodyEditorPage::MenuButton_Click(Platform::Object^ sender, 
 	}
 	else if (textsItem == (ContentControl^)e->OriginalSource)
 	{
-		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(textsCtrl);
+		Flyout::ShowAttachedFlyout(textsCtrl);
 	}
 	else if (partsItem == (ContentControl^)e->OriginalSource)
 	{
-		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(partsCtrl);
+		Flyout::ShowAttachedFlyout(partsCtrl);
 	}
 	else if (addItem == (ContentControl^)e->OriginalSource)
 	{
@@ -950,21 +1122,20 @@ void StrokeEditor::MelodyEditorPage::MenuButton_Click(Platform::Object^ sender, 
 			if (result == ContentDialogResult::Primary)
 			{
 				this->Dispatcher->RunAsync(
-					Windows::UI::Core::CoreDispatcherPriority::Normal,
-					ref new Windows::UI::Core::DispatchedHandler([=]() {
+					CoreDispatcherPriority::Normal,
+					ref new DispatchedHandler([=]() 
+				{
+					ApplicationDataContainer^ localSettings =
+						ApplicationData::Current->LocalSettings;
 
-					Windows::Storage::ApplicationDataContainer^ localSettings =
-						Windows::Storage::ApplicationData::Current->LocalSettings;
-
-					this->_texts->texts->Append(ref new Text(dialog->Selected));
-
+					this->_texts->texts->Append(ref new SM::Text(dialog->Selected));
 				}));
 			}
 		});
 	}
 	else if (deleteItem == (ContentControl^)e->OriginalSource)
 	{
-		Windows::UI::Xaml::Controls::Flyout::ShowAttachedFlyout(deleteCtrl);
+		Flyout::ShowAttachedFlyout(deleteCtrl);
 	}
 	else if (PlayItem == (ContentControl^)e->OriginalSource)
 	{
@@ -972,23 +1143,29 @@ void StrokeEditor::MelodyEditorPage::MenuButton_Click(Platform::Object^ sender, 
 	}
 	else if (ChangeViewItem == (ContentControl^)e->OriginalSource)
 	{
-		// TODO : если типов представления нот будет больше, сделать через флайаут или контентдиалог
-		viewType = viewType == ViewType::TextRow ? ViewType::ChordView : ViewType::TextRow;
+		// TODO : если типов представления нот будет больше, 
+		// сделать через флайаут или контентдиалог
+		viewType = (viewType == SMV::ViewType::TextRow)
+									? SMV::ViewType::ChordView 
+									: SMV::ViewType::TextRow;
 
 		// Соответствующим образом меняем представление
 		switch (viewType)
 		{
-		case ViewType::TextRow:
-			_textRow->Visibility = Windows::UI::Xaml::Visibility::Visible;
-			_ChordViewGrid->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-			break;
-		case ViewType::ChordView:
-			_textRow->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-			_ChordViewGrid->Visibility = Windows::UI::Xaml::Visibility::Visible;
-			UpdateChordViews(_textRow->currentPosition);
-			break;
+			case SMV::ViewType::TextRow:
+			{
+				_textRow->Visibility = Xaml::Visibility::Visible;
+				_ChordViewGrid->Visibility = Xaml::Visibility::Collapsed;
+				break;
+			}
+			case SMV::ViewType::ChordView:
+			{
+				_textRow->Visibility = Xaml::Visibility::Collapsed;
+				_ChordViewGrid->Visibility = Xaml::Visibility::Visible;
+				UpdateChordViews(_textRow->currentPosition);
+				break;
+			}
 		}
-
 	}
 	else if (settingsItem == (ContentControl^)e->OriginalSource)
 	{
@@ -1002,24 +1179,30 @@ void StrokeEditor::MelodyEditorPage::MenuButton_Click(Platform::Object^ sender, 
 	}
 }
 
-void StrokeEditor::MelodyEditorPage::UndoItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void MelodyEditorPage::UndoItem_Click(Platform::Object^ sender, 
+									  RoutedEventArgs^ e)
 {
 	((App^)App::Current)->_manager->Undo();
 }
 
 
-void StrokeEditor::MelodyEditorPage::RedoItem_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+void MelodyEditorPage::RedoItem_Click(Platform::Object^ sender, 
+									  RoutedEventArgs^ e)
 {
 	((App^)App::Current)->_manager->Redo();
 }
 
-void StrokeEditor::MelodyEditorPage::AddSymbolToText(SketchMusic::Text ^ text, SketchMusic::PositionedSymbol ^ symbol)
+void MelodyEditorPage::AddSymbolToText(SM::Text ^ text, 
+									   SM::PositionedSymbol ^ symbol)
 {
 	// добавляем символ в текст
 	auto type = symbol->_sym->GetSymType();
-	if (type == SymbolType::TEMPO || type == SymbolType::NPART || type == SymbolType::CLEF)
+	if (type == SymbolType::TEMPO 
+	 || type == SymbolType::NPART 
+	 || type == SymbolType::CLEF)
 	{
-		// темп и может какие-нибудь другие символы будем заменять вместо добавления новых в ту же точку
+		// темп и может какие-нибудь другие символы будем 
+		// заменять вместо добавления новых в ту же точку
 		text->addOrReplaceSymbol(symbol);
 	}
 	else text->addSymbol(symbol);
@@ -1042,7 +1225,8 @@ void StrokeEditor::MelodyEditorPage::AddSymbolToText(SketchMusic::Text ^ text, S
 	}
 }
 
-void StrokeEditor::MelodyEditorPage::DeleteSymbolFromText(SketchMusic::Text ^ text, SketchMusic::PositionedSymbol ^ symbol)
+void MelodyEditorPage::DeleteSymbolFromText(SM::Text ^ text, 
+											SM::PositionedSymbol ^ symbol)
 {
 	// удаляем символ из текста
 	text->deleteSymbol(symbol->_pos, symbol->_sym);
@@ -1054,10 +1238,11 @@ void StrokeEditor::MelodyEditorPage::DeleteSymbolFromText(SketchMusic::Text ^ te
 
 // Перемещение курсора назад и удаление всех символов, 
 // попавших в диапазон между исходным и конечным положением курсора
-void StrokeEditor::MelodyEditorPage::Backspace()
+void MelodyEditorPage::Backspace()
 {
 	// если в текущем положении есть разрыв строки, сперва удаляем его
-	auto curSyms = _texts->ControlText->GetSymbols(_textRow->currentPosition, _textRow->currentPosition);
+	auto curSyms = _texts->ControlText->GetSymbols(_textRow->currentPosition, 
+												   _textRow->currentPosition);
 	for (auto sym : curSyms)
 	{
 		if (sym->_sym->GetSymType() == SymbolType::NLINE)
@@ -1065,7 +1250,7 @@ void StrokeEditor::MelodyEditorPage::Backspace()
 			((App^)App::Current)->_manager->AddAndExecute(
 				DeleteSymCommand,
 				ref new SMC::SymbolHandlerArgs(_texts->ControlText,
-					sym));
+											   sym));
 			return;
 		}
 	}
@@ -1080,32 +1265,36 @@ void StrokeEditor::MelodyEditorPage::Backspace()
 	if (selectedSyms->Size > 0)
 	{
 		((App^)App::Current)->_manager->AddAndExecute(
-			DeleteMultipleSymCommand,
-			ref new SMC::MultiSymbolHandlerArgs(_textRow->current,
-				selectedSyms));
+											DeleteMultipleSymCommand,
+											ref new SMC::MultiSymbolHandlerArgs(_textRow->current,
+																				selectedSyms));
 	}
 }
 
 
-void StrokeEditor::MelodyEditorPage::OnCanRedoChanged(Platform::Object ^sender, bool args)
+void MelodyEditorPage::OnCanRedoChanged(Platform::Object ^sender, 
+										bool args)
 {
 	RedoItem->IsEnabled = args;
 }
 
 
-void StrokeEditor::MelodyEditorPage::OnCanUndoChanged(Platform::Object ^sender, bool args)
+void MelodyEditorPage::OnCanUndoChanged(Platform::Object ^sender, 
+										bool args)
 {
 	UndoItem->IsEnabled = args;
 }
 
 
-void StrokeEditor::MelodyEditorPage::OnKeyDown(Windows::UI::Core::CoreWindow ^sender, Windows::UI::Core::KeyEventArgs ^args)
+void MelodyEditorPage::OnKeyDown(CoreWindow ^sender, 
+								 KeyEventArgs ^args)
 {
 	if (args->KeyStatus.WasKeyDown == true)
 		return;
 
 	using Windows::System::VirtualKey;
-	bool isCtrl = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Control) != Windows::UI::Core::CoreVirtualKeyStates::None);
+	bool isCtrl = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Control) 
+						!= CoreVirtualKeyStates::None);
 	
 	if (ctrlPressed)
 	{
@@ -1129,7 +1318,8 @@ void StrokeEditor::MelodyEditorPage::OnKeyDown(Windows::UI::Core::CoreWindow ^se
 }
 
 
-void StrokeEditor::MelodyEditorPage::OnKeyUp(Windows::UI::Core::CoreWindow ^sender, Windows::UI::Core::KeyEventArgs ^args)
+void MelodyEditorPage::OnKeyUp(CoreWindow ^sender, 
+							   KeyEventArgs ^args)
 {
 	using Windows::System::VirtualKey;
 	if (args->VirtualKey == VirtualKey::Control)
@@ -1137,19 +1327,23 @@ void StrokeEditor::MelodyEditorPage::OnKeyUp(Windows::UI::Core::CoreWindow ^send
 }
 
 // Озвучиваем нажатый на textRow символ
-void StrokeEditor::MelodyEditorPage::OnSymbolPressed(Platform::Object ^sender, SketchMusic::PositionedSymbol ^args)
+void MelodyEditorPage::OnSymbolPressed(Platform::Object ^sender, 
+									   SM::PositionedSymbol ^args)
 {
-	auto snote = dynamic_cast<SketchMusic::SNote^>(args->_sym);
+	auto snote = dynamic_cast<SM::SNote^>(args->_sym);
 	if (snote)
 	{
-		((App^)App::Current)->_player->playSingleNote(snote, _textRow->current->instrument, 500, nullptr);
+		((App^)App::Current)->_player->playSingleNote(snote, 
+													  _textRow->current->instrument, 
+													  500, nullptr);
 	}
 }
 
 
-void StrokeEditor::MelodyEditorPage::TextsList_ItemClick(Platform::Object^ sender, Windows::UI::Xaml::Controls::ItemClickEventArgs^ e)
+void MelodyEditorPage::TextsList_ItemClick(Platform::Object^ sender, 
+										   ItemClickEventArgs^ e)
 {
-	Text^ text = dynamic_cast<Text^>(e->ClickedItem); // TextsList->SelectedItem
+	SketchMusic::Text^ text = dynamic_cast<SM::Text^>(e->ClickedItem); // TextsList->SelectedItem
 	if (text)
 	{
 		if (text != _textRow->current)
@@ -1167,11 +1361,11 @@ void StrokeEditor::MelodyEditorPage::TextsList_ItemClick(Platform::Object^ sende
 				if (result == ContentDialogResult::Primary)
 				{
 					this->Dispatcher->RunAsync(
-						Windows::UI::Core::CoreDispatcherPriority::Normal,
-						ref new Windows::UI::Core::DispatchedHandler([=]() {
-
-						Windows::Storage::ApplicationDataContainer^ localSettings =
-							Windows::Storage::ApplicationData::Current->LocalSettings;
+						CoreDispatcherPriority::Normal,
+						ref new DispatchedHandler([=]() 
+					{
+						ApplicationDataContainer^ localSettings =
+							ApplicationData::Current->LocalSettings;
 
 						_textRow->current->instrument = dialog->Selected;
 						//TextsList->ItemsSource = _texts;
@@ -1184,7 +1378,8 @@ void StrokeEditor::MelodyEditorPage::TextsList_ItemClick(Platform::Object^ sende
 }
 
 
-void StrokeEditor::MelodyEditorPage::TextsFlyout_Opened(Platform::Object^ sender, Platform::Object^ e)
+void MelodyEditorPage::TextsFlyout_Opened(Platform::Object^ sender, 
+										  Platform::Object^ e)
 {
 	int sel = TextsList->SelectedIndex;
 	TextsList->DataContext = nullptr;

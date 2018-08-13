@@ -112,6 +112,16 @@ public:
 				result += L"\ue112";
 			}
 			break;
+		case KeyType::beat:
+			if (key->value >= 0)
+			{
+				result += L"\ue893";
+			}
+			else
+			{
+				result += L"\ue892";
+			}
+			break;
 		case KeyType::enter:
 			result += L"\uE751";
 			break;

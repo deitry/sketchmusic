@@ -47,8 +47,12 @@ public:
 	// операции
 
 	SketchMusic::Cursor^ inc();
+	SketchMusic::Cursor^ inc(SketchMusic::Cursor^ offset);
+
 	void incTick(float inc)
 	{
+		if (inc == 0) return;
+
 		this->_tick += inc;
 		while (this->_tick > TICK_IN_BEAT)
 		{
@@ -64,12 +68,34 @@ public:
 		return ref new SketchMusic::Cursor(_beat,0);
 	}
 	SketchMusic::Cursor^ dec();
+	SketchMusic::Cursor^ dec(SketchMusic::Cursor^ offset);
+
 	SketchMusic::Cursor^ decBeat()
 	{
 		if (this->_beat > 0)
 			this->_beat--;
 		this->_tick = 0;
 		return ref new SketchMusic::Cursor(_beat, 0);
+	}
+	
+	void decTick(float dec)
+	{
+		if (dec == 0) return;
+
+		this->_beat = dec / TICK_IN_BEAT;
+		this->_tick -= static_cast<int>(std::floor(dec)) % TICK_IN_BEAT;
+		if (this->_tick < 0)
+		{
+			if (this->_beat > 0)
+			{
+				--this->_beat;
+				this->_tick = TICK_IN_BEAT - dec;
+			}
+			else
+			{
+				this->_tick = 0;
+			}
+		}
 	}
 	
 	bool EQ(SketchMusic::Cursor^ that);

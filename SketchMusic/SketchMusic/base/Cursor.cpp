@@ -86,3 +86,22 @@ IJsonValue ^ SketchMusic::Cursor::Serialize()
 {
 	return nullptr;
 }
+
+SketchMusic::Cursor^ SketchMusic::Cursor::inc(SketchMusic::Cursor^ offset)
+{
+	this->_beat += offset->Beat;
+	this->incTick(offset->Tick);
+
+	return this;
+}
+
+SketchMusic::Cursor^ SketchMusic::Cursor::dec(SketchMusic::Cursor^ offset)
+{
+	this->decTick(offset->Tick);
+
+	this->_beat -= offset->Beat;
+	if (this->_beat < 0)
+		this->_beat = 0;
+
+	return this;
+}
