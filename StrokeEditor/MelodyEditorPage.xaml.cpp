@@ -641,6 +641,11 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 
 						// FIXME: сейчас - для увеличения размера
 						_textRow->AddBeatItem_Click(this, ref new RoutedEventArgs());
+
+						// перемещаем курсор
+						if (viewType == SMV::ViewType::TextRow)
+							_textRow->MoveCursorRight();
+						else MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
 					}
 					else
 					{
@@ -653,6 +658,11 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 
 						// FIXME: сейчас - для уменьшения размера
 						_textRow->DeleteBeatItem_Click(this, ref new RoutedEventArgs());
+
+						// перемещаем курсор
+						if (viewType == SMV::ViewType::TextRow)
+							_textRow->MoveCursorLeft();
+						else MoveLeftCWBtn_Click(this, ref new RoutedEventArgs);
 					}
 					_textRow->UpdateText();
 				}));

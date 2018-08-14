@@ -75,6 +75,7 @@
     <ClInclude Include="editors\LyricsEditorPage.xaml.h" />
     <ClInclude Include="editors\MelodicSequenceEditorPage.xaml.h" />
     <ClInclude Include="editors\RhythmEditorPage.xaml.h" />
+    <ClInclude Include="pch_c.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\LockScreenLogo.scale-200.png">

@@ -32,7 +32,7 @@ SketchMusic::View::TextRow::TextRow()
 
 	initialised = 0;
 	scale = 2;
-	quantize = 4;
+	quantize = 1;
 
 	currentPosition = ref new Cursor;
 	data = ref new CompositionData;

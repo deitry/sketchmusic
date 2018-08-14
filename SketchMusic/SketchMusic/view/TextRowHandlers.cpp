@@ -88,7 +88,7 @@ void SketchMusic::View::TextRow::InitializePage()
 
 	initialised = 1;
 	scale = 2;
-	quantize = 4;
+	quantize = 1;
 }
 
 // масштабирование
@@ -371,6 +371,3 @@ void SketchMusic::View::TextRow::SetScale(int scaleFactor)
 		RedrawText();
 	}
 }
-
-
-
