@@ -242,10 +242,11 @@ Windows::Foundation::Point StrokeEditor::IdeaGrid::GetCoordinatsOfPosition(Curso
 		total += part->Length;
 	}
 
-	float newX = GridCanvas->ActualWidth * pos->Beat / total;
-	float newY = layer*(double)this->Resources->Lookup("LayerHeight");
+	auto newX = GridCanvas->ActualWidth * pos->Beat / total;
+	auto newY = layer*(double)this->Resources->Lookup("LayerHeight");
 
-	return Windows::Foundation::Point(newX, newY);
+	return Windows::Foundation::Point(static_cast<float>(newX), 
+									  static_cast<float>(newY));
 }
 
 Cursor ^ StrokeEditor::IdeaGrid::GetPositionOfPoint(Windows::Foundation::Point point)
@@ -263,7 +264,7 @@ Cursor ^ StrokeEditor::IdeaGrid::GetPositionOfPoint(Windows::Foundation::Point p
 void StrokeEditor::IdeaGrid::CreateNewIdea(Windows::Foundation::Point point)
 {
 	auto pos = GetPositionOfPoint(point);
-	int layer = point.Y / (double)this->Resources->Lookup("LayerHeight");
+	int layer = static_cast<int>(point.Y / (double)this->Resources->Lookup("LayerHeight"));
 
 	auto dialog = ref new AddIdeaDialog;
 	concurrency::create_task(dialog->ShowAsync())
@@ -378,10 +379,10 @@ void StrokeEditor::IdeaGrid::OnPointerMoved(Platform::Object ^sender, Windows::U
 		orig.X -= _DraggedOffset.X;
 
 		if (orig.X < 0) orig.X = 0;
-		if (orig.X > GridCanvas->ActualWidth) orig.X = GridCanvas->ActualWidth;
+		if (orig.X > GridCanvas->ActualWidth) orig.X = static_cast<float>(GridCanvas->ActualWidth);
 
 		auto pos = GetPositionOfPoint(orig);
-		auto point = GetCoordinatsOfPosition(pos, orig.Y / (double)this->Resources->Lookup("LayerHeight"));
+		auto point = GetCoordinatsOfPosition(pos, static_cast<int>(orig.Y / (double)this->Resources->Lookup("LayerHeight")));
 		
 		IdeaCanvas->SetLeft(_Dragged, point.X);
 		IdeaCanvas->SetTop(_Dragged, point.Y);
@@ -401,7 +402,7 @@ void StrokeEditor::IdeaGrid::OnPointerReleased(Platform::Object ^sender, Windows
 			orig.X -= _DraggedOffset.X;
 			auto pos = GetPositionOfPoint(orig);
 			idea->Pos = pos;
-			idea->Layer = orig.Y / (double)this->Resources->Lookup("LayerHeight");
+			idea->Layer = static_cast<int>(orig.Y / (double)this->Resources->Lookup("LayerHeight"));
 		}
 
 		_Dragged = nullptr;

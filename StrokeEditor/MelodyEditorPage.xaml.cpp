@@ -563,9 +563,10 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 						{
 							auto delay = concurrency::create_task([this]
 							{
-								unsigned int timeout = 600 * 60 
+								unsigned int timeout = static_cast<unsigned int>(
+														600 * 60 
 														/ ((App^)App::Current)->_player->_BPM 
-														/ _textRow->scale;
+														/ _textRow->scale);
 								concurrency::wait(timeout);
 
 								Dispatcher->RunAsync(CoreDispatcherPriority::Normal, 
@@ -589,7 +590,7 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 			}
 			case SMV::KeyType::tempo:
 			{
-				SM::ISymbol^ sym = ref new SM::STempo(args->key->value);
+				SM::ISymbol^ sym = ref new SM::STempo(static_cast<float>(args->key->value));
 
 				// создаём команду на добавление ноты в текст и сохраняем её в истории
 				((App^)App::Current)->_manager->AddAndExecute(

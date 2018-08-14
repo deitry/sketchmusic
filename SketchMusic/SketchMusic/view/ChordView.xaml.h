@@ -5,10 +5,11 @@
 
 #pragma once
 
-#include "..\SketchMusic.h"
+#include "../SketchMusic.h"
 #include "../base/Cursor.h"
 #include "../base/Text.h"
-#include "SketchMusic\view\ChordView.g.h"
+#include "../base/SNote.h"
+#include "SketchMusic/view/ChordView.g.h"
 
 using namespace Windows::Foundation::Collections;
 using namespace Platform::Collections;

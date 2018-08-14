@@ -4,6 +4,7 @@
 #include "Sample.h"
 #include "Instrument.h"
 #include "SoundFont.h"
+#include "../base/SNoteEnd.h"
 
 SFGenAmount^ GetAmount(std::map<SFGeneratorID, SFGenAmount^> generators, SFGeneratorID id)
 {
@@ -194,7 +195,7 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 				// - окончательно применяем частоту
 				this->setFrequency(voice, freq, origFreq);
 				// - аттенюейшн / громкость
-				voice->SetVolume(0.3);
+				voice->SetVolume(0.2f);
 				// TODO : - панорамирование
 				// TODO : - эффекты
 				
@@ -283,7 +284,7 @@ void SketchMusic::Player::SFSoundEngine::setFrequency(IXAudio2SourceVoice* voice
 {
 	if (voice)
 	{
-		double ratio = freq / origFreq;
-		voice->SetFrequencyRatio(ratio);
+		auto ratio = freq / origFreq;
+		voice->SetFrequencyRatio(static_cast<float>(ratio));
 	}
 }

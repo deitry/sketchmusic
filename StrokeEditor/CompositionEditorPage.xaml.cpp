@@ -254,7 +254,7 @@ void StrokeEditor::CompositionEditorPage::UpdateTotalLength()
 
 	CompositionSlider->Maximum = totalLength;
 
-	totalLength = totalLength * 60 / CompositionProject->Data->BPM;	// /BPM
+	totalLength = static_cast<int>(totalLength * 60 / CompositionProject->Data->BPM);
 	int minutes = totalLength / 60;
 	int seconds = totalLength % 60;
 	FullLengthTxt->Text = minutes.ToString() + ":" + ((seconds < 10) ? "0" : "") + seconds.ToString();

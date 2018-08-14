@@ -64,7 +64,7 @@ public:
 	void deleteBeat(Cursor^ position, Cursor^ offset);
 	//void MoveSymbols(Cursor^ leftBound, Cursor^ rightBound, Cursor^ to);
 
-	unsigned int getSize() { return _t.size(); }
+	unsigned int getSize() { return static_cast<unsigned int>(_t.size()); }
 	IObservableVector<PositionedSymbol^>^ getText();
 	IObservableVector<PositionedSymbol^>^ GetSymbols(Cursor^ from, Cursor^ to);
 	

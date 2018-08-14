@@ -70,8 +70,8 @@ namespace SketchMusic
 
 			SketchMusic::View::KeyboardType _layout;
 		protected:
-			virtual void OnLoaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e) override;
-			virtual void OnUnloaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e) override;
+			virtual void OnLoaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
+			virtual void OnUnloaded(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e);
 
 		public:
 			BaseKeyboard();

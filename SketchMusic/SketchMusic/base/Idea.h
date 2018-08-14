@@ -21,10 +21,14 @@ namespace SketchMusic
 		//Idea(Platform::String^ _name) { Name = _name; }
 		Idea();
 		Idea(String^ _name, IdeaCategoryEnum _cat);
-		Idea(int _hash, String^ _name, IdeaCategoryEnum _cat, String^ _desc, int _parent, byte _rating,
-			CompositionData^ _content, String^ tags, String^ projects, long long _created, long long _modified); // для загрузки
-		Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, String ^ _desc, int _parent, byte _rating,
-			Platform::String ^ _content, String ^ _tags, String ^ _projects, long long _created, long long _modified);	// чтобы не десериализовывать контент
+		Idea(int _hash, String^ _name, IdeaCategoryEnum _cat, 
+			 String^ _desc, int _parent, byte _rating,
+			 CompositionData^ _content, String^ tags, String^ projects, long long _created, long long _modified); // для загрузки
+		[Windows::Foundation::Metadata::DefaultOverloadAttribute]
+		Idea(int _hash, String ^ _name, IdeaCategoryEnum _cat, 
+			 String ^ _desc, int _parent, byte _rating,
+			 Platform::String ^ _content, String ^ _tags, 
+			 String ^ _projects, long long _created, long long _modified);	// чтобы не десериализовывать контент
 
 		CompositionData^ GetContent();
 
@@ -89,7 +93,7 @@ namespace SketchMusic
 		}
 		virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
 		{
-			return (int)0;
+			return nullptr;
 		}
 
 		TimeToStrConverter() {}

@@ -2,6 +2,7 @@
 #include "TextRow.xaml.h"
 #include "../base/Text.h"
 #include "../base/Composition.h"
+#include "../commands/CommandManager.h"
 
 using namespace SketchMusic;
 
@@ -178,8 +179,8 @@ void SketchMusic::View::TextRow::OnPointerPressed(Platform::Object ^sender, Wind
 	_scrollViewer->HorizontalScrollMode = ScrollMode::Disabled;
 	_scrollViewer->VerticalScrollMode = ScrollMode::Disabled;
 	_lastPoint = e->GetCurrentPoint(_canvas)->Position;
-	_lastPoint.X -= Canvas::GetLeft(ctrl);
-	_lastPoint.Y -= Canvas::GetTop(ctrl);
+	_lastPoint.X -= static_cast<float>(Canvas::GetLeft(ctrl));
+	_lastPoint.Y -= static_cast<float>(Canvas::GetTop(ctrl));
 
 	_dragged = ctrl;
 	_isMoving = true;
@@ -276,7 +277,7 @@ void SketchMusic::View::TextRow::MoveCursorLeft()
 	float tick = currentPosition->Tick;
 	
 	// округ€лем с точностью до квантизации
-	int roundedTicks = round(tick * quantize);
+	int roundedTicks = static_cast<int>(round(tick * quantize));
 	//beat -= 1 / this->initialised;
 	roundedTicks -= TICK_IN_BEAT; //  /quantize;
 	tick = (float)roundedTicks / quantize;
@@ -307,7 +308,7 @@ void SketchMusic::View::TextRow::MoveCursorRight()
 	float tick = currentPosition->Tick;
 	
 	// округ€лем с точностью до квантизации
-	int roundedTicks = round(tick * quantize);
+	int roundedTicks = static_cast<int>(round(tick * quantize));
 	//beat -= 1 / this->initialised;
 	roundedTicks += TICK_IN_BEAT; //  /quantize;
 	tick = (float)roundedTicks / quantize;

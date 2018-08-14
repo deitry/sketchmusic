@@ -5,6 +5,7 @@
 
 #include "pch.h"
 #include "ChordView.xaml.h"
+#include "../base/STempo.h"
 
 using namespace SketchMusic;
 

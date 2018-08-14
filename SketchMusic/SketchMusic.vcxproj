@@ -213,14 +213,16 @@
     <ClInclude Include="SketchMusic\base\CompositionData.h" />
     <ClInclude Include="SketchMusic\base\Cursor.h" />
     <ClInclude Include="SketchMusic\base\Idea.h" />
-    <ClInclude Include="SketchMusic\base\OnKeyToStringConverter.h" />
+    <ClInclude Include="SketchMusic\base\PartDefinition.h" />
     <ClInclude Include="SketchMusic\base\SGNote.h" />
     <ClInclude Include="SketchMusic\base\SLineEnd.h" />
+    <ClInclude Include="SketchMusic\base\SNewPart.h" />
     <ClInclude Include="SketchMusic\base\SNote.h" />
     <ClInclude Include="SketchMusic\base\SNoteEnd.h" />
     <ClInclude Include="SketchMusic\base\SRNote.h" />
     <ClInclude Include="SketchMusic\base\SScale.h" />
     <ClInclude Include="SketchMusic\base\SSpace.h" />
+    <ClInclude Include="SketchMusic\base\STempo.h" />
     <ClInclude Include="SketchMusic\base\Symbol.h" />
     <ClInclude Include="SketchMusic\base\Text.h" />
     <ClInclude Include="SketchMusic\commands\Command.h" />
@@ -247,6 +249,7 @@
     </ClInclude>
     <ClInclude Include="SketchMusic\view\Key.h" />
     <ClInclude Include="SketchMusic\view\Keyboard.h" />
+    <ClInclude Include="SketchMusic\view\OnKeyToStringConverter.h" />
     <ClInclude Include="SketchMusic\view\TextRow.xaml.h">
       <DependentUpon>SketchMusic\view\TextRow.xaml</DependentUpon>
     </ClInclude>

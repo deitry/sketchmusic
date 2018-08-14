@@ -104,8 +104,8 @@ Windows::Data::Json::IJsonValue ^ SketchMusic::PositionedIdea::Serialize()
 	if (Content && Content->Name)			json->Insert(t::IDEA_NAME, JsonValue::CreateStringValue(Content->Name));
 	if (Content && Content->SerializedContent) json->Insert(t::IDEA_CONTENT, JsonValue::CreateStringValue(Content->SerializedContent));
 	if (Content && Content->Rating)		json->Insert(t::IDEA_RATE, JsonValue::CreateNumberValue(Content->Rating));
-	if (Content && Content->CreationTime)	json->Insert(t::IDEA_CRE, JsonValue::CreateNumberValue(Content->CreationTime));
-	if (Content && Content->ModifiedTime)	json->Insert(t::IDEA_MOD, JsonValue::CreateNumberValue(Content->ModifiedTime));
+	if (Content && Content->CreationTime)	json->Insert(t::IDEA_CRE, JsonValue::CreateNumberValue(static_cast<double>(Content->CreationTime)));
+	if (Content && Content->ModifiedTime)	json->Insert(t::IDEA_MOD, JsonValue::CreateNumberValue(static_cast<double>(Content->ModifiedTime)));
 	if (Content && Content->Description)	json->Insert(t::IDEA_DESC, JsonValue::CreateStringValue(Content->Description));
 	if (Content && Content->Parent)		json->Insert(t::IDEA_PARENT, JsonValue::CreateNumberValue(Content->Parent));
 	if (Content && Content->Tags)			json->Insert(t::IDEA_TAGS, JsonValue::CreateStringValue(Content->Tags));
@@ -117,7 +117,7 @@ PositionedIdea ^ SketchMusic::PositionedIdea::Deserialize(Windows::Data::Json::J
 {
 	auto idea = ref new PositionedIdea();
 	idea->Pos = ref new Cursor((int)json->GetNamedNumber(t::PIDEA_POS, 0));
-	idea->Layer = json->GetNamedNumber(t::PIDEA_LAY, 0);
+	idea->Layer = static_cast<int>(json->GetNamedNumber(t::PIDEA_LAY, 0));
 	idea->Length = ref new Cursor((int)json->GetNamedNumber(t::PIDEA_LEN, 0));
 
 	idea->Content = ref new Idea;

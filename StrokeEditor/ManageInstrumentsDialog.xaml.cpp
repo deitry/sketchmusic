@@ -203,6 +203,6 @@ void StrokeEditor::ManageInstrumentsDialog::ManageInstrumentsDialog_SizeChanged(
 	auto width = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView()->VisibleBounds.Width;
 	// адаптация к ширине экрана
 	if (width > 500)
-		width *= 0.9;
+		width *= 0.9f;
 	this->Width = width;
 }

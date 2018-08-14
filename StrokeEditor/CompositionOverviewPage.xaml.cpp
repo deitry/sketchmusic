@@ -72,10 +72,10 @@ void StrokeEditor::CompositionOverviewPage::InitializePage()
 			filePickerToken.cancel();
 			return folder;
 		}
-		catch (AccessDeniedException^ e) {}
-		catch (concurrency::invalid_operation* e) {}
-		catch (Exception^ e) {}
-		catch (std::exception* e) {}
+		catch (AccessDeniedException^ e) { (void)e; }
+		catch (concurrency::invalid_operation* e) { (void)e; }
+		catch (Exception^ e) { (void)e; }
+		catch (std::exception* e) { (void)e; }
 		return openPickerTask.get();
 	})
 	.then([=](StorageFolder^ folder)

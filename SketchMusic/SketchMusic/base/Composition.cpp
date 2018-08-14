@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Composition.h"
 #include "Text.h"
+#include "STempo.h"
 
 using namespace SketchMusic;
 namespace t = SketchMusic::SerializationTokens;
@@ -36,7 +37,7 @@ IObservableVector<PartDefinition^>^ SketchMusic::CompositionData::getParts()
 {
 	auto parts = ref new Platform::Collections::Vector<PartDefinition^>;
 	PartDefinition^ prev = nullptr;
-	int curBpm = BPM;
+	float curBpm = BPM;
 	std::pair<Cursor^, ISymbol^> prevTempo;
 	for (auto&& i : ControlText->_t)
 	{
@@ -287,7 +288,7 @@ Composition ^ SketchMusic::Composition::Deserialize(JsonObject ^ json)
 	{
 		comp->Lib = CompositionLibrary::Deserialize(ideas);
 	}
-	comp->Data->BPM = json->GetNamedNumber(SerializationTokens::PROJ_BPM, 120);
+	comp->Data->BPM = static_cast<float>(json->GetNamedNumber(SerializationTokens::PROJ_BPM, 120));
 	return comp;
 }
 

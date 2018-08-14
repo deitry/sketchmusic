@@ -114,6 +114,9 @@ namespace SketchMusic
 		ACCENT	= 12,	// для "подсветки" данного положения - таким образом будем выделять ключевые места.
 						// По сути, ту же самую роль может выполнять GNote, но этот элемент будет проще, безо всяких значений,
 						// а также будет служить для разового "смещения" метронома
+
+		SCALE	= 15,	// гамма, звукоряд
+		HARMONY = 16,	// текущая гармония
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
@@ -224,61 +227,9 @@ namespace SketchMusic
 		PositionedSymbol(Cursor^ pos, ISymbol^ sym) { _pos = pos; _sym = sym; }
 	};
 
-	[Windows::UI::Xaml::Data::Bindable]
-	public ref class SNote sealed : public SketchMusic::ISymbol, public SketchMusic::INote
-	{
-	private:
-		static Platform::String^ valToString(int val);	// то ли перенеси функцию в INote,
-			// то ли вообще вынести в отдельный класс, который занимается преобразованиями
-	public:
-		SNote() { _val = 0; }
-		SNote(int tone) { _val = tone; _velocity = 0; _voice = 0; }
-		SNote(int tone, int velocity, int voice) { _val = tone; _velocity = velocity; _voice = voice; }
-
-		virtual property int _val;
-		virtual property int _velocity;
-		virtual property int _voice;
-
-		virtual SymbolType GetSymType() { return SymbolType::NOTE; }
-		virtual Platform::String^ ToString() { 
-			String^ str;
-			switch (_val % 12)
-			{
-			case 0: str += "A"; break;
-			case 1: case -11: str += "A#"; break;
-			case 2: case -10: str += "B"; break;
-			case 3: case -9: str += "C"; break;
-			case 4: case -8: str += "C#"; break;
-			case 5: case -7: str += "D"; break;
-			case 6: case -6: str += "D#"; break;
-			case 7: case -5: str += "E"; break;
-			case 8: case -4: str += "F"; break;
-			case 9: case -3: str += "F#"; break;
-			case 10: case -2: str += "G"; break;
-			case 11: case -1: str += "G#"; break;
-			default: break;
-			}
-			str += ((_val + MIDIKEYTOA4 - 9) / 12 - 1);
-			return str;
-		}
-
-		// Унаследовано через ISymbol
-		virtual bool EQ(ISymbol^ second);
-		//virtual Platform::String^ Serialize() { return "note," + valToString(_val); }	// приставка указывает на тип
-	};
-
-	public ref class SSpace sealed : public SketchMusic::ISymbol
-	{
-	public:
-		SSpace() {}
-
-		virtual SymbolType GetSymType() { return SymbolType::SPACE; }
-		virtual Platform::String^ ToString() { return L"\uE75D"; }
-
-		// Унаследовано через ISymbol
-		virtual bool EQ(ISymbol ^ second);
-		//virtual Platform::String^ Serialize() { return "space"; }
-	};
+	partial ref class SNote;
+	
+	partial ref class SSpace;
 
 	// акцент - как визуальный, так и звуковой.
 	// Для него будет реализовано специальное поведение проигрывателя - если встречается этот символ,
@@ -320,222 +271,42 @@ namespace SketchMusic
 		virtual bool EQ(ISymbol ^ second);
 	};
 
-	public ref class SNewPart sealed : public SketchMusic::ISymbol
+	partial ref class SNewPart;
+	partial ref class PartDefinition;
+
+	partial ref class STempo;
+	partial ref class SRNote;
+	partial ref class SGNote;
+	partial ref class SNoteEnd;
+
+	public enum class Degree
+	{
+		I,
+		II,
+		III,
+		IV,
+		V,
+		VI,
+		VII,
+	};
+
+	public enum class DegreeInfo
+	{
+		Normal,
+		Dim,
+		Aug,
+	};
+
+	public ref class SHarmony sealed : public ISymbol
 	{
 	public:
-		SNewPart() {}
-		SNewPart(String^ _cat) { category = _cat; }
-		SNewPart(String^ _name, String^ _cat, DynamicCategory _dyn) { Name = _name; category = _cat; dynamic = _dyn; }
-
-		property String^ Name;
-		property String^ category;	// "A", "B", "куплет", "бридж" - определяется только категория
-			//, номер будет отображаться автоматически в зависимости от положения в композиции
-		
-		property DynamicCategory dynamic;
-
-		virtual SymbolType GetSymType() { return SymbolType::NPART; }
-		virtual Platform::String^ ToString() { return L"\uE70B" + category; }
-
 		// Унаследовано через ISymbol
-		virtual bool EQ(ISymbol ^ second);
-	};
-
-	// Вместо использования PositionedSymbol для оперирования на уровне частей в редакторе композиции,
-	// будем создавать специальный объект, для этого предназначенный
-	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
-	public ref class PartDefinition sealed : Windows::UI::Xaml::Data::INotifyPropertyChanged
-	{
-	private:
-		void OnPropertyChanged(Platform::String^ propertyName);
-		int m_number;
-		int m_length;
-		double m_time;
-	public:
-		PartDefinition() {}
-		PartDefinition(PositionedSymbol^ psym) { originalPos = psym->_pos; original = dynamic_cast<SNewPart^>(psym->_sym); }
-		PartDefinition(Cursor^ pos, SNewPart^ sym) { originalPos = pos; original = sym; }
-
-		PositionedSymbol^ GetPositionedSymbol(Cursor^ cur) 
-		{ 
-			if (cur) return ref new PositionedSymbol(cur, original); 
-			else return ref new PositionedSymbol(originalPos, original);
-		}
-
-		property Cursor^ originalPos;
-		property SNewPart^ original;
-
-		property int Number		// порядковый номер части с этой категорией. Будет вычисляться автоматически, здесь храним для удобства
-		{
-			int get() { return m_number; }
-			void set(int num) { m_number = num; OnPropertyChanged("Number"); }
-		}
-		property int Length	// продолжительность в "битах". Будет вычисляться автоматически, здесь храним для удобства
-		{
-			int get() { return m_length; }
-			void set(int num) { m_length = num; OnPropertyChanged("Length"); }
-		}
-		property double Time
-		{
-			double get() { return m_time; }
-			void set(double num) { m_time = num; OnPropertyChanged("Time"); }
-		}
-
-		// Унаследовано через INotifyPropertyChanged
-		virtual event Windows::UI::Xaml::Data::PropertyChangedEventHandler ^ PropertyChanged;
-		// продолжительность в секундах, опять же для удобства. Будем вычислять автоматичеки, проходясь по тексту и учитывая STempo
-	};
-
-	public ref class STempo sealed : public SketchMusic::ISymbol
-	{
-	public:
-		STempo() {}
-		STempo(float t) { value = t; }
-
-		property float value;
-
-		virtual SymbolType GetSymType() { return SymbolType::TEMPO; }
-		virtual Platform::String^ ToString() { return value.ToString(); }
-
-		// Унаследовано через ISymbol
-		virtual bool EQ(ISymbol ^ second);
-	};
-
-	public ref class SRNote sealed : public ISymbol, public SketchMusic::INote
-	{
-	private:
-		static Platform::String^ valToString(int val);
-		// 0 = тоника, далее по полутонам
-		// положение тоники будет задаваться с помощью символов SScale
-	public:
-		SRNote() { _val = 0; }
-		SRNote(int rtone) { _val = rtone; _velocity = 0; _voice = 0; }
-		SRNote(int rtone, int velocity, int voice) { _val = rtone; _velocity = velocity; _voice = voice; }
-
-		virtual property int _val;
-		virtual property int _velocity;
-		virtual property int _voice;
-
-		virtual SymbolType GetSymType() { return SymbolType::RNOTE; }
-		virtual Platform::String^ ToString() { return valToString(_val); }
-
-		// Унаследовано через ISymbol
-		virtual bool EQ(ISymbol ^ second);
-		//virtual Platform::String^ Serialize() { return "rnote," + valToString(_val); }
-	};
-
-	public ref class SGNote sealed : public ISymbol, public SketchMusic::INote
-	{
-	private:
-		static Platform::String^ valToString(int val);
-		// никак не отсчитывается.
-		// в дальнейшем для обеспечения автоматической конкретизации будет зависимым от "паттерна" (?)	
-	public:
-		SGNote() {}
-		SGNote(int gnote) { _val = gnote; _velocity = 0; _voice = 0; }
-		SGNote(int gtone, int velocity, int voice) { _val = gtone; _velocity = velocity; _voice = voice; }
-
-		virtual property int _val
-		{
-			int get() { return (abs(_valX) + _valY * 100)* ((_valX >= 0 )? 1 : -1 ); }
-			void set(int val) { _valY = abs(val) / 100; _valX = val % 100; }
-		}
-		
-		property int _valX;
-		property int _valY;
-		virtual property int _velocity;
-		virtual property int _voice;
-
-		virtual SymbolType GetSymType() { return SymbolType::GNOTE; }
-		virtual Platform::String^ ToString() { return L"" + _valX + ";" + _valY; }
-
-		// Унаследовано через ISymbol
-		virtual bool EQ(ISymbol ^ second);
-		//virtual Platform::String^ Serialize() { return "gnote," + valToString(_val); }
-	};
-
-	/**
-	Заканчивает все ноты, какие есть в этой дорожке
-	*/
-	public ref class SNoteEnd sealed : public ISymbol, INote
-	{
-	public:
-		SNoteEnd() {}
-
-		virtual SymbolType GetSymType() { return SymbolType::END; }
-		virtual Platform::String^ ToString() { return L"\uE81A"; }
-
-		// Унаследовано через INote
-		virtual property int _val;
-		virtual property int _velocity;
-		virtual property int _voice;
-
-		// Унаследовано через ISymbol
-		virtual bool EQ(ISymbol ^ second);
-		//virtual Platform::String^ Serialize() { return "end"; }
-	};
-
-	// Структура, определяющая модификаторы аккорда
-	public value struct SChordMod
-	{
-		bool minor;	// = _3dim; 0 = major
-		bool dim;	// = _5dim; 0 = normal
-		bool aug;	// = _5aug; 0 = normal. dim && aug == normal
-
-		// модификаторы аккорда - включение (или выключение) ступеней в аккорд
-		bool _2;
-		bool _3ex;	// ВЫКЛЮЧАЕТ ступень из аккорда. Нужно для получения нетерцовых аккордов
-		bool _4;
-		bool _5ex;	// ВЫКЛЮЧАЕТ ступень из аккорда.
-		bool _6;
-		bool _7;
-		bool _8;
-		bool _9;
-
-		// "небазовые" модуляторы звукоряда - можно изменять только ступени 2..7
-		// 1 всегда остаётся 1, вне октавы всё повторяется. 7aug = oct = 1 пренебрегаем
-		bool _2dim;
-		bool _2aug;
-		bool _3aug;
-		bool _4dim;
-		bool _4aug;
-		bool _6dim;
-		bool _6aug;
-		bool dom;		// = _7dim; "доминантность" 7аккорда. Вне зависимости от _7 изменяет положение ступени звукоряда
-	};
-
-	/**
-	Определяет текущую гамму
-	- нужен класс Конкретизатор
-	*/
-	public ref class SChord sealed : public ISymbol //, INote
-	{
-	private:
-		bool ModulatorsEQ(SChordMod m);
-
-	public:
-		SChord() {}
-		SChord(int _key, int _deg, int _var, int _bass, SChordMod _mod)
-		{
-			key = _key; degree = _deg; variation = _var; bass = _bass; mod = _mod;
-		}
-
-		virtual SymbolType GetSymType() { return SymbolType::CHORD; }
-		virtual Platform::String^ ToString() { return "SChord"; }
-
-		property int key;			// В каком ключе будет аккорд: C, D, E ... Тут будет содержаться значение конкретной ноты
-		property int degree;		// ступень гаммы, от которой отстраивается аккорд: I, II, V ... соответсвует также ладу: ионийский, ...
-		property int variation;		// обращение аккорда. Нужно будет для конкретизации. Не знаю пока, как учитывать широкое / узкое расположение
-		property int bass;			// значение ноты в басу
-
-		property SChordMod mod;	// модификаторы
-
-								// Унаследовано через ISymbol
+		virtual SymbolType GetSymType() { return SymbolType::HARMONY; };
+		virtual Platform::String ^ ToString() { return "SHarmony"; };
 		virtual bool EQ(ISymbol ^ second);
 
-		// Унаследовано через INote
-		//virtual property int _val;
-		//virtual property int _velocity;
-		//virtual property int _voice;
+		property Degree baseDegree;
+		// TODO: мапа (int степень, DegreeInfo тип) - так будут добавляться все другие ступени, формируя произвольный аккорд
 	};
 
 	// переименовать в LinStart и пусть он хранит всю необходимую информацию
@@ -822,203 +593,12 @@ namespace SketchMusic
 		public delegate bool SymbolHandler(SymbolHandlerArgs^ args);
 
 
-		// основные классы
-		//ref class Command;			// с делегатами в качестве исполняемых функций
-		public ref class Command sealed
-		{
-		private:
-			Handler^ _Handler;
-			Handler^ _Unexecute;
-			CanExecuteMethod^ _CanExecute;
-
-		public:
-			Command(Handler^ handler, Handler^ unexecute)
-			{
-				_Handler = handler;
-				_Unexecute = unexecute;
-			}
-
-			Command(Handler^ handler, Handler^ unexecute, CanExecuteMethod^ canExecute)
-			{
-				_Handler = handler;
-				_CanExecute = canExecute;
-				_Unexecute = unexecute;
-			}
-
-		internal:
-
-			virtual bool CanExecute(Object^ parameter)
-			{
-				if (_CanExecute)
-					return _CanExecute(parameter);
-				return true;
-			}
-
-			virtual bool Execute(Object^ parameter)
-			{
-				if (_Handler) // && CanExecute
-					return _Handler(parameter);
-				return false;
-			}
-
-			virtual bool Unexecute(Object^ parameter)
-			{
-				if (_Unexecute)
-					return _Unexecute(parameter);
-				return false;
-			}
-
-			virtual event EventHandler<Platform::Object^>^ CanExecuteChanged;
-		};
-
-		public ref class CommandState sealed		// команда вместе с её параметром
-		{
-		public:
-			CommandState(Command^ command, Object^ args)
-			{
-				_command = command;
-				_args = args;
-			}
-
-			// обёртка, чтобы не морочиться с аргументами
-			// TODO : возвращать bool - выполнена команда или нет
-			bool Execute() { return _command->Execute(_args); }
-			bool Unexecute() { return _command->Unexecute(_args); }
-
-			property Command^ _command;
-			property Object^ _args;
-		};
-
 		const int DEFAULT_MAX_COM = 100;
-		
-		// принимает команды и хранит историю
-		//[Windows::UI::Xaml::Data::Bindable]
-		public ref class CommandManager sealed //: Windows::UI::Xaml::Data::INotifyPropertyChanged
-		{
-		private:
-			// История команд
-			Windows::Foundation::Collections::IVector<SketchMusic::Commands::CommandState^>^ _commands;
-			//void OnPropertyChanged(Platform::String^ propertyName);
-			int m_index;
-			bool m_canUndo;
-			bool m_canRedo;
 
-		public:
-
-			//virtual event Windows::UI::Xaml::Data::PropertyChangedEventHandler^ PropertyChanged;
-
-			// делаем вручную, потому что мне не удалось заставить работать привязки через ProertyChanged
-			event EventHandler<bool>^ CanUndoChanged;	
-			event EventHandler<bool>^ CanRedoChanged;
-
-			CommandManager()
-			{
-				MaxCommandCount = DEFAULT_MAX_COM;
-				_commands = ref new Platform::Collections::Vector<CommandState^>;
-				_CurrentIndex = -1;
-			}
-
-			CommandManager(int max)
-			{
-				MaxCommandCount = max;
-				_commands = ref new Platform::Collections::Vector<CommandState^>;
-				_CurrentIndex = -1;
-			}
-
-			property int MaxCommandCount; // максимальное количество команд
-			property int _CurrentIndex	// указывает индекс последней выполненной команды (-1, если ничего нет)
-			{
-				int get() { return m_index; }
-				void set(int ind)
-				{ 
-					m_index = ind;
-					if (m_index >= 0) 
-						CanUndo = true;
-					else CanUndo = false;
-					//int max = ; // по непонятной причине, если просто вставить выражение в возвращаемое значение,
-					if (m_index < ((int)_commands->Size - 1))
-						CanRedo = true;
-					else CanRedo = false;
-				}
-			}
-			property bool CanUndo { bool get() { return m_canUndo; }
-				void set(bool can) 
-				{
-					if (m_canUndo == can) return;
-					m_canUndo = can;
-					//OnPropertyChanged(L"CanUndo");
-					CanUndoChanged(this, m_canUndo);
-				} 
-			}
-			property bool CanRedo
-			{
-				bool get() { return m_canRedo; }
-				void set(bool can)
-				{
-					if (m_canRedo == can) return;
-					m_canRedo = can;
-					//OnPropertyChanged(L"CanRedo");
-					CanRedoChanged(this, m_canRedo);
-				}
-			}
-
-			// список доступных манипуляций
-			bool Undo()
-			{
-				if (CanUndo)
-				{
-					// "разделываем" последнюю выполненую команду, уменьшаем счётчик
-					return _commands->GetAt(_CurrentIndex--)->Unexecute();
-				};
-				return false;
-			}
-
-			bool Redo()
-			{
-				if (CanRedo)
-				{
-					return ExecuteCurrent();
-				}
-				return false;
-			}
-
-			void Clear()
-			{
-				_commands->Clear();
-				_CurrentIndex = -1;
-			}
-			
-			// Выполняет текущую команду (последнюю или ту, на которую мы отмотали в результате undo-redo)
-			bool ExecuteCurrent()
-			{
-				// переводим счётчик на следующую команду, делаем её
-				return _commands->GetAt(++_CurrentIndex)->Execute();
-			}
-
-			bool AddAndExecute(SketchMusic::Commands::Command^ command, Platform::Object^ args)
-			{
-				auto commandState = ref new CommandState(command, args);
-				// если мы посередине списка команд - убираем все последующие, чтобы не создавать параллельных веток
-				if (_CurrentIndex != _commands->Size - 1)
-				{
-					for (int cur = _commands->Size - 1; cur > _CurrentIndex; cur--)
-					{
-						_commands->RemoveAtEnd();
-					}
-				}
-
-				// если количество команд достигло заданного предела или по каким-то причинам превышает его
-				// - удаляем команду из начала
-				while (_CurrentIndex >= MaxCommandCount-1)
-				{
-					_commands->RemoveAt(0);
-					_CurrentIndex--;
-				}
-
-				_commands->Append(commandState);
-				return ExecuteCurrent();
-			}
-		};
+		// основные классы
+		partial ref class Command;
+		partial ref class CommandState; // команда вместе с её параметром
+		partial ref class CommandManager; // принимает команды и хранит историю
 	}
 
 	namespace Player

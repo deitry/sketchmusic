@@ -35,7 +35,7 @@ void StrokeEditor::EditCompositionDialog::ContentDialog_PrimaryButtonClick(Windo
 	{
 		//comp->Header->FileName = CompositionFileName->Text;
 		comp->Header->Name = CompositionName->Text;
-		comp->Data->BPM = std::stoi(CompositionBPM->Text->Data());
+		comp->Data->BPM = std::stof(CompositionBPM->Text->Data());
 		comp->Header->Description = CompositionDescription->Text;
 	}
 }

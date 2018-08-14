@@ -7,6 +7,7 @@
 #include "TextRow.xaml.h"
 #include "../base/Text.h"
 #include "../base/Composition.h"
+#include "../base/SSpace.h"
 
 using namespace SketchMusic;
 
@@ -161,7 +162,9 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 {
 	// вставка разрыва строки
 	// - находим строку, в которую будем вставлять разрыв
-	unsigned int difBeat = pos->Beat >= _startPos->Beat ? pos->Beat - _startPos->Beat : 0;
+	auto difBeat = (pos->Beat >= _startPos->Beat) 
+								? pos->Beat - _startPos->Beat 
+								: 0;
 	int ctrlCnt = 0;
 
 	for (unsigned int i = 0; i < _mainPanel->Children->Size; i++)
@@ -174,7 +177,7 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 		if (difBeat < ctrlCnt)
 		{
 			// - вычисляем индекс нового крайнего элемента
-			unsigned int rowEnd = ctrlCnt - difBeat;
+			auto rowEnd = ctrlCnt - difBeat;
 
 			// - создаём новую строку, вставляем в _mainPanel
 			StackPanel^ newRow = ref new StackPanel;
@@ -187,7 +190,7 @@ void SketchMusic::View::TextRow::InsertLineBreak(Cursor^ pos)
 			//current->addSymbol(psym);
 
 			// - переносим в новую строку все контролы после нового крайнего
-			while (rowEnd < rowPanel->Children->Size)
+			while (rowEnd < static_cast<int>(rowPanel->Children->Size))
 			{
 				auto element = rowPanel->Children->GetAt(0);
 				rowPanel->Children->RemoveAt(0);
@@ -470,7 +473,7 @@ int SketchMusic::View::TextRow::GetControlIndexAtPos(Cursor^ pos, int offset)
 {
 	//int lookupIndex = pos->getBeat()*initialised + pos->getTick() * scale / TICK_IN_BEAT * initialised / scale;
 	int dif = pos->Beat - _startPos->Beat;
-	int lookupIndex = dif*initialised + pos->Tick / TICK_IN_BEAT * initialised;
+	int lookupIndex = static_cast<int>(dif*initialised + pos->Tick / TICK_IN_BEAT * initialised);
 	lookupIndex += offset;
 	return lookupIndex;
 }
@@ -509,7 +512,7 @@ ContentControl^ SketchMusic::View::TextRow::GetControlAtPos(Cursor^ pos, int off
 
 float SketchMusic::View::TextRow::CalculateTick(float offsetX, ContentControl ^ ctrl)
 {
-	return ((int)((offsetX + ctrl->Width / quantize / 4) / ctrl->Width * quantize)) * TICK_IN_BEAT / quantize;
+	return static_cast<float>(((int)((offsetX + ctrl->Width / quantize / 4) / ctrl->Width * quantize)) * TICK_IN_BEAT / quantize);
 	//int tick = (int)(offset.X / ctrl->Width * TICK_IN_BEAT * scale / TICK_IN_BEAT) * TICK_IN_BEAT / scale;
 }
 
@@ -564,8 +567,8 @@ Point SketchMusic::View::TextRow::GetCoordinatsOfPosition(Cursor^ pos)
 		auto point = transform->TransformPoint(basePoint);
 
 		// смещение учитывая тики
-		point.X += ctrl->Width * pos->Tick / TICK_IN_BEAT;
-		if (pos->EQ(_maxPos)) point.X += ctrl->Width;
+		point.X += static_cast<float>(ctrl->Width * pos->Tick / TICK_IN_BEAT);
+		if (pos->EQ(_maxPos)) point.X += static_cast<float>(ctrl->Width);
 		return point;
 	}
 	return Point(0,0);
@@ -583,7 +586,7 @@ Point SketchMusic::View::TextRow::GetCoordinatsOfControl(Windows::UI::Xaml::Cont
 
 	// прибавка к x чтобы можно было "кидать" на точку привязки не только справа, но и чуть-чуть слева
 	float tick = CalculateTick(offset.X, ctrl);
-	point.X += tick * ctrl->Width / TICK_IN_BEAT;
+	point.X += static_cast<float>(tick * ctrl->Width / TICK_IN_BEAT);
 
 	return point;
 }

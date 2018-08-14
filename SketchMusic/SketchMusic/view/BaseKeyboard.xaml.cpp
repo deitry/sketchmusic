@@ -21,7 +21,11 @@ using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Media;
 
-// Документацию по шаблону элемента "Элемент управления на основе шаблона" см. по адресу http://go.microsoft.com/fwlink/?LinkId=234235
+namespace
+{
+	// сдвигать клавиатуру по полутонам вместо октавы
+	bool isSemitoneShift = false;
+}
 
 SketchMusic::View::BaseKeyboard::BaseKeyboard()
 {
@@ -112,7 +116,7 @@ inline void OnOctaveInc(Key^ key)
 	case KeyType::note:
 	//case KeyType::genericNote:
 	case KeyType::relativeNote:
-		key->value += 12;
+		key->value += ::isSemitoneShift ? 1 : 12;
 		UpdateParent(key);
 		break;
 	default:
@@ -127,7 +131,7 @@ inline void OnOctaveDec(Key^ key)
 	case KeyType::note:
 	//case KeyType::genericNote:
 	case KeyType::relativeNote:
-		key->value -= 12;
+		key->value -= ::isSemitoneShift ? 1 : 12;
 		UpdateParent(key);
 		break;
 	default:
@@ -314,8 +318,8 @@ void SketchMusic::View::BaseKeyboard::OnPushKey(Key ^ key)
 			this->currentState->state = KeyboardStateEnum::control;	// TODO : выглядит очень плохо.
 																	// Надо будет понять, что вообще имеется в виду под state
 			KeyboardStateChanged(this, currentState);
+			if (!key->value) ::isSemitoneShift = !::isSemitoneShift;
 			break;
-
 		case KeyType::layout:
 		case KeyType::tempo:
 		case KeyType::quantization:
@@ -920,7 +924,7 @@ void SketchMusic::View::BaseKeyboard::OnReleaseKey(Key ^ key)
 
 void SketchMusic::View::BaseKeyboard::OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
 {
-	auto key = ref new Key(KeyType::tempo, TempoSlider->Value);
+	auto key = ref new Key(KeyType::tempo, static_cast<int>(TempoSlider->Value));
 	auto keyArgs = ref new KeyboardEventArgs(key, this->pressedKeys);
 	KeyPressed(this, keyArgs);
 	

@@ -8,41 +8,68 @@ using namespace Windows::Foundation;
 using namespace Windows::UI::Xaml::Input;
 using namespace SketchMusic;
 
-/*public ref class SketchMusic::Commands::Command sealed : public ICommand
+public ref class SketchMusic::Commands::Command sealed
 {
 private:
-	Handler^ _handler;
-	Handler^ _unexecute;
-	CanExecuteMethod^ _canExecute;
+	Handler ^ _Handler;
+	Handler^ _Unexecute;
+	CanExecuteMethod^ _CanExecute;
 
 public:
-
-	Command(Handler^ handler, CanExecuteMethod^ canExecute, Handler^ unexecute)
+	Command(Handler^ handler, Handler^ unexecute)
 	{
-		_handler = handler;
-		_canExecute = canExecute;
-		_unexecute = unexecute;
+		_Handler = handler;
+		_Unexecute = unexecute;
 	}
+
+	Command(Handler^ handler, Handler^ unexecute, CanExecuteMethod^ canExecute)
+	{
+		_Handler = handler;
+		_CanExecute = canExecute;
+		_Unexecute = unexecute;
+	}
+
+internal:
 
 	virtual bool CanExecute(Object^ parameter)
 	{
-		if (_canExecute)
-			return _canExecute(parameter);
-		
+		if (_CanExecute)
+			return _CanExecute(parameter);
 		return true;
 	}
 
-	virtual void Execute(Object^ parameter)
+	virtual bool Execute(Object^ parameter)
 	{
-		if (_handler)
-			_handler(parameter);
+		if (_Handler) // && CanExecute
+			return _Handler(parameter);
+		return false;
 	}
 
-	void Unexecute(Object^ parameter)
+	virtual bool Unexecute(Object^ parameter)
 	{
-		if (_unexecute)
-			_unexecute(parameter);
+		if (_Unexecute)
+			return _Unexecute(parameter);
+		return false;
 	}
 
 	virtual event EventHandler<Platform::Object^>^ CanExecuteChanged;
-};*/
+};
+
+// команда вместе с её параметром
+public ref class SketchMusic::Commands::CommandState sealed
+{
+public:
+	CommandState(Command^ command, Object^ args)
+	{
+		_command = command;
+		_args = args;
+	}
+
+	// обёртка, чтобы не морочиться с аргументами
+	// TODO : возвращать bool - выполнена команда или нет
+	bool Execute() { return _command->Execute(_args); }
+	bool Unexecute() { return _command->Unexecute(_args); }
+
+	property Command^ _command;
+	property Object^ _args;
+};

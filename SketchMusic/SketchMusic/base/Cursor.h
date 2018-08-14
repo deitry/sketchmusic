@@ -82,7 +82,7 @@ public:
 	{
 		if (dec == 0) return;
 
-		this->_beat = dec / TICK_IN_BEAT;
+		this->_beat = static_cast<int>(dec / TICK_IN_BEAT);
 		this->_tick -= static_cast<int>(std::floor(dec)) % TICK_IN_BEAT;
 		if (this->_tick < 0)
 		{
@@ -103,7 +103,7 @@ public:
 	bool LT(SketchMusic::Cursor^ that);
 	bool LE(SketchMusic::Cursor^ that);
 
-	Platform::String^ ToString() { return "" + _beat + ":" + _tick; }
+	Platform::String^ ToString() override { return "" + _beat + ":" + _tick; }
 	IJsonValue^ Serialize();
 	property Platform::String^ asString;
 };

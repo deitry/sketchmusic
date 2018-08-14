@@ -27,6 +27,7 @@ namespace StrokeEditor
 			Workspace = _folder; File = _file; Project = _project; Selected = selected; SelectedIdea = nullptr;
 		}
 
+		[Windows::Foundation::Metadata::DefaultOverloadAttribute]
 		CompositionNavigationArgs(StorageFolder^ _folder, StorageFile^ _file, Composition^ _project, Idea^ idea)
 		{
 			Workspace = _folder; File = _file; Project = _project; Selected = -1; SelectedIdea = idea;

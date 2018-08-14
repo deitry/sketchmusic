@@ -3,6 +3,7 @@
 #include "../SketchMusic.h"
 #include "../base/Cursor.h"
 #include "../base/Symbol.h"
+#include "../base/STempo.h"
 #include "../base/Text.h"
 #include "../base/Idea.h"
 #include "../base/Composition.h"
@@ -29,7 +30,7 @@ SketchMusic::Player::Player::Player()
 	cycling = false;
 	needPlayGeneric = true;
 	StopAtLast = true;
-	quantize = 4.;
+	quantize = 4;
 
 	// do - чтобы можно было "скипнуть" инициализацию, если то-то не удалось
 	do
@@ -347,7 +348,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 			static int prevBeat = -1;
 
 			int localQ = quantize ? quantize : 32;
-			int quant = cursor->Tick * localQ / TICK_IN_BEAT;
+			int quant = static_cast<int>(cursor->Tick * localQ / TICK_IN_BEAT);
 			
 			int beat = cursor->Beat;
 			if ((quant != prevQuant) || (beat != prevBeat))
@@ -383,7 +384,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 	});
 	
 	getIterators.wait();
-	unsigned int timeout = 1000 * 60 / _BPM;
+	unsigned int timeout = static_cast<unsigned int>(1000 * 60 / _BPM);
 	// для самой последней ноты
 	concurrency::wait(timeout);
 	this->stop();

@@ -37,7 +37,8 @@ SketchMusic::Cursor^ SketchMusic::Cursor::inc()
 
 SketchMusic::Cursor^ SketchMusic::Cursor::dec()
 {
-	int beat = _beat, tick = _tick--;
+	auto beat = _beat;
+	auto tick = _tick--;
 
 	if (tick < 0)
 	{

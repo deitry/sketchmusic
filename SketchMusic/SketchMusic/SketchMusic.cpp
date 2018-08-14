@@ -2,6 +2,11 @@
 #include "pch.h"
 #include "SketchMusic.h"
 #include "base/Text.h"
+#include "base/SNote.h"
+#include "base/SRNote.h"
+#include "base/SNoteEnd.h"
+#include "base/SSpace.h"
+#include "base/STempo.h"
 
 using namespace SketchMusic;
 using namespace Platform;
@@ -115,8 +120,8 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 			}
 			case SymbolType::TEMPO:
 			{
-				vel = obj->GetNamedNumber(t::NOTE_VALUE, 120.);
-				return ref new STempo(vel);
+				auto val = obj->GetNamedNumber(t::NOTE_VALUE, 120.);
+				return ref new STempo(static_cast<float>(val));
 			}
 			case SymbolType::END:
 			{
@@ -169,8 +174,8 @@ ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType t
 	}
 	case SketchMusic::View::KeyType::tempo:
 	{
-		int ival = 120;
-		if (val) ival = (int)val;
+		auto ival = 120.f;
+		if (val) ival = (float)val;
 		return ref new STempo(ival);
 	}
 	case SketchMusic::View::KeyType::end:
@@ -265,46 +270,6 @@ bool SketchMusic::SNoteEnd::EQ(ISymbol ^ second)
 	return false;
 }
 
-bool SketchMusic::SChord::ModulatorsEQ(SChordMod m)
-{
-	if ((m.aug == mod.aug) &&
-		(m.dim == mod.dim) &&
-		(m.dom == mod.dom) &&
-		(m.minor == mod.minor) &&
-		(m._2 == mod._2) &&
-		(m._2aug == mod._2aug) &&
-		(m._2dim == mod._2dim) &&
-		(m._3aug == mod._3aug) &&
-		(m._3ex == mod._3ex) &&
-		(m._4 == mod._4) &&
-		(m._4aug == mod._4aug) &&
-		(m._4dim == mod._4dim) &&
-		(m._5ex == mod._5ex) &&
-		(m._6 == mod._6) &&
-		(m._6aug == mod._6aug) &&
-		(m._6dim == mod._6dim) &&
-		(m._7 == mod._7) &&
-		(m._8 == mod._8) &&
-		(m._9 == mod._9)) return true;
-	return false;
-}
-
-bool SketchMusic::SChord::EQ(ISymbol ^ second)
-{
-	if (second->GetSymType() != SymbolType::CHORD) return false;
-	auto chord = dynamic_cast<SChord^>(second);
-	if (chord)
-	{
-		if ((chord->key == key) &&
-			(chord->bass == bass) &&
-			(chord->degree == degree) &&
-			(ModulatorsEQ(chord->mod)) &&
-			(chord->variation == variation)) return true;
-	}
-
-	return false;
-}
-
 bool SketchMusic::SNewLine::EQ(ISymbol ^ second)
 {
 	if (second->GetSymType() == SymbolType::NLINE) return true;
@@ -326,3 +291,9 @@ bool SketchMusic::SString::EQ(ISymbol ^ second)
 //{
 //	this->PropertyChanged(this, ref new Windows::UI::Xaml::Data::PropertyChangedEventArgs(propertyName));
 //}
+
+
+bool SketchMusic::SHarmony::EQ(ISymbol ^ second)
+{
+	return false;
+}

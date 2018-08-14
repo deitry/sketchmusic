@@ -76,7 +76,7 @@ void SketchMusic::Player::SimpleSoundEngine::InitializeVoices()
 		this->_voices.push_back(pSourceVoice);
 		this->_available.insert(std::make_pair(i, true));
 		pSourceVoice->Start();
-		pSourceVoice->SetVolume(0.3);
+		pSourceVoice->SetVolume(0.2f);
 		_available_voices++;
 	}
 	_currentVoice = _available_voices - 1;
@@ -118,7 +118,7 @@ void SketchMusic::Player::SimpleSoundEngine::playNote(INote^ note, int duration,
 		_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
 	}
 
-	float freq = _sample->getFrequency() * pow(2., note->_val / 12.);
+	double freq = _sample->getFrequency() * pow(2., note->_val / 12.);
 	float origFreq = _sample->getFrequency();
 	this->setFrequency(voice, freq, origFreq);
 
@@ -133,13 +133,13 @@ void SketchMusic::Player::SimpleSoundEngine::playNote(INote^ note, int duration,
 	auto stop = stopToken.get_token();
 	auto release = concurrency::create_task([=]
 	{
-		unsigned int timeout = _buffer.LoopLength * _buffer.LoopCount * 1000. * origFreq / freq / 44100;
+		auto timeout = _buffer.LoopLength * _buffer.LoopCount * 1000. * origFreq / freq / 44100;
 		// смотри выше про duration
 		if (_buffer.LoopCount == XAUDIO2_LOOP_INFINITE)
 		{
 			timeout *= 100000;
 		}
-		concurrency::wait(timeout);
+		concurrency::wait(static_cast<unsigned int>(timeout));
 		this->ReleaseVoice(voice);
 	}, stop);
 }
@@ -207,7 +207,7 @@ void SketchMusic::Player::SimpleSoundEngine::setFrequency(IXAudio2SourceVoice* v
 {
 	if (voice)
 	{
-		voice->SetFrequencyRatio(freq / origFreq);
+		voice->SetFrequencyRatio(static_cast<float>(freq / origFreq));
 	}
 }
 
@@ -233,7 +233,7 @@ IXAudio2SourceVoice* SketchMusic::Player::SimpleSoundEngine::GetVoice()
 
 void SketchMusic::Player::SimpleSoundEngine::ReleaseVoice(IXAudio2SourceVoice* voice)
 {
-	int max = _voices.size();
+	auto max = _voices.size();
 	int voiceNo = -1;
 
 	for (int i = 0; i < max; i++)

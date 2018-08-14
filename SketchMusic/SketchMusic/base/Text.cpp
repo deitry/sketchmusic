@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Text.h"
 #include "Cursor.h"
+#include "STempo.h"
 
 using namespace SketchMusic;
 using Windows::Foundation::Collections::IVector;
@@ -306,10 +307,9 @@ SketchMusic::Text ^ SketchMusic::Text::deserialize(Windows::Data::Json::JsonObje
 		JsonObject^ jEl = i->GetObject();
 		if (jEl)
 		{
-			int pos_tick = static_cast<int>(jEl->GetNamedNumber(t::BEAT));
-			int pos_beat = static_cast<int>(jEl->GetNamedNumber(t::TICK));
-			auto pos = ref new Cursor(pos_tick, pos_beat);
-
+			auto pos_beat = static_cast<int>(jEl->GetNamedNumber(t::BEAT));
+			auto pos_tick = static_cast<float>(jEl->GetNamedNumber(t::TICK));
+			auto pos = ref new Cursor(pos_beat, pos_tick);
 			auto sym = ISymbolFactory::Deserialize(jEl);
 
 			text->_t.insert(std::make_pair(pos, sym));

@@ -144,7 +144,7 @@ void StrokeEditor::LibraryEntryPage::SaveEntry()
 {
 	this->_entry->Name = entryNameTB->Text;
 	this->_entry->Description = descrTB->Text;
-	this->_entry->Rating = ratingSlider->Value;
+	this->_entry->Rating = static_cast<unsigned char>(std::floor(ratingSlider->Value));
 	long long time;
 	_time64(&time);
 	this->_entry->ModifiedTime = time;
