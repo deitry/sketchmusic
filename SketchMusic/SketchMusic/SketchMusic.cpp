@@ -4,15 +4,32 @@
 #include "base/Text.h"
 #include "base/SNote.h"
 #include "base/SRNote.h"
+#include "base/SGNote.h"
 #include "base/SNoteEnd.h"
 #include "base/SSpace.h"
 #include "base/STempo.h"
+#include "base/SScale.h"
+#include "base/PartDefinition.h"
 
 using namespace SketchMusic;
 using namespace Platform;
 using namespace Windows::Data::Json;
 using SketchMusic::SymbolType;
 namespace t = SketchMusic::SerializationTokens;
+
+namespace
+{
+	std::map<Degree, Platform::String^> degreeSerializationString =
+	{
+		{ Degree::I,	t::SCALE_1 },
+		{ Degree::II,	t::SCALE_2 },
+		{ Degree::III,	t::SCALE_3 },
+		{ Degree::IV,	t::SCALE_4 },
+		{ Degree::V,	t::SCALE_5 },
+		{ Degree::VI,	t::SCALE_6 },
+		{ Degree::VII,	t::SCALE_7 },
+	};
+}
 
 Platform::String^ SketchMusic::SNote::valToString(int val)
 {
@@ -31,11 +48,6 @@ bool SketchMusic::SNote::EQ(ISymbol^ second)
 	}
 
 	return false;
-}
-
-Platform::String^ SketchMusic::SRNote::valToString(int val)
-{
-	return "0";
 }
 
 bool SketchMusic::SRNote::EQ(ISymbol ^ second)
@@ -110,6 +122,32 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 				voi = (int) obj->GetNamedNumber(t::NOTE_VOICE,0);
 				return ref new SGNote(val);
 			}
+			case SymbolType::SCALE:
+			{
+				auto scaleBase = static_cast<NoteType>(static_cast<int>(obj->GetNamedNumber(t::SCALE_BASE, 0)));
+				auto steps = ref new Platform::Collections::Map<Degree, DegreeInfo>();
+				auto readDegreeInfo = [steps, obj] (Degree degree)
+				{
+					auto degreeInfo = static_cast<DegreeInfo>(static_cast<int>(obj->GetNamedNumber(::degreeSerializationString.at(degree)), 
+																								   static_cast<int>(DegreeInfo::Tone)));
+					steps->Insert(degree, degreeInfo);
+				};
+
+				readDegreeInfo(Degree::I);
+				readDegreeInfo(Degree::II);
+				readDegreeInfo(Degree::III);
+				readDegreeInfo(Degree::IV);
+				readDegreeInfo(Degree::V);
+				readDegreeInfo(Degree::VI);
+				readDegreeInfo(Degree::VII);
+
+				return ref new SScale(scaleBase, steps);
+			}
+			case SymbolType::HARMONY:
+			{
+				auto val = static_cast<int>(obj->GetNamedNumber(t::NOTE_VALUE, 1));
+				return ref new SHarmony(val);
+			}
 			case SymbolType::NPART:
 			{
 				auto name = obj->GetNamedString(t::PART_NAME, "");
@@ -148,7 +186,8 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 	return nullptr;
 }
 
-ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType type, Object^ val)
+ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType type, 
+													Object^ val)
 {
 	switch (type)
 	{
@@ -167,6 +206,17 @@ ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType t
 		int ival = (int)val;
 		return ref new SGNote(ival);
 	}
+	case SketchMusic::View::KeyType::scale:
+	{
+		int ival = (int)val;
+		auto baseNote = static_cast<NoteType>(ival);
+		return ref new SScale(baseNote, ScaleCategory::Major);
+	}
+	case SketchMusic::View::KeyType::harmony:
+	{
+		int ival = (int)val;
+		return ref new SHarmony(ival);
+	}
 	case SketchMusic::View::KeyType::newPart:
 	{
 		auto str = (Platform::String^)val;
@@ -175,7 +225,7 @@ ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType t
 	case SketchMusic::View::KeyType::tempo:
 	{
 		auto ival = 120.f;
-		if (val) ival = (float)val;
+		if (val) ival = static_cast<float>(safe_cast<int>(val));
 		return ref new STempo(ival);
 	}
 	case SketchMusic::View::KeyType::end:
@@ -214,18 +264,6 @@ bool SketchMusic::SSpace::EQ(ISymbol ^ second)
 bool SketchMusic::SAccent::EQ(ISymbol ^ second)
 {
 	if (second->GetSymType() == SymbolType::ACCENT) return true;
-
-	return false;
-}
-
-bool SketchMusic::SClef::EQ(ISymbol ^ second)
-{
-	if (second->GetSymType() != SymbolType::CLEF) return false;
-	auto clef = dynamic_cast<SClef^>(second);
-	if (clef)
-	{
-		if (clef->bottom == bottom) return true;
-	}
 
 	return false;
 }
@@ -287,13 +325,68 @@ bool SketchMusic::SString::EQ(ISymbol ^ second)
 	return false;
 }
 
-//void SketchMusic::Commands::CommandManager::OnPropertyChanged(Platform::String ^ propertyName)
-//{
-//	this->PropertyChanged(this, ref new Windows::UI::Xaml::Data::PropertyChangedEventArgs(propertyName));
-//}
-
-
 bool SketchMusic::SHarmony::EQ(ISymbol ^ second)
 {
+	if (second->GetSymType() != SymbolType::HARMONY) return false;
+	auto rhs = dynamic_cast<SHarmony^>(second);
+	if (rhs)
+	{
+		if (rhs->_val == _val) return true;
+	}
 	return false;
 }
+
+Platform::String^ SketchMusic::noteTypeToString(NoteType note)
+{
+	switch (note)
+	{
+		case NoteType::A:	return "A";
+		case NoteType::As:	return "As";
+		case NoteType::B:	return "B";
+		case NoteType::C:	return "C";
+		case NoteType::Cs:	return "Cs";
+		case NoteType::D:	return "D";
+		case NoteType::Ds:	return "Ds";
+		case NoteType::E:	return "E";
+		case NoteType::F:	return "F";
+		case NoteType::Fs:	return "Fs";
+		case NoteType::G:	return "G";
+		case NoteType::Gs:	return "Gs";
+		default: break;
+	}
+	return "?";
+}
+
+Platform::String ^ SketchMusic::SHarmony::ToString()
+{
+	Platform::String^ str = "";
+	Platform::String^ sharp = "s";
+	switch (_val % 12)
+	{
+	case 0: str += "I"; break;
+	case 1: case -11: str += "I" + sharp; break;
+		case 2: case -10: str += "II"; break;
+		case 3: case -9 :str += "III"; break;
+		case 4: case -8: str += "III" + sharp; break;
+		case 5: case -7: str += "IV"; break;
+		case 6: case -6: str += "IV" + sharp; break;
+		case 7: case -5: str += "V"; break;
+		case 8: case -4: str += "VI"; break;
+		case 9: case -3: str += "VI" + sharp; break;
+		case 10: case -2: str += "VII"; break;
+		case 11: case -1: str += "VII" + sharp; break;
+		default: break;
+	}
+
+	auto oct = _val / 12;
+	if (oct > 0)
+	{
+		str += "+" + oct;
+	}
+	else if (_val < 0)
+	{
+		str += "-" + abs(oct - (_val % 12 ? 1 : 0));
+	}
+
+	return str;
+};

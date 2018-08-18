@@ -40,7 +40,11 @@ public:
 template<>
 struct std::less<SketchMusic::View::Key^>
 {
-	bool operator() (SketchMusic::View::Key^ x, SketchMusic::View::Key^ y) const { return x->type < y->type; }
+	bool operator() (SketchMusic::View::Key^ x, SketchMusic::View::Key^ y) const 
+	{ 
+		return x->type < y->type; 
+	
+	}
 	typedef SketchMusic::View::Key^ first_argument_type;
 	typedef SketchMusic::View::Key^ second_argument_type;
 	typedef bool result_type;

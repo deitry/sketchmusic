@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../SketchMusic.h"
+#include "SScale.h"
 
 using namespace SketchMusic;
 using namespace Platform;
@@ -16,9 +17,8 @@ private:
 
 public:
 	property float BPM;	// базовый темп
+	property SScale^ scale; // базовая гамма
 
-						// TODO : добавить дорожку с "системными" данными? - вносить туда всё, что касается композиции в целом
-						// один текст воспринимается как одна дорожка
 	property IObservableVector<Text^>^ texts
 	{
 		IObservableVector<Text^>^ get() { return m_texts; }

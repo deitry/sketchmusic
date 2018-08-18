@@ -57,6 +57,9 @@ public:
 			}
 		}
 	}
+
+	property SScale^ _scale;
+	property SHarmony^ _harmony;
 	property bool needMetronome;
 
 	property SketchMusic::Cursor^ _cursor;

@@ -123,6 +123,8 @@ public:
 		{
 		case SketchMusic::View::KeyType::note:
 		case SketchMusic::View::KeyType::relativeNote:
+		case SketchMusic::View::KeyType::scale:
+		case SketchMusic::View::KeyType::harmony:
 			break;
 		case SketchMusic::View::KeyType::genericNote:
 		default:
@@ -154,7 +156,8 @@ public:
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::KeyStateToColorConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+public ref class SketchMusic::View::KeyStateToColorConverter sealed 
+	: Windows::UI::Xaml::Data::IValueConverter
 {
 public:
 	property Windows::UI::Xaml::Media::Brush^ KeyBrush;
@@ -162,7 +165,8 @@ public:
 
 	// на основе клавиши выдаёт её графическое отображение
 	// TODO : для всякого рода перемещений, стрелочек и так далее сделать красиво
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+							Object^ parameter, Platform::String^ language)
 	{
 		SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(value);
 		if (key == nullptr) return KeyBrush;
@@ -179,7 +183,8 @@ public:
 		}
 	}
 
-	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+								Object^ parameter, Platform::String^ language)
 	{
 		return nullptr;
 	}
@@ -188,10 +193,12 @@ public:
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::OnPositionedSymbolToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+public ref class SketchMusic::View::OnPositionedSymbolToTextConverter sealed 
+	: Windows::UI::Xaml::Data::IValueConverter
 {
 public:
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+							Object^ parameter, Platform::String^ language)
 	{
 		SketchMusic::PositionedSymbol^ psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
 		if (psym == nullptr) return "";
@@ -233,10 +240,12 @@ public:
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::PartCatToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+public ref class SketchMusic::View::PartCatToTextConverter sealed 
+	: Windows::UI::Xaml::Data::IValueConverter
 {
 public:
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+							Object^ parameter, Platform::String^ language)
 	{
 		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
 		if (part == nullptr) return nullptr;
@@ -245,7 +254,8 @@ public:
 			str += part->Number;
 		return str;
 	}
-	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType,
+								Object^ parameter, Platform::String^ language)
 	{
 		return nullptr;
 	}
@@ -254,10 +264,12 @@ public:
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::PartTimeToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
+public ref class SketchMusic::View::PartTimeToTextConverter sealed 
+	: Windows::UI::Xaml::Data::IValueConverter
 {
 public:
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+							Object^ parameter, Platform::String^ language)
 	{
 		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
 		if (part == nullptr) return nullptr;
@@ -268,7 +280,8 @@ public:
 		String^ str = (part->Time ? "" : "~") + minutes.ToString() + ":" + ((seconds < 10) ? "0" : "") + seconds.ToString();
 		return str;
 	}
-	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+								Object^ parameter, Platform::String^ language)
 	{
 		return nullptr;
 	}
@@ -280,14 +293,16 @@ public:
 public ref class SketchMusic::View::PartNameToTextConverter sealed : Windows::UI::Xaml::Data::IValueConverter
 {
 public:
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+							Object^ parameter, Platform::String^ language)
 	{
 		SketchMusic::PartDefinition^ part = dynamic_cast<SketchMusic::PartDefinition^>(value);
 		if (part == nullptr) return nullptr;
 		if (part->original == nullptr) return nullptr;
 		return part->original->Name;
 	}
-	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+								Object^ parameter, Platform::String^ language)
 	{
 		return nullptr;
 	}
@@ -318,7 +333,8 @@ public:
 		}
 		return str;
 	}
-	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+								Object^ parameter, Platform::String^ language)
 	{
 		return nullptr;
 	}
@@ -327,13 +343,15 @@ public:
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::PSymbolToVerticalPosConverter sealed : Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
+public ref class SketchMusic::View::PSymbolToVerticalPosConverter sealed 
+	: Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
 {
 public:
 	property double LineSpacing;	// рассотояние между предполагаемыми линиями нотного стана
 	property double AvailableHeight;
 		
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+							Object^ parameter, Platform::String^ language)
 	{
 		//SketchMusic::ISymbol^ symbol = dynamic_cast<SketchMusic::ISymbol^>(value);
 		//if (symbol == nullptr) return nullptr;
@@ -381,7 +399,8 @@ public:
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::PSymbolToHorizontalPosConverter sealed : Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
+public ref class SketchMusic::View::PSymbolToHorizontalPosConverter sealed 
+	: Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
 {
 public:
 	property double LineSpacing;	// рассотояние между предполагаемыми линиями нотного стана
@@ -424,7 +443,8 @@ public:
 		return AvailableWidth / 2;
 	}
 
-	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+								Object^ parameter, Platform::String^ language)
 	{
 		return nullptr;
 	}
@@ -433,11 +453,13 @@ public:
 };
 
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::PSymbolToStyleConverter sealed : Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
+public ref class SketchMusic::View::PSymbolToStyleConverter sealed 
+	: Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
 {
 public:
 	
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+							Object^ parameter, Platform::String^ language)
 	{
 		auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(value);
 		if (psym == nullptr) return nullptr;
@@ -449,10 +471,20 @@ public:
 			if (Application::Current->Resources->HasKey("GenericNoteCtrlStyle"))
 				return Application::Current->Resources->Lookup("GenericNoteCtrlStyle");
 		}
+		case SketchMusic::SymbolType::RNOTE:
+		{
+			if (Application::Current->Resources->HasKey("RelativeNoteCtrlStyle"))
+				return Application::Current->Resources->Lookup("RelativeNoteCtrlStyle");
+		}
 		case SketchMusic::SymbolType::NOTE:
 		{
 			if (Application::Current->Resources->HasKey("SymbolControlStyle"))
 				return Application::Current->Resources->Lookup("SymbolControlStyle");
+		}
+		case SketchMusic::SymbolType::SCALE:
+		{
+			if (Application::Current->Resources->HasKey("ScaleCtrlStyle"))
+				return Application::Current->Resources->Lookup("ScaleCtrlStyle");
 		}
 		case SketchMusic::SymbolType::TEMPO:
 		default:
@@ -463,7 +495,8 @@ public:
 		return nullptr;
 	}
 
-	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+								Object^ parameter, Platform::String^ language)
 	{
 		return nullptr;
 	}
@@ -471,23 +504,27 @@ public:
 	PSymbolToStyleConverter() {}
 };
 
-
 [Windows::Foundation::Metadata::WebHostHiddenAttribute]
-public ref class SketchMusic::View::MultiplicatedLengthConverter sealed : Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
+public ref class SketchMusic::View::MultiplicatedLengthConverter sealed 
+	: Windows::UI::Xaml::Data::IValueConverter, Windows::UI::Xaml::DependencyObject
 {
 public:
 	property double Multiplicator;	// рассотояние между предполагаемыми линиями нотного стана
 	
 	property double Default;
 
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ Convert(Object^ value, 
+							Windows::UI::Xaml::Interop::TypeName targetType, 
+							Object^ parameter, 
+							Platform::String^ language)
 	{
 		if (Default)
 			return (Default)*Multiplicator;
 		return ((double)value)*Multiplicator;
 	}
 
-	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName  targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ ConvertBack(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+								Object^ parameter, Platform::String^ language)
 	{
 		return nullptr;
 	}

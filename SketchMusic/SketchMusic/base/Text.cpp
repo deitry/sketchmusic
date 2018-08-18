@@ -2,6 +2,8 @@
 #include "Text.h"
 #include "Cursor.h"
 #include "STempo.h"
+#include "SNewPart.h"
+#include "SScale.h"
 
 using namespace SketchMusic;
 using Windows::Foundation::Collections::IVector;
@@ -257,6 +259,7 @@ IJsonValue^ SketchMusic::Text::serialize()
 		{
 			jsym->Insert(t::NOTE_VALUE, JsonValue::CreateNumberValue(tempo->value));
 		}
+		
 		auto part = dynamic_cast<SNewPart^>(sym.second);
 		if (part)
 		{
@@ -264,6 +267,25 @@ IJsonValue^ SketchMusic::Text::serialize()
 			jsym->Insert(t::PART_CAT, JsonValue::CreateStringValue(part->category));
 			jsym->Insert(t::PART_DYN, JsonValue::CreateNumberValue((int)part->dynamic));
 		}
+
+		auto scale = dynamic_cast<SScale^>(sym.second);
+		if (scale)
+		{
+			jsym->Insert(t::SCALE_BASE, JsonValue::CreateNumberValue(static_cast<int>(scale->_baseNote)));
+			auto steps = scale->_steps;
+			for (auto&& degree : steps)
+			{
+				jsym->Insert(t::degreeSerializationString.at(degree->Key), 
+							 JsonValue::CreateNumberValue(static_cast<int>(degree->Value)));
+			}
+		}
+
+		auto harmony = dynamic_cast<SHarmony^>(sym.second);
+		if (harmony)
+		{
+			jsym->Insert(t::NOTE_VALUE, JsonValue::CreateNumberValue(harmony->_val));
+		}
+
 		auto note = dynamic_cast<INote^>(sym.second);
 		if (note)
 		{
@@ -271,6 +293,7 @@ IJsonValue^ SketchMusic::Text::serialize()
 			if (note->_velocity) { jsym->Insert(t::NOTE_VELOCITY, JsonValue::CreateNumberValue(note->_velocity)); }
 			if (note->_velocity) { jsym->Insert(t::NOTE_VOICE, JsonValue::CreateNumberValue(note->_voice)); }
 		}
+		
 		jsonNotes->Append(jsym);
 	}
 	json->Insert(t::NOTES_ARRAY, jsonNotes);

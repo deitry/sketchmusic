@@ -2,6 +2,8 @@
 
 #include "../SketchMusic.h"
 #include "Key.h"
+#include "../base/SNote.h"
+#include "../base/SRNote.h"
 #include <string>
 
 using namespace SketchMusic;
@@ -12,7 +14,8 @@ public ref class SketchMusic::View::OnKeyToStringConverter sealed : Windows::UI:
 public:
 	// на основе клавиши выдаёт её графическое отображение
 	// TODO : для всякого рода перемещений, стрелочек и так далее сделать красиво
-	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, Object^ parameter, Platform::String^ language)
+	virtual Object^ Convert(Object^ value, Windows::UI::Xaml::Interop::TypeName targetType, 
+							Object^ parameter, Platform::String^ language)
 	{
 		SketchMusic::View::Key^ key = dynamic_cast<SketchMusic::View::Key^>(value);
 		if (key == nullptr) return "";
@@ -26,11 +29,25 @@ public:
 			return (ref new SNote(key->value))->ToString();
 		}
 		case KeyType::relativeNote:
-			result += "" + key->value + "r";
-			break;
+		{
+			return (ref new SRNote(key->value))->ToString();
+		}
 		case KeyType::genericNote:
 			result += "(" + (key->value % 100) + "," + (abs(key->value) / 100) + ")";
 			break;
+		case KeyType::harmony:
+		{
+			return (ref new SHarmony(key->value))->ToString();
+			//auto degree = static_cast<Degree>(key->value);
+			//result += SerializationTokens::degreeSerializationString.at(degree);
+			//break;
+		}
+		case KeyType::scale:
+		{
+			auto baseNote = static_cast<NoteType>(key->value);
+			result += SketchMusic::noteTypeToString(baseNote);
+			break;
+		}
 		case KeyType::octave:
 			if (key->value >= 0)
 			{

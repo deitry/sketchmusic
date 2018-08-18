@@ -277,7 +277,7 @@
                                  BorderBrush="{ThemeResource SystemControlBackgroundBaseLowBrush}"
                                  HorizontalAlignment="Left"
                                  VerticalAlignment="Stretch"
-                                 Margin="5,12,5,5"
+                                 Margin="5,20,5,5"
                                  />
                     
                     <!--<Button Name="HamburgerButton2" Style="{StaticResource MenuBtnStyle}"

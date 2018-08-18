@@ -561,6 +561,7 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 												 ref new DispatchedHandler(
 							[=] ()
 						{
+							// TODO: вынести в отдельную функцайку
 							auto delay = concurrency::create_task([this]
 							{
 								unsigned int timeout = static_cast<unsigned int>(
@@ -588,9 +589,14 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 				}
 				break;
 			}
+			// символы, добавляемые в "управляющий" текст 
+			case SMV::KeyType::scale:
+			case SMV::KeyType::harmony:
 			case SMV::KeyType::tempo:
 			{
-				SM::ISymbol^ sym = ref new SM::STempo(static_cast<float>(args->key->value));
+				// создаём новый символ
+				SM::ISymbol^ sym = SM::ISymbolFactory::CreateSymbol(args->key->type,
+																	args->key->value);
 
 				// создаём команду на добавление ноты в текст и сохраняем её в истории
 				((App^)App::Current)->_manager->AddAndExecute(
@@ -599,6 +605,19 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 						_texts->ControlText, 
 						ref new PositionedSymbol(ref new SM::Cursor(_textRow->currentPosition), 
 												 sym)));
+
+				if (args->key->type != SMV::KeyType::tempo)
+				{
+					// сдвигаем курсор для всех "управляющих" символов, кроме темпа (он вставляется по-другому)
+					if (this->viewType == SMV::ViewType::TextRow)
+					{
+						this->_textRow->MoveCursorRight();
+					}
+					else
+					{
+						this->MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
+					}
+				}
 				break;
 			}
 			case SMV::KeyType::enter:
@@ -627,7 +646,7 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 			case SMV::KeyType::beat:
 			{
 				Dispatcher->RunAsync(CoreDispatcherPriority::Normal,
-					ref new DispatchedHandler([=]
+									 ref new DispatchedHandler([=]
 				{
 					// TODO: через команды, чтобы можно было отменять/возвращать
 
@@ -1203,6 +1222,7 @@ void MelodyEditorPage::RedoItem_Click(Platform::Object^ sender,
 	((App^)App::Current)->_manager->Redo();
 }
 
+// FIXME: здесь этого быть не должно
 void MelodyEditorPage::AddSymbolToText(SM::Text ^ text, 
 									   SM::PositionedSymbol ^ symbol)
 {
@@ -1210,8 +1230,13 @@ void MelodyEditorPage::AddSymbolToText(SM::Text ^ text,
 	auto type = symbol->_sym->GetSymType();
 	if (type == SymbolType::TEMPO 
 	 || type == SymbolType::NPART 
-	 || type == SymbolType::CLEF)
+	 || type == SymbolType::CLEF
+	 || type == SymbolType::HARMONY
+	 || type == SymbolType::SCALE)
 	{
+		// удаляем предыдущий графический символ
+		_textRow->DeleteSymbolViews(symbol->_pos, type);
+
 		// темп и может какие-нибудь другие символы будем 
 		// заменять вместо добавления новых в ту же точку
 		text->addOrReplaceSymbol(symbol);

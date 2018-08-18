@@ -62,6 +62,8 @@ void SketchMusic::View::BaseKeyboard::OnKeyboardPressed(Key^ key)
 	case KeyType::note:
 	case KeyType::genericNote:
 	case KeyType::relativeNote:
+	case KeyType::scale:
+	case KeyType::harmony:
 		break;
 	default:
 	{
@@ -116,6 +118,7 @@ inline void OnOctaveInc(Key^ key)
 	case KeyType::note:
 	//case KeyType::genericNote:
 	case KeyType::relativeNote:
+	case KeyType::harmony:
 		key->value += ::isSemitoneShift ? 1 : 12;
 		UpdateParent(key);
 		break;
@@ -131,6 +134,7 @@ inline void OnOctaveDec(Key^ key)
 	case KeyType::note:
 	//case KeyType::genericNote:
 	case KeyType::relativeNote:
+	case KeyType::harmony:
 		key->value -= ::isSemitoneShift ? 1 : 12;
 		UpdateParent(key);
 		break;
@@ -288,6 +292,8 @@ void SketchMusic::View::BaseKeyboard::OnPushKey(Key ^ key)
 		case KeyType::note:
 		case KeyType::genericNote:
 		case KeyType::relativeNote:
+		case KeyType::scale:
+		case KeyType::harmony:
 			KeyPressed(this, args);
 			if (pressedKeys == 1)
 			{
@@ -472,7 +478,11 @@ std::pair<ContentControl^, bool> SketchMusic::View::BaseKeyboard::GetControl(std
 		auto key = dynamic_cast<SketchMusic::View::Key^>(ctrl.first->Content);
 		if (key == nullptr) continue;
 
-		if (key->type == KeyType::note || key->type == KeyType::genericNote)
+		if (key->type == KeyType::note 
+			|| key->type == KeyType::genericNote
+			|| key->type == KeyType::scale
+			|| key->type == KeyType::harmony
+			|| key->type == KeyType::relativeNote)
 		{
 			// проверка на тип раскладки - только для нот
 			auto el = dynamic_cast<FrameworkElement^>(ctrl.first->Parent);
@@ -883,8 +893,9 @@ void SketchMusic::View::BaseKeyboard::OnReleaseKey(Key ^ key)
 					if (tag == L"CtrlPanel") continue;
 					auto tagType = static_cast<KeyboardType>(std::stoi(tag->Data()));
 
-					if (key->value == 0 && tagType == _layout) row->Visibility = Windows::UI::Xaml::Visibility::Visible;
-					else row->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+					row->Visibility = (key->value == 0 && tagType == _layout) 
+										? Windows::UI::Xaml::Visibility::Visible
+										: Windows::UI::Xaml::Visibility::Collapsed;
 				}
 			}
 			KeyReleased(this, args);
@@ -901,6 +912,8 @@ void SketchMusic::View::BaseKeyboard::OnReleaseKey(Key ^ key)
 		case KeyType::note:
 		case KeyType::relativeNote:
 		case KeyType::genericNote:
+		case KeyType::scale:
+		case KeyType::harmony:
 			KeyReleased(this, args);
 			break;
 		default:
@@ -922,7 +935,8 @@ void SketchMusic::View::BaseKeyboard::OnReleaseKey(Key ^ key)
 }
 
 
-void SketchMusic::View::BaseKeyboard::OnClick(Platform::Object ^sender, Windows::UI::Xaml::RoutedEventArgs ^e)
+void SketchMusic::View::BaseKeyboard::OnClick(Platform::Object ^sender, 
+											  Windows::UI::Xaml::RoutedEventArgs ^e)
 {
 	auto key = ref new Key(KeyType::tempo, static_cast<int>(TempoSlider->Value));
 	auto keyArgs = ref new KeyboardEventArgs(key, this->pressedKeys);
@@ -931,7 +945,8 @@ void SketchMusic::View::BaseKeyboard::OnClick(Platform::Object ^sender, Windows:
 	TempoFlyout->Hide();
 }
 
-void SketchMusic::View::BaseKeyboard::OnQuantizeClick(Platform::Object ^ sender, Windows::UI::Xaml::RoutedEventArgs ^ e)
+void SketchMusic::View::BaseKeyboard::OnQuantizeClick(Platform::Object ^ sender, 
+													  Windows::UI::Xaml::RoutedEventArgs ^ e)
 {
 	// 
 	auto bt = dynamic_cast<Button^>(sender);//e->OriginalSource);
@@ -989,6 +1004,9 @@ void SketchMusic::View::BaseKeyboard::MenuFlyoutItem_Click(Platform::Object^ sen
 		case KeyboardType::Basic:
 		case KeyboardType::Generic:
 		case KeyboardType::Classic:
+		case KeyboardType::Scale:
+		case KeyboardType::Harmony:
+		case KeyboardType::Relative:
 			for (auto&& row : mainPanel->Children)
 			{
 				auto el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));

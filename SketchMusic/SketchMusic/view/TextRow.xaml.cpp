@@ -7,6 +7,7 @@
 #include "TextRow.xaml.h"
 #include "../base/Text.h"
 #include "../base/Composition.h"
+#include "../base/SGNote.h"
 #include "../base/SSpace.h"
 
 using namespace SketchMusic;
@@ -21,8 +22,6 @@ using namespace Windows::UI::Xaml::Documents;
 using namespace Windows::UI::Xaml::Input;
 using namespace Windows::UI::Xaml::Interop;
 using namespace Windows::UI::Xaml::Media;
-
-// Документацию по шаблону элемента "Элемент управления на основе шаблона" см. по адресу http://go.microsoft.com/fwlink/?LinkId=234235
 
 SketchMusic::View::TextRow::TextRow()
 {
@@ -53,7 +52,9 @@ SketchMusic::View::TextRow::TextRow()
 - исходя из quantize решаем сколько должно быть точек привязки и рисуем один-единственный кружок,
 соответствующий ближайшей к указателю точке
 */
-void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, int newScale, int selectedPart)
+void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text, 
+													int newScale, 
+													int selectedPart)
 {
 	if (text == nullptr)
 		return;
@@ -401,6 +402,15 @@ void SketchMusic::View::TextRow::AddSymbolView(Text^ source, PositionedSymbol^ s
 	case SymbolType::GNOTE:
 		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("GenericNoteCtrlStyle"));
 		break;
+	case SymbolType::RNOTE:
+		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("RelativeNoteCtrlStyle"));
+		break;
+	case SymbolType::HARMONY:
+		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("HarmonyCtrlStyle"));
+		break; 
+	case SymbolType::SCALE:
+		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("ScaleCtrlStyle"));
+		break;
 	default:
 		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("SymbolControlStyle"));
 		break;
@@ -426,7 +436,7 @@ void SketchMusic::View::TextRow::DeleteSymbolView(PositionedSymbol ^ symbol)
 {
 	if (dynamic_cast<SketchMusic::SNewLine^>(symbol->_sym))
 	{
-		// вставляем разрыв строки
+		// удаляем разрыв строки
 		this->DeleteLineBreak(symbol->_pos);
 		return;
 	}
@@ -453,6 +463,39 @@ void SketchMusic::View::TextRow::DeleteSymbolView(PositionedSymbol ^ symbol)
 	}
 }
 
+// удаляем все представления символов в данном положении
+// Нужно, чтобы удалять управляющие символы
+void SketchMusic::View::TextRow::DeleteSymbolViews(Cursor ^ pos, SymbolType type)
+{
+	if (type == SymbolType::NLINE)
+	{
+		// удаляем разрыв строки
+		this->DeleteLineBreak(pos);
+		return;
+	}
+
+	unsigned int i = 0;
+	while (i < _canvas->Children->Size)
+	{
+		auto ctrl = dynamic_cast<ContentControl^>(_canvas->Children->GetAt(i));
+		if (ctrl)
+		{
+			// по тегу проверяем, что нота принадлежит текущей дорожке
+			auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
+			if (((Text^)ctrl->Tag == current || (Text^)ctrl->Tag == data->ControlText) && (psym != nullptr))
+			{
+				// если это нота того же типа в этом же положенииы
+				if (psym->_pos->EQ(pos) && (psym->_sym->GetSymType() == type))
+				{
+					_canvas->Children->RemoveAt(i);
+					continue;
+				}
+			}
+		}
+		i++;
+	}
+}
+
 ContentControl ^ SketchMusic::View::TextRow::GetSymbolView(PositionedSymbol ^ symbol)
 {
 	for (auto&& child : _canvas->Children)
@@ -469,7 +512,8 @@ ContentControl ^ SketchMusic::View::TextRow::GetSymbolView(PositionedSymbol ^ sy
 	return nullptr;
 }
 
-int SketchMusic::View::TextRow::GetControlIndexAtPos(Cursor^ pos, int offset)
+int SketchMusic::View::TextRow::GetControlIndexAtPos(Cursor^ pos, 
+													 int offset)
 {
 	//int lookupIndex = pos->getBeat()*initialised + pos->getTick() * scale / TICK_IN_BEAT * initialised / scale;
 	int dif = pos->Beat - _startPos->Beat;
@@ -480,7 +524,8 @@ int SketchMusic::View::TextRow::GetControlIndexAtPos(Cursor^ pos, int offset)
 
 // по факту нам сам контрол редко бывает нужен, нужнее точка его левого верхнего угла
 // поэтому стоит возвращать Point
-ContentControl^ SketchMusic::View::TextRow::GetControlAtPos(Cursor^ pos, int offset)
+ContentControl^ SketchMusic::View::TextRow::GetControlAtPos(Cursor^ pos, 
+															int offset)
 {
 	int currentIndex = 0;
 	int lookupIndex = GetControlIndexAtPos(pos, offset);
@@ -510,7 +555,8 @@ ContentControl^ SketchMusic::View::TextRow::GetControlAtPos(Cursor^ pos, int off
 	return nullptr;
 }
 
-float SketchMusic::View::TextRow::CalculateTick(float offsetX, ContentControl ^ ctrl)
+float SketchMusic::View::TextRow::CalculateTick(float offsetX, 
+												ContentControl ^ ctrl)
 {
 	return static_cast<float>(((int)((offsetX + ctrl->Width / quantize / 4) / ctrl->Width * quantize)) * TICK_IN_BEAT / quantize);
 	//int tick = (int)(offset.X / ctrl->Width * TICK_IN_BEAT * scale / TICK_IN_BEAT) * TICK_IN_BEAT / scale;
@@ -520,7 +566,8 @@ float SketchMusic::View::TextRow::CalculateTick(float offsetX, ContentControl ^ 
 // Следует передавать текущее вычисленное значение точки привязки. Может быть, стоит пересылать связку Ctrl-sender + Point относительно Ctrl'а,
 // этого должно быть достаточно, чтобы точно вычислить значение курсора, соответствующее текущей точке
 // Cursor GetPositionAtPoint(ContentControl, Point)
-Cursor^ SketchMusic::View::TextRow::GetPositionOfControl(Windows::UI::Xaml::Controls::ContentControl^ ctrl, Point offset)
+Cursor^ SketchMusic::View::TextRow::GetPositionOfControl(Windows::UI::Xaml::Controls::ContentControl^ ctrl, 
+														 Point offset)
 {
 	if ((_mainPanel == nullptr) || (ctrl == nullptr))
 		return nullptr;
@@ -575,7 +622,8 @@ Point SketchMusic::View::TextRow::GetCoordinatsOfPosition(Cursor^ pos)
 }
 
 // вспомогательная функция для тех случаев, когда у нас уже есть контрол и нам нужно только округлить x
-Point SketchMusic::View::TextRow::GetCoordinatsOfControl(Windows::UI::Xaml::Controls::ContentControl^ ctrl, Point offset)
+Point SketchMusic::View::TextRow::GetCoordinatsOfControl(Windows::UI::Xaml::Controls::ContentControl^ ctrl, 
+														 Point offset)
 {
 	if ((_mainPanel == nullptr) || (ctrl == nullptr))
 		return Point(0, 0);
@@ -629,6 +677,15 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 			}
 		}
 		break;
+	case SketchMusic::SymbolType::SCALE:
+	{
+		if (_dict->HasKey("ctrlKeyForeground"))
+		{
+			auto brush = reinterpret_cast<Windows::UI::Xaml::Media::Brush^>(_dict->Lookup("ctrlKeyForeground"));
+			ctrl->Background = brush;
+		}
+		break;
+	}
 	case SketchMusic::SymbolType::NPART:
 	case SketchMusic::SymbolType::TEMPO:
 	default:
@@ -665,6 +722,22 @@ double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
 		}
 		break;
 	}
+	case SymbolType::RNOTE:
+	{
+		INote^ inote = dynamic_cast<INote^>(sym);
+		if (inote)
+		{
+			// TODO : сделать расчёт похитрее, чтобы выглядело как на нотном стане
+			// В том числе разрещить вылезать за пределы, увеличивая тем самым высоту строки
+			// (чтобы строки не налезали друг на друга)
+			offsetY = inote->_val >= 0 ?
+				-abs(inote->_val) % 12 :
+				-12 * ((inote->_val % 12) != 0) + abs(inote->_val) % 12;
+			offsetY *= RowHeight / 12;
+			offsetY += RowHeight - 5;
+		}
+		break;
+	}
 	case SymbolType::GNOTE:
 	{
 		SGNote^ gnote = dynamic_cast<SGNote^>(sym);
@@ -680,9 +753,19 @@ double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
 		offsetY = RowHeight - 14;
 		break;
 	}
+	case SymbolType::SCALE:
+	{
+		offsetY = -0.05 * RowHeight;
+		break;
+	}
+	case SymbolType::HARMONY:
+	{
+		offsetY = 1.05 * RowHeight;
+		break;
+	}
 	default:
 	{
-		offsetY = -14;
+		offsetY = -10;
 		break;
 	}
 	}
@@ -701,14 +784,19 @@ void SketchMusic::View::TextRow::SetNoteOnCanvas(ContentControl ^ note)
 	_canvas->SetTop(note, point.Y + offsetY);
 }
 
-void SketchMusic::View::TextRow::SetSymbolView(PositionedSymbol ^ oldSymbol, PositionedSymbol^ newSymbol)
+void SketchMusic::View::TextRow::SetSymbolView(PositionedSymbol^ oldSymbol, 
+											   PositionedSymbol^ newSymbol)
 {
 	auto ctrl = GetSymbolView(oldSymbol);
-	ctrl->DataContext = newSymbol;
-	SetNoteOnCanvas(ctrl);
+	if (ctrl)
+	{
+		ctrl->DataContext = newSymbol;
+		SetNoteOnCanvas(ctrl);
+	}
 }
 
-void SketchMusic::View::TextRow::OpenPlaceholderContextDialog(ContentControl^ ctrl, Windows::Foundation::Point point)
+void SketchMusic::View::TextRow::OpenPlaceholderContextDialog(ContentControl^ ctrl, 
+															  Windows::Foundation::Point point)
 {
 	if (CurrentHolded) return;
 	if (ctrl == nullptr) return;
@@ -718,7 +806,8 @@ void SketchMusic::View::TextRow::OpenPlaceholderContextDialog(ContentControl^ ct
 	PlaceholderContextMenu->ShowAt(ctrl, point);
 }
 
-void SketchMusic::View::TextRow::OnRightTapped(Platform::Object ^sender, Windows::UI::Xaml::Input::RightTappedRoutedEventArgs ^e)
+void SketchMusic::View::TextRow::OnRightTapped(Platform::Object ^sender, 
+											   Windows::UI::Xaml::Input::RightTappedRoutedEventArgs ^e)
 {
 	// не пропускаем тач
 	if (e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Touch)
@@ -730,7 +819,8 @@ void SketchMusic::View::TextRow::OnRightTapped(Platform::Object ^sender, Windows
 }
 
 
-void SketchMusic::View::TextRow::OnHolding(Platform::Object ^sender, Windows::UI::Xaml::Input::HoldingRoutedEventArgs ^e)
+void SketchMusic::View::TextRow::OnHolding(Platform::Object ^sender, 
+										   Windows::UI::Xaml::Input::HoldingRoutedEventArgs ^e)
 {
 	// пропускаем только нажатие тачем
 	if ((e->PointerDeviceType == Windows::Devices::Input::PointerDeviceType::Mouse) ||

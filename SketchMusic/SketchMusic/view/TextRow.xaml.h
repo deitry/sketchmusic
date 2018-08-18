@@ -109,6 +109,7 @@ public:
 	// работа с отдельными символами
 	void AddSymbolView(Text^ source, PositionedSymbol^ symbol);
 	void DeleteSymbolView(PositionedSymbol^ symbol);
+	void DeleteSymbolViews(Cursor^ pos, SymbolType type);
 	ContentControl^ GetSymbolView(PositionedSymbol^ symbol);
 	void SetSymbolView(PositionedSymbol^ oldSymbol, PositionedSymbol^ newSymbol);
 

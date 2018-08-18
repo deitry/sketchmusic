@@ -34,6 +34,24 @@ namespace SketchMusic
 	ref class Composition;
 	ref class PositionedIdea;
 	
+	public enum class NoteType
+	{
+		A	= 0,
+		As	= 1,
+		B	= 2,
+		C	= 3,
+		Cs	= 4,
+		D	= 5,
+		Ds	= 6,
+		E	= 7,
+		F	= 8,
+		Fs	= 9,
+		G	= 10,
+		Gs	= 11,
+	};
+
+	Platform::String^ noteTypeToString(NoteType note);
+
 	public enum class IdeaCategoryEnum
 		// категория, к которой относится идея. Будет использоваться 
 		// для выбора отображения редактора идеи и для сортировки. Может ещё где-нибудь
@@ -89,8 +107,6 @@ namespace SketchMusic
 	ref class Instrument;
 	ref class InstrumentToTextConverter;
 
-	
-
 	// внутренняя структура
 
 	// список используемых типов символов
@@ -127,7 +143,6 @@ namespace SketchMusic
 		{
 			if (value == nullptr) return nullptr;
 			IdeaCategoryEnum type = (IdeaCategoryEnum)(value);
-			//int res = static_cast<int>(type);
 			switch (type)
 			{
 			case IdeaCategoryEnum::chord: return "Аккорд";
@@ -165,7 +180,6 @@ namespace SketchMusic
 		{
 			if (value == nullptr) return nullptr;
 			IdeaCategoryEnum type = (IdeaCategoryEnum)(value);
-			//int res = static_cast<int>(type);
 			switch (type)
 			{
 			case IdeaCategoryEnum::chord: return "Аккорд";
@@ -213,7 +227,6 @@ namespace SketchMusic
 		property int _val;
 		property int _velocity;
 		property int _voice;
-		//property Platform::String^ str; // ? для будущего, когда появятся слова и подписи
 	};
 
 	[Windows::Foundation::Metadata::WebHostHiddenAttribute]
@@ -245,7 +258,6 @@ namespace SketchMusic
 
 		// Унаследовано через ISymbol
 		virtual bool EQ(ISymbol ^ second);
-		//virtual Platform::String^ Serialize() { return "space"; }
 	};
 
 
@@ -255,22 +267,6 @@ namespace SketchMusic
 	//const int TenorClef		= 0;
 	//const int BaritoneClef	= 0;
 
-
-	public ref class SClef sealed : public SketchMusic::ISymbol
-	{
-	public:
-		SClef() {}
-		SClef(int val) { bottom = val; }
-
-		property int bottom; // устанавливает высоту звука для нижней линии на нотном стане.
-		
-		virtual SymbolType GetSymType() { return SymbolType::CLEF; }
-		virtual Platform::String^ ToString() { return "Clef"; }
-
-		// Унаследовано через ISymbol
-		virtual bool EQ(ISymbol ^ second);
-	};
-
 	partial ref class SNewPart;
 	partial ref class PartDefinition;
 
@@ -278,35 +274,47 @@ namespace SketchMusic
 	partial ref class SRNote;
 	partial ref class SGNote;
 	partial ref class SNoteEnd;
+	partial ref class SScale;
 
 	public enum class Degree
 	{
-		I,
-		II,
-		III,
-		IV,
-		V,
-		VI,
-		VII,
+		I	= 1,
+		II	= 2,
+		III	= 3,
+		IV	= 4,
+		V	= 5,
+		VI	= 6,
+		VII	= 7,
 	};
 
+	// нормальное положение отсчитывается относительно мажора
 	public enum class DegreeInfo
 	{
-		Normal,
-		Dim,
-		Aug,
+		Tone = 0,
+		Dim = 1,
+		Aug = 2,
 	};
 
+	public enum class DegreeMod
+	{
+		Normal = 0,
+		Flat = -1,
+		Sharp = 1,
+	};
+
+	// текущая гармония будет определяться символом текущей ступени,
+	// от которой будут "отсчитываться" относительные ноты
 	public ref class SHarmony sealed : public ISymbol
 	{
 	public:
+		SHarmony(int val) { _val = val; }
+
 		// Унаследовано через ISymbol
 		virtual SymbolType GetSymType() { return SymbolType::HARMONY; };
-		virtual Platform::String ^ ToString() { return "SHarmony"; };
+		virtual Platform::String ^ ToString();
 		virtual bool EQ(ISymbol ^ second);
 
-		property Degree baseDegree;
-		// TODO: мапа (int степень, DegreeInfo тип) - так будут добавляться все другие ступени, формируя произвольный аккорд
+		property int _val;
 	};
 
 	// переименовать в LinStart и пусть он хранит всю необходимую информацию
@@ -324,7 +332,6 @@ namespace SketchMusic
 
 		// Унаследовано через ISymbol
 		virtual bool EQ(ISymbol ^ second);
-		//virtual Platform::String^ Serialize() { return "nline"; }
 	};
 
 	/**
@@ -342,7 +349,6 @@ namespace SketchMusic
 
 		// Унаследовано через ISymbol
 		virtual bool EQ(ISymbol ^ second);
-		//virtual Platform::String^ Serialize() { return "string," + value; }
 	};
 
 	namespace SerializationTokens
@@ -368,6 +374,15 @@ namespace SketchMusic
 		static Platform::String^ PART_CAT = "s";		// категория части
 		static Platform::String^ PART_DYN = "d";		// динамика части
 
+		static Platform::String^ SCALE_BASE = "s";		// базовая нота гаммы
+		static Platform::String^ SCALE_1 = "I";			// первая ступень гаммы
+		static Platform::String^ SCALE_2 = "II";		// вторая ступень гаммы
+		static Platform::String^ SCALE_3 = "III";		// 
+		static Platform::String^ SCALE_4 = "IV";		// 
+		static Platform::String^ SCALE_5 = "V";			// 
+		static Platform::String^ SCALE_6 = "VI";		// 
+		static Platform::String^ SCALE_7 = "VII";		// 
+
 		static Platform::String^ IDEA_HASH = "h";	// хеш
 		static Platform::String^ IDEA_NAME = "n";	// название идеи
 		static Platform::String^ IDEA_MOD = "m";	// время изменения
@@ -381,13 +396,23 @@ namespace SketchMusic
 		static Platform::String^ PIDEA_POS = "p";	// положение идеи в битах Beat
 		static Platform::String^ PIDEA_LEN = "l";	// длина идеи в битах Beat
 		static Platform::String^ PIDEA_LAY = "i";	// слой идеи
-		
+
+		static const std::map<Degree, Platform::String^> degreeSerializationString =
+		{
+			{ Degree::I,	SCALE_1 },
+			{ Degree::II,	SCALE_2 },
+			{ Degree::III,	SCALE_3 },
+			{ Degree::IV,	SCALE_4 },
+			{ Degree::V,	SCALE_5 },
+			{ Degree::VI,	SCALE_6 },
+			{ Degree::VII,	SCALE_7 },
+		};
 	}
 
 	// классы для обеспечения модели синтеза SoundFont
 	// Наберём все возможные, потом выпилим ненужне
-	namespace SFReader{
-
+	namespace SFReader
+	{
 		ref class SFInstrument;
 		ref class SFInstrumentZone;
 		ref class SFPresetZone;
@@ -709,6 +734,8 @@ namespace SketchMusic
 			precount		= 32,	// установить предварительные тики перед проигрыванием
 			accent			= 33,	// акцентирование
 			eraser			= 35,	// "ластик"
+			scale			= 40,	// гамма
+			harmony			= 41,	// ступень гармонии
 		};
 
 		public enum class KeyboardStateEnum
@@ -772,6 +799,8 @@ namespace SketchMusic
 			Modulators	= 5,	// "модуляторы" для "относительных" нот. Сейчас предполагается, что это будут значения двух видов - ступень текущей гаммы
 								// или {ступень текущей; ступень следующей гаммы} - для переходов между гаммами - ступень одной становится ступенью другой	
 								// ? будет полезно?
+			Scale		= 6,
+			Harmony		= 7,
 			Controls	= 10,	// надо было их сделать 0
 		};
 		

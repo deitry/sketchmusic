@@ -244,6 +244,7 @@ SketchMusic::CompositionData::CompositionData()
 	ControlText = ref new Text(ref new Instrument(SerializationTokens::CONTROL_TEXT));
 	this->texts = ref new Platform::Collections::Vector < Text^ >;
 	BPM = 120;
+	scale = ref new SScale(NoteType::A, ScaleCategory::Minor);
 }
 
 IJsonValue^ SketchMusic::Composition::Serialize()

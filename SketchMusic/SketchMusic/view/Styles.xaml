@@ -17,6 +17,8 @@
     <x:Double x:Key="PlaceholderWidth">6.0</x:Double>
     <x:Double x:Key="SymbolWidth">18.0</x:Double>
     <x:Double x:Key="SymbolHeight">13.0</x:Double>
+    <x:Double x:Key="RSymbolWidth">25.0</x:Double>
+    <x:Double x:Key="RSymbolHeight">20.0</x:Double>
     <x:Double x:Key="GSymbolWidth">30.0</x:Double>
     <x:Double x:Key="GSymbolHeight">25.0</x:Double>
     <x:Double x:Key="LineSpacing">15</x:Double>
@@ -196,6 +198,24 @@
         </Grid>
     </ControlTemplate>
 
+    <ControlTemplate TargetType="ContentControl" x:Key="RNoteControlTemplate">
+        <Grid BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+            <Rectangle x:Name="symbolEllipse" 
+                       Stroke="{TemplateBinding Background}" 
+                       StrokeThickness="3"
+                       Fill="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                       Width="{TemplateBinding Width}" 
+                       Height="{TemplateBinding Height}"
+                       />
+
+            <TextBlock x:Name="symbolTextBlock"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Foreground="{ThemeResource SystemControlBackgroundBaseHighBrush}">
+                <Run FontFamily="Segoe MDL2 Assets" Text="{Binding DataContext, RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource possym2text}}"/>
+            </TextBlock>
+        </Grid>
+    </ControlTemplate>
+
     <Style TargetType="ContentControl" x:Key="SymbolControlStyle" x:Name="SymbolControlStyle">
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="Foreground" Value="Transparent"/>
@@ -213,8 +233,21 @@
         <Setter Property="Width" Value="{StaticResource GSymbolWidth}"/>
         <Setter Property="Height" Value="{StaticResource GSymbolHeight}"/>
         <Setter Property="Template" Value="{StaticResource GNoteControlTemplate}"/>
+    </Style>
 
 
+    <Style TargetType="ContentControl" x:Key="HarmonyCtrlStyle" x:Name="HarmonyCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">
+        <Setter Property="Background" Value="{StaticResource tempoBackground}"/>
+        <Setter Property="Width" Value="{StaticResource GSymbolWidth}"/>
+        <Setter Property="Height" Value="{StaticResource GSymbolHeight}"/>
+        <Setter Property="Template" Value="{StaticResource GNoteControlTemplate}"/>
+    </Style>
+
+    <Style TargetType="ContentControl" x:Key="RelativeNoteCtrlStyle" x:Name="RelativeNoteCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">
+        <Setter Property="Background" Value="{StaticResource tempoBackground}"/>
+        <Setter Property="Width" Value="{StaticResource RSymbolWidth}"/>
+        <Setter Property="Height" Value="{StaticResource RSymbolHeight}"/>
+        <Setter Property="Template" Value="{StaticResource RNoteControlTemplate}"/>
     </Style>
 
     <Style TargetType="ContentControl" x:Key="SymbolCtrlStyle" x:Name="SymbolCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">
@@ -223,6 +256,14 @@
         <Setter Property="Height" Value="{StaticResource GSymbolHeight}"/>
         <Setter Property="Template" Value="{StaticResource SymbolControlTemplate}"/>
     </Style>
+
+    <Style TargetType="ContentControl" x:Key="ScaleCtrlStyle" x:Name="ScaleCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">
+        <Setter Property="Background" Value="{StaticResource ctrlKeyForeground}"/>
+        <Setter Property="Width" Value="{StaticResource GSymbolWidth}"/>
+        <Setter Property="Height" Value="{StaticResource GSymbolHeight}"/>
+        <Setter Property="Template" Value="{StaticResource GNoteControlTemplate}"/>
+    </Style>
+
 
     <ControlTemplate x:Key="PlaceholderControlTemplate">
 

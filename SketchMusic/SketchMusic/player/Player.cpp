@@ -4,6 +4,10 @@
 #include "../base/Cursor.h"
 #include "../base/Symbol.h"
 #include "../base/STempo.h"
+#include "../base/SNote.h"
+#include "../base/SRNote.h"
+#include "../base/SGNote.h"
+#include "../base/SScale.h"
 #include "../base/Text.h"
 #include "../base/Idea.h"
 #include "../base/Composition.h"
@@ -27,15 +31,17 @@ SketchMusic::Player::Player::Player()
 	this->_cursor = ref new SketchMusic::Cursor;
 	needMetronome = true;
 	_BPM = 120;
+	_scale = ref new SScale(NoteType::C, ScaleCategory::Minor);
+	_harmony = ref new SHarmony(0);
 	cycling = false;
 	needPlayGeneric = true;
 	StopAtLast = true;
 	quantize = 4;
 
-	// do - чтобы можно было "скипнуть" инициализацию, если то-то не удалось
+	// do - С‡С‚РѕР±С‹ РјРѕР¶РЅРѕ Р±С‹Р»Рѕ "СЃРєРёРїРЅСѓС‚СЊ" РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ, РµСЃР»Рё С‚Рѕ-С‚Рѕ РЅРµ СѓРґР°Р»РѕСЃСЊ
 	do
 	{
-		// создаём объект XAudio2
+		// СЃРѕР·РґР°С‘Рј РѕР±СЉРµРєС‚ XAudio2
 		HRESULT hr = XAudio2Create(&pXAudio2);
 		if (FAILED(hr))
 		{
@@ -43,7 +49,7 @@ SketchMusic::Player::Player::Player()
 			break;
 		}
 
-		// создаём мастеринговый голос
+		// СЃРѕР·РґР°С‘Рј РјР°СЃС‚РµСЂРёРЅРіРѕРІС‹Р№ РіРѕР»РѕСЃ
 		hr = pXAudio2->CreateMasteringVoice(&pMasteringVoice);
 		if (FAILED(hr))
 		{
@@ -57,15 +63,15 @@ SketchMusic::Player::Player::Player()
 }
 
 /**
-Метод проигрывает указанную ноту с продолжительностью по умолчанию.
-Используется для проигрывания ноты при нажатии на клавиатуру
-Возможно, стоит объединить с методом playNotes или сделать перегрузкой...
+РњРµС‚РѕРґ РїСЂРѕРёРіСЂС‹РІР°РµС‚ СѓРєР°Р·Р°РЅРЅСѓСЋ РЅРѕС‚Сѓ СЃ РїСЂРѕРґРѕР»Р¶РёС‚РµР»СЊРЅРѕСЃС‚СЊСЋ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ.
+РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РїСЂРѕРёРіСЂС‹РІР°РЅРёСЏ РЅРѕС‚С‹ РїСЂРё РЅР°Р¶Р°С‚РёРё РЅР° РєР»Р°РІРёР°С‚СѓСЂСѓ
+Р’РѕР·РјРѕР¶РЅРѕ, СЃС‚РѕРёС‚ РѕР±СЉРµРґРёРЅРёС‚СЊ СЃ РјРµС‚РѕРґРѕРј playNotes РёР»Рё СЃРґРµР»Р°С‚СЊ РїРµСЂРµРіСЂСѓР·РєРѕР№...
 */
 void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note, SketchMusic::Instrument^ instrument, int duration, SketchMusic::Player::NoteOff^ noteOff)
 {
 	auto playNote = concurrency::create_task([=]
 	{
-		// если имеющийся не устраивает
+		// РµСЃР»Рё РёРјРµСЋС‰РёР№СЃСЏ РЅРµ СѓСЃС‚СЂР°РёРІР°РµС‚
 		if (_keyboardEngine && (!_keyboardEngine->getInstrument()->EQ(instrument)))
 		{
 			_engines->ReleaseSoundEngine(_keyboardEngine);
@@ -90,50 +96,54 @@ void SketchMusic::Player::Player::playMetronome()
 	static SNote^ note = ref new SNote(17);
 	if (_metronome)
 	{
-		_metronome->Play(note, 20, nullptr); // TODO : незачем каждый раз создавать новую ноту, можно хранить значение
+		_metronome->Play(note, 20, nullptr); // TODO : РЅРµР·Р°С‡РµРј РєР°Р¶РґС‹Р№ СЂР°Р· СЃРѕР·РґР°РІР°С‚СЊ РЅРѕРІСѓСЋ РЅРѕС‚Сѓ, РјРѕР¶РЅРѕ С…СЂР°РЅРёС‚СЊ Р·РЅР°С‡РµРЅРёРµ
 	}
 }
 
 
-// Для проигрывания идей и прочей мелочи
+// Р”Р»СЏ РїСЂРѕРёРіСЂС‹РІР°РЅРёСЏ РёРґРµР№ Рё РїСЂРѕС‡РµР№ РјРµР»РѕС‡Рё
 void SketchMusic::Player::Player::playText(CompositionData^ data, Cursor^ pos) //, SketchMusic::Cursor^ end
 {
 	playText(data, nullptr, pos);
 }
 
 /**
-Принимает данные о композиции и проигрывает их начиная с pos (а может и с нуля, в зависимости от настроек)
+РџСЂРёРЅРёРјР°РµС‚ РґР°РЅРЅС‹Рµ Рѕ РєРѕРјРїРѕР·РёС†РёРё Рё РїСЂРѕРёРіСЂС‹РІР°РµС‚ РёС… РЅР°С‡РёРЅР°СЏ СЃ pos (Р° РјРѕР¶РµС‚ Рё СЃ РЅСѓР»СЏ, РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ РЅР°СЃС‚СЂРѕРµРє)
 */
-void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLibrary^ lib, Cursor^ pos) //, SketchMusic::Cursor^ end
+void SketchMusic::Player::Player::playText(CompositionData^ data, 
+										   CompositionLibrary^ lib, 
+										   Cursor^ pos)
 {
-	// - для каждой из дорожек инициализировать инструмент
-	// - - создать по соурс войсу на каждый семпл
-	// - - если такой инструмент уже проинициализирован, не трогать
-	// - пройтись по всем нотам
+	// - РґР»СЏ РєР°Р¶РґРѕР№ РёР· РґРѕСЂРѕР¶РµРє РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ РёРЅСЃС‚СЂСѓРјРµРЅС‚
+	// - - СЃРѕР·РґР°С‚СЊ РїРѕ СЃРѕСѓСЂСЃ РІРѕР№СЃСѓ РЅР° РєР°Р¶РґС‹Р№ СЃРµРјРїР»
+	// - - РµСЃР»Рё С‚Р°РєРѕР№ РёРЅСЃС‚СЂСѓРјРµРЅС‚ СѓР¶Рµ РїСЂРѕРёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅ, РЅРµ С‚СЂРѕРіР°С‚СЊ
+	// - РїСЂРѕР№С‚РёСЃСЊ РїРѕ РІСЃРµРј РЅРѕС‚Р°Рј
 	this->_state = s::PLAY;
 
 	SketchMusic::Cursor^ cursor = ref new SketchMusic::Cursor(pos);
 	_cursor = cursor;
 
 	// ----
-	// Этап 1: собираем итераторы со всего набора текстов, которые указывают
-	// на ноты, ближайшие к данному положению курсора.
-	// Заодно инициализируем SoundEngine, отвечающие за инструменты, связанные с текстом, если таковые ещё не проинициализированы
+	// Р­С‚Р°Рї 1: СЃРѕР±РёСЂР°РµРј РёС‚РµСЂР°С‚РѕСЂС‹ СЃРѕ РІСЃРµРіРѕ РЅР°Р±РѕСЂР° С‚РµРєСЃС‚РѕРІ, РєРѕС‚РѕСЂС‹Рµ СѓРєР°Р·С‹РІР°СЋС‚
+	// РЅР° РЅРѕС‚С‹, Р±Р»РёР¶Р°Р№С€РёРµ Рє РґР°РЅРЅРѕРјСѓ РїРѕР»РѕР¶РµРЅРёСЋ РєСѓСЂСЃРѕСЂР°.
+	// Р—Р°РѕРґРЅРѕ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј SoundEngine, РѕС‚РІРµС‡Р°СЋС‰РёРµ Р·Р° РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹, СЃРІСЏР·Р°РЅРЅС‹Рµ СЃ С‚РµРєСЃС‚РѕРј, РµСЃР»Рё С‚Р°РєРѕРІС‹Рµ РµС‰С‘ РЅРµ РїСЂРѕРёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°РЅС‹
 	auto iterMap 
-		= new std::vector< std::pair<SketchMusic::Player::ISoundEngine^, std::pair<IIterator < SketchMusic::PositionedSymbol^ > ^, IVector< SketchMusic::PositionedSymbol^ > ^> > >;
+		= new std::vector< std::pair<SketchMusic::Player::ISoundEngine^, 
+									 std::pair<IIterator < SketchMusic::PositionedSymbol^ > ^, 
+											   IVector< SketchMusic::PositionedSymbol^ > ^> > >;
 
-		// поиск стартового положения
+		// РїРѕРёСЃРє СЃС‚Р°СЂС‚РѕРІРѕРіРѕ РїРѕР»РѕР¶РµРЅРёСЏ
 	auto getIterators = concurrency::create_task([data, iterMap, this, cursor]
 	{
-		// Обработка основных текстов
+		// РћР±СЂР°Р±РѕС‚РєР° РѕСЃРЅРѕРІРЅС‹С… С‚РµРєСЃС‚РѕРІ
 		for (auto text : data->texts)
 		{
-			// получаем список символов в данном тексте
+			// РїРѕР»СѓС‡Р°РµРј СЃРїРёСЃРѕРє СЃРёРјРІРѕР»РѕРІ РІ РґР°РЅРЅРѕРј С‚РµРєСЃС‚Рµ
 			auto symbols = text->getText();
-			// находим ближайший к старту символ (ПОСЛЕ старта)
+			// РЅР°С…РѕРґРёРј Р±Р»РёР¶Р°Р№С€РёР№ Рє СЃС‚Р°СЂС‚Сѓ СЃРёРјРІРѕР» (РџРћРЎР›Р• СЃС‚Р°СЂС‚Р°)
 			
-			// с помощью iter мы учитываем все ноты, которые находятся в той точке, откуда мы начинаем
-			// startIter обозначает ту самую точку.
+			// СЃ РїРѕРјРѕС‰СЊСЋ iter РјС‹ СѓС‡РёС‚С‹РІР°РµРј РІСЃРµ РЅРѕС‚С‹, РєРѕС‚РѕСЂС‹Рµ РЅР°С…РѕРґСЏС‚СЃСЏ РІ С‚РѕР№ С‚РѕС‡РєРµ, РѕС‚РєСѓРґР° РјС‹ РЅР°С‡РёРЅР°РµРј
+			// startIter РѕР±РѕР·РЅР°С‡Р°РµС‚ С‚Сѓ СЃР°РјСѓСЋ С‚РѕС‡РєСѓ.
 			auto iter = symbols->First();
 			auto startIter = symbols->First();
 
@@ -146,7 +156,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 				else if (!initialized)
 				{
 					initialized = true;
-					// отыскиваем среди енжинов подходящий
+					// РѕС‚С‹СЃРєРёРІР°РµРј СЃСЂРµРґРё РµРЅР¶РёРЅРѕРІ РїРѕРґС…РѕРґСЏС‰РёР№
 					ISoundEngine^ engine = this->_engines->GetSoundEngine(text->instrument);
 					auto cur = startIter->HasCurrent ? startIter->Current : nullptr;
 					iterMap->push_back(std::make_pair(engine, std::make_pair(startIter, symbols)));
@@ -155,18 +165,18 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 
 				if (p->LE(cursor))
 				{
-					// обработка системных параметров - учитываем все возможные модуляции
-					// темп перенесён в ControlText, так что тут пока ничего нет	
+					// РѕР±СЂР°Р±РѕС‚РєР° СЃРёСЃС‚РµРјРЅС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ - СѓС‡РёС‚С‹РІР°РµРј РІСЃРµ РІРѕР·РјРѕР¶РЅС‹Рµ РјРѕРґСѓР»СЏС†РёРё
+					// С‚РµРјРї РїРµСЂРµРЅРµСЃС‘РЅ РІ ControlText, С‚Р°Рє С‡С‚Рѕ С‚СѓС‚ РїРѕРєР° РЅРёС‡РµРіРѕ РЅРµС‚	
 
-					// проматываем
+					// РїСЂРѕРјР°С‚С‹РІР°РµРј
 					iter->MoveNext();
 
-					// если мы достигли последней ноты, а наш курсор ещё дальше
-					// TODO : сбрасывать на ноль только если ни в каком из текстов нот дальше чем курсор
-					// оставили эту возможность только если включён cycling
+					// РµСЃР»Рё РјС‹ РґРѕСЃС‚РёРіР»Рё РїРѕСЃР»РµРґРЅРµР№ РЅРѕС‚С‹, Р° РЅР°С€ РєСѓСЂСЃРѕСЂ РµС‰С‘ РґР°Р»СЊС€Рµ
+					// TODO : СЃР±СЂР°СЃС‹РІР°С‚СЊ РЅР° РЅРѕР»СЊ С‚РѕР»СЊРєРѕ РµСЃР»Рё РЅРё РІ РєР°РєРѕРј РёР· С‚РµРєСЃС‚РѕРІ РЅРѕС‚ РґР°Р»СЊС€Рµ С‡РµРј РєСѓСЂСЃРѕСЂ
+					// РѕСЃС‚Р°РІРёР»Рё СЌС‚Сѓ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ С‚РѕР»СЊРєРѕ РµСЃР»Рё РІРєР»СЋС‡С‘РЅ cycling
 					if (cycling && (iter->HasCurrent == false) && (p->LT(cursor)))
 					{
-						// играем сначала
+						// РёРіСЂР°РµРј СЃРЅР°С‡Р°Р»Р°
 						cursor->setPos(0);
 						iter = symbols->First();
 						startIter = symbols->First();
@@ -175,38 +185,55 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 			}
 		}
 
-		// Обработка управляющего текста - положение курсора уже определено
-		// получаем список символов в данном тексте
+		// РћР±СЂР°Р±РѕС‚РєР° СѓРїСЂР°РІР»СЏСЋС‰РµРіРѕ С‚РµРєСЃС‚Р° - РїРѕР»РѕР¶РµРЅРёРµ РєСѓСЂСЃРѕСЂР° СѓР¶Рµ РѕРїСЂРµРґРµР»РµРЅРѕ
+		// РїРѕР»СѓС‡Р°РµРј СЃРїРёСЃРѕРє СЃРёРјРІРѕР»РѕРІ РІ РґР°РЅРЅРѕРј С‚РµРєСЃС‚Рµ
 		auto symbols = data->ControlText->getText();
-		// находим ближайший к старту символ (ПОСЛЕ старта)
+		// РЅР°С…РѕРґРёРј Р±Р»РёР¶Р°Р№С€РёР№ Рє СЃС‚Р°СЂС‚Сѓ СЃРёРјРІРѕР» (РџРћРЎР›Р• СЃС‚Р°СЂС‚Р°)
 		auto iter = symbols->First();
 		auto startIter = symbols->First();
 		_BPM = data->BPM;
+		_scale = data->scale;
+
 		while (iter->HasCurrent)
 		{
 			auto p = iter->Current->_pos;
 		
 			if (p->LE(cursor))
 			{
-				// обработка системных параметров - учитываем все возможные модуляции
+				// РѕР±СЂР°Р±РѕС‚РєР° СЃРёСЃС‚РµРјРЅС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ - СѓС‡РёС‚С‹РІР°РµРј РІСЃРµ РІРѕР·РјРѕР¶РЅС‹Рµ РјРѕРґСѓР»СЏС†РёРё
 				auto tempo = dynamic_cast<STempo^>(iter->Current->_sym);
 				if (tempo)
 				{
 					_BPM = tempo->value;
 				}
+
+				auto scale = dynamic_cast<SScale^>(iter->Current->_sym);
+				if (scale)
+				{
+					_scale = scale;
+				}
+
+				auto harmony = dynamic_cast<SHarmony^>(iter->Current->_sym);
+				if (harmony)
+				{
+					_harmony = harmony;
+				}
 		
-				// проматываем
+				// РїСЂРѕРјР°С‚С‹РІР°РµРј
 				iter->MoveNext();
 				if (p->LT(cursor)) startIter->MoveNext();
 			}
 			else
 			{
-				iterMap->push_back(std::make_pair(nullptr, std::make_pair(startIter, symbols)));
+				// РІСЃС‚Р°РІР»СЏРµРј СѓРїСЂР°РІР»СЏСЋС‰РёР№ С‚РµРєСЃС‚ СЃР°РјС‹Рј РїРµСЂРІС‹Рј, 
+				// С‡С‚РѕР±С‹ РѕРЅ СѓСЃРїРµРІР°Р» РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊСЃСЏ СЂР°РЅСЊС€Рµ РґСЂСѓРіРёС…
+				iterMap->insert(iterMap->begin(), 
+								std::make_pair(nullptr, std::make_pair(startIter, symbols)));
 				break;
 			}
 		}
 	})
-		// прекаунт
+		// РїСЂРµРєР°СѓРЅС‚
 		.then([this, iterMap, cursor, data]
 	{
 		if (precount && recording)
@@ -219,8 +246,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 
 			while (actualCount >= 0 && _state != s::STOP)
 			{
-				// метроном
-				if (((tmp->Beat - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
+				// РјРµС‚СЂРѕРЅРѕРј
+				if (((tmp->Beat - pbeat) > 0)) // РґРѕР»Р¶РЅРѕ СЃСЂР°Р±Р°С‚С‹РІР°С‚СЊ, РєРѕРіРґР° РїРµСЂРµС…РѕРґРёРј РЅР° РЅРѕРІС‹Р№ Р±РёС‚
 				{
 					playMetronome();
 					actualCount--;
@@ -236,7 +263,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 		}
 	})
 		
-		// основное проигрывание
+		// РѕСЃРЅРѕРІРЅРѕРµ РїСЂРѕРёРіСЂС‹РІР°РЅРёРµ
 		.then([this, iterMap, cursor] //, end
 	{
 		auto tempState = _state;
@@ -247,9 +274,9 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 
 		while (tempState == s::PLAY)
 		{
-			// запустить асинхронно
+			// Р·Р°РїСѓСЃС‚РёС‚СЊ Р°СЃРёРЅС…СЂРѕРЅРЅРѕ
 			//concurrency::parallel_for_each(iterList->begin(), iterList->end(), [this](Windows::Foundation::Collections::IIterator<SketchMusic::PositionedSymbol^>^ iter)
-			// - один итератор = один текст = один инструмент = один саунденжин = несколько нот
+			// - РѕРґРёРЅ РёС‚РµСЂР°С‚РѕСЂ = РѕРґРёРЅ С‚РµРєСЃС‚ = РѕРґРёРЅ РёРЅСЃС‚СЂСѓРјРµРЅС‚ = РѕРґРёРЅ СЃР°СѓРЅРґРµРЅР¶РёРЅ = РЅРµСЃРєРѕР»СЊРєРѕ РЅРѕС‚
 			if (StopAtLast) tempState = s::WAIT;
 			else tempState = this->_state;
 
@@ -261,10 +288,12 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 					tempState = this->_state;
 					SketchMusic::Cursor^ pos = pIter->Current->_pos;
 
-					// выбираем все ноты в данной точке
+					// РІС‹Р±РёСЂР°РµРј РІСЃРµ РЅРѕС‚С‹ РІ РґР°РЅРЅРѕР№ С‚РѕС‡РєРµ
 					if (pos->LE(cursor))
 					{
-						Windows::Foundation::Collections::IVector<SketchMusic::INote^>^ notes = ref new Platform::Collections::Vector < SketchMusic::INote^ >;
+						auto notes = ref new Platform::Collections::Vector < SketchMusic::INote^ >;
+						auto rnotes = ref new Platform::Collections::Vector < SketchMusic::SRNote^ >;
+						
 						do
 						{
 							switch (pIter->Current->_sym->GetSymType())
@@ -279,9 +308,18 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 								}
 								break;
 							}
+							case SymbolType::RNOTE:
+							{
+								auto rnote = dynamic_cast<SketchMusic::SRNote^>(pIter->Current->_sym);
+								if (rnote)
+								{
+									rnotes->Append(rnote);
+								}
+								break;
+							}
 							case SymbolType::GNOTE:
 							{
-								// проигрываем чуть-чуть с помощью метронома, чтобы не заводить отдельный
+								// РїСЂРѕРёРіСЂС‹РІР°РµРј С‡СѓС‚СЊ-С‡СѓС‚СЊ СЃ РїРѕРјРѕС‰СЊСЋ РјРµС‚СЂРѕРЅРѕРјР°, С‡С‚РѕР±С‹ РЅРµ Р·Р°РІРѕРґРёС‚СЊ РѕС‚РґРµР»СЊРЅС‹Р№
 								auto note = dynamic_cast<SketchMusic::SGNote^>(pIter->Current->_sym);
 								if (needPlayGeneric)
 									_metronome->Play(ref new SNote(-24 + note->_valX + note->_valY*5), 40, nullptr);
@@ -290,35 +328,54 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 							case SymbolType::TEMPO:
 							{
 								auto tempo = dynamic_cast<SketchMusic::STempo^>(pIter->Current->_sym);
-								if (tempo)
-								{
-									_BPM = tempo->value;
-								}
+								if (tempo) _BPM = tempo->value;
+								break;
+							}
+							case SymbolType::SCALE:
+							{
+								auto scale = dynamic_cast<SketchMusic::SScale^>(pIter->Current->_sym);
+								if (scale) _scale = scale;
+								break;
+							}
+							case SymbolType::HARMONY:
+							{
+								auto harmony = dynamic_cast<SketchMusic::SHarmony^>(pIter->Current->_sym);
+								if (harmony) _harmony = harmony;
 								break;
 							}
 							}
 							pIter->MoveNext();
 						} while (pIter->HasCurrent && pIter->Current->_pos->LE(cursor));
 
-						// TODO : конкретизация относительных нот.
-						// Они должны конкретизирваться относительно нот вводимых в данный момент
-						// Заодно нужно отделить функцию проигрывания текущей позиции / одной доли?,
-						// чтобы успешно реализовать пошаговый ввод.
-						// Хотя в общем-то ничего больше вводить не надо, пошаговый ввод можно сделать уже на основе имеющихся функций.
+						for (auto&& rnote : rnotes)
+						{
+							// РєРѕРЅРєСЂРµС‚РёР·Р°С†РёСЏ РЅР° РѕСЃРЅРѕРІРµ SScale Рё SSharmony
+							int tone = static_cast<int>(_scale->_baseNote)
+								+ _harmony->_val
+								+ rnote->_val;
+
+							auto note = ref new SNote(tone);
+							if (note)
+							{
+								// РїСЂРѕРёРіСЂС‹РІР°РЅРёРµ
+								notes->Append(note);
+							}
+						}
+						
 						if (notes && notes->Size > 0 && iter->first)
 							iter->first->Play(notes);
 
-						// проматываем до следующего элемента
-						// без проверки на INote будем ловить все символы, в т.ч. новые строки и так далее
-						// Может, так оно и правильнее.
+						// РїСЂРѕРјР°С‚С‹РІР°РµРј РґРѕ СЃР»РµРґСѓСЋС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р°
+						// Р±РµР· РїСЂРѕРІРµСЂРєРё РЅР° INote Р±СѓРґРµРј Р»РѕРІРёС‚СЊ РІСЃРµ СЃРёРјРІРѕР»С‹, РІ С‚.С‡. РЅРѕРІС‹Рµ СЃС‚СЂРѕРєРё Рё С‚Р°Рє РґР°Р»РµРµ
+						// РњРѕР¶РµС‚, С‚Р°Рє РѕРЅРѕ Рё РїСЂР°РІРёР»СЊРЅРµРµ.
 						//while (pIter->HasCurrent && !(dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym)))
 						//{
 						//	pIter->MoveNext();
 						//	if (!(pIter->HasCurrent)) break;
 						//}
-					}
+					} // if (pos->LE(cursor))
 
-					// если уже пропустили символ, то переходим ко следующему, чтобы не возникало "зависаний"
+					// РµСЃР»Рё СѓР¶Рµ РїСЂРѕРїСѓСЃС‚РёР»Рё СЃРёРјРІРѕР», С‚Рѕ РїРµСЂРµС…РѕРґРёРј РєРѕ СЃР»РµРґСѓСЋС‰РµРјСѓ, С‡С‚РѕР±С‹ РЅРµ РІРѕР·РЅРёРєР°Р»Рѕ "Р·Р°РІРёСЃР°РЅРёР№"
 					if ((pIter->HasCurrent) && (pIter->Current->_pos->LT(cursor)))
 					{
 						do
@@ -327,11 +384,11 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 							if (!(pIter->HasCurrent)) break;
 						} while (!(dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym)));
 					}
-				}
+				} // if (pIter->HasCurrent)
 			};
 			
-			// метроном
-			if (needMetronome && ((cursor->Beat - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
+			// РјРµС‚СЂРѕРЅРѕРј
+			if (needMetronome && ((cursor->Beat - pbeat) > 0)) // РґРѕР»Р¶РЅРѕ СЃСЂР°Р±Р°С‚С‹РІР°С‚СЊ, РєРѕРіРґР° РїРµСЂРµС…РѕРґРёРј РЅР° РЅРѕРІС‹Р№ Р±РёС‚
 			{
 				playMetronome();
 			}
@@ -343,7 +400,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 			float offset = dif * _BPM * TICK_IN_BEAT / 60 / 1000000;
 			cursor->incTick(offset);
 
-			// квантизация
+			// РєРІР°РЅС‚РёР·Р°С†РёСЏ
 			static int prevQuant = -1;
 			static int prevBeat = -1;
 
@@ -354,13 +411,13 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 			if ((quant != prevQuant) || (beat != prevBeat))
 			{
 				Cursor^ pos = ref new Cursor(cursor);
-				pos->Tick = (float) quant * TICK_IN_BEAT / localQ;	// округляем до ближайшего кванта
+				pos->Tick = (float) quant * TICK_IN_BEAT / localQ;	// РѕРєСЂСѓРіР»СЏРµРј РґРѕ Р±Р»РёР¶Р°Р№С€РµРіРѕ РєРІР°РЅС‚Р°
 				CursorPosChanged(this, pos);
 				prevQuant = quant;
 				prevBeat = beat;
 			}
 
-			// остановка у конца - простой вариант
+			// РѕСЃС‚Р°РЅРѕРІРєР° Сѓ РєРѕРЅС†Р° - РїСЂРѕСЃС‚РѕР№ РІР°СЂРёР°РЅС‚
 			//if (end)
 			//{
 			//	if (end->LE(cursor) && !cycling)
@@ -385,11 +442,11 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, CompositionLib
 	
 	getIterators.wait();
 	unsigned int timeout = static_cast<unsigned int>(1000 * 60 / _BPM);
-	// для самой последней ноты
+	// РґР»СЏ СЃР°РјРѕР№ РїРѕСЃР»РµРґРЅРµР№ РЅРѕС‚С‹
 	concurrency::wait(timeout);
 	this->stop();
 	
-	// не забываем вернуть все взятые напрокат саунд енжины
+	// РЅРµ Р·Р°Р±С‹РІР°РµРј РІРµСЂРЅСѓС‚СЊ РІСЃРµ РІР·СЏС‚С‹Рµ РЅР°РїСЂРѕРєР°С‚ СЃР°СѓРЅРґ РµРЅР¶РёРЅС‹
 	for (auto iter = iterMap->begin(); iter != iterMap->end(); iter++)
 	{
 		_engines->ReleaseSoundEngine((*iter).first);
@@ -410,7 +467,7 @@ void SketchMusic::Player::Player::stopKeyboard()
 	}
 }
 
-// Запрашиваем у СаундПула данные о SF, чтобы иметь возможность их обрабатывать - например, получать список пресетов
+// Р—Р°РїСЂР°С€РёРІР°РµРј Сѓ РЎР°СѓРЅРґРџСѓР»Р° РґР°РЅРЅС‹Рµ Рѕ SF, С‡С‚РѕР±С‹ РёРјРµС‚СЊ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ РёС… РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ - РЅР°РїСЂРёРјРµСЂ, РїРѕР»СѓС‡Р°С‚СЊ СЃРїРёСЃРѕРє РїСЂРµСЃРµС‚РѕРІ
 SketchMusic::SFReader::SFData ^ SketchMusic::Player::Player::GetSFData(SketchMusic::Instrument ^ instrument)
 {
 	auto sf2engine = dynamic_cast<SketchMusic::Player::SFSoundEngine^>(_engines->GetSoundEngine(instrument));
