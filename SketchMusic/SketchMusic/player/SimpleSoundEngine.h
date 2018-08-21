@@ -23,7 +23,7 @@ private:
 	WAVEFORMATEX _waveformat;
 	Sample^ _sample;			// семпл - если мы загружаем не из саундфонта
 	
-	concurrency::cancellation_token_source stopToken;
+	concurrency::cancellation_token_source* stopToken;
 
 	void playNote(SketchMusic::INote^ note, int duration = 0, NoteOff^ noteOff = nullptr);
 	// TODO : ужесточить до SketchMusic::SNote ? Тогда Енжин сможет проигрывать только конкретизованные ноты

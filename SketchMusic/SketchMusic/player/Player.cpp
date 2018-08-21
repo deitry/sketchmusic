@@ -30,6 +30,7 @@ SketchMusic::Player::Player::Player()
 {
 	this->_cursor = ref new SketchMusic::Cursor;
 	needMetronome = true;
+	metroNote = ref new SNote(17);
 	_BPM = 120;
 	_scale = ref new SScale(NoteType::C, ScaleCategory::Minor);
 	_harmony = ref new SHarmony(0);
@@ -88,7 +89,7 @@ void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note,
 
 		if (dynamic_cast<SGNote^>(note))
 		{
-			if (_metronome)
+			if (_metronome && needPlayGeneric)
 				_metronome->Play(this->concretize(note), duration, noteOff);
 		}
 		else if (_keyboardEngine)
@@ -101,10 +102,9 @@ void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note,
 
 void SketchMusic::Player::Player::playMetronome()
 {
-	static SNote^ note = ref new SNote(17);
-	if (_metronome)
+	if (_metronome && metroNote)
 	{
-		_metronome->Play(note, 20, nullptr); // TODO : незачем каждый раз создавать новую ноту, можно хранить значение
+		_metronome->Play(metroNote, 20, nullptr);
 	}
 }
 
@@ -145,7 +145,9 @@ SNote ^ SketchMusic::Player::Player::concretizeRNote(SRNote^ rnote)
 SNote ^ SketchMusic::Player::Player::concretizeGNote(SGNote ^ gnote)
 {
 	if (!gnote) return nullptr;
-	return ref new SNote(-24 + gnote->_valX + gnote->_valY * 5);
+	// выставляем velocity, чтобы отличать от метронома
+	// и соответственно понижать громкость
+	return ref new SNote(-24 + gnote->_valX + gnote->_valY * 5, 1, 0);
 }
 
 
@@ -370,8 +372,9 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 							case SymbolType::GNOTE:
 							{
 								// проигрываем чуть-чуть с помощью метронома, чтобы не заводить отдельный
+								// NoteOff чтобы stop метронома не приводил к отмене всего
 								_metronome->Play(this->concretize(dynamic_cast<INote^>(pIter->Current->_sym)), 
-												 40, nullptr);
+												 40, ref new NoteOff);
 								break;
 							}
 							case SymbolType::TEMPO:

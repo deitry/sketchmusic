@@ -521,6 +521,7 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 					// сохраняем noteOff где-нибудь, ассоциированно с нажатой клавишей
 					notesPlayingMap.insert(std::make_pair(args->key, noteOff));
 				}
+
 				// надо добавлять сразу аккордами
 				if (recording)
 				{
@@ -1366,11 +1367,11 @@ void MelodyEditorPage::OnKeyUp(CoreWindow ^sender,
 void MelodyEditorPage::OnSymbolPressed(Platform::Object ^sender, 
 									   SM::PositionedSymbol ^args)
 {
-	auto snote = dynamic_cast<SM::SNote^>(args->_sym);
-	if (snote)
+	auto note = dynamic_cast<SM::INote^>(args->_sym);
+	if (note)
 	{
 		((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->currentPosition);
-		((App^)App::Current)->_player->playSingleNote(snote, 
+		((App^)App::Current)->_player->playSingleNote(note, 
 													  _textRow->current->instrument, 
 													  500, nullptr);
 	}

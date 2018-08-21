@@ -15,6 +15,7 @@ private:
 
 	ISoundEngine^ _keyboardEngine;	// создаём копию выбранного енжина для проигрывания нот с клавиатуры
 	ISoundEngine^ _metronome;
+	SNote^ metroNote;
 
 	void playMetronome();
 	SketchMusic::Player::PlayerState m_state;

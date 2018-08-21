@@ -12,6 +12,7 @@ SketchMusic::Player::SimpleSoundEngine::SimpleSoundEngine(Microsoft::WRL::ComPtr
 {
 	_pXAudio2 = pXAudio2;
 	this->_instrument = instrument;
+	stopToken = new cancellation_token_source();
 
 	// подгружаем семпл инструмента
 	this->_sample = ref new SketchMusic::Sample(instrument->_name);
@@ -35,6 +36,7 @@ SketchMusic::Player::SimpleSoundEngine::SimpleSoundEngine(SimpleSoundEngine^ eng
 	this->_sample = engine->_sample;
 	
 	this->InitializeVoices();
+	this->stopToken = new cancellation_token_source();
 
 	// на всякий случай останавливаем
 	this->Stop();
@@ -85,6 +87,9 @@ void SketchMusic::Player::SimpleSoundEngine::InitializeVoices()
 SketchMusic::Player::SimpleSoundEngine::~SimpleSoundEngine()
 {
 	DestroyVoices();
+
+	stopToken->cancel();
+	delete stopToken;
 }
 
 /**
@@ -121,6 +126,8 @@ void SketchMusic::Player::SimpleSoundEngine::playNote(INote^ note, int duration,
 	double freq = _sample->getFrequency() * pow(2., note->_val / 12.);
 	float origFreq = _sample->getFrequency();
 	this->setFrequency(voice, freq, origFreq);
+	// повышаем громкость для метронома, понижаем для gnote
+	voice->SetVolume(note->_velocity ? 0.05f : 0.2f);
 
 	// передаём буфер
 	HRESULT hr = voice->SubmitSourceBuffer(&_buffer);
@@ -130,18 +137,35 @@ void SketchMusic::Player::SimpleSoundEngine::playNote(INote^ note, int duration,
 	}
 	voice->Start();
 
-	auto stop = stopToken.get_token();
-	auto release = concurrency::create_task([=]
+	// копипаст из SFSoundEngine
+	auto stop = (noteOff) ? noteOff->GetToken() : stopToken->get_token();
+	auto regToken = stop.register_callback([=]
 	{
-		auto timeout = _buffer.LoopLength * _buffer.LoopCount * 1000. * origFreq / freq / 44100;
-		// смотри выше про duration
-		if (_buffer.LoopCount == XAUDIO2_LOOP_INFINITE)
+		auto release = concurrency::create_task([=]
 		{
-			timeout *= 100000;
-		}
-		concurrency::wait(static_cast<unsigned int>(timeout));
-		this->ReleaseVoice(voice);
-	}, stop);
+			concurrency::wait(30);	// чтобы не сразу заканчивался - звучит неестественно
+			this->ReleaseVoice(voice);
+		});
+	}); 
+	
+	if (duration)
+	{
+		auto release = concurrency::create_task([=]
+		{
+			auto timeout = _buffer.LoopLength * _buffer.LoopCount * 1000. * origFreq / freq / 44100;
+			// смотри выше про duration
+			if (_buffer.LoopCount == XAUDIO2_LOOP_INFINITE)
+			{
+				timeout *= 100000;
+			}
+			concurrency::wait(static_cast<unsigned int>(timeout));
+			if (!stop.is_canceled())
+			{
+				this->ReleaseVoice(voice);
+				stop.deregister_callback(regToken);
+			}
+		}, stop);
+	}
 }
 
 /**
@@ -152,7 +176,7 @@ void SketchMusic::Player::SimpleSoundEngine::Play(SketchMusic::INote^ note, int 
 	if (!note) return;
 
 	// останавливаем все предыдущие воспроизведения
-	//this->Stop();
+	this->Stop();
 
 	// начинаем новое воспроизведение
 	this->playNote(note, duration, noteOff);
@@ -175,14 +199,9 @@ void SketchMusic::Player::SimpleSoundEngine::Play(Windows::Foundation::Collectio
 
 void SketchMusic::Player::SimpleSoundEngine::Stop()
 {
-	stopToken.cancel();
-
-	for (auto voice : _voices)
-	{
-		ReleaseVoice(voice);
-		// одновременно останавливаем и возвращаем в пул
-	}
-	_available_voices = MAX_VOICES;
+	stopToken->cancel();
+	delete stopToken;
+	stopToken = new cancellation_token_source();
 }
 
 void SketchMusic::Player::SimpleSoundEngine::stopVoice(IXAudio2SourceVoice* voice)
