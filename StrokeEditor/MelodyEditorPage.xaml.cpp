@@ -1370,7 +1370,7 @@ void MelodyEditorPage::OnSymbolPressed(Platform::Object ^sender,
 	auto note = dynamic_cast<SM::INote^>(args->_sym);
 	if (note)
 	{
-		((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->currentPosition);
+		((App^)App::Current)->_player->actualizeControlData(_texts, args->_pos);
 		((App^)App::Current)->_player->playSingleNote(note, 
 													  _textRow->current->instrument, 
 													  500, nullptr);

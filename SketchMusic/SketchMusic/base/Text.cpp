@@ -36,12 +36,8 @@ void SketchMusic::Text::addOrReplaceSymbol(PositionedSymbol ^ sym)
 	// поискать аналогичный символ в этом месте
 	auto lookup = _t.lower_bound(sym->_pos);
 	auto max = _t.upper_bound(sym->_pos);
-	if (lookup == max)
-	{
-		// если нету - вставл€ем новый символ
-		_t.insert(std::make_pair(sym->_pos,sym->_sym));
-	}
-	else
+	bool handled = false;
+	if (lookup != max)
 	{
 		// если нашли - измен€ем содержимое
 		for (;lookup != max; lookup++)
@@ -49,8 +45,15 @@ void SketchMusic::Text::addOrReplaceSymbol(PositionedSymbol ^ sym)
 			if (lookup->second->GetSymType() == sym->_sym->GetSymType())
 			{
 				lookup->second = sym->_sym;
+				handled = true;
 			}
 		}
+	}
+
+	if (!handled)
+	{
+		// если нету - вставл€ем новый символ
+		_t.insert(std::make_pair(sym->_pos, sym->_sym));
 	}
 }
 
