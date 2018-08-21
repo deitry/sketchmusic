@@ -509,17 +509,18 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 				SM::ISymbol^ sym = SM::ISymbolFactory::CreateSymbol(args->key->type, 
 																	args->key->value);
 
-				auto snote = dynamic_cast<SM::SNote^>(sym);
-				if (snote)
+				((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->currentPosition);
+
+				auto note = dynamic_cast<SM::INote^>(sym);
+				if (note)
 				{
 					SM::Player::NoteOff^ noteOff = ref new SM::Player::NoteOff;
-					((App^)App::Current)->_player->playSingleNote(snote, _textRow->current->instrument, 
+					((App^)App::Current)->_player->playSingleNote(note, _textRow->current->instrument, 
 																  0, noteOff);
 
 					// сохраняем noteOff где-нибудь, ассоциированно с нажатой клавишей
 					notesPlayingMap.insert(std::make_pair(args->key, noteOff));
 				}
-
 				// надо добавлять сразу аккордами
 				if (recording)
 				{
@@ -598,17 +599,16 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 				SM::ISymbol^ sym = SM::ISymbolFactory::CreateSymbol(args->key->type,
 																	args->key->value);
 
-				// создаём команду на добавление ноты в текст и сохраняем её в истории
-				((App^)App::Current)->_manager->AddAndExecute(
-					AddSymCommand,
-					ref new SMC::SymbolHandlerArgs(
-						_texts->ControlText, 
-						ref new PositionedSymbol(ref new SM::Cursor(_textRow->currentPosition), 
-												 sym)));
-
-				if (args->key->type != SMV::KeyType::tempo)
+				if (recording || args->key->type == SMV::KeyType::tempo)
 				{
-					// сдвигаем курсор для всех "управляющих" символов, кроме темпа (он вставляется по-другому)
+					// создаём команду на добавление ноты в текст и сохраняем её в истории
+					((App^)App::Current)->_manager->AddAndExecute(
+						AddSymCommand,
+						ref new SMC::SymbolHandlerArgs(
+							_texts->ControlText,
+							ref new PositionedSymbol(ref new SM::Cursor(_textRow->currentPosition),
+								sym)));
+
 					if (this->viewType == SMV::ViewType::TextRow)
 					{
 						this->_textRow->MoveCursorRight();
@@ -1369,6 +1369,7 @@ void MelodyEditorPage::OnSymbolPressed(Platform::Object ^sender,
 	auto snote = dynamic_cast<SM::SNote^>(args->_sym);
 	if (snote)
 	{
+		((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->currentPosition);
 		((App^)App::Current)->_player->playSingleNote(snote, 
 													  _textRow->current->instrument, 
 													  500, nullptr);

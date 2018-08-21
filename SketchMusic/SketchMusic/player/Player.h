@@ -20,6 +20,10 @@ private:
 	SketchMusic::Player::PlayerState m_state;
 	float m_bpm;
 
+	INote^ concretize(INote^ note);
+	SNote^ concretizeRNote(SRNote^ rnote);
+	SNote^ concretizeGNote(SGNote^ gnote);
+
 public:
 	event EventHandler<SketchMusic::Player::PlayerState>^ StateChanged;
 	event EventHandler<float>^ BpmChanged;
@@ -77,7 +81,6 @@ public:
 		// - можно будет реализовать "беззвучное" проигрывание - например, визуально отображать текущие ноты
 
 	SketchMusic::Cursor^ getCursor() { return this->_cursor; }
+	void actualizeControlData(SketchMusic::CompositionData^ data,
+							  SketchMusic::Cursor^ pos);
 };
-
-
-

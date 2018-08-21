@@ -240,6 +240,8 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 */
 void SketchMusic::Player::SFSoundEngine::Play(SketchMusic::INote^ note, int duration, NoteOff^ noteOff)
 {
+	if (!note) return;
+
 	// останавливаем все предыдущие воспроизведения
 	this->Stop();
 

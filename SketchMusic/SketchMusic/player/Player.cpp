@@ -67,11 +67,14 @@ SketchMusic::Player::Player::Player()
 Используется для проигрывания ноты при нажатии на клавиатуру
 Возможно, стоит объединить с методом playNotes или сделать перегрузкой...
 */
-void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note, SketchMusic::Instrument^ instrument, int duration, SketchMusic::Player::NoteOff^ noteOff)
+void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note, 
+												 SketchMusic::Instrument^ instrument, 
+												 int duration, 
+												 SketchMusic::Player::NoteOff^ noteOff)
 {
 	auto playNote = concurrency::create_task([=]
 	{
-		// если имеющийся не устраивает
+		// если имеющийся инструмент не устраивает
 		if (_keyboardEngine && (!_keyboardEngine->getInstrument()->EQ(instrument)))
 		{
 			_engines->ReleaseSoundEngine(_keyboardEngine);
@@ -83,9 +86,14 @@ void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note, Sketc
 			_keyboardEngine = _engines->GetSoundEngine(instrument);
 		}
 
-		if (_keyboardEngine)
+		if (dynamic_cast<SGNote^>(note))
 		{
-			_keyboardEngine->Play(note, duration, noteOff);
+			if (_metronome)
+				_metronome->Play(this->concretize(note), duration, noteOff);
+		}
+		else if (_keyboardEngine)
+		{
+			_keyboardEngine->Play(this->concretize(note), duration, noteOff);
 		}
 	});
 }
@@ -98,6 +106,46 @@ void SketchMusic::Player::Player::playMetronome()
 	{
 		_metronome->Play(note, 20, nullptr); // TODO : незачем каждый раз создавать новую ноту, можно хранить значение
 	}
+}
+
+INote ^ SketchMusic::Player::Player::concretize(INote ^ note)
+{
+	auto rnote = dynamic_cast<SRNote^>(note);
+	if (rnote)
+	{
+		return concretizeRNote(rnote);
+	}
+
+	auto gnote = dynamic_cast<SGNote^>(note);
+	if (gnote)
+	{
+		return (needPlayGeneric) ? concretizeGNote(gnote) 
+								 : nullptr;
+	}
+
+	return note;
+}
+
+SNote ^ SketchMusic::Player::Player::concretizeRNote(SRNote^ rnote)
+{
+	if (!rnote) return nullptr;
+
+	// конкретизируем для текущих значений гаммы/гармонии,
+	// полагая, что их уже актуализировали
+
+	int tone = static_cast<int>(_scale->_baseNote)
+		+ _harmony->_val
+		+ rnote->_val - 12; // занижаем на октаву "нулевое значение"
+
+	// FIXME: конкретизация с учётом звукоряда?
+
+	return ref new SNote(tone);
+}
+
+SNote ^ SketchMusic::Player::Player::concretizeGNote(SGNote ^ gnote)
+{
+	if (!gnote) return nullptr;
+	return ref new SNote(-24 + gnote->_valX + gnote->_valY * 5);
 }
 
 
@@ -156,10 +204,6 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 				else if (!initialized)
 				{
 					initialized = true;
-					// отыскиваем среди енжинов подходящий
-					ISoundEngine^ engine = this->_engines->GetSoundEngine(text->instrument);
-					auto cur = startIter->HasCurrent ? startIter->Current : nullptr;
-					iterMap->push_back(std::make_pair(engine, std::make_pair(startIter, symbols)));
 					break;
 				}
 
@@ -182,7 +226,11 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 						startIter = symbols->First();
 					}
 				}
-			}
+			} // while (iter->HasCurrent)
+
+			// отыскиваем среди енжинов подходящий
+			ISoundEngine^ engine = this->_engines->GetSoundEngine(text->instrument);
+			iterMap->push_back(std::make_pair(engine, std::make_pair(startIter, symbols)));
 		}
 
 		// Обработка управляющего текста - положение курсора уже определено
@@ -225,13 +273,14 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 			}
 			else
 			{
-				// вставляем управляющий текст самым первым, 
-				// чтобы он успевал обрабатываться раньше других
-				iterMap->insert(iterMap->begin(), 
-								std::make_pair(nullptr, std::make_pair(startIter, symbols)));
 				break;
 			}
-		}
+		} // while (iter->HasCurrent)
+
+		// вставляем управляющий текст самым первым, 
+		// чтобы он успевал обрабатываться раньше других
+		iterMap->insert(iterMap->begin(),
+						std::make_pair(nullptr, std::make_pair(startIter, symbols)));
 	})
 		// прекаунт
 		.then([this, iterMap, cursor, data]
@@ -292,7 +341,6 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 					if (pos->LE(cursor))
 					{
 						auto notes = ref new Platform::Collections::Vector < SketchMusic::INote^ >;
-						auto rnotes = ref new Platform::Collections::Vector < SketchMusic::SRNote^ >;
 						
 						do
 						{
@@ -313,16 +361,17 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 								auto rnote = dynamic_cast<SketchMusic::SRNote^>(pIter->Current->_sym);
 								if (rnote)
 								{
-									rnotes->Append(rnote);
+									// т.к. управляющая дорожка сейчас обрабатывается первой, 
+									// полагаем, что гамму/гармонию уже актуализировали
+									notes->Append(this->concretizeRNote(rnote));
 								}
 								break;
 							}
 							case SymbolType::GNOTE:
 							{
 								// проигрываем чуть-чуть с помощью метронома, чтобы не заводить отдельный
-								auto note = dynamic_cast<SketchMusic::SGNote^>(pIter->Current->_sym);
-								if (needPlayGeneric)
-									_metronome->Play(ref new SNote(-24 + note->_valX + note->_valY*5), 40, nullptr);
+								_metronome->Play(this->concretize(dynamic_cast<INote^>(pIter->Current->_sym)), 
+												 40, nullptr);
 								break;
 							}
 							case SymbolType::TEMPO:
@@ -346,21 +395,6 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 							}
 							pIter->MoveNext();
 						} while (pIter->HasCurrent && pIter->Current->_pos->LE(cursor));
-
-						for (auto&& rnote : rnotes)
-						{
-							// конкретизация на основе SScale и SSharmony
-							int tone = static_cast<int>(_scale->_baseNote)
-								+ _harmony->_val
-								+ rnote->_val;
-
-							auto note = ref new SNote(tone);
-							if (note)
-							{
-								// проигрывание
-								notes->Append(note);
-							}
-						}
 						
 						if (notes && notes->Size > 0 && iter->first)
 							iter->first->Play(notes);
@@ -476,4 +510,48 @@ SketchMusic::SFReader::SFData ^ SketchMusic::Player::Player::GetSFData(SketchMus
 		return sf2engine->_soundFontData;
 	}
 	return nullptr;
+}
+
+// "перематываем" текущий курсор до указанного положения,
+// применяя все "управляющие" изменения
+void SketchMusic::Player::Player::actualizeControlData(SketchMusic::CompositionData^ data, 
+													   SketchMusic::Cursor ^ pos)
+{
+	// если полагать, что для текущего положения данные актуальны,
+	// то можно "сэкономить", если pos > _cursor
+	// Если меньше, то с большой долей вероятности надо пересчитывать заново.
+	// Было бы неплохо хранить актуальную информацию в lineBreak'ах, чтобы
+	// не надо было пробегаться каждый раз по всему тексту
+		
+	if (_cursor->EQ(pos))
+		return;
+
+	this->_cursor->moveTo(pos);
+	for (auto&& symbol : data->ControlText)
+	{
+		if (symbol->_pos->GT(pos))
+			break;
+
+		switch (symbol->_sym->GetSymType())
+		{
+			case SymbolType::SCALE:
+			{
+				auto scale = dynamic_cast<SScale^>(symbol->_sym);
+				if (scale)
+				{
+					_scale = scale;
+				}
+				break;
+			}
+			case SymbolType::HARMONY:
+			{
+				auto harmony = dynamic_cast<SHarmony^>(symbol->_sym);
+				if (harmony)
+				{
+					_harmony = harmony;
+				}
+				break;
+			}
+		}
+	}
 }

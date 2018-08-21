@@ -149,6 +149,8 @@ void SketchMusic::Player::SimpleSoundEngine::playNote(INote^ note, int duration,
 */
 void SketchMusic::Player::SimpleSoundEngine::Play(SketchMusic::INote^ note, int duration, NoteOff^ noteOff)
 {
+	if (!note) return;
+
 	// останавливаем все предыдущие воспроизведения
 	//this->Stop();
 

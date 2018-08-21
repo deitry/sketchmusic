@@ -428,7 +428,7 @@
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
                             Style="{StaticResource KeyboardBtnStyle}" DataContext="41008" Tag="2_7"/>
             <ContentControl Content="{Binding RelativeSource={RelativeSource Self}, Path=DataContext, Converter={StaticResource tag2key}}"
-                            Style="{StaticResource KeyboardBtnStyle}" DataContext="41010" Tag="2_7"/>
+                            Style="{StaticResource KeyboardBtnStyle}" DataContext="41010" Tag="2_8"/>
         </StackPanel>
         
         <!-- Classic Keyboard row 1 -->

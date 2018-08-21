@@ -95,7 +95,11 @@ internal:
 	std::multimap<Cursor^, ISymbol^>::iterator end_iter;
 
 public:
-	TextIterator(Text^ txt) { m_iter = txt->_t.begin(); end_iter = txt->_t.end(); }
+	TextIterator(Text^ txt) 
+	{ 
+		m_iter = txt->_t.begin(); 
+		end_iter = txt->_t.end(); 
+	}
 
 	// Унаследовано через IIterator
 	virtual property SketchMusic::PositionedSymbol ^ Current
@@ -104,7 +108,10 @@ public:
 	}
 	virtual property bool HasCurrent
 	{
-		bool get() { return m_iter == end_iter; }
+		bool get() 
+		{ 
+			return m_iter != end_iter; 
+		}
 	}
 	virtual bool MoveNext()
 	{
