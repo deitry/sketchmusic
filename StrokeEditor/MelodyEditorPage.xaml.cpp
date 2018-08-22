@@ -1027,7 +1027,7 @@ void MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 	CurrentGChord->SetNotes(notes);
 
 	auto prevPos = txt->getPosAtLeft(pos);
-	auto prevPos2 = _texts->ControlText->getPosAtRight(pos);	// TODO : можно сделать лучше
+	auto prevPos2 = _texts->ControlText->getPosAtLeft(pos);	// TODO : можно сделать лучше
 	if (prevPos2 && prevPos2->GT(prevPos)) prevPos = prevPos2;
 
 	PrevChord->SetNotes(txt->getNotesAt(prevPos, SymbolType::NOTE));
