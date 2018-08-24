@@ -406,7 +406,9 @@ void SketchMusic::View::TextRow::AddSymbolView(Text^ source, PositionedSymbol^ s
 		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("RelativeNoteCtrlStyle"));
 		break;
 	case SymbolType::HARMONY:
-		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("HarmonyCtrlStyle"));
+		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup((source == data->ControlText)
+																				? "HarmonyCtrlStyle"
+																				: "LocalHarmonyCtrlStyle"));
 		break; 
 	case SymbolType::SCALE:
 		bt->Style = reinterpret_cast<Windows::UI::Xaml::Style^>(_dict->Lookup("ScaleCtrlStyle"));
@@ -465,7 +467,7 @@ void SketchMusic::View::TextRow::DeleteSymbolView(PositionedSymbol ^ symbol)
 
 // удаляем все представления символов в данном положении
 // Нужно, чтобы удалять управляющие символы
-void SketchMusic::View::TextRow::DeleteSymbolViews(Cursor ^ pos, SymbolType type)
+void SketchMusic::View::TextRow::DeleteSymbolViews(Cursor ^ pos, SymbolType type, Text^ text)
 {
 	if (type == SymbolType::NLINE)
 	{
@@ -482,7 +484,7 @@ void SketchMusic::View::TextRow::DeleteSymbolViews(Cursor ^ pos, SymbolType type
 		{
 			// по тегу проверяем, что нота принадлежит текущей дорожке
 			auto psym = dynamic_cast<SketchMusic::PositionedSymbol^>(ctrl->DataContext);
-			if (((Text^)ctrl->Tag == current || (Text^)ctrl->Tag == data->ControlText) && (psym != nullptr))
+			if (((Text^)ctrl->Tag == text) && (psym != nullptr))
 			{
 				// если это нота того же типа в этом же положенииы
 				if (psym->_pos->EQ(pos) && (psym->_sym->GetSymType() == type))
@@ -686,6 +688,9 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 		}
 		break;
 	}
+	case SketchMusic::SymbolType::HARMONY:
+		// оставляем тот, что выставлен в стиле
+		break;
 	case SketchMusic::SymbolType::NPART:
 	case SketchMusic::SymbolType::TEMPO:
 	default:
@@ -700,7 +705,7 @@ void SketchMusic::View::TextRow::SetBackgroundColor(ContentControl^ ctrl)
 
 }
 
-double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
+double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym, Text^ source)
 {
 	double offsetY = 0;
 	
@@ -755,12 +760,14 @@ double SketchMusic::View::TextRow::GetOffsetY(ISymbol ^ sym)
 	}
 	case SymbolType::SCALE:
 	{
-		offsetY = -0.05 * RowHeight;
+		offsetY = -0.2 * RowHeight;
 		break;
 	}
 	case SymbolType::HARMONY:
 	{
-		offsetY = 1.05 * RowHeight;
+		offsetY = (source == data->ControlText) 
+					? 0.05 * RowHeight
+					: 1.05 * RowHeight;
 		break;
 	}
 	default:
@@ -780,7 +787,7 @@ void SketchMusic::View::TextRow::SetNoteOnCanvas(ContentControl ^ note)
 
 	auto point = GetCoordinatsOfPosition(psym->_pos);
 	_canvas->SetLeft(note, point.X - PlaceholderWidth / 2);
-	double offsetY = GetOffsetY(psym->_sym);
+	double offsetY = GetOffsetY(psym->_sym, (Text^) note->Tag);
 	_canvas->SetTop(note, point.Y + offsetY);
 }
 

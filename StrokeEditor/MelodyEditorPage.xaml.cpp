@@ -429,7 +429,14 @@ void MelodyEditorPage::SaveData()
 		// отправить в библиотеку
 		if (!((App^)App::Current)->UpdateIdea(_idea))
 		{
-			((App^)App::Current)->InsertIdea(_idea);
+			if (!((App^)App::Current)->InsertIdea(_idea))
+			{
+				auto dialog = ref new ContentDialog;
+				dialog->Title = "Сохранение в библиотеку";
+				dialog->Content = "Успешно сохранено";
+				dialog->PrimaryButtonText = "Ок";
+				create_task(dialog->ShowAsync());
+			}
 		}
 
 		auto dialog = ref new ContentDialog;
@@ -503,13 +510,14 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 			}
 			case SMV::KeyType::end:
 			case SMV::KeyType::note:
+			case SMV::KeyType::localHarmony:
 			case SMV::KeyType::relativeNote:
 			case SMV::KeyType::genericNote:
 			{
 				SM::ISymbol^ sym = SM::ISymbolFactory::CreateSymbol(args->key->type, 
 																	args->key->value);
 
-				((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->currentPosition);
+				((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, _textRow->currentPosition);
 
 				auto note = dynamic_cast<SM::INote^>(sym);
 				if (note)
@@ -736,15 +744,19 @@ void MelodyEditorPage::_keyboard_KeyReleased(Platform::Object^ sender,
 {
 	// на отпускание клавиши мы должны
 	// - прекращать звучание
-	for (auto noteIter = notesPlayingMap.begin(); noteIter != notesPlayingMap.end(); noteIter++)
+	auto noteIter = notesPlayingMap.rbegin();
+	while (noteIter != notesPlayingMap.rend())
 	{
 		if (((*noteIter).first->type == args->key->type) 
 		 && ((*noteIter).first->value == args->key->value))
 		{
 			(*noteIter).second->Cancel();
-			notesPlayingMap.erase(noteIter);
-			break;
+			// NOTE: https://stackoverflow.com/questions/1830158/how-to-call-erase-with-a-reverse-iterator
+			notesPlayingMap.erase(std::next(noteIter).base());
+			continue;
 		}
+
+		++noteIter;
 	}
 
 	// обрабатывание событий отпускания некоторых клавиш
@@ -1236,7 +1248,7 @@ void MelodyEditorPage::AddSymbolToText(SM::Text ^ text,
 	 || type == SymbolType::SCALE)
 	{
 		// удаляем предыдущий графический символ
-		_textRow->DeleteSymbolViews(symbol->_pos, type);
+		_textRow->DeleteSymbolViews(symbol->_pos, type, text);
 
 		// темп и может какие-нибудь другие символы будем 
 		// заменять вместо добавления новых в ту же точку
@@ -1370,7 +1382,7 @@ void MelodyEditorPage::OnSymbolPressed(Platform::Object ^sender,
 	auto note = dynamic_cast<SM::INote^>(args->_sym);
 	if (note)
 	{
-		((App^)App::Current)->_player->actualizeControlData(_texts, args->_pos);
+		((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, args->_pos);
 		((App^)App::Current)->_player->playSingleNote(note, 
 													  _textRow->current->instrument, 
 													  500, nullptr);

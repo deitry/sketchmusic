@@ -243,6 +243,13 @@
         <Setter Property="Template" Value="{StaticResource GNoteControlTemplate}"/>
     </Style>
 
+    <Style TargetType="ContentControl" x:Key="LocalHarmonyCtrlStyle" x:Name="LocalHarmonyCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">
+        <Setter Property="Background" Value="{StaticResource noteBackground3}"/>
+        <Setter Property="Width" Value="{StaticResource GSymbolWidth}"/>
+        <Setter Property="Height" Value="{StaticResource GSymbolHeight}"/>
+        <Setter Property="Template" Value="{StaticResource GNoteControlTemplate}"/>
+    </Style>
+
     <Style TargetType="ContentControl" x:Key="RelativeNoteCtrlStyle" x:Name="RelativeNoteCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">
         <Setter Property="Background" Value="{StaticResource tempoBackground}"/>
         <Setter Property="Width" Value="{StaticResource RSymbolWidth}"/>
@@ -259,8 +266,8 @@
 
     <Style TargetType="ContentControl" x:Key="ScaleCtrlStyle" x:Name="ScaleCtrlStyle" BasedOn="{StaticResource SymbolControlStyle}">
         <Setter Property="Background" Value="{StaticResource ctrlKeyForeground}"/>
-        <Setter Property="Width" Value="{StaticResource GSymbolWidth}"/>
-        <Setter Property="Height" Value="{StaticResource GSymbolHeight}"/>
+        <Setter Property="Width" Value="{StaticResource RSymbolWidth}"/>
+        <Setter Property="Height" Value="{StaticResource RSymbolHeight}"/>
         <Setter Property="Template" Value="{StaticResource GNoteControlTemplate}"/>
     </Style>
 

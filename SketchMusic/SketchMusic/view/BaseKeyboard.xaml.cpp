@@ -24,7 +24,20 @@ using namespace Windows::UI::Xaml::Media;
 namespace
 {
 	// сдвигать клавиатуру по полутонам вместо октавы
-	bool isSemitoneShift = false;
+	bool alternativeControl = false;
+	bool currentCtrlValue = false;
+
+	using namespace SketchMusic::View;
+
+	std::map<KeyboardType, KeyType> keyboardLayoutKeyType =
+	{
+		{ KeyboardType::Basic, KeyType::note },
+		{ KeyboardType::Classic, KeyType::note },
+		{ KeyboardType::Generic, KeyType::genericNote },
+		{ KeyboardType::Relative, KeyType::relativeNote },
+		{ KeyboardType::Harmony, KeyType::harmony },
+		{ KeyboardType::Scale, KeyType::scale },
+	};
 }
 
 SketchMusic::View::BaseKeyboard::BaseKeyboard()
@@ -64,6 +77,7 @@ void SketchMusic::View::BaseKeyboard::OnKeyboardPressed(Key^ key)
 	case KeyType::relativeNote:
 	case KeyType::scale:
 	case KeyType::harmony:
+	case KeyType::localHarmony:
 		break;
 	default:
 	{
@@ -99,6 +113,20 @@ void SketchMusic::View::BaseKeyboard::OnControlPressed(Key ^ key)
 		key->type = KeyType::move;
 		UpdateParent(key);
 		break;
+	case KeyType::harmony:
+		if (::alternativeControl && currentCtrlValue)
+		{
+			key->type = KeyType::localHarmony;
+			UpdateParent(key);
+		}
+		break;
+	case KeyType::localHarmony:
+		if (!::alternativeControl && currentCtrlValue)
+		{
+			key->type = KeyType::harmony;
+			UpdateParent(key);
+		}
+		break;
 	//case KeyType::deleteSym:
 	//	key->type = KeyType::eraser;
 	//	UpdateParent(key);
@@ -119,7 +147,11 @@ inline void OnOctaveInc(Key^ key)
 	//case KeyType::genericNote:
 	case KeyType::relativeNote:
 	case KeyType::harmony:
-		key->value += ::isSemitoneShift ? 1 : 12;
+		key->value += ::alternativeControl ? 1 : 12;
+		UpdateParent(key);
+		break;	
+	case KeyType::localHarmony:
+		key->value += 12;
 		UpdateParent(key);
 		break;
 	default:
@@ -135,7 +167,11 @@ inline void OnOctaveDec(Key^ key)
 	//case KeyType::genericNote:
 	case KeyType::relativeNote:
 	case KeyType::harmony:
-		key->value -= ::isSemitoneShift ? 1 : 12;
+		key->value -= ::alternativeControl ? 1 : 12;
+		UpdateParent(key);
+		break;
+	case KeyType::localHarmony:
+		key->value -= 12;
 		UpdateParent(key);
 		break;
 	default:
@@ -213,10 +249,14 @@ void SketchMusic::View::BaseKeyboard::OnKeyboardStateChanged(Object^ object, Key
 			OnKeyboardPressed(key);
 			break;
 		case KeyboardStateEnum::octaveInc:
-			OnOctaveInc(key);
+			// берём originalType, потому что в процессе работы тип клавиш может поменяться
+			if (key->originalType == ::keyboardLayoutKeyType.at(_layout))
+				OnOctaveInc(key);
 			break;
 		case KeyboardStateEnum::octaveDec:
-			OnOctaveDec(key);
+			// берём originalType, потому что в процессе работы тип клавиш может поменяться
+			if (key->originalType == ::keyboardLayoutKeyType.at(_layout))
+				OnOctaveDec(key);
 			break;
 		case KeyboardStateEnum::normal:
 			OnNormalState(key);
@@ -294,6 +334,7 @@ void SketchMusic::View::BaseKeyboard::OnPushKey(Key ^ key)
 		case KeyType::relativeNote:
 		case KeyType::scale:
 		case KeyType::harmony:
+		case KeyType::localHarmony:
 			KeyPressed(this, args);
 			if (pressedKeys == 1)
 			{
@@ -323,8 +364,10 @@ void SketchMusic::View::BaseKeyboard::OnPushKey(Key ^ key)
 		case KeyType::control:
 			this->currentState->state = KeyboardStateEnum::control;	// TODO : выглядит очень плохо.
 																	// Надо будет понять, что вообще имеется в виду под state
+			if (!key->value) ::alternativeControl = !::alternativeControl; 
+			currentCtrlValue = key->value;
+
 			KeyboardStateChanged(this, currentState);
-			if (!key->value) ::isSemitoneShift = !::isSemitoneShift;
 			break;
 		case KeyType::layout:
 		case KeyType::tempo:
@@ -482,6 +525,7 @@ std::pair<ContentControl^, bool> SketchMusic::View::BaseKeyboard::GetControl(std
 			|| key->type == KeyType::genericNote
 			|| key->type == KeyType::scale
 			|| key->type == KeyType::harmony
+			|| key->type == KeyType::localHarmony
 			|| key->type == KeyType::relativeNote)
 		{
 			// проверка на тип раскладки - только для нот
@@ -914,6 +958,7 @@ void SketchMusic::View::BaseKeyboard::OnReleaseKey(Key ^ key)
 		case KeyType::genericNote:
 		case KeyType::scale:
 		case KeyType::harmony:
+		case KeyType::localHarmony:
 			KeyReleased(this, args);
 			break;
 		default:

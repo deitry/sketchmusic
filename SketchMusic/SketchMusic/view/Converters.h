@@ -125,6 +125,7 @@ public:
 		case SketchMusic::View::KeyType::relativeNote:
 		case SketchMusic::View::KeyType::scale:
 		case SketchMusic::View::KeyType::harmony:
+		case SketchMusic::View::KeyType::localHarmony:
 			break;
 		case SketchMusic::View::KeyType::genericNote:
 		default:

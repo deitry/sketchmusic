@@ -42,6 +42,13 @@ public:
 			//result += SerializationTokens::degreeSerializationString.at(degree);
 			//break;
 		}
+		case KeyType::localHarmony:
+		{
+			return "lo " + (ref new SHarmony(key->value))->ToString();
+			//auto degree = static_cast<Degree>(key->value);
+			//result += SerializationTokens::degreeSerializationString.at(degree);
+			//break;
+		}
 		case KeyType::scale:
 		{
 			auto baseNote = static_cast<NoteType>(key->value);

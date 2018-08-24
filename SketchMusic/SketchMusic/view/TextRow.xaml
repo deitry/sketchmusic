@@ -50,6 +50,7 @@
         <Grid>
             <StackPanel x:Name="_mainPanel"
                         Orientation="Vertical"
+                        Spacing="20"
                         />
 
             <Canvas x:Name="_canvas"

@@ -68,7 +68,7 @@ internal:
 	void SetBackgroundColor(ContentControl^ ctrl);
 	void OpenPlaceholderContextDialog(ContentControl^ ctrl, Windows::Foundation::Point point);
 
-	double GetOffsetY(ISymbol^ sym);
+	double GetOffsetY(ISymbol^ sym, Text^ source);
 	void SetNoteOnCanvas(ContentControl^ note);
 
 public:
@@ -109,7 +109,7 @@ public:
 	// работа с отдельными символами
 	void AddSymbolView(Text^ source, PositionedSymbol^ symbol);
 	void DeleteSymbolView(PositionedSymbol^ symbol);
-	void DeleteSymbolViews(Cursor^ pos, SymbolType type);
+	void DeleteSymbolViews(Cursor^ pos, SymbolType type, Text^ text);
 	ContentControl^ GetSymbolView(PositionedSymbol^ symbol);
 	void SetSymbolView(PositionedSymbol^ oldSymbol, PositionedSymbol^ newSymbol);
 

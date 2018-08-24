@@ -22,9 +22,10 @@ SketchMusic::Player::SFSoundEngine::SFSoundEngine()
 }
 
 /**
-Инициализация объекта SoundEngine, допускается только для конкретного инструмента.
+РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РѕР±СЉРµРєС‚Р° SoundEngine, РґРѕРїСѓСЃРєР°РµС‚СЃСЏ С‚РѕР»СЊРєРѕ РґР»СЏ РєРѕРЅРєСЂРµС‚РЅРѕРіРѕ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°.
 */
-SketchMusic::Player::SFSoundEngine^ SketchMusic::Player::SFSoundEngine::GetSFSoundEngine(Microsoft::WRL::ComPtr<IXAudio2> pXAudio2, SketchMusic::Instrument^ instrument)
+SketchMusic::Player::SFSoundEngine^ SketchMusic::Player::SFSoundEngine::GetSFSoundEngine(Microsoft::WRL::ComPtr<IXAudio2> pXAudio2, 
+																					     SketchMusic::Instrument^ instrument)
 {
 	auto data = SketchMusic::SFReader::SFData::ReadSFData(instrument->FileName);
 	if (data == nullptr)
@@ -45,7 +46,7 @@ SketchMusic::Player::SFSoundEngine^ SketchMusic::Player::SFSoundEngine::GetSFSou
 
 SketchMusic::Player::SFSoundEngine::SFSoundEngine(SFSoundEngine^ engine)
 {
-	// копируем все поля как есть
+	// РєРѕРїРёСЂСѓРµРј РІСЃРµ РїРѕР»СЏ РєР°Рє РµСЃС‚СЊ
 	this->_pXAudio2 = engine->_pXAudio2;
 	this->_instrument = engine->_instrument;
 	this->_sfPreset = engine->_sfPreset;
@@ -55,7 +56,7 @@ SketchMusic::Player::SFSoundEngine::SFSoundEngine(SFSoundEngine^ engine)
 	//this->InitializeVoices();
 	this->stopToken = new cancellation_token_source();
 
-	// на всякий случай останавливаем
+	// РЅР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ РѕСЃС‚Р°РЅР°РІР»РёРІР°РµРј
 	this->Stop();
 }
 
@@ -92,21 +93,21 @@ SketchMusic::Player::SFSoundEngine::~SFSoundEngine()
 }
 
 /**
-Забирает из доступного пула голосов один и играет с его помощью ноту
+Р—Р°Р±РёСЂР°РµС‚ РёР· РґРѕСЃС‚СѓРїРЅРѕРіРѕ РїСѓР»Р° РіРѕР»РѕСЃРѕРІ РѕРґРёРЅ Рё РёРіСЂР°РµС‚ СЃ РµРіРѕ РїРѕРјРѕС‰СЊСЋ РЅРѕС‚Сѓ
 */
 void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, NoteOff^ noteOff)
 {
 	auto end = dynamic_cast<SNoteEnd^>(note);
 	if (end) return;
 
-	// - проходимся по всем зонам и т.д., вычисляем конечные параметры звука
+	// - РїСЂРѕС…РѕРґРёРјСЃСЏ РїРѕ РІСЃРµРј Р·РѕРЅР°Рј Рё С‚.Рґ., РІС‹С‡РёСЃР»СЏРµРј РєРѕРЅРµС‡РЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ Р·РІСѓРєР°
 	if (_sfPreset)
 	{
-		// параметры, общие для пресета
-		double presetTuning = 0.; // в "центах" : 100 cents = 1 semitone
-		double presetAttenuation = 0;	// в сентибеллах
+		// РїР°СЂР°РјРµС‚СЂС‹, РѕР±С‰РёРµ РґР»СЏ РїСЂРµСЃРµС‚Р°
+		double presetTuning = 0.; // РІ "С†РµРЅС‚Р°С…" : 100 cents = 1 semitone
+		double presetAttenuation = 0;	// РІ СЃРµРЅС‚РёР±РµР»Р»Р°С…
 		
-		// сразу обрабатываем глобальную зону
+		// СЃСЂР°Р·Сѓ РѕР±СЂР°Р±Р°С‚С‹РІР°РµРј РіР»РѕР±Р°Р»СЊРЅСѓСЋ Р·РѕРЅСѓ
 		if (_sfPreset->globalZone)
 		{
 			auto gens = _sfPreset->globalZone->generators;
@@ -118,21 +119,22 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 
 		for (auto&& pZone : this->_sfPreset->zones)
 		{
-			// тут уже пролистываем глобальную зону
+			// С‚СѓС‚ СѓР¶Рµ РїСЂРѕР»РёСЃС‚С‹РІР°РµРј РіР»РѕР±Р°Р»СЊРЅСѓСЋ Р·РѕРЅСѓ
 			if (_sfPreset->globalZone == pZone || pZone->instrument == nullptr) continue;
 			if (!(pZone->inZone(note->_val + MIDIKEYTOA4, 100))) continue;
 
-			// параметры, общие для инструмента
-			double instrTuning = 0.; // в "центах" : 100 cents = 1 semitone
-			double instrAttenuation = 0;	// в сентибеллах
+			// РїР°СЂР°РјРµС‚СЂС‹, РѕР±С‰РёРµ РґР»СЏ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°
+			double instrTuning = 0.; // РІ "С†РµРЅС‚Р°С…" : 100 cents = 1 semitone
+			double instrAttenuation = 0;	// РІ СЃРµРЅС‚РёР±РµР»Р»Р°С…
 
-			// глобальная зона инструмента
+			// РіР»РѕР±Р°Р»СЊРЅР°СЏ Р·РѕРЅР° РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°
 			if (pZone->instrument->globalZone)
 			{
 				auto gens = pZone->instrument->globalZone->generators;
 
 				instrTuning = GetAmount(gens, SFGeneratorID::coarseTune)->val.sword * 100.
 					+ GetAmount(gens, SFGeneratorID::fineTune)->val.sword;
+
 				instrAttenuation = GetAmount(gens, SFGeneratorID::initialAttenuation)->val.sword;
 			}
 
@@ -143,15 +145,15 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 
 				if (!(iZone->inZone(note->_val + MIDIKEYTOA4, 100))) continue;
 
-				// получаем голос
+				// РїРѕР»СѓС‡Р°РµРј РіРѕР»РѕСЃ
 				IXAudio2SourceVoice* voice = this->InitializeVoice(iZone->sample);
 				if (voice == nullptr) return;
 
 				XAUDIO2_BUFFER _buffer = { 0 };
 				auto smpl = iZone->sample;
 
-				// Формируем буфер для отправки
-				// - загружаем данные по семплу
+				// Р¤РѕСЂРјРёСЂСѓРµРј Р±СѓС„РµСЂ РґР»СЏ РѕС‚РїСЂР°РІРєРё
+				// - Р·Р°РіСЂСѓР¶Р°РµРј РґР°РЅРЅС‹Рµ РїРѕ СЃРµРјРїР»Сѓ
 				_buffer.pAudioData = _sData->begin();
 				_buffer.AudioBytes = _sData->Length;
 				_buffer.Flags = XAUDIO2_END_OF_STREAM;
@@ -170,7 +172,7 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 				}
 				else
 				{
-					// если окажется, что оно нам не надо, то выкинем потом
+					// РµСЃР»Рё РѕРєР°Р¶РµС‚СЃСЏ, С‡С‚Рѕ РѕРЅРѕ РЅР°Рј РЅРµ РЅР°РґРѕ, С‚Рѕ РІС‹РєРёРЅРµРј РїРѕС‚РѕРј
 					_buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
 					_buffer.LoopBegin = smpl->loopStart
 						+ GetAmount(iZone->generators, SFGeneratorID::startloopAddrsOffset)->val.sword
@@ -184,20 +186,20 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 				double orig = GetAmount(iZone->generators, SFGeneratorID::overridingRootKey)->val.sword;
 				if (orig == 0 || orig == -1) orig = smpl->origPitch;
 
-				double origFreq = 440 * pow(2., (orig - MIDIKEYTOA4) / 12.);
+				double origFreq = 440 * pow(2., (orig - MIDIKEYTOA4 + (presetTuning + instrTuning) * 100) / 12.);
 				double freq = 440 * pow(2., (note->_val
 											+ GetAmount(iZone->generators, SFGeneratorID::coarseTune)->val.sword
 											+ GetAmount(iZone->generators, SFGeneratorID::fineTune)->val.sword / 100
 											+ iZone->sample->pitchAdj / 100) / 12.);
 
-				// TODO : когда-нибудь : модуляторы				
+				// TODO : РєРѕРіРґР°-РЅРёР±СѓРґСЊ : РјРѕРґСѓР»СЏС‚РѕСЂС‹				
 
-				// - окончательно применяем частоту
+				// - РѕРєРѕРЅС‡Р°С‚РµР»СЊРЅРѕ РїСЂРёРјРµРЅСЏРµРј С‡Р°СЃС‚РѕС‚Сѓ
 				this->setFrequency(voice, freq, origFreq);
-				// - аттенюейшн / громкость
+				// - Р°С‚С‚РµРЅСЋРµР№С€РЅ / РіСЂРѕРјРєРѕСЃС‚СЊ
 				voice->SetVolume(0.2f);
-				// TODO : - панорамирование
-				// TODO : - эффекты
+				// TODO : - РїР°РЅРѕСЂР°РјРёСЂРѕРІР°РЅРёРµ
+				// TODO : - СЌС„С„РµРєС‚С‹
 				
 				HRESULT hr = voice->SubmitSourceBuffer(&_buffer);
 				if (FAILED(hr))
@@ -213,7 +215,7 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 				{
 					auto release = concurrency::create_task([=]
 					{		
-						concurrency::wait(30);	// чтобы не сразу заканчивался - звучит неестественно
+						concurrency::wait(30);	// С‡С‚РѕР±С‹ РЅРµ СЃСЂР°Р·Сѓ Р·Р°РєР°РЅС‡РёРІР°Р»СЃСЏ - Р·РІСѓС‡РёС‚ РЅРµРµСЃС‚РµСЃС‚РІРµРЅРЅРѕ
 						this->ReleaseVoice(voice);
 					});
 				});
@@ -236,28 +238,28 @@ void SketchMusic::Player::SFSoundEngine::playNote(INote^ note, int duration, Not
 }
 
 /**
-Воспроизводит переданную ноту
+Р’РѕСЃРїСЂРѕРёР·РІРѕРґРёС‚ РїРµСЂРµРґР°РЅРЅСѓСЋ РЅРѕС‚Сѓ
 */
 void SketchMusic::Player::SFSoundEngine::Play(SketchMusic::INote^ note, int duration, NoteOff^ noteOff)
 {
 	if (!note) return;
 
-	// останавливаем все предыдущие воспроизведения
+	// РѕСЃС‚Р°РЅР°РІР»РёРІР°РµРј РІСЃРµ РїСЂРµРґС‹РґСѓС‰РёРµ РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёСЏ
 	this->Stop();
 
-	// начинаем новое воспроизведение
+	// РЅР°С‡РёРЅР°РµРј РЅРѕРІРѕРµ РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ
 	this->playNote(note, duration, noteOff);
 }
 
 /**
-Воспроизводит переданный набор нот
+Р’РѕСЃРїСЂРѕРёР·РІРѕРґРёС‚ РїРµСЂРµРґР°РЅРЅС‹Р№ РЅР°Р±РѕСЂ РЅРѕС‚
 */
 void SketchMusic::Player::SFSoundEngine::Play(Windows::Foundation::Collections::IVector<SketchMusic::INote^>^ notes)
 {
-	// останавливаем все предыдущие воспроизведения
+	// РѕСЃС‚Р°РЅР°РІР»РёРІР°РµРј РІСЃРµ РїСЂРµРґС‹РґСѓС‰РёРµ РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёСЏ
 	this->Stop();
 	
-	// начинаем новое воспроизведение
+	// РЅР°С‡РёРЅР°РµРј РЅРѕРІРѕРµ РІРѕСЃРїСЂРѕРёР·РІРµРґРµРЅРёРµ
 	for (auto note : notes)
 	{
 		this->playNote(note);
@@ -271,11 +273,11 @@ void SketchMusic::Player::SFSoundEngine::Stop()
 	stopToken = new cancellation_token_source();
 }
 
-// попользовались - избавились
+// РїРѕРїРѕР»СЊР·РѕРІР°Р»РёСЃСЊ - РёР·Р±Р°РІРёР»РёСЃСЊ
 void SketchMusic::Player::SFSoundEngine::ReleaseVoice(IXAudio2SourceVoice* voice)
 {
 	if (voice == nullptr) return;
-	// останавливаем
+	// РѕСЃС‚Р°РЅР°РІР»РёРІР°РµРј
 	HRESULT hr = voice->ExitLoop();
 	hr = voice->Stop();
 

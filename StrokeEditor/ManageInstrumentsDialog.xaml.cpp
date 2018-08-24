@@ -62,13 +62,12 @@ void StrokeEditor::ManageInstrumentsDialog::ContentDialog_SecondaryButtonClick(W
 void StrokeEditor::ManageInstrumentsDialog::ContentDialog_Opened(Windows::UI::Xaml::Controls::ContentDialog^ sender, Windows::UI::Xaml::Controls::ContentDialogOpenedEventArgs^ args)
 {
 	Instruments = ref new Platform::Collections::Vector<SketchMusic::Instrument^>;
-	Presets = ref new Platform::Collections::Vector<SketchMusic::SFReader::SFPreset^>;
 	Texts = ref new Platform::Collections::Vector<SketchMusic::Instrument^>;
 
 	// обрабатываем входные данные
 	auto data = dynamic_cast<SketchMusic::CompositionData^>(this->DataContext);
 	if (data)
-	{
+	{	
 		// не трогаем переданные нам данные; создаём у себя аналогичные тексты, чтобы проводить манипуляции с ними
 		for (auto&& text : data->texts)
 		{
@@ -84,17 +83,66 @@ void StrokeEditor::ManageInstrumentsDialog::ContentDialog_Opened(Windows::UI::Xa
 		auto getFiles = create_task([=]
 		{
 			return create_task(baseFolder->GetFolderAsync("SketchMusic\\resources\\"));
-		}).then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
+		})
+			.then([=] (task<StorageFolder^> resourceFolderTask) 
+				-> task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
 		{
 			auto resourceFolder = resourceFolderTask.get();
 			return create_task(resourceFolder->GetFilesAsync());
-		}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
+		})
+			.then([=] (task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
 		{
 			resourceListTask.wait();
 			auto list = resourceListTask.get();
+
 			for (auto&& file : list)
 			{
-				Instruments->Append(ref new Instrument(file->Name, file->Path, nullptr));
+				try
+				{
+					Instruments->Append(ref new Instrument(file->Name, file->Path, nullptr));
+				}
+				catch (...)
+				{
+					// FIXME: удалось поймать, что где-то Append вылетает (смотри ниже)
+					// на всякий случай оберну в трай-кетч и здесь
+					((App^)App::Current)->WriteToDebugFile("Ошибка Append при добавлении ""стандартных"" инструментов");
+				}
+			}
+		}).then([=]
+		{
+			// считываем файлы из дополнительной папки, если таковая указана
+			// Плохо, но я пока не понял, как повторно использовать продолжения.
+			// Видимо, нужно их оформить в виде самостоятельных тасков и вызывать в продолжении
+			Windows::Storage::ApplicationDataContainer^ localSettings =
+				Windows::Storage::ApplicationData::Current->LocalSettings;
+			if (localSettings->Values->HasKey("sf2_path"))
+			{
+				auto path = (Platform::String^)localSettings->Values->Lookup("sf2_path");
+				create_task(baseFolder->GetFolderFromPathAsync(path))
+					.then([=](task<StorageFolder^> resourceFolderTask) 
+						-> task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
+				{
+					auto resourceFolder = resourceFolderTask.get();
+					return create_task(resourceFolder->GetFilesAsync());
+				})
+					.then([=] (task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
+				{
+					auto list = resourceListTask.get();
+					for (auto&& file : list)
+					{
+						try
+						{
+							Instruments->Append(ref new Instrument(file->Name, file->Path, nullptr));
+						}
+						catch (...)
+						{
+							// периодически вылетает. Удалось поймать на Append:
+							// Вызвано исключение: нарушение доступа для чтения.
+							// __pUnknown было 0xCDCDCDCD.
+							((App^)App::Current)->WriteToDebugFile("Ошибка Append при добавлении дополнительных инструментов");
+						}
+					}
+				});
 			}
 		}).then([=]
 		{
@@ -106,39 +154,6 @@ void StrokeEditor::ManageInstrumentsDialog::ContentDialog_Opened(Windows::UI::Xa
 				}
 			}));
 		});
-
-		// считываем файлы из дополнительной папки, если таковая указана
-		// Плохо, но я пока не понял, как повторно использовать продолжения.
-		// Видимо, нужно их оформить в виде самостоятельных тасков и вызывать в продолжении
-		Windows::Storage::ApplicationDataContainer^ localSettings =
-			Windows::Storage::ApplicationData::Current->LocalSettings;
-		if (localSettings->Values->HasKey("sf2_path"))
-		{
-			auto path = (Platform::String^)localSettings->Values->Lookup("sf2_path");
-			create_task(baseFolder->GetFolderFromPathAsync(path))
-				.then([=](task<StorageFolder^> resourceFolderTask)->task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^ >
-			{
-				auto resourceFolder = resourceFolderTask.get();
-				return create_task(resourceFolder->GetFilesAsync());
-			}).then([=](task < Windows::Foundation::Collections::IVectorView < Windows::Storage::StorageFile^ > ^> resourceListTask)
-			{
-				auto list = resourceListTask.get();
-				for (auto&& file : list)
-				{
-					auto instr = ref new Instrument(file->Name, file->Path, nullptr);
-					Instruments->Append(instr);
-				}
-			}).then([=]
-			{
-				this->Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([=]()
-				{
-					if (InstrumentList)
-					{
-						InstrumentList->ItemsSource = Instruments;
-					}
-				}));
-			});
-		}
 
 		((App^)App::Current)->WriteToDebugFile("Составляем список инструментов");
 	}));

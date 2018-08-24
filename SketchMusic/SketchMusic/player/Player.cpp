@@ -31,13 +31,12 @@ SketchMusic::Player::Player::Player()
 	this->_cursor = ref new SketchMusic::Cursor;
 	needMetronome = true;
 	metroNote = ref new SNote(17);
-	_BPM = 120;
-	_scale = ref new SScale(NoteType::C, ScaleCategory::Minor);
-	_harmony = ref new SHarmony(0);
 	cycling = false;
 	needPlayGeneric = true;
 	StopAtLast = true;
 	quantize = 4;
+
+	this->setDefaultRelatives();
 
 	// do - чтобы можно было "скипнуть" инициализацию, если то-то не удалось
 	do
@@ -135,6 +134,7 @@ SNote ^ SketchMusic::Player::Player::concretizeRNote(SRNote^ rnote)
 
 	int tone = static_cast<int>(_scale->_baseNote)
 		+ _harmony->_val
+		+ _localHarmony->_val
 		+ rnote->_val - 12; // занижаем на октаву "нулевое значение"
 
 	// FIXME: конкретизация с учётом звукоряда?
@@ -148,6 +148,14 @@ SNote ^ SketchMusic::Player::Player::concretizeGNote(SGNote ^ gnote)
 	// выставляем velocity, чтобы отличать от метронома
 	// и соответственно понижать громкость
 	return ref new SNote(-24 + gnote->_valX + gnote->_valY * 5, 1, 0);
+}
+
+void SketchMusic::Player::Player::setDefaultRelatives()
+{
+	_BPM = 120;
+	_scale = ref new SScale(NoteType::C, ScaleCategory::Minor);
+	_harmony = ref new SHarmony(0);
+	_localHarmony = ref new SHarmony(0);
 }
 
 
@@ -226,6 +234,9 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 						cursor->setPos(0);
 						iter = symbols->First();
 						startIter = symbols->First();
+
+						// сбрасываем все параметры
+						this->setDefaultRelatives();
 					}
 				}
 			} // while (iter->HasCurrent)
@@ -241,6 +252,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 		// находим ближайший к старту символ (ПОСЛЕ старта)
 		auto iter = symbols->First();
 		auto startIter = symbols->First();
+		this->setDefaultRelatives();
 		_BPM = data->BPM;
 		_scale = data->scale;
 
@@ -266,6 +278,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 				auto harmony = dynamic_cast<SHarmony^>(iter->Current->_sym);
 				if (harmony)
 				{
+					// в управляющем тексте - "глобальная" гармония
 					_harmony = harmony;
 				}
 		
@@ -392,7 +405,12 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 							case SymbolType::HARMONY:
 							{
 								auto harmony = dynamic_cast<SketchMusic::SHarmony^>(pIter->Current->_sym);
-								if (harmony) _harmony = harmony;
+								if (harmony)
+								{
+									(iter == iterMap->begin())
+										? _localHarmony = harmony
+										: _harmony = harmony;
+								}
 								break;
 							}
 							}
@@ -518,6 +536,7 @@ SketchMusic::SFReader::SFData ^ SketchMusic::Player::Player::GetSFData(SketchMus
 // "перематываем" текущий курсор до указанного положения,
 // применяя все "управляющие" изменения
 void SketchMusic::Player::Player::actualizeControlData(SketchMusic::CompositionData^ data, 
+													   SketchMusic::Text^ currentText,
 													   SketchMusic::Cursor ^ pos)
 {
 	// если полагать, что для текущего положения данные актуальны,
@@ -529,7 +548,26 @@ void SketchMusic::Player::Player::actualizeControlData(SketchMusic::CompositionD
 	if (_cursor->EQ(pos))
 		return;
 
+	this->setDefaultRelatives();
+
 	this->_cursor->moveTo(pos);
+
+	for (auto&& symbol : currentText)
+	{
+		if (symbol->_pos->GT(pos))
+			break;
+
+		// из символов вне управляющих дорожек смотрим только на гармонию
+		if (symbol->_sym->GetSymType() == SymbolType::HARMONY)
+		{
+			auto harmony = dynamic_cast<SHarmony^>(symbol->_sym);
+			if (harmony)
+			{
+				_localHarmony = harmony;
+			}
+		}
+	}
+
 	for (auto&& symbol : data->ControlText)
 	{
 		if (symbol->_pos->GT(pos))

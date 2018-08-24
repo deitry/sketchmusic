@@ -736,6 +736,7 @@ namespace SketchMusic
 			eraser			= 35,	// "ластик"
 			scale			= 40,	// гамма
 			harmony			= 41,	// ступень гармонии
+			localHarmony	= 42,	// локальные ступень гармонии
 		};
 
 		public enum class KeyboardStateEnum

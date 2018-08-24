@@ -25,6 +25,8 @@ private:
 	SNote^ concretizeRNote(SRNote^ rnote);
 	SNote^ concretizeGNote(SGNote^ gnote);
 
+	void setDefaultRelatives();
+
 public:
 	event EventHandler<SketchMusic::Player::PlayerState>^ StateChanged;
 	event EventHandler<float>^ BpmChanged;
@@ -65,6 +67,7 @@ public:
 
 	property SScale^ _scale;
 	property SHarmony^ _harmony;
+	property SHarmony^ _localHarmony;
 	property bool needMetronome;
 
 	property SketchMusic::Cursor^ _cursor;
@@ -83,5 +86,6 @@ public:
 
 	SketchMusic::Cursor^ getCursor() { return this->_cursor; }
 	void actualizeControlData(SketchMusic::CompositionData^ data,
+							  SketchMusic::Text^ currentText,
 							  SketchMusic::Cursor^ pos);
 };

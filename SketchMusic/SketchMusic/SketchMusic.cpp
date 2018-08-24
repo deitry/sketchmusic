@@ -217,6 +217,11 @@ ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType t
 		int ival = (int)val;
 		return ref new SHarmony(ival);
 	}
+	case SketchMusic::View::KeyType::localHarmony:
+	{
+		int ival = (int)val;
+		return ref new SHarmony(ival);
+	}
 	case SketchMusic::View::KeyType::newPart:
 	{
 		auto str = (Platform::String^)val;

@@ -14,7 +14,6 @@ namespace StrokeEditor
 	{
 	public:
 		property Windows::Foundation::Collections::IObservableVector<SketchMusic::Instrument^>^ Instruments;
-		property Windows::Foundation::Collections::IObservableVector<SketchMusic::SFReader::SFPreset^>^ Presets;
 		property Windows::Foundation::Collections::IObservableVector<SketchMusic::Instrument^>^ Texts;
 
 		property SketchMusic::Instrument^ Selected;
