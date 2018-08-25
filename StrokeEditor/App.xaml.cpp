@@ -405,9 +405,9 @@ void StrokeEditor::App::SaveData()
 		_CurrentIdea->ModifiedTime = time;
 
 		// отправить в библиотеку
-		if (!((App^)App::Current)->UpdateIdea(_CurrentIdea))
+		if (SQLITE_OK != ((App^)App::Current)->InsertIdea(_CurrentIdea))
 		{
-			((App^)App::Current)->InsertIdea(_CurrentIdea);
+			((App^)App::Current)->UpdateIdea(_CurrentIdea);
 		}
 	}
 	else if (_CurrentCompositionArgs && _CurrentCompositionArgs->Project && _CurrentCompositionArgs->File)

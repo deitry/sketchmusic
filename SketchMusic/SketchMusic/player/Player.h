@@ -22,7 +22,7 @@ private:
 	float m_bpm;
 
 	INote^ concretize(INote^ note);
-	SNote^ concretizeRNote(SRNote^ rnote);
+	SNote^ concretizeRNote(SRNote^ rnote, SHarmony^ localHarmony);
 	SNote^ concretizeGNote(SGNote^ gnote);
 
 	void setDefaultRelatives();
@@ -67,7 +67,7 @@ public:
 
 	property SScale^ _scale;
 	property SHarmony^ _harmony;
-	property SHarmony^ _localHarmony;
+	property SHarmony^ _localHarmony; // эта "локальная" гармония будет использоваться для воспроизведения одной ноты
 	property bool needMetronome;
 
 	property SketchMusic::Cursor^ _cursor;

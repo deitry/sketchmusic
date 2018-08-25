@@ -107,12 +107,12 @@ void SketchMusic::Player::Player::playMetronome()
 	}
 }
 
-INote ^ SketchMusic::Player::Player::concretize(INote ^ note)
+INote ^ SketchMusic::Player::Player::concretize(INote ^ note) // TODO: , Concretizator^
 {
 	auto rnote = dynamic_cast<SRNote^>(note);
 	if (rnote)
 	{
-		return concretizeRNote(rnote);
+		return concretizeRNote(rnote, _localHarmony);
 	}
 
 	auto gnote = dynamic_cast<SGNote^>(note);
@@ -125,7 +125,7 @@ INote ^ SketchMusic::Player::Player::concretize(INote ^ note)
 	return note;
 }
 
-SNote ^ SketchMusic::Player::Player::concretizeRNote(SRNote^ rnote)
+SNote ^ SketchMusic::Player::Player::concretizeRNote(SRNote^ rnote, SHarmony^ localHarmony) // TODO: Concretizator^
 {
 	if (!rnote) return nullptr;
 
@@ -134,7 +134,7 @@ SNote ^ SketchMusic::Player::Player::concretizeRNote(SRNote^ rnote)
 
 	int tone = static_cast<int>(_scale->_baseNote)
 		+ _harmony->_val
-		+ _localHarmony->_val
+		+ localHarmony->_val
 		+ rnote->_val - 12; // занижаем на октаву "нулевое значение"
 
 	// FIXME: конкретизация с учётом звукоряда?
@@ -153,7 +153,7 @@ SNote ^ SketchMusic::Player::Player::concretizeGNote(SGNote ^ gnote)
 void SketchMusic::Player::Player::setDefaultRelatives()
 {
 	_BPM = 120;
-	_scale = ref new SScale(NoteType::C, ScaleCategory::Minor);
+	_scale = ref new SScale(NoteType::A, ScaleCategory::Minor);
 	_harmony = ref new SHarmony(0);
 	_localHarmony = ref new SHarmony(0);
 }
@@ -190,8 +190,11 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 									 std::pair<IIterator < SketchMusic::PositionedSymbol^ > ^, 
 											   IVector< SketchMusic::PositionedSymbol^ > ^> > >;
 
+	// отслеживаем гармонию для каждой дорожки в отдельности
+	auto localHarmonyVect = new std::vector<SHarmony^>;
+
 		// поиск стартового положения
-	auto getIterators = concurrency::create_task([data, iterMap, this, cursor]
+	auto getIterators = concurrency::create_task([data, iterMap, localHarmonyVect, this, cursor]
 	{
 		// Обработка основных текстов
 		for (auto text : data->texts)
@@ -206,8 +209,17 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 			auto startIter = symbols->First();
 
 			bool initialized = false;
+			SHarmony^ localHarmony = ref new SHarmony(0);
+
 			while (iter->HasCurrent)
 			{
+				if (iter->Current->_sym->GetSymType() == SymbolType::HARMONY)
+				{
+					auto harmony = dynamic_cast<SHarmony^>(iter->Current->_sym);
+					if (harmony)
+						localHarmony = harmony;
+				}
+
 				auto p = iter->Current->_pos;
 				
 				if (p->LT(cursor)) startIter->MoveNext();
@@ -244,6 +256,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 			// отыскиваем среди енжинов подходящий
 			ISoundEngine^ engine = this->_engines->GetSoundEngine(text->instrument);
 			iterMap->push_back(std::make_pair(engine, std::make_pair(startIter, symbols)));
+			localHarmonyVect->push_back(localHarmony);
 		}
 
 		// Обработка управляющего текста - положение курсора уже определено
@@ -296,6 +309,9 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 		// чтобы он успевал обрабатываться раньше других
 		iterMap->insert(iterMap->begin(),
 						std::make_pair(nullptr, std::make_pair(startIter, symbols)));
+
+		// чтобы индексы совпадали
+		localHarmonyVect->insert(localHarmonyVect->begin(), _harmony);
 	})
 		// прекаунт
 		.then([this, iterMap, cursor, data]
@@ -328,7 +344,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 	})
 		
 		// основное проигрывание
-		.then([this, iterMap, cursor] //, end
+		.then([this, iterMap, localHarmonyVect, cursor] //, end
 	{
 		auto tempState = _state;
 		int pbeat = -1;
@@ -344,7 +360,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 			if (StopAtLast) tempState = s::WAIT;
 			else tempState = this->_state;
 
-			for (auto iter = iterMap->begin(); iter < iterMap->end(); iter++)
+			auto localHarmony = localHarmonyVect->begin();
+			for (auto iter = iterMap->begin(); iter < iterMap->end(); ++iter, ++localHarmony)
 			{
 				auto pIter = iter->second.first;
 				if (pIter->HasCurrent)
@@ -356,7 +373,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 					if (pos->LE(cursor))
 					{
 						auto notes = ref new Platform::Collections::Vector < SketchMusic::INote^ >;
-						
+						auto rnotes = ref new Platform::Collections::Vector < SketchMusic::SRNote^ >;
+
 						do
 						{
 							switch (pIter->Current->_sym->GetSymType())
@@ -378,7 +396,10 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 								{
 									// т.к. управляющая дорожка сейчас обрабатывается первой, 
 									// полагаем, что гамму/гармонию уже актуализировали
-									notes->Append(this->concretizeRNote(rnote));
+									
+									// для учёта локальной гармонии (которая может оказаться в этой же позиции,
+									// но чуть позже текущей ноты) добавляем их в отдельный вектор, чтобы конкретизировать позже
+									rnotes->Append(rnote);
 								}
 								break;
 							}
@@ -408,8 +429,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 								if (harmony)
 								{
 									(iter == iterMap->begin())
-										? _localHarmony = harmony
-										: _harmony = harmony;
+										? _harmony = harmony
+										: (*localHarmony) = harmony;
 								}
 								break;
 							}
@@ -417,6 +438,17 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 							pIter->MoveNext();
 						} while (pIter->HasCurrent && pIter->Current->_pos->LE(cursor));
 						
+						// конкретизируем
+						for (auto&& rnote : rnotes)
+						{
+							// TODO: rnotes -> inotes
+							// а также сделать "конкретизатор", который будет хранить локальную гармонию
+							// и другие "локальные" параметры
+							// Наверное и весь метод concretize следует вынести в него
+							notes->Append(this->concretizeRNote(rnote, *localHarmony));
+						}
+
+						// конкретизация должна проводиться здесь, чтобы учесть не только ControlText, но и локальные изменения
 						if (notes && notes->Size > 0 && iter->first)
 							iter->first->Play(notes);
 
@@ -440,7 +472,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 						} while (!(dynamic_cast<SketchMusic::INote^>(pIter->Current->_sym)));
 					}
 				} // if (pIter->HasCurrent)
-			};
+			}; // for (iterMap)
 			
 			// метроном
 			if (needMetronome && ((cursor->Beat - pbeat) > 0)) // должно срабатывать, когда переходим на новый бит
@@ -507,6 +539,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 		_engines->ReleaseSoundEngine((*iter).first);
 	}
 	delete iterMap;
+	delete localHarmonyVect;
 }
 
 void SketchMusic::Player::Player::stop()
@@ -563,6 +596,7 @@ void SketchMusic::Player::Player::actualizeControlData(SketchMusic::CompositionD
 			auto harmony = dynamic_cast<SHarmony^>(symbol->_sym);
 			if (harmony)
 			{
+				// FIXME: запоминать локальную гармонию как-то по-другому
 				_localHarmony = harmony;
 			}
 		}

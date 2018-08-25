@@ -427,23 +427,29 @@ void MelodyEditorPage::SaveData()
 		_idea->ModifiedTime = time;
 
 		// отправить в библиотеку
-		if (!((App^)App::Current)->UpdateIdea(_idea))
+		auto result = ((App^)App::Current)->InsertIdea(_idea); 
+		
+		if (result != SQLITE_OK)
 		{
-			if (!((App^)App::Current)->InsertIdea(_idea))
-			{
-				auto dialog = ref new ContentDialog;
-				dialog->Title = "Сохранение в библиотеку";
-				dialog->Content = "Успешно сохранено";
-				dialog->PrimaryButtonText = "Ок";
-				create_task(dialog->ShowAsync());
-			}
+			result = ((App^)App::Current)->UpdateIdea(_idea);
 		}
 
-		auto dialog = ref new ContentDialog;
-		dialog->Title = "Сохранение в библиотеку";
-		dialog->Content = "Успешно сохранено";
-		dialog->PrimaryButtonText = "Ок";
-		create_task(dialog->ShowAsync());
+		if (result != SQLITE_OK)
+		{
+			auto dialog = ref new ContentDialog;
+			dialog->Title = "Ошибка сохранения";
+			dialog->Content = "Успешно сохранения, код " + result;
+			dialog->PrimaryButtonText = "Ок";
+			create_task(dialog->ShowAsync());
+		}
+		else
+		{
+			auto dialog = ref new ContentDialog;
+			dialog->Title = "Сохранение в библиотеку";
+			dialog->Content = "Успешно сохранено";
+			dialog->PrimaryButtonText = "Ок";
+			create_task(dialog->ShowAsync());
+		}
 	}
 }
 
@@ -773,6 +779,7 @@ void MelodyEditorPage::_keyboard_KeyReleased(Platform::Object^ sender,
 				ref new SMC::SymbolHandlerArgs(_texts->ControlText,
 					ref new PositionedSymbol(newpos, ref new SNewLine)));
 			_textRow->SetCursor(newpos);
+			((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, newpos);
 			break;
 		}
 	}
@@ -815,6 +822,7 @@ void MelodyEditorPage::OnCursorPosChanged(Platform::Object ^sender,
 			[=]() 
 	{
 		_textRow->SetCursor(pos);
+		((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, pos);
 	})));
 }
 
@@ -1021,6 +1029,7 @@ void MelodyEditorPage::UpdateChordViews(Cursor ^ pos)
 
 	//auto cur = _textRow->currentPosition; 
 	_textRow->SetCursor(pos);
+	((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, pos);
 
 	CurPosTxt->Text = L"" + pos->Beat + ":" + pos->Tick;
 	

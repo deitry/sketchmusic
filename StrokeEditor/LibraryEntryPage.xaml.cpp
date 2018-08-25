@@ -228,16 +228,29 @@ void StrokeEditor::LibraryEntryPage::ExtendBtn_Click(Platform::Object^ sender, W
 void StrokeEditor::LibraryEntryPage::SaveBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
 	SaveEntry();
-	if (!((App^)App::Current)->UpdateIdea(this->_entry))
+
+	int result = ((App^)App::Current)->InsertIdea(this->_entry); 
+	if (result != SQLITE_OK)
 	{
-		((App^)App::Current)->InsertIdea(this->_entry);
+		result = ((App^)App::Current)->UpdateIdea(this->_entry);
 	}
 
-	auto dialog = ref new ContentDialog;
-	dialog->Title = "Сохранение в библиотеку";
-	dialog->Content = "Успешно сохранено";
-	dialog->PrimaryButtonText = "Ок";
-	dialog->ShowAsync();
+	if (result != SQLITE_OK)
+	{
+		auto dialog = ref new ContentDialog;
+		dialog->Title = "Ошибка сохранения";
+		dialog->Content = "Ошибка сохранения, код " + result;
+		dialog->PrimaryButtonText = "Ок";
+		concurrency::create_task(dialog->ShowAsync());
+	}
+	else
+	{
+		auto dialog = ref new ContentDialog;
+		dialog->Title = "Сохранение в библиотеку";
+		dialog->Content = "Успешно сохранено";
+		dialog->PrimaryButtonText = "Ок";
+		concurrency::create_task(dialog->ShowAsync());
+	}
 }
 
 void StrokeEditor::LibraryEntryPage::HomeBtn_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)

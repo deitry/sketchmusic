@@ -149,8 +149,11 @@ void StrokeEditor::LibraryOverviewPage::OnNavigatedTo(NavigationEventArgs ^ e)
 			if (rc != SQLITE_OK)
 			{
 				((App^)App::Current)->UpdateIdea(idea);
-			} else {
-				if (((App^)App::Current)->ideaLibrary) ((App^)App::Current)->ideaLibrary->Append(idea);
+			} 
+			else 
+			{
+				if (((App^)App::Current)->ideaLibrary) 
+					((App^)App::Current)->ideaLibrary->Append(idea);
 			}
 			((App^)App::Current)->SaveLibrary("ideaLibrary.db");
 		}
@@ -482,8 +485,8 @@ void StrokeEditor::LibraryOverviewPage::DeleteItem_Click(Platform::Object^ sende
 {
 	ContentDialog^ deleteFileDialog = ref new ContentDialog();
 
-	deleteFileDialog->Title = "Удалить проект?";
-	deleteFileDialog->Content = "Ппроект будет удалён безвозвратно. Вы уверены?";
+	deleteFileDialog->Title = "Удалить идею?";
+	deleteFileDialog->Content = "Идея будет удалена безвозвратно. Вы уверены?";
 	deleteFileDialog->PrimaryButtonText = "Удалить";
 	deleteFileDialog->SecondaryButtonText = "Отмена";
 
