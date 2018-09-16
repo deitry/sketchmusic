@@ -156,7 +156,7 @@ IObservableVector<PositionedSymbol^>^ SketchMusic::Text::GetSymbols(Cursor ^ fro
 {
 	Vector<PositionedSymbol^>^ vect = ref new Vector<PositionedSymbol^>;
 
-	if (from== nullptr && to == nullptr) return vect;
+	if (from == nullptr && to == nullptr) return vect;
 
 	auto left = from ? _t.lower_bound(from) : _t.begin();
 	if (left == _t.end()) return vect;

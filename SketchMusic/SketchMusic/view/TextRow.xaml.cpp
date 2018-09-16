@@ -115,7 +115,38 @@ void SketchMusic::View::TextRow::AllocateSnapPoints(SketchMusic::Text^ text,
 		}
 	}
 	if (_startPos == nullptr) _startPos = ref new Cursor;
-	if (_maxPos == nullptr) _maxPos = ref new Cursor(64);
+
+	int lastNote = 0;
+	if (_maxPos == nullptr)
+	{
+		auto getLastNotePos = [] (Text^ text) -> int
+		{
+			auto syms = text->getText();
+			if (syms->Size > 0)
+			{
+				auto last = syms->GetAt(syms->Size - 1);
+				if (last)
+				{
+					return last->_pos->Beat + 1; // единичка на всякий случай
+				}
+			}
+			return 0;
+		};
+
+		// если есть тексты, а в них есть ноты, то максимальной нотой выбираем
+		if (data->ControlText)
+		{
+			lastNote = getLastNotePos(data->ControlText);
+		}
+
+		for (auto text : data->texts)
+		{
+			lastNote = max(lastNote, getLastNotePos(text));
+		}
+
+		_maxPos = ref new Cursor(max(64, lastNote));
+	}
+
 	breakLine.push_back(ref new PositionedSymbol(ref new Cursor(_maxPos), ref new SNewLine));
 	
 	int prev = _startPos->Beat;
@@ -269,7 +300,7 @@ void SketchMusic::View::TextRow::DeleteLineBreak(Cursor^ pos)
 
 void SketchMusic::View::TextRow::SetText(SketchMusic::CompositionData^ textCollection, SketchMusic::Text^ selected)
 {
-	SetText(textCollection, selected, -1);
+	this->SetText(textCollection, selected, -1);
 }
 
 void SketchMusic::View::TextRow::SetText(CompositionData ^ textCollection, SketchMusic::Text ^ selected, int selectedPart)
