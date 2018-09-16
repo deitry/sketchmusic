@@ -21,11 +21,13 @@ private:
 	SketchMusic::Player::PlayerState m_state;
 	float m_bpm;
 
-	INote^ concretize(INote^ note);
+	INote^ concretize(INote^ note, Text^ currentText);
 	SNote^ concretizeRNote(SRNote^ rnote, SHarmony^ localHarmony);
 	SNote^ concretizeGNote(SGNote^ gnote);
 
 	void setDefaultRelatives();
+
+	std::vector<SHarmony^> localHarmonyVect;
 
 public:
 	event EventHandler<SketchMusic::Player::PlayerState>^ StateChanged;
@@ -74,9 +76,9 @@ public:
 
 	Player();
 	
-	void playText(SketchMusic::CompositionData^ text, SketchMusic::CompositionLibrary^ lib, SketchMusic::Cursor^ start);
-	void playText(SketchMusic::CompositionData^ text, SketchMusic::Cursor^ start); //, SketchMusic::Cursor^ end
-	void playSingleNote(SketchMusic::INote^ note, SketchMusic::Instrument^ instrument, int duration, SketchMusic::Player::NoteOff^ stop); // для проигрывания ноты с клавиатуры
+	void playText(SketchMusic::CompositionData^ text, SketchMusic::CompositionLibrary^ lib, SketchMusic::Cursor^ start, Text^ currentText);
+	void playText(SketchMusic::CompositionData^ text, SketchMusic::Cursor^ start, Text^ currentText); //, SketchMusic::Cursor^ end
+	void playSingleNote(SketchMusic::INote^ note, SketchMusic::Text^ currentText, int duration, SketchMusic::Player::NoteOff^ stop); // для проигрывания ноты с клавиатуры
 
 	void stop();
 	void stopKeyboard();

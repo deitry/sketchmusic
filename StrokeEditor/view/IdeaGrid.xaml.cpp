@@ -475,7 +475,7 @@ void StrokeEditor::IdeaGrid::PlayIdeaBtn_Click(Platform::Object^ sender, Windows
 				((App^)App::Current)->_player->needMetronome = false;
 				((App^)App::Current)->_player->needPlayGeneric = false;
 				((App^)App::Current)->_player->StopAtLast = true;
-				((App^)App::Current)->_player->playText(posIdea->Content->GetContent(), ref new Cursor);
+				((App^)App::Current)->_player->playText(posIdea->Content->GetContent(), ref new Cursor, nullptr);
 			});
 		}));
 	}

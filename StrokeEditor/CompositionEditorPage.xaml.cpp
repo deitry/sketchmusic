@@ -486,7 +486,7 @@ void StrokeEditor::CompositionEditorPage::PlayCompositionBtn_Click(Platform::Obj
 		auto async = concurrency::create_task([=]
 		{
 			//((App^)App::Current)->_player->stop();
-			((App^)App::Current)->_player->playText(CompositionProject->Data, ref new SketchMusic::Cursor(start));
+			((App^)App::Current)->_player->playText(CompositionProject->Data, ref new SketchMusic::Cursor(start), nullptr);
 		});
 	}));
 }

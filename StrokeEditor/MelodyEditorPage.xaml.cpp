@@ -470,7 +470,8 @@ void MelodyEditorPage::playAll_Click()
 			//((App^)App::Current)->_player->stop();
 			((App^)App::Current)->WriteToDebugFile("Запуск плеера");
 			((App^)App::Current)->_player->playText(this->_texts, 
-													ref new SM::Cursor(_textRow->currentPosition));
+													ref new SM::Cursor(_textRow->currentPosition),
+													_textRow->current);
 		});
 	}));
 }
@@ -522,14 +523,16 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 			{
 				SM::ISymbol^ sym = SM::ISymbolFactory::CreateSymbol(args->key->type, 
 																	args->key->value);
-
-				((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, _textRow->currentPosition);
+				if (((App^)App::Current)->_player->_state == Player::PlayerState::STOP)
+				{
+					((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, _textRow->currentPosition);
+				}
 
 				auto note = dynamic_cast<SM::INote^>(sym);
 				if (note)
 				{
 					SM::Player::NoteOff^ noteOff = ref new SM::Player::NoteOff;
-					((App^)App::Current)->_player->playSingleNote(note, _textRow->current->instrument, 
+					((App^)App::Current)->_player->playSingleNote(note, _textRow->current, 
 																  0, noteOff);
 
 					// сохраняем noteOff где-нибудь, ассоциированно с нажатой клавишей
@@ -822,7 +825,10 @@ void MelodyEditorPage::OnCursorPosChanged(Platform::Object ^sender,
 			[=]() 
 	{
 		_textRow->SetCursor(pos);
-		((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, pos);
+		if (((App^)App::Current)->_player->_state == Player::PlayerState::STOP)
+		{
+			((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, pos);
+		}
 	})));
 }
 
@@ -1393,7 +1399,7 @@ void MelodyEditorPage::OnSymbolPressed(Platform::Object ^sender,
 	{
 		((App^)App::Current)->_player->actualizeControlData(_texts, _textRow->current, args->_pos);
 		((App^)App::Current)->_player->playSingleNote(note, 
-													  _textRow->current->instrument, 
+													  _textRow->current, 
 													  500, nullptr);
 	}
 }

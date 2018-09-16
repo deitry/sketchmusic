@@ -462,7 +462,7 @@ void StrokeEditor::App::Play(SketchMusic::CompositionData^ texts, SketchMusic::C
 	//auto async = concurrency::create_task([this,texts, cursor]
 	//{
 		this->_player->stop();
-		this->_player->playText(texts, cursor);
+		this->_player->playText(texts, cursor, nullptr);
 	//});
 }
 

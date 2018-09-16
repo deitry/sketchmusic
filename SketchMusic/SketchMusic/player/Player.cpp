@@ -68,14 +68,14 @@ SketchMusic::Player::Player::Player()
 Возможно, стоит объединить с методом playNotes или сделать перегрузкой...
 */
 void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note, 
-												 SketchMusic::Instrument^ instrument, 
+												 SketchMusic::Text^ currentText, 
 												 int duration, 
 												 SketchMusic::Player::NoteOff^ noteOff)
 {
 	auto playNote = concurrency::create_task([=]
 	{
 		// если имеющийся инструмент не устраивает
-		if (_keyboardEngine && (!_keyboardEngine->getInstrument()->EQ(instrument)))
+		if (_keyboardEngine && (!_keyboardEngine->getInstrument()->EQ(currentText->instrument)))
 		{
 			_engines->ReleaseSoundEngine(_keyboardEngine);
 			_keyboardEngine = nullptr;
@@ -83,17 +83,17 @@ void SketchMusic::Player::Player::playSingleNote(SketchMusic::INote^ note,
 
 		if (_keyboardEngine == nullptr)
 		{
-			_keyboardEngine = _engines->GetSoundEngine(instrument);
+			_keyboardEngine = _engines->GetSoundEngine(currentText->instrument);
 		}
 
 		if (dynamic_cast<SGNote^>(note))
 		{
 			if (_metronome && needPlayGeneric)
-				_metronome->Play(this->concretize(note), duration, noteOff);
+				_metronome->Play(this->concretize(note, currentText), duration, noteOff);
 		}
 		else if (_keyboardEngine)
 		{
-			_keyboardEngine->Play(this->concretize(note), duration, noteOff);
+			_keyboardEngine->Play(this->concretize(note, currentText), duration, noteOff);
 		}
 	});
 }
@@ -107,7 +107,7 @@ void SketchMusic::Player::Player::playMetronome()
 	}
 }
 
-INote ^ SketchMusic::Player::Player::concretize(INote ^ note) // TODO: , Concretizator^
+INote ^ SketchMusic::Player::Player::concretize(INote ^ note, Text^ currentText) // TODO: , Concretizator^
 {
 	auto rnote = dynamic_cast<SRNote^>(note);
 	if (rnote)
@@ -156,13 +156,17 @@ void SketchMusic::Player::Player::setDefaultRelatives()
 	_scale = ref new SScale(NoteType::A, ScaleCategory::Minor);
 	_harmony = ref new SHarmony(0);
 	_localHarmony = ref new SHarmony(0);
+	for (auto&& localH : localHarmonyVect)
+	{
+		localH = ref new SHarmony(0);
+	}
 }
 
 
 // Для проигрывания идей и прочей мелочи
-void SketchMusic::Player::Player::playText(CompositionData^ data, Cursor^ pos) //, SketchMusic::Cursor^ end
+void SketchMusic::Player::Player::playText(CompositionData^ data, Cursor^ pos, Text^ currentText) //, SketchMusic::Cursor^ end
 {
-	playText(data, nullptr, pos);
+	playText(data, nullptr, pos, currentText);
 }
 
 /**
@@ -170,7 +174,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data, Cursor^ pos) /
 */
 void SketchMusic::Player::Player::playText(CompositionData^ data, 
 										   CompositionLibrary^ lib, 
-										   Cursor^ pos)
+										   Cursor^ pos, 
+										   Text^ currentText)
 {
 	// - для каждой из дорожек инициализировать инструмент
 	// - - создать по соурс войсу на каждый семпл
@@ -191,14 +196,26 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 											   IVector< SketchMusic::PositionedSymbol^ > ^> > >;
 
 	// отслеживаем гармонию для каждой дорожки в отдельности
-	auto localHarmonyVect = new std::vector<SHarmony^>;
+	//auto localHarmonyVect = new std::vector<SHarmony^>;
+	localHarmonyVect.clear();
+
+	int indexOfCurrentText = -1;
+	int iterIndex = -1;
 
 		// поиск стартового положения
-	auto getIterators = concurrency::create_task([data, iterMap, localHarmonyVect, this, cursor]
+	auto getIterators = concurrency::create_task([data, iterMap, this, cursor, currentText, &iterIndex, &indexOfCurrentText]
 	{
+		++iterIndex;
+
 		// Обработка основных текстов
-		for (auto text : data->texts)
+		for (auto&& text : data->texts)
 		{
+			++iterIndex;
+			if (text == currentText) // ситуации -1 == -1 по идее не возникнет
+			{
+				indexOfCurrentText = iterIndex;
+			}
+
 			// получаем список символов в данном тексте
 			auto symbols = text->getText();
 			// находим ближайший к старту символ (ПОСЛЕ старта)
@@ -217,7 +234,14 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 				{
 					auto harmony = dynamic_cast<SHarmony^>(iter->Current->_sym);
 					if (harmony)
+					{
 						localHarmony = harmony;
+						//if (currentText == text)
+						if (indexOfCurrentText == iterIndex)
+						{
+							_localHarmony = harmony;
+						}
+					}
 				}
 
 				auto p = iter->Current->_pos;
@@ -256,7 +280,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 			// отыскиваем среди енжинов подходящий
 			ISoundEngine^ engine = this->_engines->GetSoundEngine(text->instrument);
 			iterMap->push_back(std::make_pair(engine, std::make_pair(startIter, symbols)));
-			localHarmonyVect->push_back(localHarmony);
+			localHarmonyVect.push_back(localHarmony);
 		}
 
 		// Обработка управляющего текста - положение курсора уже определено
@@ -311,7 +335,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 						std::make_pair(nullptr, std::make_pair(startIter, symbols)));
 
 		// чтобы индексы совпадали
-		localHarmonyVect->insert(localHarmonyVect->begin(), _harmony);
+		localHarmonyVect.insert(localHarmonyVect.begin(), _harmony);
 	})
 		// прекаунт
 		.then([this, iterMap, cursor, data]
@@ -344,7 +368,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 	})
 		
 		// основное проигрывание
-		.then([this, iterMap, localHarmonyVect, cursor] //, end
+		.then([this, iterMap, cursor, data, indexOfCurrentText] //, end
 	{
 		auto tempState = _state;
 		int pbeat = -1;
@@ -360,9 +384,11 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 			if (StopAtLast) tempState = s::WAIT;
 			else tempState = this->_state;
 
-			auto localHarmony = localHarmonyVect->begin();
+			auto localHarmony = localHarmonyVect.begin();
+			int iterIndex = -1;
 			for (auto iter = iterMap->begin(); iter < iterMap->end(); ++iter, ++localHarmony)
 			{
+				++iterIndex;
 				auto pIter = iter->second.first;
 				if (pIter->HasCurrent)
 				{
@@ -407,7 +433,8 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 							{
 								// проигрываем чуть-чуть с помощью метронома, чтобы не заводить отдельный
 								// NoteOff чтобы stop метронома не приводил к отмене всего
-								_metronome->Play(this->concretize(dynamic_cast<INote^>(pIter->Current->_sym)), 
+								_metronome->Play(this->concretize(dynamic_cast<INote^>(pIter->Current->_sym),
+																  data->texts->GetAt(iterIndex)), 
 												 40, ref new NoteOff);
 								break;
 							}
@@ -428,9 +455,18 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 								auto harmony = dynamic_cast<SketchMusic::SHarmony^>(pIter->Current->_sym);
 								if (harmony)
 								{
-									(iter == iterMap->begin())
-										? _harmony = harmony
-										: (*localHarmony) = harmony;
+									if (iter == iterMap->begin())
+									{
+										_harmony = harmony;
+									}
+									else
+									{
+										(*localHarmony) = harmony;
+										if (iterIndex == indexOfCurrentText)
+										{
+											_localHarmony = harmony;
+										}
+									}
 								}
 								break;
 							}
@@ -521,9 +557,10 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 				for (auto iter = iterMap->begin(); iter != iterMap->end(); iter++)
 				{
 					iter->second.first = iter->second.second->First();
+					this->setDefaultRelatives();
 				}
 			}
-		}
+		} // while (tempState == s::PLAY)
 
 	});
 	
@@ -539,7 +576,6 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 		_engines->ReleaseSoundEngine((*iter).first);
 	}
 	delete iterMap;
-	delete localHarmonyVect;
 }
 
 void SketchMusic::Player::Player::stop()
@@ -585,6 +621,10 @@ void SketchMusic::Player::Player::actualizeControlData(SketchMusic::CompositionD
 
 	this->_cursor->moveTo(pos);
 
+	unsigned int index = 0;
+	bool resultOfIndex = (currentText) ? data->texts->IndexOf(currentText, &index)
+									   : false;
+
 	for (auto&& symbol : currentText)
 	{
 		if (symbol->_pos->GT(pos))
@@ -598,6 +638,10 @@ void SketchMusic::Player::Player::actualizeControlData(SketchMusic::CompositionD
 			{
 				// FIXME: запоминать локальную гармонию как-то по-другому
 				_localHarmony = harmony;
+				//if (resultOfIndex)
+				//{
+				//	localHarmonyVect.at(index) = harmony;
+				//}
 			}
 		}
 	}

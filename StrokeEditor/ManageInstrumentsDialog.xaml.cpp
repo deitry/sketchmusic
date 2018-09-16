@@ -208,7 +208,7 @@ void StrokeEditor::ManageInstrumentsDialog::Button_Click(Platform::Object^ sende
 	if (selectedInstrument && selectedPreset)
 	{
 		auto instrument = ref new SketchMusic::Instrument(selectedInstrument->_name,selectedInstrument->FileName, selectedPreset->name);
-		((App^)Application::Current)->_player->playSingleNote(ref new SketchMusic::SNote(0), instrument, 500, nullptr);
+		((App^)Application::Current)->_player->playSingleNote(ref new SketchMusic::SNote(0), ref new Text(instrument), 500, nullptr);
 	}
 }
 
