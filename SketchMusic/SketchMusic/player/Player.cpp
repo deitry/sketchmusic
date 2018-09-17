@@ -368,7 +368,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 	})
 		
 		// основное проигрывание
-		.then([this, iterMap, cursor, data, indexOfCurrentText] //, end
+		.then([this, iterMap, cursor, data, &indexOfCurrentText] //, end
 	{
 		auto tempState = _state;
 		int pbeat = -1;
