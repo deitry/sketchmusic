@@ -112,16 +112,9 @@ void MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
 
 		if (localSettings->Values->HasKey("precount"))
 		{
-			Object^ obj = localSettings->Values->Lookup("precount");
-			bool has = (obj) ? true
-							 : false;
-			
-			// не знаю, почему с ним так сложно.
-			// но почему-то тут периодически всё падает
-			
-			((App^)App::Current)->_player->precount = has ? 4 : 0;
-			_keyboard->SetKey(SMV::KeyType::precount, 
-							  ((App^)App::Current)->_player->precount);
+			bool needPrecount = (bool) localSettings->Values->Lookup("precount");
+			((App^)App::Current)->_player->precount = needPrecount ? 4 : 0;
+			_keyboard->SetKey(SMV::KeyType::precount, needPrecount);
 		}
 		else 
 		{
@@ -512,7 +505,7 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 				((App^)App::Current)->_player->precount = args->key->value;
 				ApplicationData::Current->LocalSettings->Values->Insert(
 												"precount", 
-												((App^)App::Current)->_player->needMetronome);
+												((App^)App::Current)->_player->precount != 0);
 				break;
 			}
 			case SMV::KeyType::end:
