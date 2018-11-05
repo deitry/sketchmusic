@@ -38,6 +38,7 @@ using namespace concurrency;
 using namespace Windows::Storage;
 using namespace Windows::Storage::Streams;
 using namespace Windows::Data::Json;
+using namespace Platform::Collections;
 
 // Шаблон элемента пустой страницы задокументирован по адресу http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -564,7 +565,8 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 					//this->CurPos->Text = "beat = " + _textRow->currentPosition->getBeat()
 					//	+ " / tick = " + _textRow->currentPosition->getTick();
 
-					if (!appending 
+					if (!appending
+						&& args->key->type != SMV::KeyType::localHarmony
 						&& ((App^)App::Current)->_player->_state != SM::Player::PlayerState::PLAY)
 					{
 						appending = true;
@@ -576,10 +578,7 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 							// TODO: вынести в отдельную функцайку
 							auto delay = concurrency::create_task([this]
 							{
-								unsigned int timeout = static_cast<unsigned int>(
-														600 * 60 
-														/ ((App^)App::Current)->_player->_BPM 
-														/ _textRow->scale);
+								unsigned int timeout = 200;
 								concurrency::wait(timeout);
 
 								Dispatcher->RunAsync(CoreDispatcherPriority::Normal, 
@@ -595,7 +594,7 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 										this->MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
 									}
 								}));
-							});
+ 							});
 						}));
 					}
 				}
@@ -622,7 +621,12 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 
 					if (this->viewType == SMV::ViewType::TextRow)
 					{
-						this->_textRow->MoveCursorRight();
+						if (!(args->key->type == SMV::KeyType::harmony ||
+							args->key->type == SMV::KeyType::localHarmony ||
+							args->key->type == SMV::KeyType::scale))
+						{
+							this->_textRow->MoveCursorRight();
+						}
 					}
 					else
 					{
@@ -1319,12 +1323,19 @@ void MelodyEditorPage::Backspace()
 
 	// выбираем все символы из текста между этими двумя положениями
 	auto selectedSyms = _textRow->current->GetSymbols(newPos, currentPos);
-	if (selectedSyms->Size > 0)
+	IObservableVector<PositionedSymbol^>^ onlySyms = ref new Vector<PositionedSymbol^>;
+	for (auto&& sym : selectedSyms)
+	{
+		if (sym->_sym->GetSymType() != SM::SymbolType::HARMONY)
+			onlySyms->Append(sym);
+	}
+
+	if (onlySyms->Size > 0)
 	{
 		((App^)App::Current)->_manager->AddAndExecute(
 											DeleteMultipleSymCommand,
 											ref new SMC::MultiSymbolHandlerArgs(_textRow->current,
-																				selectedSyms));
+																				onlySyms));
 	}
 }
 
