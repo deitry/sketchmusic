@@ -9,7 +9,7 @@
     mc:Ignorable="d">
 
     <x:Double x:Key="NoteWidth">85.0</x:Double>
-    <x:Double x:Key="CtrlWidth">60.0</x:Double>
+    <x:Double x:Key="CtrlWidth">54.0</x:Double>
     <x:Double x:Key="NoteHeight">56.0</x:Double>
     <x:Double x:Key="RowHeight">70.0</x:Double>
     <x:Double x:Key="BeatWidth">45.0</x:Double>
