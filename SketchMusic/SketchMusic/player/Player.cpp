@@ -132,7 +132,7 @@ SNote ^ SketchMusic::Player::Player::concretizeRNote(SRNote^ rnote, SHarmony^ lo
 	// конкретизируем для текущих значений гаммы/гармонии,
 	// полагая, что их уже актуализировали
 
-	int tone = static_cast<int>(_scale->_baseNote)
+	int tone = _scale->ToValue()
 		+ _harmony->_val
 		+ localHarmony->_val
 		+ rnote->_val - 12; // занижаем на октаву "нулевое значение"

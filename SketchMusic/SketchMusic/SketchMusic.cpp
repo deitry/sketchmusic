@@ -346,17 +346,17 @@ Platform::String^ SketchMusic::noteTypeToString(NoteType note)
 	switch (note)
 	{
 		case NoteType::A:	return "A";
-		case NoteType::As:	return "As";
+		case NoteType::As:	return "A#";
 		case NoteType::B:	return "B";
 		case NoteType::C:	return "C";
-		case NoteType::Cs:	return "Cs";
+		case NoteType::Cs:	return "C#";
 		case NoteType::D:	return "D";
-		case NoteType::Ds:	return "Ds";
+		case NoteType::Ds:	return "D#";
 		case NoteType::E:	return "E";
 		case NoteType::F:	return "F";
-		case NoteType::Fs:	return "Fs";
+		case NoteType::Fs:	return "F#";
 		case NoteType::G:	return "G";
-		case NoteType::Gs:	return "Gs";
+		case NoteType::Gs:	return "G#";
 		default: break;
 	}
 	return "?";

@@ -69,4 +69,10 @@ public:
 
 	// ”наследовано через ISymbol
 	virtual bool EQ(ISymbol ^ second) { return false; }
+
+	int ToValue()
+	{
+		int value = static_cast<int>(_baseNote);
+		return (value <= 2) ? value : value - 12; // чтобы гамма в целом была ниже
+	}
 };
