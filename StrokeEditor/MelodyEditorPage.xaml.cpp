@@ -356,14 +356,14 @@ void MelodyEditorPage::InitializePage()
 }
 
 
-void MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender, 
-									   RoutedEventArgs^ e)
+void MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender,
+	RoutedEventArgs^ e)
 {
 	// остановить проигрывание, если идёт
 	((App^)App::Current)->_player->cycling = false;
 	((App^)App::Current)->_player->stop();
 	((App^)App::Current)->_player->stopKeyboard();
-	
+
 	// сохраняем настройки
 	ApplicationDataContainer^ localSettings =
 		ApplicationData::Current->LocalSettings;
@@ -384,16 +384,15 @@ void MelodyEditorPage::GoBackBtn_Click(Platform::Object^ sender,
 	// проверка на композицию раньше, потому что если редактируем идею внутри композиции, у нас может быть и то, и другое
 	if (_compositionArgs)
 	{
-		this->Frame->Navigate(TypeName(CompositionEditorPage::typeid), 
-							  _compositionArgs);
+		this->Frame->Navigate(TypeName(CompositionEditorPage::typeid),
+			_compositionArgs);
 	}
 	else if (_idea)
-	{	
-		this->Frame->Navigate(TypeName(LibraryEntryPage::typeid), 
-							  ref new LibraryEntryNavigationArgs(_idea, true));
+	{
+		this->Frame->Navigate(TypeName(LibraryEntryPage::typeid),
+			ref new LibraryEntryNavigationArgs(_idea, true));
 	}
 }
-
 
 void MelodyEditorPage::SaveData()
 {
@@ -434,9 +433,16 @@ void MelodyEditorPage::SaveData()
 		{
 			auto dialog = ref new ContentDialog;
 			dialog->Title = "Ошибка сохранения";
-			dialog->Content = "Успешно сохранения, код " + result;
+			dialog->Content = "Ошибка сохранения, код " + result;
 			dialog->PrimaryButtonText = "Ок";
-			create_task(dialog->ShowAsync());
+			try
+			{
+				create_task(dialog->ShowAsync());
+			}
+			catch (...)
+			{
+				// FIXME: падает по ctrl-s Only a single ContentDialog can be open at any time
+			}
 		}
 		else
 		{
@@ -444,7 +450,14 @@ void MelodyEditorPage::SaveData()
 			dialog->Title = "Сохранение в библиотеку";
 			dialog->Content = "Успешно сохранено";
 			dialog->PrimaryButtonText = "Ок";
-			create_task(dialog->ShowAsync());
+			try
+			{
+				create_task(dialog->ShowAsync());
+			}
+			catch (...)
+			{
+				// FIXME: падает по ctrl-s Only a single ContentDialog can be open at any time
+			}
 		}
 	}
 }
