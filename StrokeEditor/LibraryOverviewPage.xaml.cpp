@@ -35,17 +35,10 @@ inline String^ StringFromAscIIChars(char* chars) //StrokeEditor::LibraryOverview
 {
 	if (!chars) return nullptr;
 
-	size_t newsize = strlen(chars) + 1;
-	wchar_t * wcstring = new wchar_t[newsize];
-	size_t convertedChars = 0;
-	mbstowcs_s(&convertedChars, wcstring, newsize, chars, _TRUNCATE);
-	String^ str = ref new Platform::String(wcstring);
-	delete[] wcstring;
-	return str;
+	std::string str = { chars };
+	auto wstr = utf8_decode(str);
 
-	//std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-	//std::wstring intermediateForm = converter.from_bytes(chars);
-	//return ref new Platform::String(intermediateForm.c_str());
+	return ref new Platform::String(wstr.data());
 }
 
 int StrokeEditor::LibraryOverviewPage::sqlite_readentry_callback(void *unused, int count, char **data, char **columns)

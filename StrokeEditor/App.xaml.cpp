@@ -6,9 +6,6 @@
 #include "pch.h"
 #include "MainMenuPage.xaml.h"
 
-#include <cvt/wstring>
-#include <codecvt>
-
 using namespace StrokeEditor;
 
 using namespace Platform;
@@ -194,13 +191,8 @@ void StrokeEditor::App::WriteToDebugFile(Platform::String ^ str)
 void StrokeEditor::App::OpenLibrary(Platform::String ^ dbPath)
 {
 	WriteToDebugFile("Открытие файла " + dbPath);
-	// создание базы данных, если отсутствует
-	//sqlite3* libraryDB; // объявление в хидере
-	int size_needed = WideCharToMultiByte(CP_UTF8, 0, dbPath->Data(), dbPath->Length(), NULL, 0, NULL, NULL);
-	char *pathC = new char[size_needed + 1];
-	WideCharToMultiByte(CP_UTF8, 0, dbPath->Data(), dbPath->Length(), pathC, size_needed, NULL, NULL);
-	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-	pathC[size_needed] = '\0';
+	auto path = utf8_encode(dbPath->Data());
+	auto pathC = path.c_str();
 
 	if (sqlite3_open(pathC, &libraryDB))
 	{
@@ -234,8 +226,6 @@ void StrokeEditor::App::OpenLibrary(Platform::String ^ dbPath)
 			sqlite3_free(zErrMsg);
 		}
 	}
-
-	delete[] pathC;
 }
 
 void StrokeEditor::App::SaveLibrary(Platform::String ^ dbName)
@@ -337,18 +327,14 @@ int StrokeEditor::App::InsertIdea(SketchMusic::Idea ^ idea)
 	String^ sqlQuery = L"INSERT INTO summary (hash,name,category,content,parent,tags,projects,created,modified,description,rating) "
 		"VALUES (" + idea->Hash + ",'" + idea->Name + "'," + static_cast<int>(idea->Category).ToString() + ",'" + idea->SerializedContent + "'," + idea->Parent +
 		",'" + idea->Tags + "','" + idea->Projects + "'," + idea->CreationTime + "," + idea->ModifiedTime + ",'" + idea->Description + "'," + idea->Rating + ");";
-
-	int size_needed = WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), NULL, 0, NULL, NULL);
-	char* charQuery = new char[size_needed + 1];
-	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
-	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-	charQuery[size_needed] = '\0';
+	
+	std::string stringQuery = utf8_encode(sqlQuery->Data());
+	auto charQuery = stringQuery.c_str();
 	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
 	if (rc != SQLITE_OK) {
 		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
-	delete[] charQuery;
 	return rc;
 }
 
@@ -360,17 +346,13 @@ int StrokeEditor::App::DeleteIdea(SketchMusic::Idea ^ idea)
 	String^ sqlQuery = "DELETE FROM summary WHERE "
 		"hash=" + idea->Hash + ";";
 
-	int size_needed = sqlQuery->Length();
-	char* charQuery = new char[size_needed + 1];
-	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
-	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-	charQuery[size_needed] = '\0';
+	std::string stringQuery = utf8_encode(sqlQuery->Data());
+	auto charQuery = stringQuery.c_str();
 	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
 	if (rc != SQLITE_OK) {
 		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
-	delete[] charQuery;
 	return rc;
 }
 
@@ -483,16 +465,12 @@ int StrokeEditor::App::UpdateIdea(SketchMusic::Idea ^ idea)
 		"modified=" + idea->ModifiedTime + " "
 		"WHERE hash=" + idea->Hash + " ;";
 
-	int size_needed = WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), NULL, 0, NULL, NULL);
-	char* charQuery = new char[size_needed + 1];
-	WideCharToMultiByte(CP_UTF8, 0, sqlQuery->Data(), sqlQuery->Length(), charQuery, size_needed, NULL, NULL);
-	//const char* pathC = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(fullPath->Data()).c_str();
-	charQuery[size_needed] = '\0';
+	std::string stringQuery = utf8_encode(sqlQuery->Data());
+	auto charQuery = stringQuery.c_str();
 	int rc = sqlite3_exec(db, charQuery, NULL, 0, &zErrMsg);
 	if (rc != SQLITE_OK) {
 		fprintf(stderr, "SQL error: %s\n", zErrMsg);
 		sqlite3_free(zErrMsg);
 	}
-	delete[] charQuery;
 	return rc;
 }
