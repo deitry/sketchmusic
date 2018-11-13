@@ -11,7 +11,7 @@ public:
 	property KeyType originalType;	// в дальнейшем тип и значение могут измениться
 	property int originalValue;		// здесь сохраняем те, что были даны при создании - поможет в поисках
 	property KeyType type;
-	property int value;
+	property float value;
 	property int shift;	// аналог повышения регистра при нажатии шифта
 	property Object^ parent;	// ? ссылка на ctrl, который визуально представляет кнопку
 
@@ -29,7 +29,7 @@ public:
 		shift = 0;
 	}
 
-	Key(KeyType type, int value)
+	Key(KeyType type, float value)
 	{
 		this->type = type;
 		this->value = value;

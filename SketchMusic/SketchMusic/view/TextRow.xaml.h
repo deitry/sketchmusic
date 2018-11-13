@@ -45,7 +45,7 @@ private:
 
 	Cursor^ _maxPos;
 	Cursor^ _startPos;	// что принимаем за ноль
-	int m_quantize;
+	float m_quantize;
 
 	std::vector<PositionedSymbol^> breakLine;
 	// в отдельном массиве содержим символы, которые отмечают разрыв строки.
@@ -89,10 +89,10 @@ public:
 	property Text^ current;
 	property Text^ format;
 	property int scale;			// текущий уровень масштаба 
-	property int quantize		// текущий уровень квантизации - делитель Tick
+	property float quantize		// текущий уровень квантизации - делитель Tick
 	{
-		int get() { return m_quantize; }
-		void set(int val) { m_quantize = val ? val : 1; }
+		float get() { return m_quantize; }
+		void set(float val) { m_quantize = val ? val : 1; }
 	}
 	property bool EraserTool;	// если true - по нажатию на кнопку удаляем
 

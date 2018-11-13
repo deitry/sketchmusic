@@ -34,7 +34,7 @@ public:
 	event EventHandler<float>^ BpmChanged;
 	event EventHandler<SketchMusic::Cursor^>^ CursorPosChanged;
 
-	property int quantize; // 0 - писать как есть, >0 - кратность квантизации (TickInBeat/2 ...)
+	property float quantize; // 0 - писать как есть, >0 - кратность квантизации (TickInBeat/2 ...)
 		// поначалу будет синхронизирована с масштабом TextRow
 	
 	property SketchMusic::Player::PlayerState _state

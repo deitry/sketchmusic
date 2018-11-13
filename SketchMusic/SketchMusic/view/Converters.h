@@ -134,7 +134,7 @@ public:
 
 		Windows::UI::Xaml::Media::Brush^ brush = nullptr;
 
-		switch (key->value % 12)
+		switch (static_cast<int>(key->value) % 12)
 		{
 		case 1: case 4: case 6: case 9: case 11:
 		case -1: case -3: case -6: case -8: case -11:

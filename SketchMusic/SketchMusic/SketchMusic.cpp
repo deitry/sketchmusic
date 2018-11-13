@@ -189,37 +189,33 @@ ISymbol ^ SketchMusic::ISymbolFactory::Deserialize(JsonObject^ obj)
 ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType type, 
 													Object^ val)
 {
+	int ival = static_cast<int>((float)val);
+
 	switch (type)
 	{
 	case SketchMusic::View::KeyType::note:
 	{
-		int ival = (int)val;
 		return ref new SNote(ival);
 	}
 	case SketchMusic::View::KeyType::relativeNote:
 	{
-		int ival = (int)val;
 		return ref new SRNote(ival);
 	}
 	case SketchMusic::View::KeyType::genericNote:
 	{
-		int ival = (int)val;
 		return ref new SGNote(ival);
 	}
 	case SketchMusic::View::KeyType::scale:
 	{
-		int ival = (int)val;
 		auto baseNote = static_cast<NoteType>(ival);
 		return ref new SScale(baseNote, ScaleCategory::Major);
 	}
 	case SketchMusic::View::KeyType::harmony:
 	{
-		int ival = (int)val;
 		return ref new SHarmony(ival);
 	}
 	case SketchMusic::View::KeyType::localHarmony:
 	{
-		int ival = (int)val;
 		return ref new SHarmony(ival);
 	}
 	case SketchMusic::View::KeyType::newPart:
@@ -229,9 +225,9 @@ ISymbol ^ SketchMusic::ISymbolFactory::CreateSymbol(SketchMusic::View::KeyType t
 	}
 	case SketchMusic::View::KeyType::tempo:
 	{
-		auto ival = 120.f;
-		if (val) ival = static_cast<float>(safe_cast<int>(val));
-		return ref new STempo(ival);
+		auto fval = 120.f;
+		if (val) fval = (float) val;
+		return ref new STempo(fval);
 	}
 	case SketchMusic::View::KeyType::end:
 	{

@@ -571,63 +571,63 @@ void SketchMusic::View::BaseKeyboard::OnKeyDown(Windows::UI::Core::CoreWindow^ s
 	case VirtualKey::Space: ctrl = GetControl(_keys, "play");break;
 		// альтернатива для обобщённых нот?
 	case VirtualKey::Number1: 
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q1, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_1"); break;
 	case VirtualKey::Number2: 
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q2, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_2"); break;
 	case VirtualKey::Number3: 
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q3, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_3"); break;
 	case VirtualKey::Number4: 
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q4, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_4"); break;
 	case VirtualKey::Number5:
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q5, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_5"); break;
 	case VirtualKey::Number6:
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
-			OnQuantizeClick(q1t, nullptr); return;
+			OnQuantizeClick(q6, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_6"); break;
 	case VirtualKey::Number7:
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
-			OnQuantizeClick(q2t, nullptr); return;
+			OnQuantizeClick(q7, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_7"); break;
 	case VirtualKey::Number8:
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
-			OnQuantizeClick(q3t, nullptr); return;
+			OnQuantizeClick(q8, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_8"); break;
 	case VirtualKey::Number9:
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
-			OnQuantizeClick(q4t, nullptr); return;
+			OnQuantizeClick(q9, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_9"); break;
 	case VirtualKey::Number0:
-		if (ctrlPressed && isQuantizeFlyoutOpened && 1)
+		if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
-			OnQuantizeClick(q5t, nullptr); return;
+			OnQuantizeClick(q10, nullptr); return;
 		}
 		else ctrl = GetControl(_keys, "1_10"); break;
 	case VirtualKey::Q:
@@ -1000,7 +1000,7 @@ void SketchMusic::View::BaseKeyboard::OnQuantizeClick(Platform::Object ^ sender,
 		quantizeNeed->IsChecked = true;
 
 		// на сколько надо поделить
-		int div = std::stoi(((String^)bt->DataContext)->Data());
+		float div = std::stof(((String^)bt->DataContext)->Data());
 
 		auto key = ref new Key(KeyType::quantization, div);
 		auto args = ref new KeyboardEventArgs(key, this->pressedKeys);

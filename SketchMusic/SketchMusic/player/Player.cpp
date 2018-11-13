@@ -527,7 +527,7 @@ void SketchMusic::Player::Player::playText(CompositionData^ data,
 			static int prevQuant = -1;
 			static int prevBeat = -1;
 
-			int localQ = quantize ? quantize : 32;
+			float localQ = (quantize > 0) ? quantize : TICK_IN_BEAT;
 			int quant = static_cast<int>(cursor->Tick * localQ / TICK_IN_BEAT);
 			
 			int beat = cursor->Beat;

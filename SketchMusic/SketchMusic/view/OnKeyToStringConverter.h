@@ -33,7 +33,7 @@ public:
 			return (ref new SRNote(key->value))->ToString();
 		}
 		case KeyType::genericNote:
-			result += "(" + (key->value % 100) + "," + (abs(key->value) / 100) + ")";
+			result += "(" + (static_cast<int>(key->value) % 100) + "," + (abs(static_cast<int>(key->value)) / 100) + ")";
 			break;
 		case KeyType::harmony:
 		{
@@ -51,7 +51,7 @@ public:
 		}
 		case KeyType::scale:
 		{
-			auto baseNote = static_cast<NoteType>(key->value);
+			auto baseNote = static_cast<NoteType>(static_cast<int>(key->value));
 			result += SketchMusic::noteTypeToString(baseNote);
 			break;
 		}

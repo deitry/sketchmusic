@@ -47,6 +47,8 @@ MelodyEditorPage::MelodyEditorPage()
 	((App^)App::Current)->WriteToDebugFile("Инициализация окна редактирования текста");
 	InitializeComponent();
 	((App^)App::Current)->WriteToDebugFile("Инициализация компонентов завершена");
+
+	((App^)App::Current)->_player->quantize = _textRow->quantize;
 }
 
 void MelodyEditorPage::OnNavigatedTo(NavigationEventArgs ^ e)
