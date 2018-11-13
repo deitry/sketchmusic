@@ -620,20 +620,6 @@ void MelodyEditorPage::_keyboard_KeyboardPressed(Platform::Object^ sender,
 							_texts->ControlText,
 							ref new PositionedSymbol(ref new SM::Cursor(_textRow->currentPosition),
 								sym)));
-
-					if (this->viewType == SMV::ViewType::TextRow)
-					{
-						if (!(args->key->type == SMV::KeyType::harmony ||
-							args->key->type == SMV::KeyType::localHarmony ||
-							args->key->type == SMV::KeyType::scale))
-						{
-							this->_textRow->MoveCursorRight();
-						}
-					}
-					else
-					{
-						this->MoveRightCWBtn_Click(this, ref new RoutedEventArgs);
-					}
 				}
 				break;
 			}
