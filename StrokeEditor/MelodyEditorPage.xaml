@@ -279,6 +279,7 @@
                                  HorizontalAlignment="Left"
                                  VerticalAlignment="Stretch"
                                  Margin="5,20,5,5"
+                                 AllowFocusOnInteraction="False"
                                  />
                     
                     <!--<Button Name="HamburgerButton2" Style="{StaticResource MenuBtnStyle}"
