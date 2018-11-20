@@ -28,6 +28,7 @@ namespace SketchMusic
 			bool input;
 			bool tempoPressed;
 			bool ctrlPressed;
+			bool altPressed;
 
 			bool isTempoFlyoutOpened;
 			bool isQuantizeFlyoutOpened;
@@ -114,6 +115,7 @@ namespace SketchMusic
 			void TempoFlyout_Closed(Platform::Object^ sender, Platform::Object^ e);
 			void LayoutFlyout_Opened(Platform::Object^ sender, Platform::Object^ e);
 			void LayoutFlyout_Closed(Platform::Object^ sender, Platform::Object^ e);
+			void switchLayout(KeyboardType type);
 		};
 	}
 }

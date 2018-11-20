@@ -551,10 +551,10 @@ void SketchMusic::View::BaseKeyboard::OnKeyDown(Windows::UI::Core::CoreWindow^ s
 
 	using Windows::System::VirtualKey;
 	std::pair<ContentControl^, bool> ctrl;
-
 	bool isShift = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Shift) != Windows::UI::Core::CoreVirtualKeyStates::None);
 	bool isCtrl = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Control) != Windows::UI::Core::CoreVirtualKeyStates::None);
 	bool isAlt = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Menu) != Windows::UI::Core::CoreVirtualKeyStates::None);
+	//auto isAlt = e->KeyStatus.IsMenuKeyDown; // почему-то при нажатом альте вообще onKeyX не отрабатывает
 
 	//if (isShift && isAlt)
 	//{
@@ -571,37 +571,61 @@ void SketchMusic::View::BaseKeyboard::OnKeyDown(Windows::UI::Core::CoreWindow^ s
 	case VirtualKey::Space: ctrl = GetControl(_keys, "play");break;
 		// альтернатива для обобщённых нот?
 	case VirtualKey::Number1: 
-		if (ctrlPressed && isQuantizeFlyoutOpened)
+		if (isAlt)
+		{
+			this->switchLayout(KeyboardType::Basic);
+		}
+		else if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q1, nullptr); break;
 		}
 		else ctrl = GetControl(_keys, "1_1"); break;
 	case VirtualKey::Number2: 
-		if (ctrlPressed && isQuantizeFlyoutOpened)
+		if (isAlt)
+		{
+			this->switchLayout(KeyboardType::Classic);
+		}
+		else if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q2, nullptr); break;
 		}
 		else ctrl = GetControl(_keys, "1_2"); break;
 	case VirtualKey::Number3: 
-		if (ctrlPressed && isQuantizeFlyoutOpened)
+		if (isAlt)
+		{
+			this->switchLayout(KeyboardType::Generic);
+		}
+		else if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q3, nullptr); break;
 		}
 		else ctrl = GetControl(_keys, "1_3"); break;
 	case VirtualKey::Number4: 
-		if (ctrlPressed && isQuantizeFlyoutOpened)
+		if (isAlt)
+		{
+			this->switchLayout(KeyboardType::Relative);
+		}
+		else if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q4, nullptr); break;
 		}
 		else ctrl = GetControl(_keys, "1_4"); break;
 	case VirtualKey::Number5:
-		if (ctrlPressed && isQuantizeFlyoutOpened)
+		if (isAlt)
+		{
+			this->switchLayout(KeyboardType::Harmony);
+		}
+		else if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q5, nullptr); break;
 		}
 		else ctrl = GetControl(_keys, "1_5"); break;
 	case VirtualKey::Number6:
-		if (ctrlPressed && isQuantizeFlyoutOpened)
+		if (isAlt)
+		{
+			this->switchLayout(KeyboardType::Scale);
+		}
+		else if (ctrlPressed && isQuantizeFlyoutOpened)
 		{
 			OnQuantizeClick(q6, nullptr); break;
 		}
@@ -691,6 +715,7 @@ void SketchMusic::View::BaseKeyboard::OnKeyDown(Windows::UI::Core::CoreWindow^ s
 	case (VirtualKey)187:
 	case VirtualKey::Add: ctrl = GetControl(_keys, "+"); break;
 	case VirtualKey::Control: ctrlPressed = true; ctrl = GetControl(_keys, "ctrl"); break;
+	case VirtualKey::Menu: altPressed = true; break;
 	case VirtualKey::Enter:
 		if (ctrlPressed)
 			ctrl = GetControl(_keys, "end");
@@ -718,6 +743,7 @@ void SketchMusic::View::BaseKeyboard::OnKeyUp(Windows::UI::Core::CoreWindow^ sen
 	bool isShift = sender->GetForCurrentThread()->GetKeyState(VirtualKey::Shift) != Windows::UI::Core::CoreVirtualKeyStates::None;
 	bool isCtrl = sender->GetForCurrentThread()->GetKeyState(VirtualKey::Control) != Windows::UI::Core::CoreVirtualKeyStates::None;
 	bool isAlt = (sender->GetForCurrentThread()->GetKeyState(VirtualKey::Menu) != Windows::UI::Core::CoreVirtualKeyStates::None);
+	//auto isAlt = e->KeyStatus.IsMenuKeyDown; // почему-то при нажатом альте вообще onKeyX не отрабатывает
 
 	//if (isShift && isAlt)
 	//{
@@ -853,6 +879,7 @@ void SketchMusic::View::BaseKeyboard::OnKeyUp(Windows::UI::Core::CoreWindow^ sen
 	case VirtualKey::Up:
 	case VirtualKey::Add: ctrl = GetControl(_keys, "+"); break;
 	case VirtualKey::Control: ctrlPressed = false; ctrl = GetControl(_keys, "ctrl"); if (ctrl.first) { ReleaseKey(ctrl.first); PushKey(ctrl.first); } break;
+	case VirtualKey::Menu: altPressed = false; break; // не работает
 	case VirtualKey::Enter:
 		if (ctrlPressed)
 			ctrl = GetControl(_keys, "end");
@@ -1047,34 +1074,7 @@ void SketchMusic::View::BaseKeyboard::MenuFlyoutItem_Click(Platform::Object^ sen
 	if (el)
 	{
 		int type = std::stoi(((String^)el->Tag)->Data());
-		_layout = static_cast<KeyboardType>(type);
-		
-		switch (_layout)
-		{
-		case KeyboardType::Basic:
-		case KeyboardType::Generic:
-		case KeyboardType::Classic:
-		case KeyboardType::Scale:
-		case KeyboardType::Harmony:
-		case KeyboardType::Relative:
-			for (auto&& row : mainPanel->Children)
-			{
-				auto el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
-				if (el)
-				{
-					auto str = (String^)el->Tag;
-					if (str == "CtrlPanel") continue;
-
-					int type = std::stoi(str->Data());
-					KeyboardType tag = static_cast<KeyboardType>(type);
-					if (tag == _layout) el->Visibility = Windows::UI::Xaml::Visibility::Visible;
-					else el->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
-				}
-			}
-			break;
-		default: break;
-		}
-		
+		this->switchLayout(static_cast<KeyboardType>(type));
 	}
 
 	LayoutFlyout->Hide();
@@ -1156,4 +1156,23 @@ void SketchMusic::View::BaseKeyboard::LayoutFlyout_Opened(Platform::Object^ send
 void SketchMusic::View::BaseKeyboard::LayoutFlyout_Closed(Platform::Object^ sender, Platform::Object^ e)
 {
 	isLayoutFlyoutOpened = false;
+}
+
+void SketchMusic::View::BaseKeyboard::switchLayout(KeyboardType type)
+{
+	_layout = type;
+	for (auto&& row : mainPanel->Children)
+	{
+		auto el = dynamic_cast<FrameworkElement^>(static_cast<Object^>(row));
+		if (el)
+		{
+			auto str = (String^)el->Tag;
+			if (str == "CtrlPanel") continue;
+
+			int type = std::stoi(str->Data());
+			KeyboardType tag = static_cast<KeyboardType>(type);
+			if (tag == _layout) el->Visibility = Windows::UI::Xaml::Visibility::Visible;
+			else el->Visibility = Windows::UI::Xaml::Visibility::Collapsed;
+		}
+	}
 }
