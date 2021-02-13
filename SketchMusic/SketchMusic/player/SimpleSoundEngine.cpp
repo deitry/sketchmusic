@@ -34,7 +34,7 @@ SketchMusic::Player::SimpleSoundEngine::SimpleSoundEngine(SimpleSoundEngine^ eng
 	this->_instrument = engine->_instrument;
 	this->_waveformat = engine->_waveformat;
 	this->_sample = engine->_sample;
-	
+
 	this->InitializeVoices();
 	this->stopToken = new cancellation_token_source();
 
@@ -47,7 +47,7 @@ void SketchMusic::Player::SimpleSoundEngine::DestroyVoices()
 	_available_voices = 0;
 	_currentVoice = 0;
 
-	// очищаем, если что-то есть. Удалять сами голоса не надо, 
+	// очищаем, если что-то есть. Удалять сами голоса не надо,
 	// т.к. они и так все есть в _voices
 	if (_available.size())
 	{
@@ -99,7 +99,7 @@ void SketchMusic::Player::SimpleSoundEngine::playNote(INote^ note, int duration,
 {
 	// по-старинке, без саундфонта
 	IXAudio2SourceVoice* voice = this->GetVoice();
-	if (voice == nullptr) 
+	if (voice == nullptr)
 		return;
 
 	XAUDIO2_BUFFER _buffer; //= new XAUDIO2_BUFFER;
@@ -146,8 +146,8 @@ void SketchMusic::Player::SimpleSoundEngine::playNote(INote^ note, int duration,
 			concurrency::wait(30);	// чтобы не сразу заканчивался - звучит неестественно
 			this->ReleaseVoice(voice);
 		});
-	}); 
-	
+	});
+
 	if (duration)
 	{
 		auto release = concurrency::create_task([=]
